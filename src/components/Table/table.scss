@@ -1,0 +1,25 @@
+@keyframes dropdown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.3s ease-out;
+}
+
+.scroll-shadow-right::after {
+  content: "";
+  position: absolute;
+  right: 200px;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.05), transparent);
+  pointer-events: none;
+}
