@@ -9,7 +9,7 @@
  * For the active AI integration see:
  *   - Backend tools: server/ai/tools/*.tools.js
  *   - Backend service: server/ai/ai.service.js
- *   - Frontend entry: ui/src/services/systemAiService.js
+ *   - Frontend entry: ui/src/pages/ai-mode/ai.service.js
  */
 
 /* ==========================================================================

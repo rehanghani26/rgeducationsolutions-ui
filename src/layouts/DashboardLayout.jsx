@@ -233,7 +233,7 @@ const DashboardLayout = () => {
               type="button"
               onClick={() => navigate(ROUTES.AI_MODE)}
               className="group relative flex items-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-[1px] shadow-md shadow-indigo-500/20 transition-all duration-300 hover:scale-105 hover:shadow-indigo-500/40 active:scale-95 flex-shrink-0"
-              title="Open Full-Page Gemini AI Mode"
+              title="Open Full-Page AI Mode"
             >
               <div className="flex items-center gap-1.5 sm:gap-2 rounded-[11px] bg-white px-2.5 sm:px-3.5 py-1.5 transition-colors group-hover:bg-opacity-90 dark:bg-slate-900/90 dark:group-hover:bg-slate-900/70">
                 <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-500 transition-transform group-hover:rotate-12 animate-pulse dark:text-indigo-400 flex-shrink-0" />
@@ -241,7 +241,7 @@ const DashboardLayout = () => {
                   AI Mode
                 </span>
                 <span className="hidden sm:inline-flex rounded-full bg-indigo-500/10 px-1.5 py-0.2 text-[9px] font-bold text-indigo-600 dark:bg-indigo-400/20 dark:text-indigo-300">
-                  Gemini
+                  NVIDIA
                 </span>
               </div>
             </button>
