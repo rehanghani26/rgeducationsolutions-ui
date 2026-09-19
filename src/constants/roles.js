@@ -33,6 +33,10 @@ export const ROLES = {
 export const ADMIN_ROLES = [
   ROLES.SUPER_ADMIN,
   ROLES.SCHOOL_ADMIN,
+  'admin',
+  'superadmin',
+  'super_admin',
+  'school_admin',
   ROLES.DIRECTOR,
   ROLES.PRINCIPAL,
 ];

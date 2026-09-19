@@ -61,8 +61,10 @@ export const ROUTES = {
     CLASS_PARAM:  '/academics/classes/:classId',
     SECTIONS:     '/academics/sections',
     SUBJECTS:     '/academics/subjects',
+    SYLLABUS:     '/academics/syllabus',
     classDetail: (id = ':classId') => `/academics/classes/${id}`,
   },
+  SYLLABUS: '/academics/syllabus',
 
   // ── Attendance ───────────────────────────────────────────────────────────
   ATTENDANCE: '/attendance',

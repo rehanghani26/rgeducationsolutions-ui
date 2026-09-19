@@ -20,7 +20,19 @@ export const useExams = (params = {}) => {
     setLoading(true);
     try {
       const res = await examService.getAll(params);
-      if (res.data?.exams?.length > 0) setData(res.data);
+      const list = Array.isArray(res?.exams)
+        ? res.exams
+        : Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : Array.isArray(res?.data?.exams)
+        ? res.data.exams
+        : [];
+      if (list.length > 0) {
+        const pag = res.pagination || res.data?.pagination || { total: list.length, page: 1, pages: 1 };
+        setData({ exams: list, pagination: pag });
+      }
     } catch (err) {
       setError(err);
     } finally {
@@ -43,7 +55,10 @@ export const useExam = (id) => {
     if (!id) return;
     setLoading(true);
     examService.getById(id)
-      .then(res => setData(res.data?.exam ?? mockExams.find(e => e.id === id || e._id === id) ?? mockExams[0]))
+      .then(res => {
+        const found = res?.exam || res?.data?.exam || res?.data || mockExams.find(e => e.id === id || e._id === id);
+        setData(found ?? mockExams[0]);
+      })
       .catch(err => {
         setError(err);
         setData(mockExams.find(e => e.id === id || e._id === id) ?? mockExams[0]);

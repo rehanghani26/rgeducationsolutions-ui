@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { FileText, BookOpen, GraduationCap, Award, Activity } from 'lucide-react';
+import { FileText, BookOpen, GraduationCap, Award, Activity, ClipboardList, ExternalLink, CheckCircle } from 'lucide-react';
 import DetailPageLayout, { EditButton } from '../../components/ui/DetailPageLayout.jsx';
 import ActivityTimeline from '../../components/ui/ActivityTimeline.jsx';
 import examService from '../../services/examService.js';
-import { mockExams, mockResults } from '../../data/mockData.js';
+import resultService from '../../services/resultService.js';
+import { mockExams } from '../../data/mockData.js';
 import Loader from '../../components/ui/Loader.jsx';
 
 const InfoGrid = ({ items }) => (
@@ -21,10 +22,12 @@ const InfoGrid = ({ items }) => (
 
 const ExamDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [exam, setExam] = useState(null);
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [classResults, setClassResults] = useState({});
 
   // Direct useEffect API Fetch
   useEffect(() => {
@@ -36,8 +39,9 @@ const ExamDetail = () => {
       examService.getActivity(id).catch(() => null),
     ]).then(([res, actRes]) => {
       const fallbackExam = mockExams.find((e) => e.id === id || e._id === id) || mockExams[0];
-      setExam({ ...fallbackExam, ...res?.data?.exam });
-      setActivity(actRes?.data || { logs: [] });
+      const realExam = res?.exam || res?.data?.exam || res?.data;
+      setExam(realExam ? { ...fallbackExam, ...realExam } : fallbackExam);
+      setActivity(actRes?.logs || actRes?.data || { logs: [] });
     }).finally(() => setLoading(false));
   }, [id]);
 
@@ -117,28 +121,42 @@ const ExamDetail = () => {
           </div>
         );
       case 'results':
+        const classes = exam?.classNames || exam?.classes || ['Grade 10 - Section A'];
         return (
-          <div className="space-y-4 text-xs">
-            <div className="flex justify-between items-center">
-              <h4 className="font-bold text-slate-800 dark:text-white">Sample Exam Scorecards</h4>
-              <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">Evaluated</span>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold text-slate-800 dark:text-white text-sm">Class-wise Results</h4>
+              <button
+                onClick={() => navigate('/results')}
+                className="flex items-center gap-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg transition-all"
+              >
+                <ClipboardList size={12} /> Enter Results
+              </button>
             </div>
-            <div className="space-y-3">
-              {mockResults.map((res) => (
-                <div key={res.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-extrabold text-sm text-slate-900 dark:text-white">{res.studentName}</p>
-                      <p className="text-[10px] text-slate-400">{res.studentId} · {res.class} (Roll: {res.rollNo})</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {classes.map((cls) => {
+                const clsKey = typeof cls === 'string' ? cls : cls.name;
+                return (
+                  <div key={clsKey} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-800 dark:text-white">🏫 {clsKey}</p>
+                      <button
+                        onClick={() => navigate('/results')}
+                        className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                      >
+                        <ExternalLink size={10} /> View
+                      </button>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-indigo-500">{res.gpa}</p>
-                      <p className="text-[10px] font-bold text-emerald-500">{res.rank}</p>
-                    </div>
+                    <p className="text-[10px] text-slate-400">Click "Enter Results" to upload marks for this class</p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+            {exam?.isPublished && (
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg">
+                <CheckCircle size={14} /> Results have been published for this exam.
+              </div>
+            )}
           </div>
         );
       case 'activity':

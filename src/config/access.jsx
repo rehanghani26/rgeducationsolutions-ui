@@ -55,7 +55,7 @@ export const ROLE_PERMISSIONS = {
       'dashboard', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'fees',
       'inventory', 'library', 'transport', 'hostel', 'certificates',
-      'notifications', 'reports', 'online-classes', 'homework'
+      'notifications', 'reports', 'settings', 'online-classes', 'homework'
     ],
     actions: ['create', 'read', 'update', 'manage'],
   },
@@ -106,7 +106,7 @@ export const ROLE_PERMISSIONS = {
     modules: [
       'dashboard', 'students', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'library', 'notifications',
-      'online-classes', 'homework'
+      'settings', 'online-classes', 'homework'
     ],
     actions: ['create', 'read', 'update'],
   },
@@ -114,7 +114,7 @@ export const ROLE_PERMISSIONS = {
     modules: [
       'dashboard', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'library', 'notifications',
-      'online-classes', 'homework'
+      'settings', 'online-classes', 'homework'
     ],
     actions: ['create', 'read', 'update'],
   },
@@ -122,7 +122,7 @@ export const ROLE_PERMISSIONS = {
     modules: [
       'dashboard', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'library', 'notifications',
-      'online-classes', 'homework'
+      'settings', 'online-classes', 'homework'
     ],
     actions: ['create', 'read', 'update'],
   },
@@ -130,7 +130,7 @@ export const ROLE_PERMISSIONS = {
     modules: [
       'dashboard', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'notifications',
-      'online-classes', 'homework'
+      'settings', 'online-classes', 'homework'
     ],
     actions: ['create', 'read', 'update'],
   },

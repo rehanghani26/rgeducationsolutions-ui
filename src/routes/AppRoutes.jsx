@@ -24,11 +24,12 @@ const RoleGuard = ({ children, allowedRoles, module }) => {
   const { user } = useSelector((state) => state.auth);
   if (!user) return <Navigate to={ROUTES.LOGIN} replace />;
   if (!allowedRoles && !module) return children;
-  const userRole = (user.role || '').toLowerCase();
+  const rawRole = (user.role || '').toLowerCase();
+  const userRole = rawRole.replace(/_/g, '-');
   if (userRole === ROLES.SUPER_ADMIN || userRole === 'superadmin') return children;
   if (module && hasModuleAccess(user, module)) return children;
-  const allowed = allowedRoles && allowedRoles.map((r) => (r || '').toLowerCase());
-  return allowed && allowed.includes(userRole)
+  const allowed = allowedRoles && allowedRoles.map((r) => (r || '').toLowerCase().replace(/_/g, '-'));
+  return allowed && (allowed.includes(userRole) || allowed.includes(rawRole))
     ? children
     : <Navigate to={ROUTES.DASHBOARD} replace />;
 };

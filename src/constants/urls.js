@@ -70,6 +70,18 @@ export const EXAM_URLS = {
   ACTIVITY:  (id)  => `/exams/${id}/activity`,
 };
 
+// ─── Results ──────────────────────────────────────────────────────────────────
+export const RESULT_URLS = {
+  BASE:                '/results',
+  BULK:                '/results/bulk',
+  BY_ID:               (id)          => `/results/${id}`,
+  STUDENT_HISTORY:     (studentId)   => `/results/student/${studentId}`,
+  STUDENT_EXAM:        (examId, sid) => `/results/exam/${examId}/student/${sid}`,
+  CLASS_RESULTS:       (examId, cid) => `/results/exam/${examId}/class/${cid}`,
+  PUBLISH:             (examId, cid) => `/results/exam/${examId}/class/${cid}/publish`,
+  STATS:               (examId)      => `/results/stats/${examId}`,
+};
+
 // ─── Attendance ───────────────────────────────────────────────────────────────
 export const ATTENDANCE_URLS = {
   BASE:  '/attendance',
@@ -107,20 +119,29 @@ export const HOMEWORK_URLS = {
   GRADE:     (id, submId) => `/homework/${id}/grade/${submId}`,
 };
 
+// ─── Class Syllabus / Curriculum ──────────────────────────────────────────────
+export const SYLLABUS_URLS = {
+  BASE:     '/syllabus',
+  BY_CLASS: (classId) => `/syllabus/${classId}`,
+  RESET:    (classId) => `/syllabus/${classId}/reset`,
+};
+
 // ─── Aggregated export ────────────────────────────────────────────────────────
 export const API_URLS = {
-  AUTH:          AUTH_URLS,
-  STUDENTS:      STUDENT_URLS,
-  TEACHERS:      TEACHER_URLS,
-  FEES:          FEE_URLS,
-  EXPENSES:      EXPENSE_URLS,
-  INVENTORY:     INVENTORY_URLS,
-  EXAMS:         EXAM_URLS,
-  ATTENDANCE:    ATTENDANCE_URLS,
-  AUDIT_LOGS:    AUDIT_LOG_URLS,
-  ERP:           ERP_URLS,
+  AUTH:           AUTH_URLS,
+  STUDENTS:       STUDENT_URLS,
+  TEACHERS:       TEACHER_URLS,
+  FEES:           FEE_URLS,
+  EXPENSES:       EXPENSE_URLS,
+  INVENTORY:      INVENTORY_URLS,
+  EXAMS:          EXAM_URLS,
+  RESULTS:        RESULT_URLS,
+  SYLLABUS:       SYLLABUS_URLS,
+  ATTENDANCE:     ATTENDANCE_URLS,
+  AUDIT_LOGS:     AUDIT_LOG_URLS,
+  ERP:            ERP_URLS,
   ONLINE_CLASSES: ONLINE_CLASS_URLS,
-  HOMEWORK:      HOMEWORK_URLS,
+  HOMEWORK:       HOMEWORK_URLS,
 };
 
 export default API_URLS;

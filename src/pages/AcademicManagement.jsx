@@ -13,6 +13,7 @@ import Loader from "../components/ui/Loader.jsx";
 import { Can, CanButton, getUserFromStorage } from "../config/access.jsx";
 import { useSelector } from "react-redux";
 import StudentAcademicView, { buildDynamicTimetable, ENRICHED_STUDENT_SUBJECTS } from "./academics/StudentAcademicView.jsx";
+import ClassSyllabusSettings from "./settings/ClassSyllabusSettings.jsx";
 
 const DEFAULT_COURSES = (ENRICHED_STUDENT_SUBJECTS || []).map((s) => ({
   ...s,
@@ -588,31 +589,33 @@ const AcademicManagement = () => {
             <span>Student View Preview</span>
           </button>
 
-          <Can module="academics" action="create">
-            {activeTab === "curriculum" ? (
-              <CanButton id="ASSIGN_CURRICULUM">
-                <button
-                  onClick={() => handleOpenAssignCurriculum()}
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all duration-150 text-xs"
-                >
-                  <Plus size={16} />
-                  <span>Assign Curriculum & Course</span>
-                </button>
-              </CanButton>
-            ) : (
-              <CanButton id={activeTab === "classes" ? "CREATE_CLASS" : activeTab === "sections" ? "CREATE_SECTION" : "CREATE_SUBJECT"}>
-                <button
-                  onClick={openModal}
-                  className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all duration-150 text-xs"
-                >
-                  <Plus size={16} />
-                  <span>
-                    Add {activeTab === "classes" ? "Class Level" : activeTab === "sections" ? "Section" : "Subject"}
-                  </span>
-                </button>
-              </CanButton>
-            )}
-          </Can>
+          {activeTab !== "syllabus" && (
+            <Can module="academics" action="create">
+              {activeTab === "curriculum" ? (
+                <CanButton id="ASSIGN_CURRICULUM">
+                  <button
+                    onClick={() => handleOpenAssignCurriculum()}
+                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all duration-150 text-xs"
+                  >
+                    <Plus size={16} />
+                    <span>Assign Curriculum & Course</span>
+                  </button>
+                </CanButton>
+              ) : (
+                <CanButton id={activeTab === "classes" ? "CREATE_CLASS" : activeTab === "sections" ? "CREATE_SECTION" : "CREATE_SUBJECT"}>
+                  <button
+                    onClick={openModal}
+                    className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all duration-150 text-xs"
+                  >
+                    <Plus size={16} />
+                    <span>
+                      Add {activeTab === "classes" ? "Class Level" : activeTab === "sections" ? "Section" : "Subject"}
+                    </span>
+                  </button>
+                </CanButton>
+              )}
+            </Can>
+          )}
         </div>
       </div>
 
@@ -627,10 +630,10 @@ const AcademicManagement = () => {
       )}
 
       {/* Tab select buttons */}
-      <div className="flex bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 text-xs font-bold gap-1 shadow-sm w-full max-w-xl">
+      <div className="flex bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 text-xs font-bold gap-1 shadow-sm w-full max-w-2xl overflow-x-auto">
         <button
           onClick={() => setActiveTab("classes")}
-          className={`flex-1 py-2 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-2 px-3 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
             activeTab === "classes"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -640,7 +643,7 @@ const AcademicManagement = () => {
         </button>
         <button
           onClick={() => setActiveTab("sections")}
-          className={`flex-1 py-2 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-2 px-3 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
             activeTab === "sections"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -650,7 +653,7 @@ const AcademicManagement = () => {
         </button>
         <button
           onClick={() => setActiveTab("subjects")}
-          className={`flex-1 py-2 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-2 px-3 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
             activeTab === "subjects"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -660,13 +663,23 @@ const AcademicManagement = () => {
         </button>
         <button
           onClick={() => setActiveTab("curriculum")}
-          className={`flex-1 py-2 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors ${
+          className={`flex-1 py-2 px-3 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
             activeTab === "curriculum"
               ? "bg-indigo-600 text-white shadow-sm"
               : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           <GraduationCap size={14} /> Curriculum & Courses
+        </button>
+        <button
+          onClick={() => setActiveTab("syllabus")}
+          className={`flex-1 py-2 px-3 rounded-lg capitalize flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
+            activeTab === "syllabus"
+              ? "bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400"
+              : "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+          }`}
+        >
+          <BookOpen size={14} /> Class Syllabus & Books
         </button>
       </div>
 
@@ -1209,6 +1222,12 @@ const AcademicManagement = () => {
                 </div>
               );
             })()}
+
+            {activeTab === "syllabus" && (
+              <div className="pt-2">
+                <ClassSyllabusSettings />
+              </div>
+            )}
           </div>
         )}
       </div>

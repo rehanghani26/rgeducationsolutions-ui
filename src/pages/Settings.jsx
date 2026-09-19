@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import {
   Save,
@@ -6,17 +7,15 @@ import {
   BookOpen,
   Package,
   Clock,
-  FileText,
-  Lock,
   Settings as SettingsIcon,
   DollarSign,
-  Bell,
   Shield,
-  Database,
   GraduationCap,
   ArrowLeft,
   Megaphone,
   Globe,
+  Search,
+  Sparkles,
 } from "lucide-react";
 import api from "../services/api.js";
 import SettingsCard from "./settings/SettingsCard";
@@ -24,23 +23,26 @@ import SchoolProfileSettings from "./settings/SchoolProfileSettings";
 import TeacherSettings from "./settings/TeacherSettings";
 import StudentSettings from "./settings/StudentSettings";
 import InventorySettings from "./settings/InventorySettings";
-import TimesheetSettings from "./settings/TimesheetSettings";
-import PolicySettings from "./settings/PolicySettings";
-import AccessSettings from "./settings/AccessSettings";
 import AcademicSettings from "./settings/AcademicSettings";
 import FinanceSettings from "./settings/FinanceSettings";
-import NotificationSettings from "./settings/NotificationSettings";
 import SecuritySettings from "./settings/SecuritySettings";
-import BackupSettings from "./settings/BackupSettings";
 import NoticeSettings from "./settings/NoticeSettings";
 import MasterPeriodSettings from "./settings/MasterPeriodSettings";
 import SessionManagementSettings from "./settings/SessionManagementSettings";
 import PortalManagementSettings from "./settings/PortalManagementSettings";
+import ClassSyllabusSettings from "./settings/ClassSyllabusSettings";
 import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
 
 const Settings = () => {
   const { updateBranding } = useSchoolBranding();
-  const [selectedTab, setSelectedTab] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+
+  const [selectedTab, setSelectedTab] = useState(
+    tabFromUrl === "class-syllabus" ? "syllabus" : tabFromUrl || null
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [settings, setSettings] = useState({
     schoolName: "",
     schoolCode: "",
@@ -67,6 +69,12 @@ const Settings = () => {
     autoGenerateAdmissionNumber: true,
     admissionNumberPrefix: "STU",
   });
+
+  useEffect(() => {
+    if (tabFromUrl) {
+      setSelectedTab(tabFromUrl === "class-syllabus" ? "syllabus" : tabFromUrl);
+    }
+  }, [tabFromUrl]);
 
   useEffect(() => {
     api
@@ -110,7 +118,39 @@ const Settings = () => {
       );
   };
 
+  const handleSelectTab = (tabId) => {
+    setSelectedTab(tabId);
+    if (tabId) {
+      setSearchParams({ tab: tabId });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   const settingsTabs = [
+    {
+      id: "syllabus",
+      label: "Class Syllabus",
+      badge: "Curriculum & Books",
+      icon: BookOpen,
+      description:
+        "Prescribed textbooks (e.g. Our English, Math Magic), subjects, full marks, and pass marks for all grades",
+      component: ClassSyllabusSettings,
+    },
+    {
+      id: "academic",
+      label: "Academic Settings",
+      icon: GraduationCap,
+      description: "Passing criteria, grading scale, GPA, and grade distribution tracking",
+      component: AcademicSettings,
+    },
+    {
+      id: "masterperiod",
+      label: "Master Period",
+      icon: Clock,
+      description: "Define daily period structure — Regular & Exam schedules with period types",
+      component: MasterPeriodSettings,
+    },
     {
       id: "portal",
       label: "Portal Management",
@@ -131,13 +171,6 @@ const Settings = () => {
       icon: Megaphone,
       description: "Publish school notices, announcements, and bulletins",
       component: NoticeSettings,
-    },
-    {
-      id: "masterperiod",
-      label: "Master Period",
-      icon: Clock,
-      description: "Define daily period structure — Regular & Exam schedules with period types",
-      component: MasterPeriodSettings,
     },
     {
       id: "profile",
@@ -168,13 +201,6 @@ const Settings = () => {
       component: InventorySettings,
     },
     {
-      id: "academic",
-      label: "Academic",
-      icon: BookOpen,
-      description: "Grade settings, passing percentage, and grade distribution tracking",
-      component: AcademicSettings,
-    },
-    {
       id: "finance",
       label: "Finance",
       icon: DollarSign,
@@ -190,60 +216,194 @@ const Settings = () => {
     },
   ];
 
-  const SelectedComponent = selectedTab
-    ? settingsTabs.find((t) => t.id === selectedTab)?.component
-    : null;
+  const filteredTabs = settingsTabs.filter((tab) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      tab.label.toLowerCase().includes(query) ||
+      tab.description.toLowerCase().includes(query) ||
+      (tab.badge && tab.badge.toLowerCase().includes(query)) ||
+      tab.id.toLowerCase().includes(query)
+    );
+  });
+
+  const selectedTabObj = settingsTabs.find((t) => t.id === selectedTab);
+  const SelectedComponent = selectedTabObj?.component || null;
 
   return (
     <div className="space-y-6 pb-12">
       <ToastContainer position="top-right" theme="colored" />
 
+      {/* Top Category Navigation Pills (Always visible for quick switching) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
+        <button
+          type="button"
+          onClick={() => handleSelectTab(null)}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+            !selectedTab
+              ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <SettingsIcon size={14} /> All Settings
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleSelectTab("syllabus")}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+            selectedTab === "syllabus"
+              ? "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300 dark:ring-indigo-800"
+              : "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 border border-indigo-200/80 dark:border-indigo-800/80"
+          }`}
+        >
+          <BookOpen size={14} className="text-indigo-600 dark:text-indigo-400" />
+          Class Syllabus & Books
+          <span className="px-1.5 py-0.2 text-[9px] font-black uppercase rounded-full bg-amber-400 text-slate-950">
+            Core
+          </span>
+        </button>
+
+        {settingsTabs
+          .filter((t) => t.id !== "syllabus")
+          .map((tab) => {
+            const Icon = tab.icon;
+            const isActive = selectedTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleSelectTab(tab.id)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                  isActive
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </button>
+            );
+          })}
+      </div>
+
       {!selectedTab ? (
         <>
-          <div>
-            <h2 className="text-3xl font-extrabold tracking-tight">System Settings</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Manage all ERP configurations, permissions, notices, and preferences.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                System Settings
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-1">
+                Manage all school configurations, curriculum syllabuses, permissions, and preferences.
+              </p>
+            </div>
+
+            {/* Quick Search */}
+            <div className="relative min-w-[260px]">
+              <Search
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search settings (e.g. syllabus, books)..."
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Featured Highlight Banner: Class Syllabus */}
+          <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-700/50">
+            <div className="flex items-start sm:items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-amber-300 shrink-0 border border-white/20 shadow-inner">
+                <BookOpen size={24} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400 text-indigo-950 px-2 py-0.5 rounded-full shadow-sm">
+                    Featured Curriculum Tool
+                  </span>
+                  <h3 className="font-extrabold text-base text-white">
+                    Class Syllabus & Prescribed Textbooks
+                  </h3>
+                </div>
+                <p className="text-xs text-indigo-200 mt-0.5 max-w-2xl">
+                  Configure grade-wise textbooks (e.g. <em>Our English</em>, <em>Math Magic</em>), subjects, full marks & passing marks. Auto-fills during exam scheduling & result entry.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSelectTab("syllabus")}
+              className="px-4 py-2.5 bg-white text-indigo-900 hover:bg-indigo-50 font-extrabold text-xs rounded-xl shadow transition shrink-0 flex items-center justify-center gap-1.5 self-start sm:self-auto"
+            >
+              Open Class Syllabus &rarr;
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {settingsTabs.map((tab) => (
+            {filteredTabs.map((tab) => (
               <SettingsCard
                 key={tab.id}
                 icon={tab.icon}
                 title={tab.label}
+                badge={tab.badge}
                 description={tab.description}
-                onClick={() => setSelectedTab(tab.id)}
+                onClick={() => handleSelectTab(tab.id)}
               />
             ))}
           </div>
+
+          {filteredTabs.length === 0 && (
+            <div className="text-center py-12 text-slate-400">
+              <p className="font-semibold text-sm">No settings found matching &quot;{searchQuery}&quot;</p>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="mt-2 text-xs text-indigo-600 font-bold hover:underline"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
         </>
       ) : (
         <>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-3">
             <button
-              onClick={() => setSelectedTab(null)}
-              className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-semibold text-sm"
+              onClick={() => handleSelectTab(null)}
+              className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-semibold text-sm transition"
             >
-              <ArrowLeft size={18} /> Back to Settings
+              <ArrowLeft size={18} /> Back to Overview
             </button>
+            {selectedTabObj && (
+              <span className="text-xs font-bold text-slate-400">
+                Settings &gt; {selectedTabObj.label}
+              </span>
+            )}
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
             <div className="space-y-6">
               <SelectedComponent settings={settings} handleChange={handleChange} />
-              {selectedTab !== "notice" && selectedTab !== "masterperiod" && selectedTab !== "session" && selectedTab !== "portal" && (
-                <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    onClick={handleSubmit}
-                    type="button"
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg text-xs"
-                  >
-                    <Save size={14} /> Save Changes
-                  </button>
-                </div>
-              )}
+              {selectedTab !== "notice" &&
+                selectedTab !== "masterperiod" &&
+                selectedTab !== "session" &&
+                selectedTab !== "portal" &&
+                selectedTab !== "syllabus" && (
+                  <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={handleSubmit}
+                      type="button"
+                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg text-xs"
+                    >
+                      <Save size={14} /> Save Changes
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
         </>

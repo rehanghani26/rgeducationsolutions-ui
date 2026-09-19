@@ -1,6 +1,6 @@
 import React from "react";
 
-const SettingsCard = ({ icon: Icon, title, description, onClick }) => {
+const SettingsCard = ({ icon: Icon, title, description, badge, onClick }) => {
   return (
     <div
       onClick={onClick}
@@ -11,9 +11,16 @@ const SettingsCard = ({ icon: Icon, title, description, onClick }) => {
           <Icon size={24} className="text-indigo-600 dark:text-indigo-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
-            {title}
-          </h3>
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {title}
+            </h3>
+            {badge && (
+              <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 rounded-full text-[10px] font-extrabold border border-indigo-200 dark:border-indigo-800">
+                {badge}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
             {description}
           </p>

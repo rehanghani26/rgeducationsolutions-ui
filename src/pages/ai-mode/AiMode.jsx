@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { useAiChat } from "./useAiChat.js";
 import AiSidebar from "./components/AiSidebar.jsx";
 import AiHeader from "./components/AiHeader.jsx";
@@ -9,6 +10,9 @@ import AiInput from "./components/AiInput.jsx";
 
 export default function AiMode() {
   const { user } = useSelector((state) => state.auth);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const promptParam = searchParams.get("prompt");
+  const processedPromptRef = useRef(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth >= 1100 : true
@@ -30,6 +34,16 @@ export default function AiMode() {
     handleDeleteSession,
     handleSendMessage,
   } = useAiChat();
+
+  // Execute prompt from URL if present
+  useEffect(() => {
+    if (promptParam && !processedPromptRef.current) {
+      processedPromptRef.current = true;
+      handleSendMessage(promptParam);
+      // Clean query string
+      setSearchParams({}, { replace: true });
+    }
+  }, [promptParam, handleSendMessage, setSearchParams]);
 
   // Responsive sidebar resize listener
   useEffect(() => {

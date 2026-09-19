@@ -88,6 +88,13 @@ export const NAV_SECTIONS = [
         permission: 'academics',
       },
       {
+        name:       'Class Syllabus',
+        path:       ROUTES.ACADEMICS.SYLLABUS,
+        icon:       BookOpen,
+        roles:      [...ADMIN_ROLES, 'admin', 'superadmin', 'super_admin', 'school_admin', ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR],
+        permission: 'academics',
+      },
+      {
         name:       'Attendance',
         path:       ROUTES.ATTENDANCE,
         icon:       CalendarCheck,
@@ -241,7 +248,7 @@ export const NAV_SECTIONS = [
         name:       'Settings',
         path:       ROUTES.SETTINGS,
         icon:       SettingsIcon,
-        roles:      ADMIN_ROLES,
+        roles:      [...ADMIN_ROLES, 'admin', 'superadmin', 'super_admin', 'school_admin', ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR],
         permission: null,
       },
     ],
@@ -267,14 +274,19 @@ export const filterNavForUser = (user) => {
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => {
-        // Super-admin has access to everything
-        if (user.role === ROLES.SUPER_ADMIN || user.role === 'superadmin') return true;
+        const rawRole = (user.role || '').trim().toLowerCase();
+        const normRole = rawRole.replace(/_/g, '-');
 
-        // User role MUST be explicitly listed in item.roles
-        if (!item.roles.includes(user.role)) return false;
+        // Super-admin has access to everything
+        if (normRole === 'super-admin' || normRole === 'superadmin') return true;
+
+        // User role MUST match an entry in item.roles
+        const itemRoles = (item.roles || []).map((r) => String(r).toLowerCase().replace(/_/g, '-'));
+        if (!itemRoles.includes(rawRole) && !itemRoles.includes(normRole)) return false;
 
         // If privileged admin role, allow item
-        if (PRIVILEGED_ROLES.includes(user.role)) return true;
+        const privRoles = PRIVILEGED_ROLES.map((r) => String(r).toLowerCase().replace(/_/g, '-'));
+        if (privRoles.includes(rawRole) || privRoles.includes(normRole)) return true;
 
         // For non-privileged roles, if item requires permission, check user permissions or module access
         if (item.permission) {

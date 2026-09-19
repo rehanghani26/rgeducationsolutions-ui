@@ -7,11 +7,50 @@ import {
   Boxes,
   BarChart2,
   BookOpen,
+  Award,
+  Sliders,
+  FileSpreadsheet,
 } from "lucide-react";
 
 export const STORAGE_KEY_SESSIONS = "GEMINI_ERP_CHAT_SESSIONS_V2";
 
 export const SUGGESTED_PROMPTS = [
+  {
+    icon: BookOpen,
+    title: "Exam Schedule & Papers",
+    prompt:
+      "Show all upcoming exams and their subject schedule with prescribed books and timings.",
+    gradient: "from-fuchsia-600 to-pink-600",
+    bg: "bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border-fuchsia-500/20",
+    textColor: "text-fuchsia-300",
+  },
+  {
+    icon: Award,
+    title: "Exam Results & Toppers",
+    prompt:
+      "Show me exam analytics, top rankers, and grade performance for recent exams.",
+    gradient: "from-amber-500 to-yellow-600",
+    bg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20",
+    textColor: "text-amber-300",
+  },
+  {
+    icon: FileSpreadsheet,
+    title: "Class Syllabus & Books",
+    prompt:
+      "What are the prescribed textbooks, authors, and full marks for Class 1 and Class 10?",
+    gradient: "from-teal-600 to-emerald-600",
+    bg: "bg-teal-500/10 hover:bg-teal-500/20 border-teal-500/20",
+    textColor: "text-teal-300",
+  },
+  {
+    icon: Sliders,
+    title: "School Settings",
+    prompt:
+      "View the current school profile, contact details, and academic session settings.",
+    gradient: "from-blue-600 to-cyan-600",
+    bg: "bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20",
+    textColor: "text-blue-300",
+  },
   {
     icon: GraduationCap,
     title: "Student List",
@@ -22,29 +61,12 @@ export const SUGGESTED_PROMPTS = [
     textColor: "text-blue-300",
   },
   {
-    icon: Plus,
-    title: "Enroll Student",
-    prompt:
-      "Enroll a new student named Aarav Sharma in Class 10 Section A, parent: Rajesh Sharma.",
-    gradient: "from-emerald-600 to-teal-600",
-    bg: "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20",
-    textColor: "text-emerald-300",
-  },
-  {
-    icon: Users,
-    title: "User Accounts",
-    prompt: "List all system user accounts, roles, and their current status.",
-    gradient: "from-purple-600 to-pink-600",
-    bg: "bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20",
-    textColor: "text-purple-300",
-  },
-  {
     icon: ClipboardList,
-    title: "Attendance",
+    title: "Attendance Overview",
     prompt: "What is the school's attendance rate today? Show absent students.",
-    gradient: "from-amber-600 to-orange-600",
-    bg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20",
-    textColor: "text-amber-300",
+    gradient: "from-orange-600 to-amber-600",
+    bg: "bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/20",
+    textColor: "text-orange-300",
   },
   {
     icon: DollarSign,
@@ -55,15 +77,6 @@ export const SUGGESTED_PROMPTS = [
     textColor: "text-rose-300",
   },
   {
-    icon: Boxes,
-    title: "Inventory",
-    prompt:
-      "Show inventory items running low on stock and their current quantities.",
-    gradient: "from-cyan-600 to-sky-600",
-    bg: "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20",
-    textColor: "text-cyan-300",
-  },
-  {
     icon: BarChart2,
     title: "Dashboard Stats",
     prompt:
@@ -72,35 +85,37 @@ export const SUGGESTED_PROMPTS = [
     bg: "bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20",
     textColor: "text-violet-300",
   },
-  {
-    icon: BookOpen,
-    title: "Exam Schedule",
-    prompt: "Show upcoming exams and assessments scheduled for this month.",
-    gradient: "from-fuchsia-600 to-pink-600",
-    bg: "bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border-fuchsia-500/20",
-    textColor: "text-fuchsia-300",
-  },
 ];
 
 export const QUICK_CHIPS = [
   {
+    emoji: "📝",
+    label: "Exams",
+    prompt: "Show all exams and subject schedule",
+  },
+  {
+    emoji: "🏆",
+    label: "Results & Toppers",
+    prompt: "Show exam results and top rankers",
+  },
+  {
+    emoji: "📚",
+    label: "Class Syllabus",
+    prompt: "Show prescribed books for Class 1",
+  },
+  {
+    emoji: "⚙️",
+    label: "Settings",
+    prompt: "Show school settings and profile info",
+  },
+  {
     emoji: "📋",
-    label: "List Students",
+    label: "Students",
     prompt: "Show me all enrolled students",
   },
   {
-    emoji: "➕",
-    label: "Add Student",
-    prompt: "Enroll a new student in Class 9A",
-  },
-  {
-    emoji: "👥",
-    label: "Users",
-    prompt: "Show all system user accounts",
-  },
-  {
     emoji: "📊",
-    label: "Stats",
+    label: "Attendance",
     prompt: "Give me today's attendance overview",
   },
   {
@@ -108,9 +123,5 @@ export const QUICK_CHIPS = [
     label: "Fees",
     prompt: "Show pending fee collections",
   },
-  {
-    emoji: "📦",
-    label: "Inventory",
-    prompt: "Show low stock inventory items",
-  },
 ];
+

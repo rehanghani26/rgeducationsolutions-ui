@@ -22,6 +22,7 @@ import {
   InventoryEdit,
   ClassList,
   ClassDetail,
+  ClassSyllabusPage,
   AcademicManagement,
   AttendanceManagement,
   ExamList,
@@ -84,6 +85,8 @@ const appRoutes = [
   { path: ROUTES.ACADEMICS.BASE, element: AcademicManagement, name: 'academic-overview', module: 'academics' },
   { path: ROUTES.ACADEMICS.CLASSES, element: ClassList, name: 'class-list', module: 'academics' },
   { path: ROUTES.ACADEMICS.CLASS_PARAM, element: ClassDetail, name: 'class-detail', module: 'academics' },
+  { path: ROUTES.ACADEMICS.SYLLABUS, element: ClassSyllabusPage, name: 'class-syllabus', module: 'academics' },
+  { path: ROUTES.SYLLABUS, element: ClassSyllabusPage, name: 'syllabus', module: 'academics' },
 
   // Attendance
   { path: ROUTES.ATTENDANCE, element: AttendanceManagement, name: 'attendance', module: 'attendance' },
@@ -108,7 +111,7 @@ const appRoutes = [
   { path: ROUTES.USER_MANAGEMENT, element: UserManagement, name: 'user-management', module: 'user-management', allowedRoles: [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin'] },
   { path: ROUTES.USER_DETAIL, element: UserDetailPage, name: 'user-detail', module: 'user-management', allowedRoles: [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin'] },
   { path: ROUTES.AUDIT_LOGS, element: AuditLogList, name: 'audit-logs', allowedRoles: ADMIN_ROLES },
-  { path: ROUTES.SETTINGS, element: Settings, name: 'settings', allowedRoles: ADMIN_ROLES },
+  { path: ROUTES.SETTINGS, element: Settings, name: 'settings', allowedRoles: [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR] },
 
   // Learning Modules
   { path: ROUTES.ONLINE_CLASSES, element: OnlineClassesManagement, name: 'online-classes', module: 'online-classes' },

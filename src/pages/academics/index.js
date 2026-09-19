@@ -7,3 +7,4 @@
 export { default as ClassList }   from './ClassList.jsx';
 export { default as ClassDetail } from './ClassDetail.jsx';
 export { default as StudentAcademicView } from './StudentAcademicView.jsx';
+export { default as ClassSyllabusPage } from './ClassSyllabusPage.jsx';
