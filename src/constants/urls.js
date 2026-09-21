@@ -126,6 +126,18 @@ export const SYLLABUS_URLS = {
   RESET:    (classId) => `/syllabus/${classId}/reset`,
 };
 
+// ─── Documents (Certificates & ID Cards) ──────────────────────────────────────
+export const DOCUMENT_URLS = {
+  CERTIFICATES:            '/documents/certificates',
+  BY_ID:                   (id)    => `/documents/certificates/${id}`,
+  ISSUE:                   '/documents/certificates/issue',
+  BULK_ISSUE:              '/documents/certificates/bulk-issue',
+  REVOKE:                  (id)    => `/documents/certificates/${id}/revoke`,
+  VERIFY:                  (token) => `/documents/verify/${token}`,
+  CUSTOM_TEMPLATES:        '/documents/templates/custom',
+  CUSTOM_TEMPLATE_BY_ID:   (id)    => `/documents/templates/custom/${id}`,
+};
+
 // ─── Aggregated export ────────────────────────────────────────────────────────
 export const API_URLS = {
   AUTH:           AUTH_URLS,
@@ -142,6 +154,7 @@ export const API_URLS = {
   ERP:            ERP_URLS,
   ONLINE_CLASSES: ONLINE_CLASS_URLS,
   HOMEWORK:       HOMEWORK_URLS,
+  DOCUMENTS:      DOCUMENT_URLS,
 };
 
 export default API_URLS;

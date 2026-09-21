@@ -76,7 +76,7 @@ export const ROUTES = {
     detail: (id = ':id') => `/exams/${id}`,
   },
 
-  // ── Module Routes (Direct String Paths) ──────────────────────────────────
+  // ── Module Routes (Direct String Paths) ──────────────────────────────────────────────
   TIMETABLE:     '/timetable',
   RESULTS:       '/results',
   LEAVE:         '/leave',
@@ -87,6 +87,11 @@ export const ROUTES = {
   CERTIFICATES:  '/certificates',
   NOTIFICATIONS: '/notifications',
   REPORTS:       '/reports',
+
+  // ── Certificate Sub-routes ──────────────────────────────────────────────────────────────
+  // Public verification page — no authentication required
+  VERIFY_CERTIFICATE: '/verify/certificate/:token',
+  verifyCertificate: (token = ':token') => `/verify/certificate/${token}`,
 
   // ── System ───────────────────────────────────────────────────────────────
   AUDIT_LOGS: '/audit-logs',

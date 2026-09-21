@@ -44,3 +44,4 @@ export { default as HomeworkManagement }      from './homework/HomeworkManagemen
 export { default as UserManagement }          from './UserManagement.jsx';
 export { default as UserDetailPage }          from './UserDetailPage.jsx';
 export { default as AiMode }                  from './ai-mode/AiMode.jsx';
+export { default as VerifyCertificatePage }   from './certificates/VerifyCertificatePage.jsx';

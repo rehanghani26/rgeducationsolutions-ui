@@ -1,63 +1,159 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Award, FileCheck, Download, Printer, Plus } from 'lucide-react';
-import PageHeader from '../../components/ui/PageHeader.jsx';
-import Button from '../../components/ui/Button.jsx';
-import { mockCertificates } from '../../data/mockData.js';
+/**
+ * @file CertificatesManagement.jsx
+ * @description Main Document & Credential Command Center for the School ERP.
+ * Features 4 distinct workflow modules:
+ * 1. ID Cards — Student, Teacher, and Staff ID generation & batch printing
+ * 2. Certificates — Official certificate issuance, registry, revocation, and print
+ * 3. Templates & Studio — 20 built-in templates + custom visual styling studio
+ * 4. Verification — In-app validation of cryptographic verification tokens
+ */
 
-const CertificatesManagement = () => {
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  CreditCard,
+  Award,
+  Palette,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+import PageHeader from '../../components/ui/PageHeader.jsx';
+import { useSchoolBranding } from '../../context/SchoolBrandingContext.jsx';
+
+import IdCardsModule from './components/IdCardsModule.jsx';
+import CertificatesModule from './components/CertificatesModule.jsx';
+import TemplatesModule from './components/TemplatesModule.jsx';
+import VerifyModule from './components/VerifyModule.jsx';
+
+const TABS = [
+  {
+    id: 'id-cards',
+    label: 'ID Cards',
+    icon: CreditCard,
+    badge: 'Students • Faculty • Staff',
+    color: 'sky',
+  },
+  {
+    id: 'certificates',
+    label: 'Certificates',
+    icon: Award,
+    badge: 'Official Credentials',
+    color: 'amber',
+  },
+  {
+    id: 'templates',
+    label: 'Templates & Studio',
+    icon: Palette,
+    badge: '20 Designs',
+    color: 'violet',
+  },
+  {
+    id: 'verify',
+    label: 'Verification',
+    icon: ShieldCheck,
+    badge: 'Tamper-Proof Audit',
+    color: 'emerald',
+  },
+];
+
+export default function CertificatesManagement() {
+  const [activeTab, setActiveTab] = useState('id-cards');
+  const authUser = useSelector((state) => state.auth?.user);
+  const schoolBranding = useSchoolBranding();
+
+  const userRole = authUser?.role || 'student';
+
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-12">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6 pb-16"
+    >
+      {/* Top Header */}
       <PageHeader
-        title="Certificates & Official Documentation"
-        subtitle="Generate Bonafide, Transfer Certificates (TC), and Hifz Completion Sanad documents"
-        breadcrumbs={[{ label: 'Administration' }, { label: 'Certificates' }]}
-        actions={<Button icon={<Plus size={16} />}>Generate Certificate</Button>}
+        title="ID Cards & Certificate Management"
+        subtitle="Runtime dynamic rendering engine for institutional ID cards, verifiable certificates, and credential audit"
+        breadcrumbs={[{ label: 'Administration' }, { label: 'ID Cards & Certificates' }]}
       />
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Issued Certificates Records</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 font-bold text-xs uppercase border-b border-slate-200 dark:border-slate-800">
-                <th className="p-3">Certificate No</th>
-                <th className="p-3">Student Name</th>
-                <th className="p-3">Document Type</th>
-                <th className="p-3">Issued Date</th>
-                <th className="p-3">Verified Authority</th>
-                <th className="p-3 text-center">Status</th>
-                <th className="p-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-              {mockCertificates.map((cert) => (
-                <tr key={cert.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                  <td className="p-3 text-slate-400 text-xs font-mono">{cert.certNo}</td>
-                  <td className="p-3 font-extrabold text-slate-900 dark:text-white">{cert.studentName}</td>
-                  <td className="p-3 font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
-                    <Award size={16} /> {cert.type}
-                  </td>
-                  <td className="p-3 text-xs text-slate-500">{cert.issueDate}</td>
-                  <td className="p-3 text-xs text-slate-600 dark:text-slate-300">{cert.verifiedBy}</td>
-                  <td className="p-3 text-center">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
-                      {cert.status}
-                    </span>
-                  </td>
-                  <td className="p-3 text-center">
-                    <Button variant="ghost" size="sm" icon={<Printer size={14} />}>Print PDF</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Modern Navigation Tabs */}
+      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900/70 border border-slate-800 rounded-2xl backdrop-blur-md shadow-lg">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer relative ${
+                isActive
+                  ? 'bg-slate-800 text-white shadow-md border border-slate-700/80'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              }`}
+            >
+              <Icon
+                size={16}
+                className={
+                  isActive
+                    ? tab.color === 'sky'
+                      ? 'text-sky-400'
+                      : tab.color === 'amber'
+                      ? 'text-amber-400'
+                      : tab.color === 'violet'
+                      ? 'text-violet-400'
+                      : 'text-emerald-400'
+                    : 'text-slate-400'
+                }
+              />
+              <span>{tab.label}</span>
+              <span
+                className={`text-[10px] font-normal px-2 py-0.5 rounded-full ${
+                  isActive
+                    ? 'bg-slate-900/80 text-slate-300 border border-slate-700'
+                    : 'bg-slate-950/40 text-slate-500'
+                }`}
+              >
+                {tab.badge}
+              </span>
+
+              {isActive && (
+                <motion.div
+                  layoutId="activeTabPill"
+                  className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-sky-400 via-indigo-400 to-amber-400 rounded-full"
+                />
+              )}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Tab Panels */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18 }}
+        >
+          {activeTab === 'id-cards' && (
+            <IdCardsModule schoolSettings={schoolBranding} userRole={userRole} />
+          )}
+
+          {activeTab === 'certificates' && (
+            <CertificatesModule schoolSettings={schoolBranding} userRole={userRole} />
+          )}
+
+          {activeTab === 'templates' && (
+            <TemplatesModule schoolSettings={schoolBranding} userRole={userRole} />
+          )}
+
+          {activeTab === 'verify' && <VerifyModule />}
+        </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
-};
-
-export default CertificatesManagement;
+}

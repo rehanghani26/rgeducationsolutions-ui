@@ -44,6 +44,7 @@ import {
   UserManagement,
   UserDetailPage,
   AiMode,
+  VerifyCertificatePage,
 } from '../pages/index.js';
 
 import { ROUTES } from './routes.js';
@@ -53,6 +54,7 @@ const appRoutes = [
   // ─── Public Authentication Routes ──────────────────────────────────────────
   { path: ROUTES.LOGIN, element: Login, name: 'login', public: true },
   { path: ROUTES.SIGNUP, element: Signup, name: 'signup', public: true },
+  { path: ROUTES.VERIFY_CERTIFICATE, element: VerifyCertificatePage, name: 'verify-certificate', public: true },
 
   // ─── Protected Application Routes ───────────────────────────────────────────
   { path: ROUTES.DASHBOARD, element: Dashboard, name: 'dashboard', navTitle: 'Dashboard' },

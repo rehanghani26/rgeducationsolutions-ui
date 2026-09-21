@@ -202,10 +202,10 @@ export const NAV_SECTIONS = [
         permission: 'fee',
       },
       {
-        name:       'Certificates',
+        name:       'Certificates & ID Cards',
         path:       ROUTES.CERTIFICATES,
         icon:       BadgeCheck,
-        roles:      ADMIN_ROLES,
+        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.STUDENT],
         permission: 'academics',
       },
     ],
