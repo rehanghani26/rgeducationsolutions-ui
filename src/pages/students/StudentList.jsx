@@ -2,13 +2,38 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
-import { Plus, FolderDown, Copy, Eye, EyeOff, Check, FileSpreadsheet, Upload, Download, CheckCircle2 } from "lucide-react";
+import {
+  Plus,
+  FolderDown,
+  Copy,
+  Eye,
+  EyeOff,
+  Check,
+  FileSpreadsheet,
+  Upload,
+  Download,
+  CheckCircle2,
+  Edit3,
+  ShieldCheck,
+  Users,
+  GraduationCap,
+  Sparkles,
+  ExternalLink,
+  CreditCard,
+  UserCheck,
+  Search,
+  School,
+  Phone,
+  Lock,
+  FileText,
+} from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
 import SearchFilters from "../../components/ui/SearchFilters.jsx";
 import StatusBadge from "../../components/ui/StatusBadge.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import Button from "../../components/ui/Button.jsx";
+import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
 import StudentForm, {
   blankStudentForm,
   randomPassword,
@@ -41,10 +66,13 @@ const StudentList = () => {
   const [activeCredentialsModal, setActiveCredentialsModal] = useState(null);
   const [showPasswordText, setShowPasswordText] = useState(false);
   const [copiedField, setCopiedField] = useState("");
+  const [activePdfDoc, setActivePdfDoc] = useState(null);
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
   const [students, setStudents] = useState(mockStudents);
   const [pagination, setPagination] = useState({ total: mockStudents.length, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -107,7 +135,16 @@ const StudentList = () => {
   const fetchStudentsData = async () => {
     setLoading(true);
     try {
-      const res = await getStudents({ page, limit: 20, search, status });
+      const res = await getStudents({
+        page,
+        limit: 20,
+        search,
+        status,
+        class: selectedClass,
+        className: selectedClass,
+        section: selectedSection,
+        sectionName: selectedSection,
+      });
       if (res?.students) {
         setStudents(res.students);
         if (res.pagination) setPagination(res.pagination);
@@ -129,38 +166,82 @@ const StudentList = () => {
 
   useEffect(() => {
     fetchStudentsData();
-  }, [page, search, status]);
+  }, [page, search, status, selectedClass, selectedSection]);
 
   const columns = [
     {
       key: "name",
-      label: "Student Name",
-      render: (row) => (
-        <div>
-          <div className="font-semibold text-slate-900 dark:text-white">
-            {row.name || `${row.firstName || ''} ${row.lastName || ''}`.trim()}
+      label: "Student",
+      render: (row) => {
+        const fullName = row.name || `${row.firstName || ''} ${row.lastName || ''}`.trim() || 'Student';
+        const photo = row.photo || row.imagesRef?.img || '';
+        const initials = (row.firstName?.[0] || fullName?.[0] || 'S') + (row.lastName?.[0] || fullName?.split(' ')?.[1]?.[0] || '');
+
+        return (
+          <div className="flex items-center gap-3">
+            {/* Student Photo Avatar */}
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm border border-indigo-200/50 dark:border-indigo-800/40">
+              {photo ? (
+                <img
+                  src={photo}
+                  alt={fullName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <span className="uppercase tracking-wider">{initials.slice(0, 2)}</span>
+              )}
+            </div>
+
+            {/* Name & Admission Number */}
+            <div className="min-w-0">
+              <div className="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition truncate text-xs">
+                {fullName}
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.2 rounded border border-indigo-200/50 dark:border-indigo-800/40">
+                  {row.admissionNumber || row.studentId || 'ADM-N/A'}
+                </span>
+                {row.gender && (
+                  <span className="text-[10px] text-slate-400 font-semibold">
+                    · {row.gender}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="text-xs text-slate-500 font-mono">
-            {row.admissionNumber || row.rollNumber || "ADM-N/A"}
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "class",
-      label: "Class / Section",
+      label: "Class & Section",
       render: (row) => {
-        const rawCls = row.className || row.classDetails?.label || row.classDetails?.name || row.classId?.name || row.class;
-        const rawSec = row.sectionName || row.sectionDetails?.label || row.sectionDetails?.name || row.sectionId?.name || row.section;
-        
+        const rawCls = row.className || row.classDetails?.name || row.classId?.name || row.class;
+        const rawSec = row.sectionName || row.sectionDetails?.name || row.sectionId?.name || row.section;
         const cls = (rawCls && rawCls !== "null" && rawCls !== "undefined") ? rawCls : "N/A";
         const sec = (rawSec && rawSec !== "null" && rawSec !== "undefined") ? rawSec : "N/A";
-        
-        const display = (cls === "N/A" && sec === "N/A") ? "N/A" : (cls !== "N/A" && sec !== "N/A") ? `${cls} - ${sec}` : (cls !== "N/A" ? cls : sec);
+
         return (
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-            {display}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold w-fit">
+              <School size={12} className="text-indigo-500" />
+              <span>{cls}</span>
+              {sec !== "N/A" && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-slate-400" />
+                  <span className="text-indigo-600 dark:text-indigo-400">{sec}</span>
+                </>
+              )}
+            </span>
+            {row.academicYear && (
+              <span className="text-[10px] text-slate-400 font-mono pl-0.5">
+                {row.academicYear}
+              </span>
+            )}
+          </div>
         );
       },
     },
@@ -168,10 +249,70 @@ const StudentList = () => {
       key: "rollNumber",
       label: "Roll No",
       render: (row) => (
-        <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
-          {row.rollNumber || "—"}
+        <span className="inline-flex items-center justify-center font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+          {row.rollNumber != null ? `#${row.rollNumber}` : '—'}
         </span>
       ),
+    },
+    {
+      key: "aadhaar",
+      label: "Govt / Aadhaar",
+      render: (row) => {
+        const aadhaar = row.aadhaarNumber;
+        const pdf = row.aadhaarDocument || row.AdharRef?.pdf;
+
+        if (!aadhaar && !pdf) {
+          return <span className="text-[11px] text-slate-400 italic">—</span>;
+        }
+
+        return (
+          <div className="space-y-1">
+            {aadhaar ? (
+              <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
+                <ShieldCheck size={13} className="text-emerald-500 flex-shrink-0" />
+                <span>•••• {String(aadhaar).slice(-4)}</span>
+              </div>
+            ) : null}
+
+            {pdf ? (
+              <a
+                href={pdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded border border-indigo-200/50 dark:border-indigo-800/40"
+              >
+                <span>Aadhaar PDF</span>
+                <ExternalLink size={9} />
+              </a>
+            ) : (
+              <span className="text-[10px] text-amber-500 font-semibold">No PDF</span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: "parent",
+      label: "Guardian & Phone",
+      render: (row) => {
+        const parentName = row.parentName || row.parentId?.name || '—';
+        const contact = row.contactNumber || row.parentContact || row.phone || '';
+
+        return (
+          <div className="space-y-0.5">
+            <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
+              {parentName}
+            </div>
+            {contact && (
+              <div className="text-[11px] text-slate-500 flex items-center gap-1 font-mono">
+                <Phone size={10} className="text-slate-400" />
+                <span>{contact}</span>
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "status",
@@ -179,21 +320,64 @@ const StudentList = () => {
       render: (row) => <StatusBadge status={row.status || "active"} />,
     },
     {
-      key: "credentials",
-      label: "DB Credentials",
-      render: (row) => (
-        canSeeCredentials ? (
-          <button
-            onClick={(e) => handleFetchCredentials(row, e)}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition shadow-sm"
-          >
-            <Eye size={13} />
-            <span>Show DB Password</span>
-          </button>
-        ) : (
-          <span className="text-xs text-slate-400 font-mono">Hidden</span>
-        )
-      ),
+      key: "actions",
+      label: "Actions",
+      className: "text-right",
+      render: (row) => {
+        const targetId = row._id || row.id || row.admissionNumber;
+        const pdfDoc = row.aadhaarDocument || row.AdharRef?.pdf || row.aadhaarPdf;
+        return (
+          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+            {pdfDoc && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActivePdfDoc({
+                    url: pdfDoc,
+                    title: `${row.name} — UIDAI Aadhaar Document`,
+                    subtitle: row.aadhaarNumber ? `Aadhaar: ${row.aadhaarNumber}` : '',
+                    refId: row.AdharRef?.id || row.aadhaarDocId || '',
+                  });
+                }}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 transition"
+                title="Preview Aadhaar PDF"
+              >
+                <FileText size={15} />
+              </button>
+            )}
+            <button
+              onClick={() => navigate(`/students/${targetId}`)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+              title="View Profile"
+            >
+              <Eye size={15} />
+            </button>
+            <button
+              onClick={() => navigate(`/students/${targetId}/edit`)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+              title="Edit Student"
+            >
+              <Edit3 size={15} />
+            </button>
+            <button
+              onClick={() => navigate(`/id-cards?studentId=${targetId}`)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+              title="Print ID Card"
+            >
+              <CreditCard size={15} />
+            </button>
+            {canSeeCredentials && (
+              <button
+                onClick={(e) => handleFetchCredentials(row, e)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition"
+                title="Reveal DB Password"
+              >
+                <Lock size={14} />
+              </button>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -202,6 +386,18 @@ const StudentList = () => {
     if (form.confirmPassword && form.password !== form.confirmPassword) {
       return toast.warning("Passwords do not match");
     }
+
+    // Manual single registration: Aadhaar Number, Photo, and Aadhaar PDF are mandatory
+    if (!form.aadhaarNumber || !form.aadhaarNumber.trim()) {
+      return toast.warning("Aadhaar Number is mandatory for student registration.");
+    }
+    if (!form.photo || !form.photo.trim()) {
+      return toast.warning("Student Photo is mandatory (Max 1MB). Please upload a student photo.");
+    }
+    if (!form.aadhaarDocument || !form.aadhaarDocument.trim()) {
+      return toast.warning("Aadhaar PDF Document is mandatory (Max 1MB). Please upload the Aadhaar PDF.");
+    }
+
     const payloadForm = {
       ...form,
       confirmPassword: form.confirmPassword || form.password,
@@ -382,7 +578,15 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
             } else if (key === 'parentname' || key === 'guardian' || key === 'parent') rowObj.parentName = val;
             else if (key === 'parentcontact' || key === "parentphone" || key === "parentnumber") rowObj.parentContact = val;
             else if (key === 'parentemail') rowObj.parentEmail = val;
-            else if (key.includes('aadhaar') || key.includes('adhar')) rowObj.aadhaarNumber = val;
+            else if (key.includes('aadhaar') || key.includes('adhar')) {
+              if (key.includes('pdf') || key.includes('doc')) {
+                rowObj.aadhaarDocument = val;
+              } else {
+                rowObj.aadhaarNumber = val;
+              }
+            } else if (key.includes('photo') || key.includes('img') || key.includes('picture')) {
+              rowObj.photo = val;
+            }
           });
 
           if (!rowObj.firstName && cols[0]) rowObj.firstName = cols[0];
@@ -462,15 +666,88 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
         }
       />
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      {/* ── Summary Metric Strip ────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Enrolled</p>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">{pagination.total || students.length}</p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <Users size={24} />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Students</p>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+              {students.filter((s) => (s.status || 'active') === 'active').length}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <UserCheck size={24} />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Aadhaar Verified</p>
+            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+              {students.filter((s) => Boolean(s.aadhaarNumber)).length}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <ShieldCheck size={24} />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Passout / Graduated</p>
+            <p className="text-2xl font-black text-slate-700 dark:text-slate-300">
+              {students.filter((s) => (s.status || '').toLowerCase().includes('passout')).length}
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center">
+            <GraduationCap size={24} />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {
             setSearch(v);
             setPage(1);
           }}
-          placeholder="Search by name, admission number, roll, parent..."
+          placeholder="Search by name, admission no, roll, aadhaar, parent..."
           filters={[
+            {
+              key: "class",
+              value: selectedClass,
+              onChange: (v) => {
+                setSelectedClass(v);
+                setPage(1);
+              },
+              options: [
+                { value: "", label: "All Classes" },
+                ...CLASS_OPTIONS.map((c) => ({ value: c.name, label: c.name })),
+              ],
+            },
+            {
+              key: "section",
+              value: selectedSection,
+              onChange: (v) => {
+                setSelectedSection(v);
+                setPage(1);
+              },
+              options: [
+                { value: "", label: "All Sections" },
+                ...SECTION_OPTIONS.map((s) => ({ value: s.name, label: s.name })),
+              ],
+            },
             {
               key: "status",
               value: status,
@@ -482,18 +759,21 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                 { value: "", label: "All Status" },
                 { value: "active", label: "Active" },
                 { value: "inactive", label: "Inactive" },
+                { value: "Passout", label: "Passout" },
               ],
             },
           ]}
           onClear={() => {
             setSearch("");
             setStatus("");
+            setSelectedClass("");
+            setSelectedSection("");
             setPage(1);
           }}
         />
 
         {loading ? (
-          <Loader fullPage size="lg" text="Fetching students list..." />
+          <Loader fullPage size="lg" text="Fetching students directory..." />
         ) : (
           <DataTable
             columns={columns}
@@ -947,6 +1227,16 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
           </div>
         </form>
       </Modal>
+
+      {/* Aadhaar PDF Viewer Modal */}
+      <PdfViewerModal
+        open={Boolean(activePdfDoc)}
+        onClose={() => setActivePdfDoc(null)}
+        url={activePdfDoc?.url || ''}
+        title={activePdfDoc?.title || 'Aadhaar Document'}
+        subtitle={activePdfDoc?.subtitle || ''}
+        refId={activePdfDoc?.refId || ''}
+      />
     </div>
   );
 };

@@ -188,6 +188,45 @@ export async function exportStudentsCsv() {
   }
 }
 
+/**
+ * Upload student file (photo or Aadhaar PDF) to backend which streams to Cloudinary.
+ * @param {File} file
+ * @param {'photo' | 'aadhaar'} type
+ */
+export async function uploadStudentFile(file, type = 'photo') {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    const response = await api.post(STUDENT_URLS.UPLOAD_FILE, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || error.message || 'File upload failed';
+    toast.error(msg);
+    throw { status: error.response?.status, message: msg };
+  }
+}
+
+/**
+ * Fetch a student image or document by its ID (imagesRef.id or AdharRef.id)
+ * @param {string} fileId
+ */
+export async function getStudentFileById(fileId) {
+  try {
+    const response = await api.get(`/students/file/${fileId}`);
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || error.message || 'File not found';
+    toast.error(msg);
+    throw { status: error.response?.status, message: msg };
+  }
+}
+
 const studentService = {
   getAll: getStudents,
   getById: getStudentById,
@@ -200,6 +239,8 @@ const studentService = {
   bulkPromote: bulkPromoteStudents,
   bulkImport: bulkImportStudents,
   exportCsv: exportStudentsCsv,
+  uploadFile: uploadStudentFile,
+  getFileById: getStudentFileById,
 };
 
 export default studentService;

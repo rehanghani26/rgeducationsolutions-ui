@@ -28,6 +28,7 @@ export const STUDENT_URLS = {
   BULK_PROMOTE:  '/students/bulk-promote',
   BULK_IMPORT:   '/students/bulk-import',
   EXPORT_CSV:    '/students/export/csv',
+  UPLOAD_FILE:   '/students/upload-file',
 };
 
 // ─── Teachers ─────────────────────────────────────────────────────────────────

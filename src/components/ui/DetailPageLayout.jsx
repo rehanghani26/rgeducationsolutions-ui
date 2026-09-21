@@ -34,8 +34,16 @@ const DetailPageLayout = ({
           )}
           <div className="flex items-center gap-4">
             {avatar && (
-              <div className="w-14 h-14 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-600/20">
-                {avatar}
+              <div className="w-14 h-14 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-600/20 overflow-hidden flex-shrink-0">
+                {typeof avatar === 'string' &&
+                (avatar.startsWith('http://') ||
+                  avatar.startsWith('https://') ||
+                  avatar.startsWith('/') ||
+                  avatar.startsWith('data:image')) ? (
+                  <img src={avatar} alt={title || 'Avatar'} className="w-full h-full object-cover" />
+                ) : (
+                  avatar
+                )}
               </div>
             )}
             <div>
