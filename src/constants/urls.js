@@ -137,6 +137,8 @@ export const DOCUMENT_URLS = {
   VERIFY:                  (token) => `/documents/verify/${token}`,
   CUSTOM_TEMPLATES:        '/documents/templates/custom',
   CUSTOM_TEMPLATE_BY_ID:   (id)    => `/documents/templates/custom/${id}`,
+  DEFAULT_TEMPLATE:        (cat)   => `/documents/templates/default/${cat}`,
+  SET_DEFAULT_TEMPLATE:    '/documents/templates/default',
 };
 
 // ─── Aggregated export ────────────────────────────────────────────────────────

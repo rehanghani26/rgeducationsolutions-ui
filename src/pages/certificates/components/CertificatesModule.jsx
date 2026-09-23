@@ -29,6 +29,8 @@ import { getIssuedCertificates, revokeCertificate } from '../services/documentSe
 import { getTemplateById } from '../templates/registry.js';
 import { CERTIFICATE_TYPES } from '../constants/documentConstants.js';
 import { getVerificationUrl } from '../utils/qrUtils.js';
+import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
+import { openDocumentInNewTab } from '../utils/printUtils.js';
 
 export default function CertificatesModule({ schoolSettings = {}, userRole = '' }) {
   const [certificates, setCertificates] = useState([]);
@@ -84,6 +86,17 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
     } finally {
       setSubmittingRevocation(false);
     }
+  };
+
+  const handleOpenCertInNewTab = (cert) => {
+    const tmpl = getTemplateById(cert.templateId || 'certificate-classic');
+    const data = prepareTemplateData(cert, cert.recipientType || 'student', schoolSettings, cert);
+    const html = renderTemplate(tmpl, data);
+    openDocumentInNewTab(html, {
+      orientation: tmpl.orientation || 'landscape',
+      title: `${data.name || 'Recipient'}_${data.certificateType || 'Certificate'}_${cert.certificateNumber || ''}`,
+      pageSize: 'a4',
+    });
   };
 
   const filteredCertificates = useMemo(() => {
@@ -291,9 +304,19 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
                             type="button"
                             onClick={() => setActivePreviewCert(cert)}
                             className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition"
-                            title="Preview & Print"
+                            title="Preview Modal"
                           >
                             <Eye size={15} />
+                          </button>
+
+                          {/* Open in Standalone Tab */}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenCertInNewTab(cert)}
+                            className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition"
+                            title="Open Standalone in New Tab"
+                          >
+                            <Printer size={15} />
                           </button>
 
                           {/* Public Verify URL */}
@@ -423,7 +446,12 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
       <IssueModal
         isOpen={isIssueModalOpen}
         onClose={() => setIsIssueModalOpen(false)}
-        onSuccess={loadCertificates}
+        onSuccess={(newCert) => {
+          loadCertificates();
+          if (newCert && (newCert.certificateNumber || newCert._id)) {
+            setActivePreviewCert(newCert);
+          }
+        }}
       />
     </div>
   );

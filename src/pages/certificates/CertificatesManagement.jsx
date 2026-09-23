@@ -8,8 +8,9 @@
  * 4. Verification — In-app validation of cryptographic verification tokens
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CreditCard,
@@ -58,7 +59,15 @@ const TABS = [
 ];
 
 export default function CertificatesManagement() {
-  const [activeTab, setActiveTab] = useState('id-cards');
+  const [searchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || 'id-cards');
+
+  useEffect(() => {
+    if (urlTab && TABS.some((t) => t.id === urlTab)) {
+      setActiveTab(urlTab);
+    }
+  }, [urlTab]);
   const authUser = useSelector((state) => state.auth?.user);
   const schoolBranding = useSchoolBranding();
 

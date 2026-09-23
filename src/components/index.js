@@ -24,3 +24,5 @@ export { default as StatusBadge }       from './ui/StatusBadge.jsx';
 export { default as Tabs }              from './ui/Tabs.jsx';
 export { default as ThemeToggle }       from './ui/ThemeToggle.jsx';
 export { default as SessionBootstrap }  from './SessionBootstrap.jsx';
+export { default as FallbackUI }        from './ui/FallbackUI.jsx';
+export { default as ErrorBoundary }     from './ui/ErrorBoundary.jsx';

@@ -9,6 +9,7 @@ import AppRoutes from "./routes/AppRoutes.jsx";
 import SessionBootstrap from "./components/SessionBootstrap.jsx";
 import { ThemeProvider, useTheme } from "./theme/ThemeContext.jsx";
 import { SchoolBrandingProvider } from "./context/SchoolBrandingContext.jsx";
+import { ErrorBoundary } from "./components/index.js";
 import "./index.css";
 
 const AppBootstrap = () => {
@@ -16,26 +17,30 @@ const AppBootstrap = () => {
 
   return (
     <BrowserRouter>
-      <SessionBootstrap>
-        <AppRoutes />
-        <ToastContainer
-          position="top-right"
-          theme={theme}
-          autoClose={4000}
-        />
-      </SessionBootstrap>
+      <ErrorBoundary>
+        <SessionBootstrap>
+          <AppRoutes />
+          <ToastContainer
+            position="top-right"
+            theme={theme}
+            autoClose={4000}
+          />
+        </SessionBootstrap>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ThemeProvider>
-        <SchoolBrandingProvider>
-          <AppBootstrap />
-        </SchoolBrandingProvider>
-      </ThemeProvider>
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <ThemeProvider>
+          <SchoolBrandingProvider>
+            <AppBootstrap />
+          </SchoolBrandingProvider>
+        </ThemeProvider>
+      </Provider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

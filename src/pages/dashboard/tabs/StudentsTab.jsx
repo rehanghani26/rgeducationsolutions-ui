@@ -27,7 +27,8 @@ const StudentsTab = () => {
     let isMounted = true;
     setLoading(true);
 
-    api.get("/dashboard/students-analytics")
+    api
+      .get("/dashboard/students-analytics")
       .then((res) => {
         if (isMounted && res.data?.data) {
           setData(res.data.data);
@@ -58,7 +59,11 @@ const StudentsTab = () => {
 
   const genderPieSlices = [
     { name: "Male Students", value: genderStats.Male || 0, color: "#6366f1" },
-    { name: "Female Students", value: genderStats.Female || 0, color: "#ec4899" },
+    {
+      name: "Female Students",
+      value: genderStats.Female || 0,
+      color: "#ec4899",
+    },
     { name: "Other", value: genderStats.Other || 0, color: "#a855f7" },
   ].filter((s) => s.value > 0);
 
@@ -110,7 +115,8 @@ const StudentsTab = () => {
         {/* Graph 1: Enrollment Growth Area Chart */}
         <SectionCard title="Student Enrollment Growth Trend">
           <div className="h-52">
-            {enrollmentGrowth.length > 0 && enrollmentGrowth.some((e) => e.enrolled > 0) ? (
+            {enrollmentGrowth.length > 0 &&
+            enrollmentGrowth.some((e) => e.enrolled > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={enrollmentGrowth}>
                   <defs>
@@ -122,14 +128,29 @@ const StudentsTab = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                   <XAxis dataKey="month" stroke="#64748b" fontSize={10} />
                   <YAxis stroke="#64748b" fontSize={10} />
-                  <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
-                  <Area type="monotone" dataKey="enrolled" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#growthGrad)" />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#0f172a",
+                      border: "1px solid #334155",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="enrolled"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#growthGrad)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex flex-col items-center justify-center gap-1">
                 <span className="text-xl font-bold text-slate-500">N/A</span>
-                <span className="text-xs text-slate-500">No enrollment trend data</span>
+                <span className="text-xs text-slate-500">
+                  No enrollment trend data
+                </span>
               </div>
             )}
           </div>
@@ -144,14 +165,22 @@ const StudentsTab = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                   <XAxis dataKey="name" stroke="#64748b" fontSize={10} />
                   <YAxis stroke="#64748b" fontSize={10} />
-                  <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#0f172a",
+                      border: "1px solid #334155",
+                      borderRadius: "8px",
+                    }}
+                  />
                   <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex flex-col items-center justify-center gap-1">
                 <span className="text-xl font-bold text-slate-500">N/A</span>
-                <span className="text-xs text-slate-500">No class distribution data</span>
+                <span className="text-xs text-slate-500">
+                  No class distribution data
+                </span>
               </div>
             )}
           </div>
@@ -163,18 +192,34 @@ const StudentsTab = () => {
             {genderPieSlices.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={genderPieSlices} cx="50%" cy="50%" innerRadius={42} outerRadius={65} paddingAngle={4} dataKey="value">
+                  <Pie
+                    data={genderPieSlices}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={42}
+                    outerRadius={65}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
                     {genderPieSlices.map((e, i) => (
                       <Cell key={i} fill={e.color} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#0f172a",
+                      border: "1px solid #334155",
+                      borderRadius: "8px",
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex flex-col items-center justify-center gap-1">
                 <span className="text-xl font-bold text-slate-500">N/A</span>
-                <span className="text-xs text-slate-500">No gender data available</span>
+                <span className="text-xs text-slate-500">
+                  No gender data available
+                </span>
               </div>
             )}
           </div>
@@ -208,14 +253,22 @@ const StudentsTab = () => {
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                     <XAxis dataKey="class" stroke="#64748b" fontSize={10} />
                     <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} />
-                    <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0f172a",
+                        border: "1px solid #334155",
+                        borderRadius: "8px",
+                      }}
+                    />
                     <Bar dataKey="rate" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center gap-1">
                   <span className="text-xl font-bold text-slate-500">N/A</span>
-                  <span className="text-xs text-slate-500">No class attendance logged</span>
+                  <span className="text-xs text-slate-500">
+                    No class attendance logged
+                  </span>
                 </div>
               )}
             </div>
@@ -227,13 +280,26 @@ const StudentsTab = () => {
           <div className="space-y-2 text-xs">
             {recentStudents.length > 0 ? (
               recentStudents.map((s, idx) => (
-                <div key={idx} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+                <div
+                  key={idx}
+                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                >
                   <div>
-                    <p className="text-xs font-bold text-slate-900 dark:text-white">{s.name}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{s.admissionNumber || s.roll} · {s.class} {s.section && s.section !== "N/A" ? `- ${s.section}` : ""}</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      {s.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      {s.admissionNumber || s.roll} · {s.class}{" "}
+                      {s.section && s.section !== "N/A" ? `- ${s.section}` : ""}
+                    </p>
                   </div>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "Recent"}
+                    {s.createdAt
+                      ? new Date(s.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "Recent"}
                   </span>
                 </div>
               ))

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../store/slices/authSlice.js";
 import { filterNavForUser, isNavActive } from "../config/navigation.js";
 import ThemeToggle from "../components/ui/ThemeToggle.jsx";
+import ErrorBoundary from "../components/ui/ErrorBoundary.jsx";
 import { THEME_MODES, useTheme } from "../theme/ThemeContext.jsx";
 import {
   LogOut,
@@ -251,7 +252,9 @@ const DashboardLayout = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto bg-slate-100 p-6 text-slate-900 dark:bg-[#090d16] dark:text-slate-100">
-          <Outlet context={{ activeDashboardTab, setActiveDashboardTab }} />
+          <ErrorBoundary compact>
+            <Outlet context={{ activeDashboardTab, setActiveDashboardTab }} />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

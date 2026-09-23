@@ -12,9 +12,15 @@ import { getStudents } from '../../../services/studentService.js';
 import { getTeachers } from '../../../services/teacherService.js';
 import { getClasses } from '../../../services/erpService.js';
 
-export default function IssueModal({ isOpen, onClose, onSuccess }) {
+export default function IssueModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialRecipientType = 'student',
+  initialRecipientId = '',
+}) {
   const [mode, setMode] = useState('single'); // 'single' | 'bulk'
-  const [recipientType, setRecipientType] = useState('student');
+  const [recipientType, setRecipientType] = useState(initialRecipientType);
   const [certificateType, setCertificateType] = useState('BONAFIDE');
   const [templateId, setTemplateId] = useState('certificate-classic');
   const [academicSession, setAcademicSession] = useState('2025-2026');
@@ -24,7 +30,7 @@ export default function IssueModal({ isOpen, onClose, onSuccess }) {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [recipientsList, setRecipientsList] = useState([]);
-  const [selectedRecipientId, setSelectedRecipientId] = useState('');
+  const [selectedRecipientId, setSelectedRecipientId] = useState(initialRecipientId || '');
   const [selectedBulkIds, setSelectedBulkIds] = useState([]);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -33,10 +39,12 @@ export default function IssueModal({ isOpen, onClose, onSuccess }) {
 
   useEffect(() => {
     if (isOpen) {
+      if (initialRecipientType) setRecipientType(initialRecipientType);
+      if (initialRecipientId) setSelectedRecipientId(initialRecipientId);
       loadClasses();
       loadRecipients();
     }
-  }, [isOpen, recipientType, selectedClass]);
+  }, [isOpen, recipientType, selectedClass, initialRecipientId]);
 
   const loadClasses = async () => {
     try {
@@ -54,17 +62,18 @@ export default function IssueModal({ isOpen, onClose, onSuccess }) {
       if (recipientType === 'student') {
         const params = { limit: 100 };
         if (selectedClass) params.class = selectedClass;
+        const res = await getStudents(params);
         const list = Array.isArray(res?.data) ? res.data : (res?.data?.students || res?.students || []);
         setRecipientsList(list);
         if (list.length > 0 && !selectedRecipientId) {
-          setSelectedRecipientId(list[0]._id || list[0].id);
+          setSelectedRecipientId(initialRecipientId || list[0]._id || list[0].id);
         }
       } else if (recipientType === 'teacher') {
         const res = await getTeachers({ limit: 100 });
         const list = Array.isArray(res?.data) ? res.data : (res?.data?.teachers || res?.teachers || []);
         setRecipientsList(list);
         if (list.length > 0 && !selectedRecipientId) {
-          setSelectedRecipientId(list[0]._id || list[0].id);
+          setSelectedRecipientId(initialRecipientId || list[0]._id || list[0].id);
         }
       } else {
         // Staff
@@ -105,7 +114,7 @@ export default function IssueModal({ isOpen, onClose, onSuccess }) {
           return;
         }
 
-        await issueCertificate({
+        const res = await issueCertificate({
           recipientType,
           recipientId: selectedRecipientId,
           certificateType,
@@ -113,6 +122,7 @@ export default function IssueModal({ isOpen, onClose, onSuccess }) {
           academicSession,
           purposeNote,
         });
+        if (onSuccess) onSuccess(res?.certificate || res);
       } else {
         // Bulk mode
         if (selectedBulkIds.length === 0) {
@@ -127,15 +137,15 @@ export default function IssueModal({ isOpen, onClose, onSuccess }) {
           purposeNote,
         }));
 
-        await bulkIssueCertificates({
+        const res = await bulkIssueCertificates({
           recipients,
           certificateType,
           templateId,
           academicSession,
         });
+        if (onSuccess) onSuccess(res);
       }
 
-      onSuccess();
       onClose();
     } catch (err) {
       console.error(err);

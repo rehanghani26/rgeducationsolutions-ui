@@ -41,9 +41,12 @@ export async function getAttendanceById(id) {
   }
 }
 
-export async function getStudentAttendance(studentId) {
+export async function getStudentAttendance(studentId, params = {}) {
   try {
-    const url = `${ATTENDANCE_URLS.BASE}/student/${studentId}`;
+    const queryStr = buildQuery(params);
+    const url = studentId
+      ? `${ATTENDANCE_URLS.BASE}/student/${studentId}${queryStr ? `?${queryStr}` : ''}`
+      : `${ATTENDANCE_URLS.BASE}/student${queryStr ? `?${queryStr}` : ''}`;
     const response = await api.get(url);
     return response.data;
   } catch (error) {

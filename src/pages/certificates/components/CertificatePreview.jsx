@@ -5,9 +5,9 @@
  */
 
 import React, { useState } from 'react';
-import { Printer, ZoomIn, ZoomOut, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Printer, ZoomIn, ZoomOut, RotateCcw, ShieldCheck, ExternalLink } from 'lucide-react';
 import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
-import { printDocument } from '../utils/printUtils.js';
+import { printDocument, openDocumentInNewTab } from '../utils/printUtils.js';
 
 export default function CertificatePreview({
   template,
@@ -83,6 +83,22 @@ export default function CertificatePreview({
             title="Fit to Screen"
           >
             <RotateCcw size={15} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              openDocumentInNewTab(html, {
+                orientation: template.orientation || 'landscape',
+                title: `${data.name || 'Student'}_${data.certificateType || 'Certificate'}`,
+                pageSize: 'a4',
+              });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition cursor-pointer"
+            title="Open standalone document in new browser tab"
+          >
+            <ExternalLink size={13} />
+            <span>New Tab</span>
           </button>
 
           <button

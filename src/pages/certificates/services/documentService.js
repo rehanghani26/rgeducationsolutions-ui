@@ -162,6 +162,43 @@ export async function deleteCustomTemplate(id) {
   }
 }
 
+/**
+ * Fetch institutional finalized default template for a category (e.g. 'student-id-card')
+ * @param {string} category
+ */
+export async function getDefaultTemplate(category = 'student-id-card') {
+  try {
+    const response = await api.get(DOCUMENT_URLS.DEFAULT_TEMPLATE(category));
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching default template:', error);
+    return {
+      success: true,
+      defaultTemplate: {
+        templateId: category === 'student-id-card' ? 'student-id-classic' : 'certificate-classic',
+        configuration: {},
+        category,
+      },
+    };
+  }
+}
+
+/**
+ * Save and finalize institutional default template layout
+ * @param {object} payload - { category, templateId, configuration, customTemplateId, name }
+ */
+export async function setDefaultTemplate(payload) {
+  try {
+    const response = await api.post(DOCUMENT_URLS.SET_DEFAULT_TEMPLATE, payload);
+    toast.success('Template finalized as institution default format!');
+    return response.data;
+  } catch (error) {
+    console.error('Error setting default template:', error);
+    toast.error(error.response?.data?.message || 'Failed to save default template');
+    throw error;
+  }
+}
+
 export default {
   getIssuedCertificates,
   getIssuedCertificateById,
@@ -173,4 +210,6 @@ export default {
   createCustomTemplate,
   updateCustomTemplate,
   deleteCustomTemplate,
+  getDefaultTemplate,
+  setDefaultTemplate,
 };

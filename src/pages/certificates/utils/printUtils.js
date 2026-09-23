@@ -201,3 +201,130 @@ export function printBatchDocuments(htmlContents, options = {}) {
     }
   }, 60000);
 }
+
+/**
+ * Opens a rendered document in a standalone new browser window/tab with print toolbar.
+ * @param {string} htmlContent - The rendered HTML string
+ * @param {object} options
+ */
+export function openDocumentInNewTab(htmlContent, options = {}) {
+  const {
+    orientation = 'landscape',
+    title = 'Official Document',
+    pageSize = 'a4',
+  } = options;
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Pop-up was blocked. Please allow pop-ups for this school portal to open documents in a new tab.');
+    return;
+  }
+
+  const pageCss = pageSize === 'card'
+    ? `@page { size: auto; margin: 0; }`
+    : `@page { size: A4 ${orientation}; margin: 0; }`;
+
+  win.document.open();
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>${title}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+        <style>
+          ${pageCss}
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .toolbar-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .toolbar-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+          }
+          .btn-print {
+            background: #d97706;
+            color: #0f172a;
+          }
+          .btn-print:hover {
+            background: #f59e0b;
+          }
+          .btn-close {
+            background: rgba(51, 65, 85, 0.6);
+            color: #cbd5e1;
+            margin-left: 8px;
+          }
+          .btn-close:hover {
+            background: rgba(51, 65, 85, 0.9);
+            color: #fff;
+          }
+          .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            width: 100%;
+          }
+          @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .toolbar { display: none !important; }
+            .canvas-container { padding: 0 !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="toolbar">
+          <div class="toolbar-title">
+            <span style="color:#f59e0b;">★</span>
+            <span>${title}</span>
+          </div>
+          <div>
+            <button class="toolbar-btn btn-print" onclick="window.print()">Print / Save as PDF</button>
+            <button class="toolbar-btn btn-close" onclick="window.close()">Close Window</button>
+          </div>
+        </div>
+        <div class="canvas-container">
+          ${htmlContent}
+        </div>
+      </body>
+    </html>
+  `);
+  win.document.close();
+}
+

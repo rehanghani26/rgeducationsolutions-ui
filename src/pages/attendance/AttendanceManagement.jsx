@@ -36,6 +36,7 @@ import {
   X,
   RefreshCw,
   Loader2,
+  Clock,
 } from "lucide-react";
 
 const AttendanceManagement = () => {
@@ -329,6 +330,8 @@ const AttendanceManagement = () => {
     // Build payload matching exact requested JSON structure:
     const payload = {
       date: attDate,
+      attendanceDate: attDate,
+      attendanceTakenDate: new Date().toISOString(),
       type: attendeeType,
       classId: attClass || "CLASS_ID",
       sectionId: attSection || "SECTION_ID",
@@ -358,16 +361,34 @@ const AttendanceManagement = () => {
 
     try {
       const res = await createAttendance(payload);
-      // Add newly saved record to top of the list
-      const savedRecord = res?.data?.attendance || res?.data || payload;
-      setRecords((prev) => [
-        {
-          ...payload,
-          id: savedRecord._id || savedRecord.id || `att-${Date.now()}`,
-          ...savedRecord,
-        },
-        ...prev,
-      ]);
+      // Update state: replace if record for same date & class exists, or prepend
+      const savedRecord = res?.data?.record || res?.data?.attendance || res?.data || payload;
+      setRecords((prev) => {
+        const idx = prev.findIndex(
+          (r) =>
+            new Date(r.attendanceDate || r.date).toDateString() === new Date(attDate).toDateString() &&
+            (r.classId === payload.classId || r.className === payload.className) &&
+            (!payload.sectionName || r.sectionName === payload.sectionName)
+        );
+        if (idx !== -1) {
+          const updated = [...prev];
+          updated[idx] = {
+            ...updated[idx],
+            ...payload,
+            ...savedRecord,
+            id: savedRecord._id || savedRecord.id || updated[idx].id,
+          };
+          return updated;
+        }
+        return [
+          {
+            ...payload,
+            id: savedRecord._id || savedRecord.id || `att-${Date.now()}`,
+            ...savedRecord,
+          },
+          ...prev,
+        ];
+      });
       setRoster([]);
       setAttClass("");
       setAttSection("");
@@ -383,9 +404,46 @@ const AttendanceManagement = () => {
   const columns = [
     {
       key: "date",
-      label: "Date",
-      render: (row) =>
-        row.date ? format(new Date(row.date), "MMM d, yyyy") : "—",
+      label: "Attendance Date",
+      render: (row) => {
+        const sessionDate = row.attendanceDate || row.date;
+        const takenDate = row.attendanceTakenDate || row.createdAt;
+        const isPast =
+          sessionDate &&
+          takenDate &&
+          new Date(sessionDate).toDateString() !== new Date(takenDate).toDateString();
+
+        return (
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
+              <Calendar size={13} className="text-indigo-500" />
+              <span>
+                {sessionDate ? format(new Date(sessionDate), "MMM d, yyyy") : "—"}
+              </span>
+              {isPast && (
+                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                  Past Date
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: "takenDate",
+      label: "Recorded / Taken At",
+      render: (row) => {
+        const takenDate = row.attendanceTakenDate || row.createdAt || row.date;
+        return (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <Clock size={12} className="text-slate-400" />
+            <span>
+              {takenDate ? format(new Date(takenDate), "MMM d, yyyy, h:mm a") : "—"}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "classSection",
@@ -791,6 +849,28 @@ const AttendanceManagement = () => {
                         : selectedRecord.takenBy) || "shadab md"}
                 </strong>
               </p>
+
+              {/* Attendance Date & Taken Date Details */}
+              <div className="flex flex-wrap items-center gap-2.5 mt-3 text-xs">
+                <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/40 px-3 py-1.5 rounded-xl font-bold text-indigo-700 dark:text-indigo-300">
+                  <Calendar size={13} />
+                  <span>
+                    Attendance For:{" "}
+                    {selectedRecord.attendanceDate || selectedRecord.date
+                      ? format(new Date(selectedRecord.attendanceDate || selectedRecord.date), "EEEE, MMM d, yyyy")
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 font-semibold">
+                  <Clock size={13} className="text-slate-400" />
+                  <span>
+                    Recorded On:{" "}
+                    {selectedRecord.attendanceTakenDate || selectedRecord.createdAt
+                      ? format(new Date(selectedRecord.attendanceTakenDate || selectedRecord.createdAt), "MMM d, yyyy, h:mm a")
+                      : "—"}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
@@ -956,11 +1036,18 @@ const AttendanceManagement = () => {
           </div>
 
           <form onSubmit={handleSaveAttendance} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-xs">
               <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
-                  Attendance Date
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px]">
+                    Attendance Date
+                  </label>
+                  {attDate && new Date(attDate).toDateString() !== new Date().toDateString() && (
+                    <span className="text-[9px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.2 rounded border border-amber-200 dark:border-amber-800/40">
+                      Past Date
+                    </span>
+                  )}
+                </div>
                 <input
                   type="date"
                   required
@@ -968,6 +1055,18 @@ const AttendanceManagement = () => {
                   onChange={(e) => setAttDate(e.target.value)}
                   className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
+                  Attendance Taken Date
+                </label>
+                <div className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span className="truncate">{format(new Date(), "MMM d, yyyy, h:mm a")}</span>
+                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0 ml-1">
+                    Live
+                  </span>
+                </div>
               </div>
 
               {attendeeType === "student" ? (

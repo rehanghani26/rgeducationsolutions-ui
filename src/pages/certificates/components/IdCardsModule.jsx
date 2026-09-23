@@ -19,6 +19,11 @@ import {
   Users,
   Eye,
   Loader2,
+  CheckCircle2,
+  BookmarkCheck,
+  Sparkles,
+  FileText,
+  Star,
 } from 'lucide-react';
 import IdCardPreview from './IdCardPreview.jsx';
 import { getTemplatesByCategory, applyTemplateOverrides } from '../templates/registry.js';
@@ -27,14 +32,19 @@ import { printBatchDocuments } from '../utils/printUtils.js';
 import { getStudents } from '../../../services/studentService.js';
 import { getTeachers } from '../../../services/teacherService.js';
 import { getClasses } from '../../../services/erpService.js';
-import { getCustomTemplates } from '../services/documentService.js';
+import { getCustomTemplates, getDefaultTemplate, setDefaultTemplate } from '../services/documentService.js';
 import { MOCK_STUDENT_DATA, MOCK_TEACHER_DATA, MOCK_STAFF_DATA } from '../constants/documentConstants.js';
 
-export default function IdCardsModule({ schoolSettings = {} }) {
+export default function IdCardsModule({ schoolSettings = {}, userRole = '' }) {
   const [recipientType, setRecipientType] = useState('student'); // 'student' | 'teacher' | 'staff'
   const [selectedTemplateId, setSelectedTemplateId] = useState('student-id-classic');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+
+  // Finalized School Layout & Preview Mode
+  const [finalizedTemplate, setFinalizedTemplate] = useState(null);
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [previewWithDummy, setPreviewWithDummy] = useState(false);
 
   // Data lists
   const [recipients, setRecipients] = useState([]);
@@ -52,16 +62,30 @@ export default function IdCardsModule({ schoolSettings = {} }) {
     loadCustomTemplates();
   }, []);
 
-  // Update default template when recipient type changes
+  // Update default template and recipients when recipient type changes
   useEffect(() => {
-    if (recipientType === 'student') setSelectedTemplateId('student-id-classic');
-    else if (recipientType === 'teacher') setSelectedTemplateId('teacher-id-professional');
-    else setSelectedTemplateId('staff-id-corporate');
-
     setCheckedIds([]);
     setSelectedRecipient(null);
+    loadDefaultTemplate(recipientType);
     loadRecipients();
   }, [recipientType, selectedClass]);
+
+  const loadDefaultTemplate = async (type = recipientType) => {
+    try {
+      const cat = `${type}-id-card`;
+      const res = await getDefaultTemplate(cat);
+      if (res?.defaultTemplate) {
+        setFinalizedTemplate(res.defaultTemplate);
+        if (res.defaultTemplate.customTemplateId) {
+          setSelectedTemplateId(res.defaultTemplate.customTemplateId);
+        } else if (res.defaultTemplate.templateId) {
+          setSelectedTemplateId(res.defaultTemplate.templateId);
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching default template:', e);
+    }
+  };
 
   const loadClasses = async () => {
     try {
@@ -160,6 +184,39 @@ export default function IdCardsModule({ schoolSettings = {} }) {
     }
   };
 
+  const isCurrentlyFinalized = Boolean(
+    finalizedTemplate && (
+      (activeTemplate?.isCustom && (finalizedTemplate.customTemplateId === activeTemplate.rawCustomId || finalizedTemplate.customTemplateId === activeTemplate.id)) ||
+      (!activeTemplate?.isCustom && (finalizedTemplate.templateId === activeTemplate?.id || finalizedTemplate.templateId === activeTemplate?.baseTemplateId))
+    )
+  );
+
+  const canManage = ['super-admin', 'school-admin', 'principal', 'director', 'admin', 'superadmin'].includes(
+    String(userRole || '').toLowerCase()
+  );
+
+  const handleFinalizeDefault = async () => {
+    if (!activeTemplate) return;
+    setIsFinalizing(true);
+    try {
+      const payload = {
+        category: `${recipientType}-id-card`,
+        templateId: activeTemplate.baseTemplateId || activeTemplate.id,
+        customTemplateId: activeTemplate.isCustom ? (activeTemplate.rawCustomId || activeTemplate.id) : null,
+        configuration: activeTemplate.configuration || {},
+        name: activeTemplate.name,
+      };
+      const res = await setDefaultTemplate(payload);
+      if (res?.defaultTemplate) {
+        setFinalizedTemplate(res.defaultTemplate);
+      }
+    } catch (e) {
+      console.error('Finalize error:', e);
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
   // Batch Print Handler
   const handleBatchPrint = () => {
     const selectedItems = recipients.filter((r) =>
@@ -225,8 +282,38 @@ export default function IdCardsModule({ schoolSettings = {} }) {
           </button>
         </div>
 
-        {/* Batch Print Action */}
-        <div className="flex items-center gap-3">
+        {/* Action Buttons: Finalize Default & Batch Print */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {canManage && (
+            <button
+              type="button"
+              onClick={handleFinalizeDefault}
+              disabled={isFinalizing || isCurrentlyFinalized}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
+                isCurrentlyFinalized
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
+                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 cursor-pointer shadow-amber-500/20'
+              }`}
+              title={
+                isCurrentlyFinalized
+                  ? 'This layout is currently saved as the school default'
+                  : 'Save this layout so all students automatically inherit it'
+              }
+            >
+              {isCurrentlyFinalized ? (
+                <>
+                  <CheckCircle2 size={14} className="text-emerald-400" />
+                  <span>Finalized School Format</span>
+                </>
+              ) : (
+                <>
+                  <BookmarkCheck size={14} />
+                  <span>{isFinalizing ? 'Finalizing...' : 'Finalize as School Default Format'}</span>
+                </>
+              )}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleBatchPrint}
@@ -234,7 +321,7 @@ export default function IdCardsModule({ schoolSettings = {} }) {
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg hover:shadow-sky-500/25 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             <Printer size={15} />
-            <span>Batch Print A4 Sheet ({checkedIds.length})</span>
+            <span>Batch Print A4 ({checkedIds.length})</span>
           </button>
         </div>
       </div>
@@ -244,28 +331,85 @@ export default function IdCardsModule({ schoolSettings = {} }) {
         {/* Left Column: Filter & Recipient Table (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           {/* Template Carousel Selector */}
-          <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5">
-              Select ID Card Template ({categoryTemplates.length} Available)
-            </label>
-            <div className="flex gap-2.5 overflow-x-auto pb-1">
-              {categoryTemplates.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setSelectedTemplateId(t.id)}
-                  className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition border ${
-                    selectedTemplateId === t.id
-                      ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-sm'
-                      : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  {t.name}
-                  <span className="block text-[10px] font-normal text-slate-500 mt-0.5">
-                    {t.orientation}
+          <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  Select {recipientType.toUpperCase()} ID Card Layout ({categoryTemplates.length} Available)
+                </label>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Choose a format to preview or finalize as institutional standard
+                </p>
+              </div>
+
+              {/* Dummy Data Preview Toggle */}
+              <button
+                type="button"
+                onClick={() => setPreviewWithDummy((prev) => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+                  previewWithDummy
+                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                    : 'bg-slate-950/70 border-slate-800 text-slate-400 hover:text-white'
+                }`}
+                title="Toggle between PDF-style sample dummy preview and real data"
+              >
+                <FileText size={13} />
+                <span>{previewWithDummy ? 'PDF Dummy Preview ON' : 'Real Recipient Data'}</span>
+              </button>
+            </div>
+
+            {/* Finalized Banner if currently active */}
+            {isCurrentlyFinalized && (
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+                <div className="flex items-center gap-2">
+                  <Star size={14} className="text-emerald-400 fill-emerald-400" />
+                  <span>
+                    <strong>{activeTemplate?.name}</strong> is currently the <strong>Active Finalized Format</strong>. All student ID cards inherit this layout.
                   </span>
-                </button>
-              ))}
+                </div>
+                <span className="text-[10px] font-mono uppercase bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/40">
+                  Locked Default
+                </span>
+              </div>
+            )}
+
+            <div className="flex gap-2.5 overflow-x-auto pb-1">
+              {categoryTemplates.map((t) => {
+                const isDefaultMatch =
+                  (finalizedTemplate?.customTemplateId && (t.rawCustomId === finalizedTemplate.customTemplateId || t.id === finalizedTemplate.customTemplateId)) ||
+                  (!finalizedTemplate?.customTemplateId && (t.id === finalizedTemplate?.templateId || t.baseTemplateId === finalizedTemplate?.templateId));
+
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setSelectedTemplateId(t.id)}
+                    className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition border relative ${
+                      selectedTemplateId === t.id
+                        ? 'bg-sky-500/20 text-sky-300 border-sky-500 shadow-sm'
+                        : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>{t.name}</span>
+                      {isDefaultMatch && (
+                        <span
+                          className="w-2 h-2 rounded-full bg-amber-400"
+                          title="Finalized School Default"
+                        />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-[10px] font-normal text-slate-500 mt-0.5">
+                      <span>{t.orientation}</span>
+                      {isDefaultMatch && (
+                        <span className="text-amber-400 font-bold flex items-center gap-0.5">
+                          <Star size={9} className="fill-amber-400" /> Default
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -395,10 +539,15 @@ export default function IdCardsModule({ schoolSettings = {} }) {
         <div className="lg:col-span-5 min-h-[500px]">
           <IdCardPreview
             template={activeTemplate}
-            recipient={selectedRecipient || MOCK_STUDENT_DATA}
+            recipient={previewWithDummy ? MOCK_STUDENT_DATA : (selectedRecipient || MOCK_STUDENT_DATA)}
             recipientType={recipientType}
             schoolSettings={schoolSettings}
-            title={`${recipientType.toUpperCase()} ID CARD`}
+            customConfig={activeTemplate?.configuration || null}
+            title={
+              previewWithDummy
+                ? `${recipientType.toUpperCase()} ID CARD (PDF DUMMY PREVIEW)`
+                : `${recipientType.toUpperCase()} ID CARD`
+            }
           />
         </div>
       </div>

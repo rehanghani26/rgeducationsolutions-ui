@@ -360,9 +360,9 @@ const StudentList = () => {
               <Edit3 size={15} />
             </button>
             <button
-              onClick={() => navigate(`/id-cards?studentId=${targetId}`)}
+              onClick={() => navigate(`/students/${targetId}?tab=id-card`)}
               className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
-              title="Print ID Card"
+              title="Student ID Card"
             >
               <CreditCard size={15} />
             </button>

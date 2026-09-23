@@ -12,58 +12,61 @@ import {
   ShieldCheck,
   User,
   Eye,
-} from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
-import Button from '../../components/ui/Button.jsx';
-import FormInput from '../../components/ui/FormInput.jsx';
-import FormSelect from '../../components/ui/FormSelect.jsx';
-import FormTextarea from '../../components/ui/FormTextarea.jsx';
-import PermissionMatrix from '../../components/ui/PermissionMatrix.jsx';
-import PdfViewerModal from '../../components/ui/PdfViewerModal.jsx';
-import { getClasses, getSections } from '../../services';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../../constants/academicOptions.js';
-import { getDefaultRolePermissions } from '../../config/access.jsx';
-import { uploadStudentFile } from '../../services/studentService.js';
+} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
+import Button from "../../components/ui/Button.jsx";
+import FormInput from "../../components/ui/FormInput.jsx";
+import FormSelect from "../../components/ui/FormSelect.jsx";
+import FormTextarea from "../../components/ui/FormTextarea.jsx";
+import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
+import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
+import { getClasses, getSections } from "../../services";
+import {
+  CLASS_OPTIONS,
+  SECTION_OPTIONS,
+} from "../../constants/academicOptions.js";
+import { getDefaultRolePermissions } from "../../config/access.jsx";
+import { uploadStudentFile } from "../../services/studentService.js";
 
 export const permissionOptions = [
-  ['dashboard', 'Dashboard Access'],
-  ['academics', 'Academic Access'],
-  ['attendance', 'Attendance View'],
-  ['fees', 'Fees View'],
-  ['exams', 'Exams View'],
+  ["dashboard", "Dashboard Access"],
+  ["academics", "Academic Access"],
+  ["attendance", "Attendance View"],
+  ["fees", "Fees View"],
+  ["exams", "Exams View"],
 ];
 
 export const initialStudentForm = {
-  firstName: '',
-  lastName: '',
-  gender: 'Male',
-  dob: '',
-  bloodGroup: '',
-  contactNumber: '',
-  alternatePhone: '',
-  email: '',
-  address: '',
+  firstName: "",
+  lastName: "",
+  gender: "Male",
+  dob: "",
+  bloodGroup: "",
+  contactNumber: "",
+  alternatePhone: "",
+  email: "",
+  address: "",
   joiningDate: new Date().toISOString().slice(0, 10),
-  classId: '',
-  sectionId: '',
-  class: '',
-  section: '',
-  parentName: '',
-  parentContact: '',
-  parentEmail: '',
-  aadhaarNumber: '',
-  photo: '',
-  aadhaarDocument: '',
-  imagesRef: { id: '', img: '' },
-  AdharRef: { id: '', pdf: '' },
-  permissions: getDefaultRolePermissions('student'),
+  classId: "",
+  sectionId: "",
+  class: "",
+  section: "",
+  parentName: "",
+  parentContact: "",
+  parentEmail: "",
+  aadhaarNumber: "",
+  photo: "",
+  aadhaarDocument: "",
+  imagesRef: { id: "", img: "" },
+  AdharRef: { id: "", pdf: "" },
+  permissions: getDefaultRolePermissions("student"),
   forcePasswordChange: true,
-  password: '',
-  confirmPassword: '',
-  status: 'active',
-  accountExpiryDate: '',
-  loginRestriction: 'none',
+  password: "",
+  confirmPassword: "",
+  status: "active",
+  accountExpiryDate: "",
+  loginRestriction: "none",
   twoFactorEnabled: false,
 };
 
@@ -71,12 +74,12 @@ export const blankStudentForm = initialStudentForm;
 export const randomPassword = () =>
   `Std@${Math.random().toString(36).slice(2, 8)}${Math.floor(100 + Math.random() * 900)}`;
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Other'];
-const BLOOD_GROUP_OPTIONS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+const GENDER_OPTIONS = ["Male", "Female", "Other"];
+const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const STATUS_OPTIONS = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'Passout', label: 'Passout / Graduated' },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "Passout", label: "Passout / Graduated" },
 ];
 
 const StudentForm = ({
@@ -116,7 +119,7 @@ const StudentForm = ({
   const handlePhotoSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = '';
+    e.target.value = "";
 
     // Validate size <= 1MB (1024 * 1024 bytes)
     if (file.size > 1024 * 1024) {
@@ -126,15 +129,20 @@ const StudentForm = ({
       return;
     }
 
-    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const validImageTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
     if (!validImageTypes.includes(file.type)) {
-      toast.error('Only JPG, PNG, and WEBP images are supported.');
+      toast.error("Only JPG, PNG, and WEBP images are supported.");
       return;
     }
 
     try {
       setUploadingPhoto(true);
-      const res = await uploadStudentFile(file, 'photo');
+      const res = await uploadStudentFile(file, "photo");
       if (res?.url) {
         const fileId = res.id || res.publicId || `img_${Date.now()}`;
         const refObj = { id: fileId, img: res.url };
@@ -143,12 +151,12 @@ const StudentForm = ({
           photo: res.url,
           imagesRef: refObj,
         });
-        toast.success('Student photo uploaded to Cloudinary successfully!');
+        toast.success("Student photo uploaded to Cloudinary successfully!");
       } else {
-        toast.error(res?.message || 'Failed to upload photo');
+        toast.error(res?.message || "Failed to upload photo");
       }
     } catch (err) {
-      console.error('Photo upload error:', err);
+      console.error("Photo upload error:", err);
     } finally {
       setUploadingPhoto(false);
     }
@@ -157,7 +165,7 @@ const StudentForm = ({
   const handleAadhaarPdfSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = '';
+    e.target.value = "";
 
     // Validate size <= 1MB (1024 * 1024 bytes)
     if (file.size > 1024 * 1024) {
@@ -168,15 +176,16 @@ const StudentForm = ({
     }
 
     const isPdf =
-      file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
     if (!isPdf) {
-      toast.error('Aadhaar document must be in PDF format (.pdf).');
+      toast.error("Aadhaar document must be in PDF format (.pdf).");
       return;
     }
 
     try {
       setUploadingAadhaar(true);
-      const res = await uploadStudentFile(file, 'aadhaar');
+      const res = await uploadStudentFile(file, "aadhaar");
       if (res?.url) {
         const fileId = res.id || res.publicId || `doc_${Date.now()}`;
         const refObj = { id: fileId, pdf: res.url };
@@ -185,12 +194,12 @@ const StudentForm = ({
           aadhaarDocument: res.url,
           AdharRef: refObj,
         });
-        toast.success('Aadhaar PDF uploaded to Cloudinary successfully!');
+        toast.success("Aadhaar PDF uploaded to Cloudinary successfully!");
       } else {
-        toast.error(res?.message || 'Failed to upload Aadhaar document');
+        toast.error(res?.message || "Failed to upload Aadhaar document");
       }
     } catch (err) {
-      console.error('Aadhaar document upload error:', err);
+      console.error("Aadhaar document upload error:", err);
     } finally {
       setUploadingAadhaar(false);
     }
@@ -202,7 +211,7 @@ const StudentForm = ({
     const permissions = form.permissions.includes(permission)
       ? form.permissions.filter((p) => p !== permission)
       : [...form.permissions, permission];
-    updateField('permissions', permissions);
+    updateField("permissions", permissions);
   };
 
   const generatePwd = () => {
@@ -222,23 +231,40 @@ const StudentForm = ({
 
   // Smart resolution for class dropdown
   const resolvedClassValue = (() => {
-    const raw = form.classId || form.class || form.className || '';
-    const str = (typeof raw === 'object' && raw !== null ? (raw._id || raw.id || raw.name || '') : String(raw || '')).trim();
-    if (!str) return '';
+    const raw = form.classId || form.class || form.className || "";
+    const str = (
+      typeof raw === "object" && raw !== null
+        ? raw._id || raw.id || raw.name || ""
+        : String(raw || "")
+    ).trim();
+    if (!str) return "";
 
     // Direct match with value
-    const byVal = classOptions.find((opt) => String(opt.value).toLowerCase() === str.toLowerCase());
+    const byVal = classOptions.find(
+      (opt) => String(opt.value).toLowerCase() === str.toLowerCase()
+    );
     if (byVal) return byVal.value;
 
     // Match with label
-    const byLabel = classOptions.find((opt) => String(opt.label).toLowerCase() === str.toLowerCase());
+    const byLabel = classOptions.find(
+      (opt) => String(opt.label).toLowerCase() === str.toLowerCase()
+    );
     if (byLabel) return byLabel.value;
 
     // Normalized match e.g. "cls-10", "class 10", "10"
-    const norm = str.replace(/^(cls-|class\s*|grade\s*)/i, '').trim().toLowerCase();
+    const norm = str
+      .replace(/^(cls-|class\s*|grade\s*)/i, "")
+      .trim()
+      .toLowerCase();
     const byNorm = classOptions.find((opt) => {
-      const optValNorm = String(opt.value).replace(/^(cls-|class\s*|grade\s*)/i, '').trim().toLowerCase();
-      const optLblNorm = String(opt.label).replace(/^(cls-|class\s*|grade\s*)/i, '').trim().toLowerCase();
+      const optValNorm = String(opt.value)
+        .replace(/^(cls-|class\s*|grade\s*)/i, "")
+        .trim()
+        .toLowerCase();
+      const optLblNorm = String(opt.label)
+        .replace(/^(cls-|class\s*|grade\s*)/i, "")
+        .trim()
+        .toLowerCase();
       return optValNorm === norm || optLblNorm === norm;
     });
     if (byNorm) return byNorm.value;
@@ -247,7 +273,10 @@ const StudentForm = ({
   })();
 
   const displayClassOptions = [...classOptions];
-  if (resolvedClassValue && !displayClassOptions.some((opt) => opt.value === resolvedClassValue)) {
+  if (
+    resolvedClassValue &&
+    !displayClassOptions.some((opt) => opt.value === resolvedClassValue)
+  ) {
     displayClassOptions.push({
       value: resolvedClassValue,
       label: form.className || form.class || resolvedClassValue,
@@ -256,23 +285,40 @@ const StudentForm = ({
 
   // Smart resolution for section dropdown
   const resolvedSectionValue = (() => {
-    const raw = form.sectionId || form.section || form.sectionName || '';
-    const str = (typeof raw === 'object' && raw !== null ? (raw._id || raw.id || raw.name || '') : String(raw || '')).trim();
-    if (!str) return '';
+    const raw = form.sectionId || form.section || form.sectionName || "";
+    const str = (
+      typeof raw === "object" && raw !== null
+        ? raw._id || raw.id || raw.name || ""
+        : String(raw || "")
+    ).trim();
+    if (!str) return "";
 
     // Direct match with value
-    const byVal = sectionOptions.find((opt) => String(opt.value).toLowerCase() === str.toLowerCase());
+    const byVal = sectionOptions.find(
+      (opt) => String(opt.value).toLowerCase() === str.toLowerCase()
+    );
     if (byVal) return byVal.value;
 
     // Match with label
-    const byLabel = sectionOptions.find((opt) => String(opt.label).toLowerCase() === str.toLowerCase());
+    const byLabel = sectionOptions.find(
+      (opt) => String(opt.label).toLowerCase() === str.toLowerCase()
+    );
     if (byLabel) return byLabel.value;
 
     // Normalized match e.g. "sec-a", "section a", "a"
-    const norm = str.replace(/^(sec-|section\s*)/i, '').trim().toLowerCase();
+    const norm = str
+      .replace(/^(sec-|section\s*)/i, "")
+      .trim()
+      .toLowerCase();
     const byNorm = sectionOptions.find((opt) => {
-      const optValNorm = String(opt.value).replace(/^(sec-|section\s*)/i, '').trim().toLowerCase();
-      const optLblNorm = String(opt.label).replace(/^(sec-|section\s*)/i, '').trim().toLowerCase();
+      const optValNorm = String(opt.value)
+        .replace(/^(sec-|section\s*)/i, "")
+        .trim()
+        .toLowerCase();
+      const optLblNorm = String(opt.label)
+        .replace(/^(sec-|section\s*)/i, "")
+        .trim()
+        .toLowerCase();
       return optValNorm === norm || optLblNorm === norm;
     });
     if (byNorm) return byNorm.value;
@@ -281,17 +327,20 @@ const StudentForm = ({
   })();
 
   const displaySectionOptions = [...sectionOptions];
-  if (resolvedSectionValue && !displaySectionOptions.some((opt) => opt.value === resolvedSectionValue)) {
+  if (
+    resolvedSectionValue &&
+    !displaySectionOptions.some((opt) => opt.value === resolvedSectionValue)
+  ) {
     displaySectionOptions.push({
       value: resolvedSectionValue,
       label: form.sectionName || form.section || resolvedSectionValue,
     });
   }
 
-  const currentPhoto = form.photo || form.imagesRef?.img || '';
-  const currentPhotoId = form.imagesRef?.id || '';
-  const currentAadhaar = form.aadhaarDocument || form.AdharRef?.pdf || '';
-  const currentAadhaarId = form.AdharRef?.id || '';
+  const currentPhoto = form.photo || form.imagesRef?.img || "";
+  const currentPhotoId = form.imagesRef?.id || "";
+  const currentAadhaar = form.aadhaarDocument || form.AdharRef?.pdf || "";
+  const currentAadhaarId = form.AdharRef?.id || "";
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -312,7 +361,8 @@ const StudentForm = ({
                 )}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Uploaded once to Cloudinary. Photo and Aadhaar PDF must be 1MB or less.
+                Uploaded once to Cloudinary. Photo and Aadhaar PDF must be 1MB
+                or less.
               </p>
             </div>
           </div>
@@ -326,7 +376,9 @@ const StudentForm = ({
                 Student Photo
                 {!editing && <span className="text-rose-500 font-bold">*</span>}
               </label>
-              <span className="text-[10px] font-semibold text-slate-400">Max 1 MB</span>
+              <span className="text-[10px] font-semibold text-slate-400">
+                Max 1 MB
+              </span>
             </div>
 
             <input
@@ -360,14 +412,16 @@ const StudentForm = ({
                     >
                       Change
                     </button>
-                    <span className="text-slate-300 dark:text-slate-600">•</span>
+                    <span className="text-slate-300 dark:text-slate-600">
+                      •
+                    </span>
                     <button
                       type="button"
                       onClick={() =>
                         onChange({
                           ...form,
-                          photo: '',
-                          imagesRef: { id: '', img: '' },
+                          photo: "",
+                          imagesRef: { id: "", img: "" },
                         })
                       }
                       disabled={uploadingPhoto}
@@ -377,8 +431,13 @@ const StudentForm = ({
                     </button>
                   </div>
                   {currentPhotoId && (
-                    <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate max-w-[180px]" title={currentPhotoId}>
-                      <span className="font-bold text-slate-600 dark:text-slate-300">ID: </span>
+                    <div
+                      className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate max-w-[180px]"
+                      title={currentPhotoId}
+                    >
+                      <span className="font-bold text-slate-600 dark:text-slate-300">
+                        ID:{" "}
+                      </span>
                       {currentPhotoId}
                     </div>
                   )}
@@ -386,17 +445,24 @@ const StudentForm = ({
               </div>
             ) : (
               <div
-                onClick={() => !uploadingPhoto && photoInputRef.current?.click()}
+                onClick={() =>
+                  !uploadingPhoto && photoInputRef.current?.click()
+                }
                 className={`p-4 rounded-xl border-2 border-dashed ${
                   !editing && !currentPhoto
-                    ? 'border-amber-400/80 bg-amber-500/5'
-                    : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40'
+                    ? "border-amber-400/80 bg-amber-500/5"
+                    : "border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40"
                 } hover:border-indigo-500 dark:hover:border-indigo-400 transition flex flex-col items-center justify-center text-center cursor-pointer min-h-[100px]`}
               >
                 {uploadingPhoto ? (
                   <div className="flex flex-col items-center gap-2 py-2">
-                    <Loader2 size={24} className="animate-spin text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-medium text-slate-500">Uploading to Cloudinary...</span>
+                    <Loader2
+                      size={24}
+                      className="animate-spin text-indigo-600 dark:text-indigo-400"
+                    />
+                    <span className="text-xs font-medium text-slate-500">
+                      Uploading to Cloudinary...
+                    </span>
                   </div>
                 ) : (
                   <>
@@ -422,7 +488,9 @@ const StudentForm = ({
                 Aadhaar Document (PDF)
                 {!editing && <span className="text-rose-500 font-bold">*</span>}
               </label>
-              <span className="text-[10px] font-semibold text-slate-400">Max 1 MB</span>
+              <span className="text-[10px] font-semibold text-slate-400">
+                Max 1 MB
+              </span>
             </div>
 
             <input
@@ -451,8 +519,13 @@ const StudentForm = ({
                 </div>
 
                 {currentAadhaarId && (
-                  <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate" title={currentAadhaarId}>
-                    <span className="font-bold text-slate-600 dark:text-slate-300">ID: </span>
+                  <div
+                    className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate"
+                    title={currentAadhaarId}
+                  >
+                    <span className="font-bold text-slate-600 dark:text-slate-300">
+                      ID:{" "}
+                    </span>
                     {currentAadhaarId}
                   </div>
                 )}
@@ -467,7 +540,9 @@ const StudentForm = ({
                       <Eye size={12} />
                       <span>Preview PDF</span>
                     </button>
-                    <span className="text-slate-300 dark:text-slate-600">•</span>
+                    <span className="text-slate-300 dark:text-slate-600">
+                      •
+                    </span>
                     <a
                       href={currentAadhaar}
                       target="_blank"
@@ -492,8 +567,8 @@ const StudentForm = ({
                       onClick={() =>
                         onChange({
                           ...form,
-                          aadhaarDocument: '',
-                          AdharRef: { id: '', pdf: '' },
+                          aadhaarDocument: "",
+                          AdharRef: { id: "", pdf: "" },
                         })
                       }
                       disabled={uploadingAadhaar}
@@ -506,17 +581,24 @@ const StudentForm = ({
               </div>
             ) : (
               <div
-                onClick={() => !uploadingAadhaar && aadhaarInputRef.current?.click()}
+                onClick={() =>
+                  !uploadingAadhaar && aadhaarInputRef.current?.click()
+                }
                 className={`p-4 rounded-xl border-2 border-dashed ${
                   !editing && !currentAadhaar
-                    ? 'border-amber-400/80 bg-amber-500/5'
-                    : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40'
+                    ? "border-amber-400/80 bg-amber-500/5"
+                    : "border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40"
                 } hover:border-indigo-500 dark:hover:border-indigo-400 transition flex flex-col items-center justify-center text-center cursor-pointer min-h-[100px]`}
               >
                 {uploadingAadhaar ? (
                   <div className="flex flex-col items-center gap-2 py-2">
-                    <Loader2 size={24} className="animate-spin text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-medium text-slate-500">Uploading PDF to Cloudinary...</span>
+                    <Loader2
+                      size={24}
+                      className="animate-spin text-indigo-600 dark:text-indigo-400"
+                    />
+                    <span className="text-xs font-medium text-slate-500">
+                      Uploading PDF to Cloudinary...
+                    </span>
                   </div>
                 ) : (
                   <>
@@ -541,16 +623,22 @@ const StudentForm = ({
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
                   Aadhaar Card Number
-                  {!editing && <span className="text-rose-500 font-bold">*</span>}
+                  {!editing && (
+                    <span className="text-rose-500 font-bold">*</span>
+                  )}
                 </label>
-                <span className="text-[10px] font-semibold text-slate-400">12 Digits</span>
+                <span className="text-[10px] font-semibold text-slate-400">
+                  12 Digits
+                </span>
               </div>
               <FormInput
                 name="aadhaarNumber"
-                value={form.aadhaarNumber || ''}
+                value={form.aadhaarNumber || ""}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/[^\d\s-]/g, '').slice(0, 16);
-                  updateField('aadhaarNumber', val);
+                  const val = e.target.value
+                    .replace(/[^\d\s-]/g, "")
+                    .slice(0, 16);
+                  updateField("aadhaarNumber", val);
                 }}
                 placeholder="e.g. 1234 5678 9012"
                 required={!editing}
@@ -575,15 +663,15 @@ const StudentForm = ({
             <FormInput
               label="First Name"
               name="firstName"
-              value={form.firstName || ''}
-              onChange={(e) => updateField('firstName', e.target.value)}
+              value={form.firstName || ""}
+              onChange={(e) => updateField("firstName", e.target.value)}
               required
             />
             <FormInput
               label="Last Name"
               name="lastName"
-              value={form.lastName || ''}
-              onChange={(e) => updateField('lastName', e.target.value)}
+              value={form.lastName || ""}
+              onChange={(e) => updateField("lastName", e.target.value)}
               required
             />
           </div>
@@ -592,16 +680,16 @@ const StudentForm = ({
             <FormSelect
               label="Gender"
               name="gender"
-              value={form.gender || 'Male'}
-              onChange={(e) => updateField('gender', e.target.value)}
+              value={form.gender || "Male"}
+              onChange={(e) => updateField("gender", e.target.value)}
               options={GENDER_OPTIONS}
             />
             <FormInput
               label="Date of Birth"
               name="dob"
               type="date"
-              value={form.dob || ''}
-              onChange={(e) => updateField('dob', e.target.value)}
+              value={form.dob || ""}
+              onChange={(e) => updateField("dob", e.target.value)}
             />
           </div>
 
@@ -609,22 +697,22 @@ const StudentForm = ({
             label="Phone Number"
             name="contactNumber"
             type="tel"
-            value={form.contactNumber || ''}
-            onChange={(e) => updateField('contactNumber', e.target.value)}
+            value={form.contactNumber || ""}
+            onChange={(e) => updateField("contactNumber", e.target.value)}
             required
           />
           <FormInput
             label="Alternate Phone"
             name="alternatePhone"
             type="tel"
-            value={form.alternatePhone || ''}
-            onChange={(e) => updateField('alternatePhone', e.target.value)}
+            value={form.alternatePhone || ""}
+            onChange={(e) => updateField("alternatePhone", e.target.value)}
           />
           <FormTextarea
             label="Address"
             name="address"
-            value={form.address || ''}
-            onChange={(e) => updateField('address', e.target.value)}
+            value={form.address || ""}
+            onChange={(e) => updateField("address", e.target.value)}
             rows={3}
           />
         </section>
@@ -640,14 +728,22 @@ const StudentForm = ({
             <div className="flex flex-wrap gap-2">
               {form.admissionNumber && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">Admission No:</span>
-                  <span className="font-mono text-xs font-bold">{form.admissionNumber}</span>
+                  <span className="text-[10px] font-bold uppercase text-slate-400">
+                    Admission No:
+                  </span>
+                  <span className="font-mono text-xs font-bold">
+                    {form.admissionNumber}
+                  </span>
                 </div>
               )}
               {form.rollNumber != null && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">Roll No:</span>
-                  <span className="font-mono text-xs font-bold">{form.rollNumber}</span>
+                  <span className="text-[10px] font-bold uppercase text-slate-400">
+                    Roll No:
+                  </span>
+                  <span className="font-mono text-xs font-bold">
+                    {form.rollNumber}
+                  </span>
                 </div>
               )}
             </div>
@@ -656,9 +752,12 @@ const StudentForm = ({
           {!editing && (
             <div className="p-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/40">
               <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span className="text-emerald-400 font-bold">Auto-Assigned:</span>
-                Admission Number is globally unique (STD-{new Date().getFullYear()}-XXXX). Roll Number
-                is assigned automatically per class &amp; section starting from 1.
+                <span className="text-emerald-400 font-bold">
+                  Auto-Assigned:
+                </span>
+                Admission Number is globally unique (STD-
+                {new Date().getFullYear()}-XXXX). Roll Number is assigned
+                automatically per class &amp; section starting from 1.
               </p>
             </div>
           )}
@@ -670,14 +769,18 @@ const StudentForm = ({
               value={resolvedClassValue}
               onChange={(e) => {
                 const val = e.target.value;
-                const selectedObj = displayClassOptions.find((c) => c.value === val);
+                const selectedObj = displayClassOptions.find(
+                  (c) => c.value === val
+                );
                 const className = selectedObj?.label || val;
                 onChange({
                   ...form,
                   classId: val,
                   class: className,
                   className,
-                  ...(val !== resolvedClassValue && !editing ? { sectionId: '' } : {}),
+                  ...(val !== resolvedClassValue && !editing
+                    ? { sectionId: "" }
+                    : {}),
                 });
               }}
               options={displayClassOptions}
@@ -689,9 +792,16 @@ const StudentForm = ({
               value={resolvedSectionValue}
               onChange={(e) => {
                 const val = e.target.value;
-                const selectedObj = displaySectionOptions.find((s) => s.value === val);
+                const selectedObj = displaySectionOptions.find(
+                  (s) => s.value === val
+                );
                 const sectionName = selectedObj?.label || val;
-                onChange({ ...form, sectionId: val, section: sectionName, sectionName });
+                onChange({
+                  ...form,
+                  sectionId: val,
+                  section: sectionName,
+                  sectionName,
+                });
               }}
               options={displaySectionOptions}
               placeholder="Select Section"
@@ -701,32 +811,32 @@ const StudentForm = ({
           <FormSelect
             label="Blood Group"
             name="bloodGroup"
-            value={form.bloodGroup || ''}
-            onChange={(e) => updateField('bloodGroup', e.target.value)}
+            value={form.bloodGroup || ""}
+            onChange={(e) => updateField("bloodGroup", e.target.value)}
             options={BLOOD_GROUP_OPTIONS}
             placeholder="Select Blood Group"
           />
           <FormInput
             label="Parent / Guardian"
             name="parentName"
-            value={form.parentName || ''}
-            onChange={(e) => updateField('parentName', e.target.value)}
+            value={form.parentName || ""}
+            onChange={(e) => updateField("parentName", e.target.value)}
             required
           />
           <FormInput
             label="Parent Contact"
             name="parentContact"
             type="tel"
-            value={form.parentContact || ''}
-            onChange={(e) => updateField('parentContact', e.target.value)}
+            value={form.parentContact || ""}
+            onChange={(e) => updateField("parentContact", e.target.value)}
             required
           />
           <FormInput
             label="Parent Email"
             name="parentEmail"
             type="email"
-            value={form.parentEmail || ''}
-            onChange={(e) => updateField('parentEmail', e.target.value)}
+            value={form.parentEmail || ""}
+            onChange={(e) => updateField("parentEmail", e.target.value)}
           />
         </section>
 
@@ -740,8 +850,8 @@ const StudentForm = ({
             label="Student Login Email"
             name="email"
             type="email"
-            value={form.email || ''}
-            onChange={(e) => updateField('email', e.target.value)}
+            value={form.email || ""}
+            onChange={(e) => updateField("email", e.target.value)}
             placeholder="e.g. student101@school.com"
             required
           />
@@ -753,7 +863,7 @@ const StudentForm = ({
                   label="Account Login Password"
                   name="password"
                   type="text"
-                  value={form.password || ''}
+                  value={form.password || ""}
                   onChange={(e) => {
                     const val = e.target.value;
                     onChange({ ...form, password: val, confirmPassword: val });
@@ -775,8 +885,8 @@ const StudentForm = ({
                 label="Confirm Password"
                 name="confirmPassword"
                 type="text"
-                value={form.confirmPassword || ''}
-                onChange={(e) => updateField('confirmPassword', e.target.value)}
+                value={form.confirmPassword || ""}
+                onChange={(e) => updateField("confirmPassword", e.target.value)}
                 required
               />
             </div>
@@ -794,16 +904,16 @@ const StudentForm = ({
             <FormSelect
               label="Status"
               name="status"
-              value={form.status || 'active'}
-              onChange={(e) => updateField('status', e.target.value)}
+              value={form.status || "active"}
+              onChange={(e) => updateField("status", e.target.value)}
               options={STATUS_OPTIONS}
             />
             <FormInput
               label="Expiry Date"
               name="accountExpiryDate"
               type="date"
-              value={form.accountExpiryDate || ''}
-              onChange={(e) => updateField('accountExpiryDate', e.target.value)}
+              value={form.accountExpiryDate || ""}
+              onChange={(e) => updateField("accountExpiryDate", e.target.value)}
             />
           </div>
         </section>
@@ -820,7 +930,7 @@ const StudentForm = ({
             icon={<Save size={14} />}
             loading={submitting}
           >
-            {submitting ? 'Saving...' : 'Save Student'}
+            {submitting ? "Saving..." : "Save Student"}
           </Button>
         </div>
       )}
@@ -830,8 +940,8 @@ const StudentForm = ({
         open={pdfPreviewOpen}
         onClose={() => setPdfPreviewOpen(false)}
         url={currentAadhaar}
-        title={`${form.firstName || 'Student'} — Aadhaar Document`}
-        subtitle={form.aadhaarNumber ? `Aadhaar: ${form.aadhaarNumber}` : ''}
+        title={`${form.firstName || "Student"} — Aadhaar Document`}
+        subtitle={form.aadhaarNumber ? `Aadhaar: ${form.aadhaarNumber}` : ""}
         refId={currentAadhaarId}
       />
     </form>
