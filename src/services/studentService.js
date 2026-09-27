@@ -189,7 +189,7 @@ export async function exportStudentsCsv() {
 }
 
 /**
- * Upload student file (photo or Aadhaar PDF) to backend which streams to Cloudinary.
+ * Upload student file (photo or Aadhaar PDF) to the server which streams to AWS S3.
  * @param {File} file
  * @param {'photo' | 'aadhaar'} type
  */

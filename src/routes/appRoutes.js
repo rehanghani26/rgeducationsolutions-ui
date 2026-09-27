@@ -49,6 +49,7 @@ import {
 
 import { ROUTES } from './routes.js';
 import { ROLES, ADMIN_ROLES, FINANCE_ROLES, INVENTORY_ROLES } from '../constants/roles.js';
+import { ServerMaintenance } from '../components/index.js';
 
 const appRoutes = [
   // ─── Public Authentication Routes ──────────────────────────────────────────
@@ -121,6 +122,9 @@ const appRoutes = [
 
   // AI Hub
   { path: ROUTES.AI_MODE, element: AiMode, name: 'ai-mode', fullScreen: true },
+
+  // Maintenance Page (Public)
+  { path: ROUTES.MAINTENANCE, element: ServerMaintenance, name: 'maintenance', public: true, fullScreen: true },
 ];
 
 export default appRoutes;

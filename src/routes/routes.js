@@ -105,8 +105,9 @@ export const ROUTES = {
   ONLINE_CLASSES: '/online-classes',
   HOMEWORK:       '/homework',
 
-  // ── AI Hub ───────────────────────────────────────────────────────────────
+  // ── AI Hub & Maintenance ──────────────────────────────────────────────────
   AI_MODE:        '/ai-mode',
+  MAINTENANCE:    '/maintenance',
 };
 
 export default ROUTES;

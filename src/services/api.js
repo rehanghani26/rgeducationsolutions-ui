@@ -35,11 +35,35 @@ const processQueue = (error, token = null) => {
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // If a request succeeds, we can signal the server is online
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    // Detect if server is offline or unreachable (no response, ERR_NETWORK, connection refused, 502/503/504)
+    const isServerDown =
+      !error.response ||
+      error.code === "ERR_NETWORK" ||
+      error.message === "Network Error" ||
+      [502, 503, 504].includes(error.response?.status);
+
+    if (isServerDown && typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("server:offline", {
+          detail: {
+            url: originalRequest?.url,
+            status: error.response?.status || 0,
+            message:
+              error.message || "ERR_CONNECTION_REFUSED - Server is currently offline",
+            timestamp: new Date().toISOString(),
+          },
+        })
+      );
+    }
+
+    if (error.response?.status !== 401 || originalRequest?._retry) {
       return Promise.reject(error);
     }
 

@@ -26,3 +26,4 @@ export { default as ThemeToggle }       from './ui/ThemeToggle.jsx';
 export { default as SessionBootstrap }  from './SessionBootstrap.jsx';
 export { default as FallbackUI }        from './ui/FallbackUI.jsx';
 export { default as ErrorBoundary }     from './ui/ErrorBoundary.jsx';
+export { default as ServerMaintenance } from './ui/ServerMaintenance.jsx';

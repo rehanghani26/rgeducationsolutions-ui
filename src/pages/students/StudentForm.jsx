@@ -151,7 +151,7 @@ const StudentForm = ({
           photo: res.url,
           imagesRef: refObj,
         });
-        toast.success("Student photo uploaded to Cloudinary successfully!");
+        toast.success("Student photo uploaded successfully!");
       } else {
         toast.error(res?.message || "Failed to upload photo");
       }
@@ -194,7 +194,7 @@ const StudentForm = ({
           aadhaarDocument: res.url,
           AdharRef: refObj,
         });
-        toast.success("Aadhaar PDF uploaded to Cloudinary successfully!");
+        toast.success("Aadhaar PDF uploaded successfully!");
       } else {
         toast.error(res?.message || "Failed to upload Aadhaar document");
       }
