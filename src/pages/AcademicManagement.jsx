@@ -8,7 +8,6 @@ import erpService from "../services/erpService.js";
 import curriculumService from "../services/curriculumService.js";
 import { getTeachers } from "../services/teacherService.js";
 import { CLASS_OPTIONS, SECTION_OPTIONS } from "../constants/academicOptions.js";
-import { mockAcademics } from "../data/mockData.js";
 import Loader from "../components/ui/Loader.jsx";
 import { Can, CanButton, getUserFromStorage } from "../config/access.jsx";
 import { useSelector } from "react-redux";

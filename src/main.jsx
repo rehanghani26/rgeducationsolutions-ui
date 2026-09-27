@@ -26,23 +26,6 @@ const AppBootstrap = () => {
     };
 
     window.addEventListener("server:offline", handleOffline);
-
-    // Initial proactive health probe
-    fetch(`${BACKEND_URL}/api/health`, { cache: "no-store" })
-      .then((res) => {
-        if (!res.ok && res.status >= 500) {
-          setIsServerDown(true);
-          setServerErrorInfo({ status: res.status, message: `Server returned HTTP ${res.status}` });
-        }
-      })
-      .catch((err) => {
-        setIsServerDown(true);
-        setServerErrorInfo({
-          status: 0,
-          message: err.message || "ERR_CONNECTION_REFUSED — Server is currently offline",
-        });
-      });
-
     return () => window.removeEventListener("server:offline", handleOffline);
   }, []);
 

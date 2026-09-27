@@ -2,19 +2,22 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser, clearError } from "../store/slices/authSlice.js";
-import { Lock, Mail, Loader2 } from "lucide-react";
+import { Lock, Mail, Loader2, Eye, EyeOff } from "lucide-react";
 import rgLogo from "../assets/logo/RGLOGO.png";
+import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
 import api from "../services/api.js";
 
 const Login = () => {
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { schoolLogo, schoolName, schoolMotto } = useSchoolBranding();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [localErrors, setLocalErrors] = useState({});
-  const [companyLogo, setCompanyLogo] = useState("");
+  const [isSetupRequired, setIsSetupRequired] = useState(false);
 
   // Redirect to Dashboard if already authenticated
   useEffect(() => {
@@ -23,17 +26,26 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  // Check if system requires initial Super Admin setup (no users in DB)
   useEffect(() => {
-    const loadCompanyProfile = async () => {
+    let isMounted = true;
+    const checkSetup = async () => {
       try {
-        const res = await api.get("/company/profile");
-        setCompanyLogo(res.data.company?.companyLogo || "");
-      } catch (err) {
-        setCompanyLogo("");
+        const res = await api.get("/auth/setup-status");
+        if (isMounted) {
+          setIsSetupRequired(Boolean(res.data?.isSetupRequired));
+        }
+      } catch {
+        if (isMounted) {
+          setIsSetupRequired(false);
+        }
       }
     };
 
-    loadCompanyProfile();
+    checkSetup();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const validateForm = () => {
@@ -75,16 +87,16 @@ const Login = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <img
-            src={rgLogo}
-            alt="RG EduCore Logo"
+            src={schoolLogo || rgLogo}
+            alt={`${schoolName || "RG EduCore"} Logo`}
             style={{ mixBlendMode: 'screen' }}
             className="inline-block w-24 h-24 object-contain mb-4"
           />
           <h2 className="text-3xl font-extrabold text-white tracking-tight">
-            RG EduCore
+            {schoolName || "RG EduCore"}
           </h2>
           <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest font-semibold">
-            The Core of Smarter School Management
+            {schoolMotto || "The Core of Smarter School Management"}
           </p>
         </div>
 
@@ -143,13 +155,22 @@ const Login = () => {
                 size={16}
               />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none cursor-pointer"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
             {localErrors.password && (
               <p className="text-red-400 text-[10px] mt-1 font-semibold">
@@ -173,18 +194,20 @@ const Login = () => {
           </button>
         </div>
 
-        {/* Register Super Admin Link */}
-        <div className="mt-8 border-t border-slate-800 pt-6 text-center">
-          <p className="text-slate-500 text-xs font-semibold">
-            First time here?{" "}
-            <Link
-              to="/signup"
-              className="text-indigo-400 hover:underline font-bold"
-            >
-              Register Super Admin
-            </Link>
-          </p>
-        </div>
+        {/* Register Super Admin Link - Only visible when NO users exist in DB */}
+        {isSetupRequired && (
+          <div className="mt-8 border-t border-slate-800 pt-6 text-center">
+            <p className="text-slate-500 text-xs font-semibold">
+              First time here?{" "}
+              <Link
+                to="/signup"
+                className="text-indigo-400 hover:underline font-bold"
+              >
+                Register Super Admin
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

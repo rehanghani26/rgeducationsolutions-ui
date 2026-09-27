@@ -177,7 +177,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              School Name *
+              School Name <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="text"
@@ -277,7 +277,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              Email Address *
+              Email Address <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="email"
@@ -291,7 +291,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
 
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              Phone Number *
+              Phone Number <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="tel"
@@ -341,7 +341,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
 
         <div>
           <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-            Address Line 1 *
+            Address Line 1 <span className="text-rose-500 font-bold">*</span>
           </label>
           <input
             type="text"
@@ -370,7 +370,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              City *
+              City <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="text"
@@ -384,7 +384,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
 
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              State/Province *
+              State/Province <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="text"
@@ -398,7 +398,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
 
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              Country *
+              Country <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="text"
@@ -412,7 +412,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
 
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
-              Postal Code *
+              Postal Code <span className="text-rose-500 font-bold">*</span>
             </label>
             <input
               type="text"

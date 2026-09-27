@@ -68,25 +68,19 @@ export const SchoolBrandingProvider = ({ children }) => {
   }, []);
 
   const refreshBranding = useCallback(async () => {
+    // Never hit any API if user is not logged in
+    const token = localStorage.getItem("token");
+    if (!token || token === "undefined" || token === "null") {
+      return;
+    }
+
     try {
-      // First try /erp/settings if authenticated
       const res = await api.get("/erp/settings").catch(() => null);
       if (res?.data?.settings) {
         const s = res.data.settings;
         const logo = s.companyLogo || s.schoolLogo || "";
         const name = s.schoolName || defaultBranding.schoolName;
         const motto = s.schoolMotto || defaultBranding.schoolMotto;
-        updateBranding({ schoolLogo: logo, schoolName: name, schoolMotto: motto });
-        return;
-      }
-
-      // Otherwise fall back to public /company/profile
-      const compRes = await api.get("/company/profile").catch(() => null);
-      if (compRes?.data?.company) {
-        const c = compRes.data.company;
-        const logo = c.companyLogo || c.schoolLogo || "";
-        const name = c.schoolName || c.companyName || defaultBranding.schoolName;
-        const motto = c.schoolMotto || defaultBranding.schoolMotto;
         updateBranding({ schoolLogo: logo, schoolName: name, schoolMotto: motto });
       }
     } catch {
@@ -95,7 +89,10 @@ export const SchoolBrandingProvider = ({ children }) => {
   }, [updateBranding]);
 
   useEffect(() => {
-    refreshBranding();
+    const token = localStorage.getItem("token");
+    if (token && token !== "undefined" && token !== "null") {
+      refreshBranding();
+    }
 
     const handleSync = (e) => {
       if (e?.detail) {

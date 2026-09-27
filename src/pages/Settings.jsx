@@ -103,6 +103,28 @@ const Settings = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (selectedTab === "profile") {
+      const missing = [];
+      if (!settings.schoolName?.trim()) missing.push("School Name");
+      if (!settings.contactEmail?.trim()) missing.push("Email Address");
+      if (!settings.schoolPhone?.trim()) missing.push("Phone Number");
+      if (!settings.addressLine1?.trim()) missing.push("Address Line 1");
+      if (!settings.city?.trim()) missing.push("City");
+      if (!settings.state?.trim()) missing.push("State/Province");
+      if (!settings.country?.trim()) missing.push("Country");
+      if (!settings.postalCode?.trim()) missing.push("Postal Code");
+
+      if (missing.length > 0) {
+        toast.error(
+          `Please fill mandatory fields: ${missing.slice(0, 3).join(", ")}${
+            missing.length > 3 ? ` (+${missing.length - 3} more)` : ""
+          }`
+        );
+        return;
+      }
+    }
+
     api
       .put("/erp/settings", settings)
       .then(() => {

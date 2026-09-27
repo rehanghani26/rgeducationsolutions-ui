@@ -23,6 +23,10 @@ import { ROUTES } from "../routes/routes.js";
 import { ROLES, ADMIN_ROLES } from "../constants/roles.js";
 import rgLogo from "../assets/logo/RGLOGO.png";
 import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
+import api from "../services/api.js";
+import MandatorySchoolProfileModal, {
+  checkIsSchoolProfileIncomplete,
+} from "../components/modals/MandatorySchoolProfileModal.jsx";
 
 const HEADER_TABS = [
   { id: "home", label: "Home", icon: LayoutDashboard },
@@ -36,13 +40,59 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeDashboardTab, setActiveDashboardTab] = useState("home");
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [settingsData, setSettingsData] = useState(null);
+  const [showMandatoryModal, setShowMandatoryModal] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
-  const { schoolLogo, schoolName } = useSchoolBranding();
+  const { schoolLogo, schoolName, refreshBranding } = useSchoolBranding();
+
+  const userRole = (user?.role || "").toLowerCase().replace(/_/g, "-");
+  const canManageSettings =
+    userRole === ROLES.SUPER_ADMIN ||
+    userRole === "superadmin" ||
+    userRole === ROLES.SCHOOL_ADMIN ||
+    userRole === "admin" ||
+    userRole === ROLES.PRINCIPAL;
+
+  React.useEffect(() => {
+    refreshBranding();
+  }, [refreshBranding]);
+
+  // Check mandatory school fields just after login
+  React.useEffect(() => {
+    if (!canManageSettings) return;
+
+    let isMounted = true;
+    api
+      .get("/erp/settings")
+      .then((res) => {
+        if (!isMounted) return;
+        const currentSettings = res.data?.settings || {};
+        setSettingsData(currentSettings);
+        if (checkIsSchoolProfileIncomplete(currentSettings)) {
+          setShowMandatoryModal(true);
+        } else {
+          setShowMandatoryModal(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to check school settings:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [canManageSettings]);
+
+  const handleProfileComplete = (savedSettings) => {
+    setSettingsData(savedSettings);
+    setShowMandatoryModal(false);
+    refreshBranding();
+  };
 
   const navSections = filterNavForUser(user);
 
@@ -257,6 +307,15 @@ const DashboardLayout = () => {
           </ErrorBoundary>
         </main>
       </div>
+
+      {/* ── Mandatory School Profile Modal (Shown immediately after login if mandatory details are missing) ── */}
+      {showMandatoryModal && (
+        <MandatorySchoolProfileModal
+          isOpen={showMandatoryModal}
+          initialSettings={settingsData || {}}
+          onComplete={handleProfileComplete}
+        />
+      )}
     </div>
   );
 };

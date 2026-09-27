@@ -6,273 +6,25 @@ import {
   ArrowRight, Search, FileCheck, BookMarked, Video, Send, CheckCircle,
   HelpCircle, ChevronRight, X
 } from 'lucide-react';
-import { mockAcademics } from '../../data/mockData.js';
 import Modal from '../../components/ui/Modal.jsx';
 import curriculumService from '../../services/curriculumService.js';
 
 // ─── Enriched Student Subjects with Syllabus & Progress ──────────────────────
-export const ENRICHED_STUDENT_SUBJECTS = [
-  {
-    id: 'subj-1',
-    code: 'MTH-103',
-    name: 'Mathematics & Geometry',
-    type: 'theory',
-    credits: 5,
-    teacher: 'Dr. Bilal Siddiqui',
-    teacherRole: 'Senior Mathematics Faculty',
-    room: 'Block A - Room 101',
-    progress: 74,
-    color: 'from-blue-600 to-indigo-600',
-    accentText: 'text-blue-500',
-    accentBg: 'bg-blue-500/10 border-blue-500/20',
-    schedule: 'Mon, Wed, Fri (08:00 AM)',
-    unitsCount: 6,
-    completedUnits: 4,
-    currentChapter: 'Unit 4: Quadratic Equations & Parabolas',
-    units: [
-      { id: 1, title: 'Unit 1: Real Numbers & Set Theory', status: 'completed', duration: '2 weeks' },
-      { id: 2, title: 'Unit 2: Polynomials & Factorization', status: 'completed', duration: '3 weeks' },
-      { id: 3, title: 'Unit 3: Linear Equations in Two Variables', status: 'completed', duration: '2.5 weeks' },
-      { id: 4, title: 'Unit 4: Quadratic Equations & Parabolas', status: 'in-progress', duration: 'Current (Week 8)' },
-      { id: 5, title: 'Unit 5: Arithmetic Progressions & Series', status: 'upcoming', duration: 'Next' },
-      { id: 6, title: 'Unit 6: Coordinate Geometry & Vectors', status: 'upcoming', duration: '3 weeks' },
-    ],
-    materials: [
-      { name: 'Class 10 Geometry Formula Handbook', type: 'PDF', size: '3.4 MB', date: 'Aug 20, 2026' },
-      { name: 'Unit 3 Solved Question Bank with Solutions', type: 'PDF', size: '5.1 MB', date: 'Aug 28, 2026' },
-    ],
-  },
-  {
-    id: 'subj-2',
-    code: 'PHY-104',
-    name: 'Physics & Applied Mechanics',
-    type: 'practical',
-    credits: 4,
-    teacher: 'Prof. Mohammed Zakir',
-    teacherRole: 'Physics Department Head',
-    room: 'Science Lab 2',
-    progress: 68,
-    color: 'from-cyan-600 to-blue-600',
-    accentText: 'text-cyan-500',
-    accentBg: 'bg-cyan-500/10 border-cyan-500/20',
-    schedule: 'Tue, Thu (08:55 AM)',
-    unitsCount: 5,
-    completedUnits: 3,
-    currentChapter: 'Unit 3: Electromagnetism & Induced Currents',
-    units: [
-      { id: 1, title: 'Unit 1: Kinematics & Laws of Motion', status: 'completed', duration: '3 weeks' },
-      { id: 2, title: 'Unit 2: Work, Energy, and Gravitational Fields', status: 'completed', duration: '3 weeks' },
-      { id: 3, title: 'Unit 3: Electromagnetism & Induced Currents', status: 'in-progress', duration: 'Current (Week 8)' },
-      { id: 4, title: 'Unit 4: Optics, Reflection & Refraction', status: 'upcoming', duration: 'Next' },
-      { id: 5, title: 'Unit 5: Wave Mechanics & Sound Waves', status: 'upcoming', duration: '2.5 weeks' },
-    ],
-    materials: [
-      { name: 'Physics Laboratory Practical Manual & Safety Guidelines', type: 'PDF', size: '4.8 MB', date: 'Aug 15, 2026' },
-      { name: 'Electromagnetism Lecture Slides & Diagrams', type: 'PPTX', size: '8.2 MB', date: 'Sep 02, 2026' },
-    ],
-  },
-  {
-    id: 'subj-3',
-    code: 'ISL-101',
-    name: 'Quranic Sciences & Tajweed',
-    type: 'theory',
-    credits: 4,
-    teacher: 'Sheikh Abdullah Al-Hafiz',
-    teacherRole: 'Head of Religious Studies',
-    room: 'Main Lecture Hall B',
-    progress: 82,
-    color: 'from-emerald-600 to-teal-600',
-    accentText: 'text-emerald-500',
-    accentBg: 'bg-emerald-500/10 border-emerald-500/20',
-    schedule: 'Mon, Wed, Thu (11:15 AM)',
-    unitsCount: 6,
-    completedUnits: 5,
-    currentChapter: 'Unit 5: Rules of Noon Sakinah and Tanween in Recitation',
-    units: [
-      { id: 1, title: 'Unit 1: Introduction to Quranic Sciences (Ulum al-Quran)', status: 'completed', duration: '2 weeks' },
-      { id: 2, title: 'Unit 2: Makki and Madani Surahs and Chronology', status: 'completed', duration: '2 weeks' },
-      { id: 3, title: 'Unit 3: Makharij al-Huroof (Articulation Points)', status: 'completed', duration: '3 weeks' },
-      { id: 4, title: 'Unit 4: Sifaat al-Huroof (Characteristics of Letters)', status: 'completed', duration: '2.5 weeks' },
-      { id: 5, title: 'Unit 5: Rules of Noon Sakinah & Tanween', status: 'in-progress', duration: 'Current' },
-      { id: 6, title: 'Unit 6: Madd (Elongation) Types and Practical Recitation', status: 'upcoming', duration: '3 weeks' },
-    ],
-    materials: [
-      { name: 'Comprehensive Tajweed Rules Reference Chart', type: 'PDF', size: '2.1 MB', date: 'Aug 10, 2026' },
-      { name: 'Recitation Audio Guide & Pronunciation Guide', type: 'ZIP', size: '14.5 MB', date: 'Aug 12, 2026' },
-    ],
-  },
-  {
-    id: 'subj-4',
-    code: 'ARB-102',
-    name: 'Classical & Modern Arabic',
-    type: 'theory',
-    credits: 4,
-    teacher: 'Fatima Az-Zahra',
-    teacherRole: 'Faculty of Arabic Linguistics',
-    room: 'Block A - Room 102',
-    progress: 70,
-    color: 'from-amber-600 to-orange-600',
-    accentText: 'text-amber-500',
-    accentBg: 'bg-amber-500/10 border-amber-500/20',
-    schedule: 'Mon, Tue, Thu (09:50 AM)',
-    unitsCount: 5,
-    completedUnits: 3,
-    currentChapter: 'Unit 4: Verb Conjugations & Weak Verb Patterns',
-    units: [
-      { id: 1, title: 'Unit 1: Arabic Morphology & Word Construction', status: 'completed', duration: '3 weeks' },
-      { id: 2, title: 'Unit 2: Nominal Sentences and Predicates', status: 'completed', duration: '2.5 weeks' },
-      { id: 3, title: 'Unit 3: Idafa (Possession) and Adjectives', status: 'completed', duration: '2 weeks' },
-      { id: 4, title: 'Unit 4: Verb Conjugations & Irregular Verbs', status: 'in-progress', duration: 'Current' },
-      { id: 5, title: 'Unit 5: Comprehension, Translation, and Dialogue', status: 'upcoming', duration: '3 weeks' },
-    ],
-    materials: [
-      { name: 'Arabic Grammar Essentials Handbook (Nahw & Sarf)', type: 'PDF', size: '3.9 MB', date: 'Aug 18, 2026' },
-      { name: 'Weekly Vocabulary & Conversational Exercises', type: 'PDF', size: '1.7 MB', date: 'Sep 01, 2026' },
-    ],
-  },
-  {
-    id: 'subj-5',
-    code: 'ENG-105',
-    name: 'English Language & Literature',
-    type: 'theory',
-    credits: 4,
-    teacher: 'Sumayya Khan',
-    teacherRole: 'Department of Humanities',
-    room: 'Block B - Room 204',
-    progress: 78,
-    color: 'from-purple-600 to-pink-600',
-    accentText: 'text-purple-500',
-    accentBg: 'bg-purple-500/10 border-purple-500/20',
-    schedule: 'Mon, Wed, Fri (12:10 PM)',
-    unitsCount: 5,
-    completedUnits: 4,
-    currentChapter: 'Unit 4: Analytical Essay Writing & Rhetorical Devices',
-    units: [
-      { id: 1, title: 'Unit 1: Modern Short Stories & Literary Elements', status: 'completed', duration: '3 weeks' },
-      { id: 2, title: 'Unit 2: Poetry Analysis & Metaphorical Devices', status: 'completed', duration: '2.5 weeks' },
-      { id: 3, title: 'Unit 3: Advanced Grammar, Syntax, and Punctuation', status: 'completed', duration: '2 weeks' },
-      { id: 4, title: 'Unit 4: Analytical Essay Writing', status: 'in-progress', duration: 'Current' },
-      { id: 5, title: 'Unit 5: Drama: Shakespearean Excerpts & Performance', status: 'upcoming', duration: '3 weeks' },
-    ],
-    materials: [
-      { name: 'Selected Anthology of Prose and Poetry Reader', type: 'PDF', size: '6.2 MB', date: 'Aug 22, 2026' },
-      { name: 'Essay Writing Rubric & Model High-Scoring Samples', type: 'PDF', size: '2.4 MB', date: 'Aug 30, 2026' },
-    ],
-  },
-  {
-    id: 'subj-6',
-    code: 'CHM-107',
-    name: 'Chemistry & Experimental Sciences',
-    type: 'practical',
-    credits: 4,
-    teacher: 'Dr. Amina Farooqui',
-    teacherRole: 'Senior Chemistry Lecturer',
-    room: 'Chemistry Lab 1',
-    progress: 62,
-    color: 'from-emerald-600 to-cyan-600',
-    accentText: 'text-emerald-500',
-    accentBg: 'bg-emerald-500/10 border-emerald-500/20',
-    schedule: 'Tue, Fri (01:30 PM)',
-    unitsCount: 5,
-    completedUnits: 3,
-    currentChapter: 'Unit 3: Chemical Bonding, Molecular Geometry & Orbitals',
-    units: [
-      { id: 1, title: 'Unit 1: Atomic Structure and Periodic Trends', status: 'completed', duration: '3 weeks' },
-      { id: 2, title: 'Unit 2: Stoichiometry and Solution Concentration', status: 'completed', duration: '2.5 weeks' },
-      { id: 3, title: 'Unit 3: Chemical Bonding & Molecular Geometry', status: 'in-progress', duration: 'Current' },
-      { id: 4, title: 'Unit 4: Thermochemistry & Reaction Kinetics', status: 'upcoming', duration: 'Next' },
-      { id: 5, title: 'Unit 5: Acids, Bases, and Equilibrium Systems', status: 'upcoming', duration: '3 weeks' },
-    ],
-    materials: [
-      { name: 'Periodic Table & Chemical Constants Reference Booklet', type: 'PDF', size: '1.9 MB', date: 'Aug 14, 2026' },
-      { name: 'Laboratory Titration & Synthesis Lab Protocols', type: 'PDF', size: '3.8 MB', date: 'Aug 26, 2026' },
-    ],
-  },
-  {
-    id: 'subj-7',
-    code: 'HIS-106',
-    name: 'World Civilizations & Islamic Heritage',
-    type: 'theory',
-    credits: 3,
-    teacher: 'Sheikh Abdullah Al-Hafiz',
-    teacherRole: 'Head of Religious Studies',
-    room: 'Block A - Room 101',
-    progress: 80,
-    color: 'from-amber-600 to-yellow-600',
-    accentText: 'text-amber-500',
-    accentBg: 'bg-amber-500/10 border-amber-500/20',
-    schedule: 'Wed, Thu (02:25 PM)',
-    unitsCount: 4,
-    completedUnits: 3,
-    currentChapter: 'Unit 3: The Golden Age of Science and Scholarship (8th–14th Century)',
-    units: [
-      { id: 1, title: 'Unit 1: Early Civilization Foundations & Near East Empires', status: 'completed', duration: '3 weeks' },
-      { id: 2, title: 'Unit 2: The Umayyad and Abbasid Dynasties', status: 'completed', duration: '3 weeks' },
-      { id: 3, title: 'Unit 3: The Golden Age of Science and Scholarship', status: 'in-progress', duration: 'Current' },
-      { id: 4, title: 'Unit 4: Global Interactions, Trade Routes, and Cultural Exchange', status: 'upcoming', duration: '2.5 weeks' },
-    ],
-    materials: [
-      { name: 'Historical Maps Atlas: Silk Road & Maritime Routes', type: 'PDF', size: '7.1 MB', date: 'Aug 19, 2026' },
-      { name: 'Primary Source Documents & Scholarly Articles', type: 'PDF', size: '4.5 MB', date: 'Aug 29, 2026' },
-    ],
-  },
-];
+export const ENRICHED_STUDENT_SUBJECTS = [];
 
 // ─── Weekly Timetable Schedule Data ──────────────────────────────────────────
 const TIMETABLE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 const WEEKLY_TIMETABLE = {
-  Monday: [
-    { period: 1, time: '08:00 – 08:50 AM', subject: 'Mathematics & Geometry', code: 'MTH-103', room: 'Room 101', teacher: 'Dr. Bilal Siddiqui', type: 'Core' },
-    { period: 2, time: '08:55 – 09:45 AM', subject: 'Classical & Modern Arabic', code: 'ARB-102', room: 'Room 102', teacher: 'Fatima Az-Zahra', type: 'Core' },
-    { period: 3, time: '09:50 – 10:40 AM', subject: 'Physics & Lab Work', code: 'PHY-104', room: 'Science Lab 2', teacher: 'Prof. Mohammed Zakir', type: 'Lab' },
-    { period: 0, time: '10:40 – 11:15 AM', subject: 'Mid-Morning Break & Assembly', isBreak: true },
-    { period: 4, time: '11:15 – 12:05 PM', subject: 'Quranic Sciences & Tajweed', code: 'ISL-101', room: 'Lecture Hall B', teacher: 'Sheikh Abdullah', type: 'Core' },
-    { period: 5, time: '12:10 – 01:00 PM', subject: 'English Language & Literature', code: 'ENG-105', room: 'Room 204', teacher: 'Sumayya Khan', type: 'Core' },
-  ],
-  Tuesday: [
-    { period: 1, time: '08:00 – 08:50 AM', subject: 'Physics & Lab Work', code: 'PHY-104', room: 'Science Lab 2', teacher: 'Prof. Mohammed Zakir', type: 'Lab' },
-    { period: 2, time: '08:55 – 09:45 AM', subject: 'Chemistry & Practical Sciences', code: 'CHM-107', room: 'Chem Lab 1', teacher: 'Dr. Amina Farooqui', type: 'Lab' },
-    { period: 3, time: '09:50 – 10:40 AM', subject: 'Classical & Modern Arabic', code: 'ARB-102', room: 'Room 102', teacher: 'Fatima Az-Zahra', type: 'Core' },
-    { period: 0, time: '10:40 – 11:15 AM', subject: 'Mid-Morning Break & Assembly', isBreak: true },
-    { period: 4, time: '11:15 – 12:05 PM', subject: 'Mathematics & Geometry', code: 'MTH-103', room: 'Room 101', teacher: 'Dr. Bilal Siddiqui', type: 'Core' },
-    { period: 5, time: '12:10 – 01:00 PM', subject: 'World Civilizations & Heritage', code: 'HIS-106', room: 'Room 101', teacher: 'Sheikh Abdullah', type: 'Core' },
-  ],
-  Wednesday: [
-    { period: 1, time: '08:00 – 08:50 AM', subject: 'Mathematics & Geometry', code: 'MTH-103', room: 'Room 101', teacher: 'Dr. Bilal Siddiqui', type: 'Core' },
-    { period: 2, time: '08:55 – 09:45 AM', subject: 'Quranic Sciences & Tajweed', code: 'ISL-101', room: 'Lecture Hall B', teacher: 'Sheikh Abdullah', type: 'Core' },
-    { period: 3, time: '09:50 – 10:40 AM', subject: 'English Language & Literature', code: 'ENG-105', room: 'Room 204', teacher: 'Sumayya Khan', type: 'Core' },
-    { period: 0, time: '10:40 – 11:15 AM', subject: 'Mid-Morning Break & Assembly', isBreak: true },
-    { period: 4, time: '11:15 – 12:05 PM', subject: 'Chemistry & Practical Sciences', code: 'CHM-107', room: 'Chem Lab 1', teacher: 'Dr. Amina Farooqui', type: 'Lab' },
-    { period: 5, time: '12:10 – 01:00 PM', subject: 'Library & Guided Study', code: 'LIB-100', room: 'Central Library', teacher: 'Irma Pince', type: 'Study' },
-  ],
-  Thursday: [
-    { period: 1, time: '08:00 – 08:50 AM', subject: 'Classical & Modern Arabic', code: 'ARB-102', room: 'Room 102', teacher: 'Fatima Az-Zahra', type: 'Core' },
-    { period: 2, time: '08:55 – 09:45 AM', subject: 'Physics & Applied Mechanics', code: 'PHY-104', room: 'Science Lab 2', teacher: 'Prof. Mohammed Zakir', type: 'Lab' },
-    { period: 3, time: '09:50 – 10:40 AM', subject: 'Quranic Sciences & Tajweed', code: 'ISL-101', room: 'Lecture Hall B', teacher: 'Sheikh Abdullah', type: 'Core' },
-    { period: 0, time: '10:40 – 11:15 AM', subject: 'Mid-Morning Break & Assembly', isBreak: true },
-    { period: 4, time: '11:15 – 12:05 PM', subject: 'World Civilizations & Heritage', code: 'HIS-106', room: 'Room 101', teacher: 'Sheikh Abdullah', type: 'Core' },
-    { period: 5, time: '12:10 – 01:00 PM', subject: 'Mathematics Problem Solving', code: 'MTH-103', room: 'Room 101', teacher: 'Dr. Bilal Siddiqui', type: 'Core' },
-  ],
-  Friday: [
-    { period: 1, time: '08:00 – 08:50 AM', subject: 'Mathematics & Geometry', code: 'MTH-103', room: 'Room 101', teacher: 'Dr. Bilal Siddiqui', type: 'Core' },
-    { period: 2, time: '08:55 – 09:45 AM', subject: 'English Language & Literature', code: 'ENG-105', room: 'Room 204', teacher: 'Sumayya Khan', type: 'Core' },
-    { period: 3, time: '09:50 – 10:40 AM', subject: 'Chemistry Lab & Experiments', code: 'CHM-107', room: 'Chem Lab 1', teacher: 'Dr. Amina Farooqui', type: 'Lab' },
-    { period: 0, time: '10:40 – 11:15 AM', subject: 'Friday Assembly & Tahfeez', isBreak: true },
-    { period: 4, time: '11:15 – 12:15 PM', subject: 'Islamic Ethics & Community Service', code: 'ETH-108', room: 'Auditorium', teacher: 'Sheikh Abdullah', type: 'Activity' },
-  ],
+  Monday: [],
+  Tuesday: [],
+  Wednesday: [],
+  Thursday: [],
+  Friday: [],
 };
 
 // ─── Student Academic Performance Mock Data ──────────────────────────────────
-const STUDENT_PERFORMANCE = [
-  { subject: 'Quranic Sciences & Tajweed', code: 'ISL-101', midterm: 96, internal: 29, maxInternal: 30, grade: 'A+', remarks: 'Exceptional recitation and mastery of Tajweed rules.' },
-  { subject: 'Classical & Modern Arabic', code: 'ARB-102', midterm: 88, internal: 27, maxInternal: 30, grade: 'A', remarks: 'Strong grammatical application; continue practicing oral fluency.' },
-  { subject: 'Mathematics & Geometry', code: 'MTH-103', midterm: 94, internal: 28, maxInternal: 30, grade: 'A+', remarks: 'Demonstrates deep analytical clarity in problem-solving.' },
-  { subject: 'Physics & Applied Mechanics', code: 'PHY-104', midterm: 86, internal: 26, maxInternal: 30, grade: 'A', remarks: 'Very good lab execution and theoretical understanding.' },
-  { subject: 'English Language & Composition', code: 'ENG-105', midterm: 91, internal: 28, maxInternal: 30, grade: 'A', remarks: 'Insightful essay contributions and articulate writing.' },
-  { subject: 'Chemistry & Practical Sciences', code: 'CHM-107', midterm: 84, internal: 25, maxInternal: 30, grade: 'B+', remarks: 'Diligent lab work. Pay extra attention to stoichiometry problems.' },
-  { subject: 'World Civilizations & Heritage', code: 'HIS-106', midterm: 92, internal: 29, maxInternal: 30, grade: 'A+', remarks: 'Superb historical analysis and thoughtful contributions.' },
-];
+const STUDENT_PERFORMANCE = [];
 
 // ─── Color Palettes for Dynamically Assigned Courses ─────────────────────────
 const PALETTES = [
@@ -429,10 +181,10 @@ export const buildDynamicTimetable = (coursesList = []) => {
 export const buildDynamicPerformance = (coursesList = []) => {
   if (!coursesList || coursesList.length === 0) {
     return {
-      records: STUDENT_PERFORMANCE,
-      termAverage: '91.4%',
-      grade: 'Grade A',
-      gpa: '3.85 / 4.0',
+      records: [],
+      termAverage: 'N/A',
+      grade: 'N/A',
+      gpa: 'N/A',
     };
   }
 
@@ -449,13 +201,13 @@ export const buildDynamicPerformance = (coursesList = []) => {
       return existing;
     }
 
-    const progress = c.progress || 72;
-    const midterm = Math.min(98, Math.max(65, Math.round(progress * 0.9 + 18)));
-    const internal = Math.min(30, Math.max(22, Math.round(midterm * 0.3)));
+    const progress = c.progress || 0;
+    const midterm = Math.min(100, Math.max(0, Math.round(progress)));
+    const internal = Math.min(30, Math.max(0, Math.round(midterm * 0.3)));
     totalScore += midterm;
 
     const grade =
-      midterm >= 93 ? 'A+' : midterm >= 85 ? 'A' : midterm >= 78 ? 'B+' : midterm >= 70 ? 'B' : 'C';
+      midterm >= 93 ? 'A+' : midterm >= 85 ? 'A' : midterm >= 78 ? 'B+' : midterm >= 70 ? 'B' : midterm > 0 ? 'C' : 'N/A';
 
     return {
       subject: c.name,
@@ -466,20 +218,20 @@ export const buildDynamicPerformance = (coursesList = []) => {
       grade: grade,
       remarks:
         grade === 'A+'
-          ? 'Exceptional mastery of concepts and outstanding coursework submission.'
+          ? 'Exceptional mastery of concepts.'
           : grade === 'A'
-          ? 'Strong conceptual understanding and active participation in class.'
-          : 'Consistent effort; revise recommended formula sheets and practical manuals.',
+          ? 'Strong conceptual understanding.'
+          : 'Course in progress.',
     };
   });
 
-  const avg = records.length > 0 ? (totalScore / records.length).toFixed(1) : '90.0';
-  const overallGrade = Number(avg) >= 90 ? 'Grade A+' : Number(avg) >= 80 ? 'Grade A' : 'Grade B+';
-  const gpa = Math.min(4.0, Number(avg) / 24.5).toFixed(2) + ' / 4.0';
+  const avg = records.length > 0 ? (totalScore / records.length).toFixed(1) : 'N/A';
+  const overallGrade = Number(avg) >= 90 ? 'Grade A+' : Number(avg) >= 80 ? 'Grade A' : Number(avg) >= 70 ? 'Grade B' : 'N/A';
+  const gpa = Number(avg) ? Math.min(4.0, Number(avg) / 25).toFixed(2) + ' / 4.0' : 'N/A';
 
   return {
     records,
-    termAverage: `${avg}%`,
+    termAverage: avg !== 'N/A' ? `${avg}%` : 'N/A',
     grade: overallGrade,
     gpa,
   };
@@ -493,15 +245,13 @@ export const StudentAcademicView = ({ currentUser }) => {
   const [searchFilter, setSearchFilter] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const studentName = currentUser?.name || 'Harry Potter';
-  const className = currentUser?.className || 'Grade 10';
-  const sectionName = currentUser?.sectionName || 'Section A';
-  const admissionNumber = currentUser?.admissionNumber || 'ADM-2024-001';
-  const rollNumber = currentUser?.rollNumber || '1001';
+  const studentName = currentUser?.name || currentUser?.username || 'N/A';
+  const className = currentUser?.className || 'N/A';
+  const sectionName = currentUser?.sectionName || 'N/A';
+  const admissionNumber = currentUser?.admissionNumber || 'N/A';
+  const rollNumber = currentUser?.rollNumber || 'N/A';
 
-  const [subjects, setSubjects] = useState(() =>
-    ENRICHED_STUDENT_SUBJECTS.map((s, i) => normalizeSubject(s, i))
-  );
+  const [subjects, setSubjects] = useState([]);
 
   // Dynamically load assigned curriculum for this class & section
   useEffect(() => {
@@ -515,13 +265,15 @@ export const StudentAcademicView = ({ currentUser }) => {
           setSubjects(normalized);
         }
       } catch (err) {
-        console.warn('Using default curriculum fallback:', err);
+        console.warn('Error loading curriculum:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
-    fetchCurriculum();
+    if (className !== 'N/A') {
+      fetchCurriculum();
+    }
     return () => {
       isMounted = false;
     };
@@ -530,7 +282,7 @@ export const StudentAcademicView = ({ currentUser }) => {
   const classTeacher =
     currentUser?.classTeacher ||
     subjects.find((s) => (s.teacherRole || '').toLowerCase().includes('class teacher'))?.teacher ||
-    'Sheikh Abdullah Al-Hafiz';
+    'N/A';
 
   const totalCredits = subjects.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
   const allMaterials = subjects.flatMap((s) =>

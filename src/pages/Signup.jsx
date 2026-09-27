@@ -1,588 +1,490 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { signupUser, clearError } from '../store/slices/authSlice.js';
 import {
-  Lock, Mail, Loader2, User, School, Phone, Calendar,
-  MapPin, Building, Globe, ArrowRight, ArrowLeft, ShieldAlert, Award
+  Lock,
+  Mail,
+  Loader2,
+  User,
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+  KeyRound,
+  RefreshCw,
+  CheckCircle2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import rgLogo from '../assets/logo/RGLOGO.png';
+import api from '../services/api.js';
+import { fetchMe } from '../store/slices/authSlice.js';
 
 const Signup = () => {
-  const { loading, error } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1);
-  
-  // Step 1: Personal details
-  const [personal, setPersonal] = useState({
+  const [step, setStep] = useState(1); // 1 = Input Details, 2 = Verify OTP, 3 = Success
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [checkingSetup, setCheckingSetup] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [countdown, setCountdown] = useState(60);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
     name: '',
-    username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
 
-  // Step 2: School details
-  const [school, setSchool] = useState({
-    schoolName: '',
-    schoolCode: '',
-    schoolType: 'secondary',
-    establishedYear: new Date().getFullYear().toString(),
-    academicYear: '2026-2027',
-    contactEmail: '',
-    schoolPhone: '',
-    alternatePhone: '',
-    websiteUrl: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    country: '',
-    postalCode: '',
-    schoolMotto: '',
-    principalName: ''
-  });
-
+  const [otp, setOtp] = useState('');
   const [localErrors, setLocalErrors] = useState({});
 
-  const handlePersonalChange = (e) => {
-    const { name, value } = e.target;
-    setPersonal(prev => ({ ...prev, [name]: value }));
-    if (localErrors[name]) {
-      setLocalErrors(prev => ({ ...prev, [name]: null }));
-    }
-  };
-
-  const handleSchoolChange = (e) => {
-    const { name, value } = e.target;
-    setSchool(prev => ({ ...prev, [name]: value }));
-    if (localErrors[name]) {
-      setLocalErrors(prev => ({ ...prev, [name]: null }));
-    }
-  };
-
-  const validateStep1 = () => {
-    const errors = {};
-    if (!personal.name.trim()) errors.name = 'Full name is required';
-    if (!personal.username.trim()) errors.username = 'Username is required';
-    if (!personal.email.trim()) {
-      errors.email = 'Email address is required';
-    } else if (!/\S+@\S+\.\S+/.test(personal.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-    if (!personal.password) {
-      errors.password = 'Password is required';
-    } else if (personal.password.length < 5) {
-      errors.password = 'Password must be at least 5 characters';
-    }
-    if (personal.password !== personal.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-    setLocalErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const validateStep2 = () => {
-    const errors = {};
-    if (!school.schoolName.trim()) errors.schoolName = 'School/Company name is required';
-    if (!school.addressLine1.trim()) errors.addressLine1 = 'Address is required';
-    if (!school.city.trim()) errors.city = 'City is required';
-    if (!school.state.trim()) errors.state = 'State is required';
-    if (!school.country.trim()) errors.country = 'Country is required';
-    if (!school.postalCode.trim()) errors.postalCode = 'Postal code is required';
-    
-    setLocalErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleNext = () => {
-    dispatch(clearError());
-    if (validateStep1()) {
-      setStep(2);
-      // Pre-fill school contact email with personal email if empty
-      if (!school.contactEmail) {
-        setSchool(prev => ({ ...prev, contactEmail: personal.email }));
+  // Verify whether the system actually requires setup (no existing users)
+  useEffect(() => {
+    let isMounted = true;
+    const verifySetupRequirement = async () => {
+      try {
+        const res = await api.get('/auth/setup-status');
+        if (isMounted) {
+          if (!res.data?.isSetupRequired) {
+            toast.info('Super Admin already exists. Please log in.');
+            navigate('/login', { replace: true });
+          }
+          setCheckingSetup(false);
+        }
+      } catch {
+        if (isMounted) setCheckingSetup(false);
       }
-    }
-  };
-
-  const handleBack = () => {
-    setStep(1);
-    setLocalErrors({});
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep2()) return;
-    
-    dispatch(clearError());
-    
-    // Combine state payloads
-    const payload = {
-      ...personal,
-      ...school
     };
 
-    const result = await dispatch(signupUser(payload));
-    if (result.meta.requestStatus === 'fulfilled') {
-      navigate('/');
+    verifySetupRequirement();
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
+  // Resend Countdown Timer
+  useEffect(() => {
+    if (step !== 2 || countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [step, countdown]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (localErrors[name]) {
+      setLocalErrors((prev) => ({ ...prev, [name]: null }));
+    }
+    setErrorMessage('');
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = 'Super Admin Name is required';
+    if (!formData.email.trim()) {
+      errors.email = 'Email address is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 5) {
+      errors.password = 'Password must be at least 5 characters';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    setLocalErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Step 1: Send OTP to Email via Resend
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const res = await api.post('/auth/send-otp', {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
+
+      toast.success(res.data?.message || 'Verification code sent to your email!');
+      setStep(2);
+      setCountdown(60);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to send verification code';
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Step 2: Resend OTP
+  const handleResendOtp = async () => {
+    if (countdown > 0 || resending) return;
+    setResending(true);
+    setErrorMessage('');
+
+    try {
+      const res = await api.post('/auth/send-otp', {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
+
+      toast.success(res.data?.message || 'New verification code sent!');
+      setCountdown(60);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to resend code';
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setResending(false);
+    }
+  };
+
+  // Step 2: Verify OTP & Activate Super Admin
+  const handleVerifyOtp = async (e) => {
+    if (e) e.preventDefault();
+    const cleanOtp = otp.trim();
+
+    if (!cleanOtp || cleanOtp.length < 6) {
+      setErrorMessage('Please enter the complete 6-digit verification code.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const res = await api.post('/auth/verify-otp', {
+        email: formData.email.trim(),
+        otp: cleanOtp,
+      });
+
+      const data = res.data;
+      if (data?.accessToken) {
+        localStorage.setItem('token', data.accessToken);
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+        dispatch(fetchMe());
+      }
+
+      setStep(3);
+      toast.success('Super Admin verified and registered successfully!');
+
+      // Smooth transition to setup/dashboard after 1.5 seconds
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 1500);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Invalid verification code';
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (checkingSetup) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center font-sans px-4"
+        style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+        }}
+      >
+        <div className="flex flex-col items-center gap-3 text-slate-300">
+          <Loader2 className="animate-spin text-indigo-400" size={32} />
+          <p className="text-xs uppercase tracking-widest font-semibold">Checking system setup status...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className="min-h-screen flex items-center justify-center font-sans px-4 py-12"
+      style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+      }}
     >
-      <div className="w-full max-w-2xl bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all duration-300">
-        
-        {/* Branding & Header */}
+      <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all duration-300">
+        {/* Header */}
         <div className="text-center mb-8">
           <img
             src={rgLogo}
             alt="RG EduCore Logo"
             style={{ mixBlendMode: 'screen' }}
-            className="inline-block w-24 h-24 object-contain mb-4"
+            className="inline-block w-20 h-20 object-contain mb-3"
           />
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">RG EduCore</h2>
-          <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest font-semibold">
-            Super Admin Registration
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            RG EduCore
+          </h2>
+          <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-semibold">
+            {step === 1 && 'Super Admin Initial Setup'}
+            {step === 2 && 'Email OTP Verification'}
+            {step === 3 && 'Setup Completed'}
           </p>
         </div>
 
-        {/* Progress Bar / Steps indicator */}
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-            step === 1 
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/30' 
-              : 'bg-indigo-950 text-indigo-400 border border-indigo-900'
-          }`}>
-            <User size={14} />
-            <span>1. Account Credentials</span>
-          </div>
-          
-          <div className="h-[1px] w-8 bg-slate-800" />
-
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-            step === 2 
-              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/30' 
-              : 'bg-indigo-950/40 text-slate-500 border border-slate-800/60'
-          }`}>
-            <School size={14} />
-            <span>2. School Details</span>
-          </div>
-        </div>
-
-        {/* Error Banner */}
-        {error && (
+        {/* Global Error Notice */}
+        {errorMessage && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-200 text-xs rounded-xl flex items-center gap-2">
-            <ShieldAlert size={16} className="text-red-400 flex-shrink-0" />
-            <p className="font-medium">{error}</p>
+            <span>⚠️</span>
+            <p>{errorMessage}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* STEP 1: Account credentials */}
-          {step === 1 && (
-            <div className="space-y-5 animate-fadeIn">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Full Name */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Super Admin Name *
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="e.g. Albus Dumbledore"
-                      value={personal.name}
-                      onChange={handlePersonalChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                  {localErrors.name && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.name}</p>
-                  )}
-                </div>
-
-                {/* Username */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Username *
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="text"
-                      name="username"
-                      placeholder="e.g. superadmin"
-                      value={personal.username}
-                      onChange={handlePersonalChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                  {localErrors.username && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.username}</p>
-                  )}
-                </div>
+        {/* ─── STEP 1: Registration Form ────────────────────────────────────────── */}
+        {step === 1 && (
+          <form onSubmit={handleSendOtp} className="space-y-4">
+            {/* Super Admin Name */}
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5">
+                Super Admin Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="e.g. Dr. Alexander Smith"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                />
               </div>
-
-              {/* Email Address */}
-              <div>
-                <label className="block text-slate-300 text-xs font-semibold mb-2">
-                  Email Address *
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="e.g. admin@school.com"
-                    value={personal.email}
-                    onChange={handlePersonalChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                  />
-                </div>
-                {localErrors.email && (
-                  <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.email}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Password */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="••••••••"
-                      value={personal.password}
-                      onChange={handlePersonalChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                  {localErrors.password && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.password}</p>
-                  )}
-                </div>
-
-                {/* Confirm Password */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Confirm Password *
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="••••••••"
-                      value={personal.confirmPassword}
-                      onChange={handlePersonalChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                  {localErrors.confirmPassword && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.confirmPassword}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Next Button */}
-              <button
-                type="button"
-                onClick={handleNext}
-                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition duration-200"
-              >
-                <span>Continue to School Profile</span>
-                <ArrowRight size={16} />
-              </button>
+              {localErrors.name && (
+                <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.name}</p>
+              )}
             </div>
-          )}
 
-          {/* STEP 2: School / organization details */}
-          {step === 2 && (
-            <div className="space-y-5 animate-fadeIn">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* School Name */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    School / Company Name *
-                  </label>
-                  <div className="relative">
-                    <School className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="text"
-                      name="schoolName"
-                      placeholder="e.g. Hogwarts Academy"
-                      value={school.schoolName}
-                      onChange={handleSchoolChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                  {localErrors.schoolName && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.schoolName}</p>
-                  )}
-                </div>
-
-                {/* School Code */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    School Code / Identifier
-                  </label>
-                  <div className="relative">
-                    <Award className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="text"
-                      name="schoolCode"
-                      placeholder="e.g. HOG-001"
-                      value={school.schoolCode}
-                      onChange={handleSchoolChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                </div>
+            {/* Email Address */}
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="admin@school.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                />
               </div>
+              {localErrors.email && (
+                <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.email}</p>
+              )}
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* School Type */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Institution Type
-                  </label>
-                  <select
-                    name="schoolType"
-                    value={school.schoolType}
-                    onChange={handleSchoolChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 px-3.5 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 select-custom"
-                  >
-                    <option value="primary" className="bg-slate-900">Primary School</option>
-                    <option value="secondary" className="bg-slate-900">Secondary School</option>
-                    <option value="senior" className="bg-slate-900">Senior Secondary</option>
-                    <option value="college" className="bg-slate-900">College</option>
-                    <option value="university" className="bg-slate-900">University</option>
-                  </select>
-                </div>
-
-                {/* Established Year */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Established Year
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="number"
-                      name="establishedYear"
-                      placeholder="e.g. 2026"
-                      value={school.establishedYear}
-                      onChange={handleSchoolChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Academic Year */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Active Session
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="text"
-                      name="academicYear"
-                      placeholder="e.g. 2026-2027"
-                      value={school.academicYear}
-                      onChange={handleSchoolChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* School Phone */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    School Phone *
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="tel"
-                      name="schoolPhone"
-                      placeholder="e.g. +1 555-0199"
-                      value={school.schoolPhone}
-                      onChange={handleSchoolChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Website URL */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Website URL
-                  </label>
-                  <div className="relative">
-                    <Globe className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                    <input
-                      type="url"
-                      name="websiteUrl"
-                      placeholder="e.g. https://hogwarts.edu"
-                      value={school.websiteUrl}
-                      onChange={handleSchoolChange}
-                      className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Address Line 1 */}
-              <div>
-                <label className="block text-slate-300 text-xs font-semibold mb-2">
-                  Address Line 1 *
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
-                  <input
-                    type="text"
-                    name="addressLine1"
-                    placeholder="e.g. 4 Privet Drive"
-                    value={school.addressLine1}
-                    onChange={handleSchoolChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                  />
-                </div>
-                {localErrors.addressLine1 && (
-                  <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.addressLine1}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* City */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    City *
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="London"
-                    value={school.city}
-                    onChange={handleSchoolChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                  />
-                  {localErrors.city && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.city}</p>
-                  )}
-                </div>
-
-                {/* State */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    State/Province *
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    placeholder="Surrey"
-                    value={school.state}
-                    onChange={handleSchoolChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                  />
-                  {localErrors.state && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.state}</p>
-                  )}
-                </div>
-
-                {/* Country */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Country *
-                  </label>
-                  <input
-                    type="text"
-                    name="country"
-                    placeholder="UK"
-                    value={school.country}
-                    onChange={handleSchoolChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                  />
-                  {localErrors.country && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.country}</p>
-                  )}
-                </div>
-
-                {/* Postal Code */}
-                <div>
-                  <label className="block text-slate-300 text-xs font-semibold mb-2">
-                    Postal Code *
-                  </label>
-                  <input
-                    type="text"
-                    name="postalCode"
-                    placeholder="HP1 1AA"
-                    value={school.postalCode}
-                    onChange={handleSchoolChange}
-                    className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
-                  />
-                  {localErrors.postalCode && (
-                    <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.postalCode}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-2">
+            {/* Password */}
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                />
                 <button
                   type="button"
-                  onClick={handleBack}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 transition duration-200"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none cursor-pointer"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  <ArrowLeft size={16} />
-                  <span>Back</span>
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50 transition duration-200"
-                >
-                  {loading ? (
-                    <Loader2 className="animate-spin" size={18} />
-                  ) : (
-                    <>
-                      <span>Complete Registration</span>
-                      <ArrowRight size={16} />
-                    </>
-                  )}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {localErrors.password && (
+                <p className="text-red-400 text-[10px] mt-1 font-semibold">{localErrors.password}</p>
+              )}
             </div>
-          )}
 
-        </form>
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 text-slate-500" size={16} />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none cursor-pointer"
+                  tabIndex={-1}
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {localErrors.confirmPassword && (
+                <p className="text-red-400 text-[10px] mt-1 font-semibold">
+                  {localErrors.confirmPassword}
+                </p>
+              )}
+            </div>
 
-        {/* Back to Login Footer */}
-        <div className="mt-8 border-t border-slate-800 pt-6 text-center">
-          <p className="text-slate-500 text-xs font-semibold">
-            Already registered?{' '}
-            <Link to="/login" className="text-indigo-400 hover:underline font-bold">
-              Sign In to School Portal
-            </Link>
-          </p>
-        </div>
+            {/* Continue Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50 transition-all cursor-pointer"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <>
+                  <span>Verify Email with OTP</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
 
+            {/* Back to Login */}
+            <div className="mt-6 border-t border-slate-800 pt-5 text-center">
+              <Link
+                to="/login"
+                className="text-xs text-slate-400 hover:text-indigo-400 transition-colors inline-flex items-center gap-1.5"
+              >
+                <ArrowLeft size={14} /> Already have an account? Sign In
+              </Link>
+            </div>
+          </form>
+        )}
+
+        {/* ─── STEP 2: OTP Verification ────────────────────────────────────────── */}
+        {step === 2 && (
+          <form onSubmit={handleVerifyOtp} className="space-y-5">
+            <div className="text-center p-3 bg-indigo-950/40 border border-indigo-500/20 rounded-2xl">
+              <ShieldCheck className="mx-auto text-indigo-400 mb-2" size={32} />
+              <p className="text-xs text-slate-300">
+                We sent a 6-digit verification code to
+              </p>
+              <p className="text-sm font-bold text-indigo-300 mt-0.5 break-all">
+                {formData.email}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-slate-300 text-xs font-semibold mb-2 text-center">
+                Enter 6-Digit OTP Code
+              </label>
+              <div className="relative">
+                <KeyRound className="absolute left-3.5 top-3.5 text-slate-500" size={18} />
+                <input
+                  type="text"
+                  maxLength={6}
+                  autoFocus
+                  placeholder="123456"
+                  value={otp}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setOtp(val);
+                    setErrorMessage('');
+                  }}
+                  className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-center font-mono text-xl tracking-[0.4em] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                />
+              </div>
+            </div>
+
+            {/* Resend Section */}
+            <div className="flex items-center justify-between text-xs px-1">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                Change Email
+              </button>
+
+              <button
+                type="button"
+                disabled={countdown > 0 || resending}
+                onClick={handleResendOtp}
+                className="text-indigo-400 hover:text-indigo-300 font-semibold disabled:text-slate-600 transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                {resending ? (
+                  <Loader2 className="animate-spin" size={13} />
+                ) : (
+                  <RefreshCw size={13} />
+                )}
+                {countdown > 0 ? `Resend code in ${countdown}s` : 'Resend Code'}
+              </button>
+            </div>
+
+            {/* Verify & Create Account Button */}
+            <button
+              type="submit"
+              disabled={loading || otp.length < 6}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50 transition-all cursor-pointer"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <>
+                  <ShieldCheck size={18} />
+                  <span>Verify & Create Super Admin</span>
+                </>
+              )}
+            </button>
+          </form>
+        )}
+
+        {/* ─── STEP 3: Setup Success ───────────────────────────────────────────── */}
+        {step === 3 && (
+          <div className="text-center py-6 space-y-4">
+            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+              <CheckCircle2 size={36} />
+            </div>
+            <h3 className="text-xl font-black text-white">Super Admin Registered!</h3>
+            <p className="text-xs text-slate-300 max-w-xs mx-auto">
+              Your account has been verified. Redirecting you to the system dashboard to complete your school setup...
+            </p>
+            <div className="flex justify-center pt-2">
+              <Loader2 className="animate-spin text-indigo-400" size={24} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

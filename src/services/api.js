@@ -14,9 +14,33 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token && token !== "undefined" && token !== "null") {
+    const rawToken = localStorage.getItem("token");
+    const token =
+      rawToken && rawToken !== "undefined" && rawToken !== "null"
+        ? rawToken
+        : null;
+
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // When not logged in, only allow public auth endpoints
+      const url = config.url || "";
+      const isPublicRoute =
+        url.includes("/auth/login") ||
+        url.includes("/auth/signup") ||
+        url.includes("/auth/setup-status") ||
+        url.includes("/auth/send-otp") ||
+        url.includes("/auth/verify-otp") ||
+        url.includes("/auth/forgot") ||
+        url.includes("/auth/reset") ||
+        url.includes("/certificates/verify");
+
+      if (!isPublicRoute) {
+        // Reject immediately so unauthenticated users do not hit any protected API
+        return Promise.reject(
+          new axios.Cancel("User is not logged in. Request cancelled.")
+        );
+      }
     }
     return config;
   },
@@ -40,6 +64,11 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // If request was cancelled prior to hitting the network, do not proceed with error handling
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     // Detect if server is offline or unreachable (no response, ERR_NETWORK, connection refused, 502/503/504)
@@ -67,9 +96,20 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Never attempt token refresh if there was no token (user not logged in)
+    const rawToken = localStorage.getItem("token");
+    const token =
+      rawToken && rawToken !== "undefined" && rawToken !== "null"
+        ? rawToken
+        : null;
+
+    if (!token) {
+      return Promise.reject(error);
+    }
+
     if (
-      originalRequest.url?.includes("/auth/login") ||
-      originalRequest.url?.includes("/auth/refresh")
+      originalRequest?.url?.includes("/auth/login") ||
+      originalRequest?.url?.includes("/auth/refresh")
     ) {
       return Promise.reject(error);
     }

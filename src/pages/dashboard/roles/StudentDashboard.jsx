@@ -139,37 +139,24 @@ const StudentDashboard = () => {
 
   // Module 1: Personal Academic Profile & Details
   const studentProfile = {
-    fullName: user?.name || user?.username || "Ahmed Al-Rashidi",
-    admissionNo: user?.admissionNumber || stats?.admissionNumber || "STU-2026-0842",
-    rollNo: user?.rollNumber || stats?.rollNumber || "10A-24",
-    className: user?.className || stats?.className || "Class 10",
-    sectionName: user?.sectionName || stats?.sectionName || "Section A",
-    houseGroup: "Phoenix House (Red)",
-    bloodGroup: "O+ Positive",
-    guardianName: "Mohammed Al-Rashidi",
-    guardianContact: "+966 50 123 4567",
-    classTeacher: "Dr. Tariq Al-Hassan",
-    academicStatus: "Active & Outstanding Performance",
+    fullName: user?.name || user?.username || "N/A",
+    admissionNo: user?.admissionNumber || stats?.admissionNumber || "N/A",
+    rollNo: user?.rollNumber || stats?.rollNumber || "N/A",
+    className: user?.className || stats?.className || "N/A",
+    sectionName: user?.sectionName || stats?.sectionName || "N/A",
+    houseGroup: stats?.houseGroup || "N/A",
+    bloodGroup: stats?.bloodGroup || "N/A",
+    guardianName: stats?.guardianName || "N/A",
+    guardianContact: stats?.guardianContact || "N/A",
+    classTeacher: stats?.classTeacher || "N/A",
+    academicStatus: stats?.academicStatus || "N/A",
   };
 
   // Module 2: Daily Class Timetable & Schedule Today
-  const studentSchedule = [
-    { period: "Period 1", time: "08:30 - 09:15 AM", subject: "Mathematics", teacher: "Dr. Tariq Al-Hassan", room: "Room 101", status: "completed" },
-    { period: "Period 2", time: "09:15 - 10:00 AM", subject: "Physics & Science", teacher: "Ms. Sara Al-Osman", room: "Lab B", status: "ongoing" },
-    { period: "Period 3", time: "10:15 - 11:00 AM", subject: "English Literature", teacher: "Mr. Bilal Al-Rashid", room: "Room 101", status: "upcoming" },
-    { period: "Period 4", time: "11:00 - 11:45 AM", subject: "Computer Science", teacher: "Eng. Ahmed Khan", room: "IT Computer Lab", status: "upcoming" },
-    { period: "Period 5", time: "12:30 - 01:15 PM", subject: "Islamic Studies", teacher: "Sheikh Omar Al-Sayed", room: "Room 101", status: "upcoming" },
-  ];
+  const studentSchedule = charts?.timetable?.length ? charts.timetable : [];
 
   // Module 3: Upcoming Exams & Deadlines
-  const upcomingExamsList = charts?.upcomingExams?.length
-    ? charts.upcomingExams
-    : [
-        { name: "Mid-Term Mathematics Exam", subject: "Mathematics", date: "2026-08-15", duration: "2 Hours", room: "Main Exam Hall A", daysLeft: "In 6 Days" },
-        { name: "Physics Lab Practical Assessment", subject: "Physics", date: "2026-08-18", duration: "1.5 Hours", room: "Science Lab B", daysLeft: "In 9 Days" },
-        { name: "English Literature Project Submission", subject: "English", date: "2026-08-22", duration: "Deadline", room: "Online Portal", daysLeft: "In 13 Days" },
-        { name: "Computer Programming Test", subject: "Computer Science", date: "2026-08-25", duration: "1 Hour", room: "IT Lab", daysLeft: "In 16 Days" },
-      ];
+  const upcomingExamsList = charts?.upcomingExams?.length ? charts.upcomingExams : [];
 
   return (
     <div className="space-y-6 font-sans text-slate-900 dark:text-slate-100">
@@ -384,52 +371,64 @@ const StudentDashboard = () => {
 
       {/* ─── MODULE 2: DAILY CLASS TIMETABLE & SCHEDULE TODAY ────────────────── */}
       <SectionCard title="Module 2: My Personal Class Timetable & Schedule Today" action="View Full Schedule" onAction={() => navigate("/timetable")}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {studentSchedule.map((item, idx) => (
-            <div key={idx} className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-wide">{item.period}</span>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded capitalize ${
-                  item.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                  item.status === 'ongoing' ? 'bg-indigo-500/20 text-indigo-400 animate-pulse border border-indigo-500/30' :
-                  'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                }`}>
-                  {item.status}
-                </span>
+        {studentSchedule.length === 0 ? (
+          <div className="py-8 text-center text-xs text-slate-500 font-semibold">
+            No class schedule available (N/A)
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {studentSchedule.map((item, idx) => (
+              <div key={idx} className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-wide">{item.period}</span>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded capitalize ${
+                    item.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                    item.status === 'ongoing' ? 'bg-indigo-500/20 text-indigo-400 animate-pulse border border-indigo-500/30' :
+                    'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                  }`}>
+                    {item.status}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">{item.subject}</h4>
+                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">{item.time}</p>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-2 text-[10px] dark:border-slate-800/80">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{item.teacher}</span>
+                  <span className="text-slate-500 font-bold font-mono">{item.room}</span>
+                </div>
               </div>
-              <div>
-                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">{item.subject}</h4>
-                <p className="text-[10px] text-slate-400 font-mono mt-0.5">{item.time}</p>
-              </div>
-              <div className="flex items-center justify-between border-t border-slate-200 pt-2 text-[10px] dark:border-slate-800/80">
-                <span className="font-medium text-slate-700 dark:text-slate-300">{item.teacher}</span>
-                <span className="text-slate-500 font-bold font-mono">{item.room}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </SectionCard>
 
       {/* ─── MODULE 3 & MODULE 4: EXAMS & NOTICE BOARD ────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* MODULE 3: Upcoming Exams & Deadlines */}
         <SectionCard title="Module 3: Upcoming Exams & Test Deadlines">
-          <div className="space-y-3">
-            {upcomingExamsList.map((exam, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase">{exam.subject || "Exam"}</span>
-                  <h4 className="text-xs font-bold leading-snug text-slate-900 dark:text-white">{exam.name || exam.title}</h4>
-                  <p className="text-[10px] text-slate-400">
-                    {exam.date ? `Date: ${exam.date}` : "Scheduled Soon"} · {exam.duration || "2 Hours"} · {exam.room || "Exam Hall"}
-                  </p>
+          {upcomingExamsList.length === 0 ? (
+            <div className="py-8 text-center text-xs text-slate-500 font-semibold">
+              No upcoming exams scheduled (N/A)
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {upcomingExamsList.map((exam, idx) => (
+                <div key={idx} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase">{exam.subject || "Exam"}</span>
+                    <h4 className="text-xs font-bold leading-snug text-slate-900 dark:text-white">{exam.name || exam.title}</h4>
+                    <p className="text-[10px] text-slate-400">
+                      {exam.date ? `Date: ${exam.date}` : "Scheduled Soon"} · {exam.duration || "2 Hours"} · {exam.room || "Exam Hall"}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl whitespace-nowrap">
+                    {exam.daysLeft || "Upcoming"}
+                  </span>
                 </div>
-                <span className="text-[10px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl whitespace-nowrap">
-                  {exam.daysLeft || "Upcoming"}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </SectionCard>
 
         {/* MODULE 4: Official School Notice Board */}

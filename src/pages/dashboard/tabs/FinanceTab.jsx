@@ -4,10 +4,10 @@ import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
 import Loader from "../../../components/ui/Loader.jsx";
 import api from "../../../services/api.js";
-import { recentTransactions, feeOverdueStudents } from "../data/dashboardData.js";
 
 const FinanceTab = () => {
   const [loading, setLoading] = useState(true);
+  const [financeData, setFinanceData] = useState(null);
 
   const currentMonth = useMemo(() => {
     return new Date().toLocaleDateString("en-US", { month: "short" });
@@ -20,9 +20,18 @@ const FinanceTab = () => {
     Promise.all([
       api.get("/finance/fees").catch(() => null),
       api.get("/finance/expenses").catch(() => null),
-    ]).finally(() => {
-      if (isMounted) setLoading(false);
-    });
+    ])
+      .then(([feesRes, expRes]) => {
+        if (isMounted) {
+          setFinanceData({
+            fees: feesRes?.data || null,
+            expenses: expRes?.data || null,
+          });
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -37,43 +46,46 @@ const FinanceTab = () => {
     );
   }
 
+  const transactions = financeData?.fees?.transactions || [];
+  const overdueList = financeData?.fees?.overdue || [];
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={CreditCard}
           label={`Fee Collected (${currentMonth})`}
-          value="₹18,45,000"
+          value={financeData?.fees?.collected ? `₹${financeData.fees.collected.toLocaleString()}` : "N/A"}
           badge={currentMonth}
-          sub="78% of Monthly Target"
+          sub="N/A"
           iconBg="bg-emerald-600/20"
           iconColor="text-emerald-400"
         />
         <StatCard
           icon={AlertTriangle}
           label="Pending Dues"
-          value="₹2,15,000"
+          value={financeData?.fees?.pending ? `₹${financeData.fees.pending.toLocaleString()}` : "N/A"}
           badge="Overdue"
           badgeColor="bg-rose-500/10 text-rose-500 border-rose-500/20"
-          sub="42 Accounts Outstanding"
+          sub="N/A"
           iconBg="bg-rose-600/20"
           iconColor="text-rose-400"
         />
         <StatCard
           icon={Wallet}
           label={`Monthly Expenses (${currentMonth})`}
-          value="₹4,50,000"
+          value={financeData?.expenses?.total ? `₹${financeData.expenses.total.toLocaleString()}` : "N/A"}
           badge="Disbursed"
-          sub="Salaries & Facilities"
+          sub="N/A"
           iconBg="bg-indigo-600/20"
           iconColor="text-indigo-400"
         />
         <StatCard
           icon={Receipt}
           label="Invoices Generated"
-          value="1,248"
+          value={financeData?.fees?.invoicesCount ? financeData.fees.invoicesCount.toLocaleString() : "N/A"}
           badge="Term II"
-          sub="Active Student Billing"
+          sub="N/A"
           iconBg="bg-cyan-600/20"
           iconColor="text-cyan-400"
         />
@@ -81,43 +93,55 @@ const FinanceTab = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title="Recent Ledger Transactions">
-          <div className="space-y-2 text-xs">
-            {recentTransactions.map((t, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-800/40"
-              >
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">{t.name}</p>
-                  <p className="text-[10px] text-slate-400">{t.type} · {t.date}</p>
-                </div>
-                <span
-                  className={`font-black ${
-                    t.amount.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'
-                  }`}
+          {transactions.length > 0 ? (
+            <div className="space-y-2 text-xs">
+              {transactions.map((t, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-800/40"
                 >
-                  {t.amount}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">{t.name || "Transaction"}</p>
+                    <p className="text-[10px] text-slate-400">{t.type || "General"} · {t.date || "N/A"}</p>
+                  </div>
+                  <span
+                    className={`font-black ${
+                      String(t.amount || "").startsWith('+') ? 'text-emerald-400' : 'text-rose-400'
+                    }`}
+                  >
+                    {t.amount || "N/A"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-slate-400 text-xs">
+              No recent ledger transactions (N/A)
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard title="Overdue Fee Accounts">
-          <div className="space-y-2 text-xs">
-            {feeOverdueStudents.map((s, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-800/40"
-              >
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">{s.name}</p>
-                  <p className="text-[10px] text-slate-400">{s.class} · {s.days} days overdue</p>
+          {overdueList.length > 0 ? (
+            <div className="space-y-2 text-xs">
+              {overdueList.map((s, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-800/40"
+                >
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">{s.name || "Student"}</p>
+                    <p className="text-[10px] text-slate-400">{s.class || "Class"} · {s.days || 0} days overdue</p>
+                  </div>
+                  <span className="font-black text-rose-400">{s.amount || "N/A"}</span>
                 </div>
-                <span className="font-black text-rose-400">{s.amount}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-slate-400 text-xs">
+              No overdue fee accounts (N/A)
+            </div>
+          )}
         </SectionCard>
       </div>
     </div>
