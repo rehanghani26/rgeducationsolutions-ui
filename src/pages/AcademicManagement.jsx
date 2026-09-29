@@ -14,6 +14,13 @@ import { useSelector } from "react-redux";
 import StudentAcademicView, { buildDynamicTimetable, ENRICHED_STUDENT_SUBJECTS } from "./academics/StudentAcademicView.jsx";
 import ClassSyllabusSettings from "./settings/ClassSyllabusSettings.jsx";
 
+// Fallback placeholder data used before API responds or when API returns no data
+const mockAcademics = {
+  classes: [],
+  sections: [],
+  subjects: [],
+};
+
 const DEFAULT_COURSES = (ENRICHED_STUDENT_SUBJECTS || []).map((s) => ({
   ...s,
   _id: s.id,

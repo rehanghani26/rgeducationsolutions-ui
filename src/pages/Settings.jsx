@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import {
   Save,
   Users,
@@ -15,7 +15,14 @@ import {
   Megaphone,
   Globe,
   Search,
+  Bell,
+  Database,
+  UserCheck,
+  CheckCircle,
+  Layers,
   Sparkles,
+  Loader2,
+  Calendar,
 } from "lucide-react";
 import api from "../services/api.js";
 import SettingsCard from "./settings/SettingsCard";
@@ -26,8 +33,12 @@ import InventorySettings from "./settings/InventorySettings";
 import AcademicSettings from "./settings/AcademicSettings";
 import FinanceSettings from "./settings/FinanceSettings";
 import SecuritySettings from "./settings/SecuritySettings";
+import NotificationSettings from "./settings/NotificationSettings";
+import PolicySettings from "./settings/PolicySettings";
+import BackupSettings from "./settings/BackupSettings";
 import NoticeSettings from "./settings/NoticeSettings";
 import MasterPeriodSettings from "./settings/MasterPeriodSettings";
+import ClassTimetableSettings from "./settings/ClassTimetableSettings";
 import SessionManagementSettings from "./settings/SessionManagementSettings";
 import PortalManagementSettings from "./settings/PortalManagementSettings";
 import ClassSyllabusSettings from "./settings/ClassSyllabusSettings";
@@ -42,33 +53,11 @@ const Settings = () => {
     tabFromUrl === "class-syllabus" ? "syllabus" : tabFromUrl || null
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState("all");
+  const [saving, setSaving] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(true);
 
-  const [settings, setSettings] = useState({
-    schoolName: "",
-    schoolCode: "",
-    registrationNumber: "",
-    affiliationNumber: "",
-    schoolType: "",
-    establishedYear: "",
-    academicYear: "",
-    contactEmail: "",
-    schoolPhone: "",
-    alternatePhone: "",
-    websiteUrl: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    state: "",
-    country: "",
-    postalCode: "",
-    companyLogo: "",
-    schoolLogo: "",
-    currencySymbol: "$",
-    autoGenerateTeacherID: true,
-    teacherIDPrefix: "T",
-    autoGenerateAdmissionNumber: true,
-    admissionNumberPrefix: "STU",
-  });
+  const [settings, setSettings] = useState({});
 
   useEffect(() => {
     if (tabFromUrl) {
@@ -77,6 +66,7 @@ const Settings = () => {
   }, [tabFromUrl]);
 
   useEffect(() => {
+    setLoadingInitial(true);
     api
       .get("/erp/settings")
       .then((res) => {
@@ -90,7 +80,8 @@ const Settings = () => {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoadingInitial(false));
   }, [updateBranding]);
 
   const handleChange = (e) => {
@@ -101,8 +92,8 @@ const Settings = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
 
     if (selectedTab === "profile") {
       const missing = [];
@@ -125,19 +116,36 @@ const Settings = () => {
       }
     }
 
-    api
-      .put("/erp/settings", settings)
-      .then(() => {
-        toast.success("Settings saved successfully!");
+    setSaving(true);
+    try {
+      // Exclude heavy sub-documents and system metadata fields from general settings PUT
+      const {
+        _id,
+        __v,
+        createdAt,
+        updatedAt,
+        portalSettings,
+        defaultDocumentTemplates,
+        ...cleanSettings
+      } = settings;
+
+      const res = await api.put("/erp/settings", cleanSettings);
+      toast.success("Settings saved successfully!");
+
+      if (res.data?.settings) {
+        setSettings((prev) => ({ ...prev, ...res.data.settings }));
         updateBranding({
-          schoolName: settings.schoolName,
-          schoolLogo: settings.companyLogo || settings.schoolLogo || "",
-          schoolMotto: settings.schoolMotto,
+          schoolName: res.data.settings.schoolName,
+          schoolLogo:
+            res.data.settings.companyLogo || res.data.settings.schoolLogo || "",
+          schoolMotto: res.data.settings.schoolMotto,
         });
-      })
-      .catch((err) =>
-        toast.error(err.response?.data?.message || "Failed to save settings.")
-      );
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to save settings.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSelectTab = (tabId) => {
@@ -150,95 +158,219 @@ const Settings = () => {
   };
 
   const settingsTabs = [
-    {
-      id: "syllabus",
-      label: "Class Syllabus",
-      badge: "Curriculum & Books",
-      icon: BookOpen,
-      description:
-        "Prescribed textbooks (e.g. Our English, Math Magic), subjects, full marks, and pass marks for all grades",
-      component: ClassSyllabusSettings,
-    },
-    {
-      id: "academic",
-      label: "Academic Settings",
-      icon: GraduationCap,
-      description: "Passing criteria, grading scale, GPA, and grade distribution tracking",
-      component: AcademicSettings,
-    },
-    {
-      id: "masterperiod",
-      label: "Master Period",
-      icon: Clock,
-      description: "Define daily period structure — Regular & Exam schedules with period types",
-      component: MasterPeriodSettings,
-    },
-    {
-      id: "portal",
-      label: "Portal Management",
-      icon: Globe,
-      description: "Manage standalone public school website, hero banner, facilities, and contact details",
-      component: PortalManagementSettings,
-    },
-    {
-      id: "session",
-      label: "Session Management & Student Upgrade",
-      icon: GraduationCap,
-      description: "Set session start & end dates, bulk upgrade whole school, promote/demote students",
-      component: SessionManagementSettings,
-    },
-    {
-      id: "notice",
-      label: "Notice Board",
-      icon: Megaphone,
-      description: "Publish school notices, announcements, and bulletins",
-      component: NoticeSettings,
-    },
+    // 1. School Settings (First)
     {
       id: "profile",
-      label: "School Profile",
+      category: "institution",
+      label: "School Profile & Identity",
       icon: SettingsIcon,
-      description: "Configure school identity, contact details, and logos",
+      badge: "Primary",
+      description:
+        "Institutional identity, contact information, postal address, affiliation numbers, logos, and banners.",
       component: SchoolProfileSettings,
+      selfManagedSave: false,
     },
+
+    // 2. Master Period Timetable (Second)
     {
-      id: "teacher",
-      label: "Add Teacher",
-      icon: Users,
-      description: "Manage teacher settings, ID generation, and class assignments",
-      component: TeacherSettings,
+      id: "masterperiod",
+      category: "academic",
+      label: "Master Period & Timetable",
+      icon: Clock,
+      badge: "Daily Schedule",
+      description:
+        "Define daily period structure — Regular & Exam timetable schedules with period types and timings.",
+      component: MasterPeriodSettings,
+      selfManagedSave: true,
     },
+
+    // 3. Class Timetable Builder (per class + section)
+    {
+      id: "classtimetable",
+      category: "academic",
+      label: "Class Timetable Builder",
+      icon: Calendar,
+      badge: "Per Class & Section",
+      description:
+        "Assign subjects and teachers to each class period slot for every class-section combination. Built on top of the Master Period structure.",
+      component: ClassTimetableSettings,
+      selfManagedSave: true,
+    },
+
+    // 4. Academic Sessions & Upgrades
+    {
+      id: "session",
+      category: "academic",
+      label: "Session & Student Upgrade",
+      icon: GraduationCap,
+      description:
+        "Academic year session start/end dates, bulk whole-school class progression, and student promotion.",
+      component: SessionManagementSettings,
+      selfManagedSave: true,
+    },
+
+    // 4. Class Syllabus & Prescribed Books
+    {
+      id: "syllabus",
+      category: "academic",
+      label: "Class Syllabus & Books",
+      badge: "Curriculum Core",
+      icon: BookOpen,
+      description:
+        "Define class-wise curriculum, subjects, prescribed textbooks, full marks, and pass marks.",
+      component: ClassSyllabusSettings,
+      selfManagedSave: true,
+    },
+
+    // 5. Academic Grading & Passing Criteria
+    {
+      id: "academic",
+      category: "academic",
+      label: "Academic & Grading Rules",
+      icon: GraduationCap,
+      description:
+        "Default passing percentage, GPA grading scale (4.0/10.0), and examination grade distribution analytics.",
+      component: AcademicSettings,
+      selfManagedSave: false,
+    },
+
+    // 6. Students & Admissions
     {
       id: "student",
-      label: "Add Student",
+      category: "operations",
+      label: "Students & Admissions",
       icon: GraduationCap,
-      description: "Configure student settings, admission numbers, and enrollment limits",
+      description:
+        "Automated student admission number series, prefix formatting, default portal passwords, and section capacity.",
       component: StudentSettings,
+      selfManagedSave: false,
     },
+
+    // 7. Faculty & Staff
     {
-      id: "inventory",
-      label: "Add Inventory",
-      icon: Package,
-      description: "Inventory tracking, stock alerts, and barcode management",
-      component: InventorySettings,
+      id: "teacher",
+      category: "operations",
+      label: "Faculty & Staff",
+      icon: Users,
+      description:
+        "Automated teacher employee ID series, prefix rules, and class staffing allocation limits.",
+      component: TeacherSettings,
+      selfManagedSave: false,
     },
+
+    // 8. Finance & Fee Policies
     {
       id: "finance",
-      label: "Finance",
+      category: "operations",
+      label: "Finance & Fee Policies",
       icon: DollarSign,
-      description: "Currency settings, fee collection frequency, and tax rules",
+      description:
+        "Active currency symbol, tuition installment options, late payment fines, and automated invoice reminders.",
       component: FinanceSettings,
+      selfManagedSave: false,
     },
+
+    // 9. Public School Website Portal
+    {
+      id: "portal",
+      category: "portal",
+      label: "Public School Portal",
+      icon: Globe,
+      badge: "Public Website",
+      description:
+        "Standalone school website builder, hero banners, director/principal messages, facilities, and contact details.",
+      component: PortalManagementSettings,
+      selfManagedSave: true,
+    },
+
+    // 10. Notice Board & Bulletins
+    {
+      id: "notice",
+      category: "portal",
+      label: "Notice Board & Bulletins",
+      icon: Megaphone,
+      description:
+        "Publish official school notices, news announcements, urgent circulars, and institutional bulletins.",
+      component: NoticeSettings,
+      selfManagedSave: true,
+    },
+
+    // 11. Staff, Attendance & HR Policies
+    {
+      id: "hr",
+      category: "operations",
+      label: "Staff & HR Policies",
+      icon: UserCheck,
+      description:
+        "Staff timesheet cycles, overtime multipliers, minimum attendance requirement, and annual leave quotas.",
+      component: PolicySettings,
+      selfManagedSave: false,
+    },
+
+    // 12. Inventory Control
+    {
+      id: "inventory",
+      category: "operations",
+      label: "Inventory Control",
+      icon: Package,
+      description:
+        "Stock movements tracking, low stock reorder alerts, threshold counts, and barcode scanning support.",
+      component: InventorySettings,
+      selfManagedSave: false,
+    },
+
+    // 13. Security & Access
     {
       id: "security",
-      label: "Security",
+      category: "system",
+      label: "Security & Access",
       icon: Shield,
-      description: "Data encryption and audit logging for security compliance",
+      description:
+        "Data encryption at rest, audit trails, two-factor authentication (2FA), session timeout, and password expiry.",
       component: SecuritySettings,
+      selfManagedSave: false,
+    },
+
+    // 14. Notifications & Alerts
+    {
+      id: "notifications",
+      category: "system",
+      label: "Notifications & Alerts",
+      icon: Bell,
+      description:
+        "Multi-channel institutional messaging: SMTP email alerts, SMS gateway integration, and browser push notices.",
+      component: NotificationSettings,
+      selfManagedSave: false,
+    },
+
+    // 15. System Backup & Data
+    {
+      id: "backup",
+      category: "system",
+      label: "System Backup & Data",
+      icon: Database,
+      description:
+        "Automated cloud database snapshots, backup frequency schedules, and disaster recovery configurations.",
+      component: BackupSettings,
+      selfManagedSave: false,
     },
   ];
 
+  const categories = [
+    { id: "all", label: "All Settings" },
+    { id: "institution", label: "School Identity" },
+    { id: "academic", label: "Academic & Schedules" },
+    { id: "operations", label: "Operations & HR" },
+    { id: "portal", label: "Portal & Notices" },
+    { id: "system", label: "Security & System" },
+  ];
+
   const filteredTabs = settingsTabs.filter((tab) => {
+    // Category filter
+    if (activeCategoryFilter !== "all" && tab.category !== activeCategoryFilter) {
+      return false;
+    }
+    // Search query filter
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -254,75 +386,23 @@ const Settings = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <ToastContainer position="top-right" theme="colored" />
 
-      {/* Top Category Navigation Pills (Always visible for quick switching) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800">
-        <button
-          type="button"
-          onClick={() => handleSelectTab(null)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-            !selectedTab
-              ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <SettingsIcon size={14} /> All Settings
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTab("syllabus")}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-            selectedTab === "syllabus"
-              ? "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300 dark:ring-indigo-800"
-              : "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 border border-indigo-200/80 dark:border-indigo-800/80"
-          }`}
-        >
-          <BookOpen size={14} className="text-indigo-600 dark:text-indigo-400" />
-          Class Syllabus & Books
-          <span className="px-1.5 py-0.2 text-[9px] font-black uppercase rounded-full bg-amber-400 text-slate-950">
-            Core
-          </span>
-        </button>
-
-        {settingsTabs
-          .filter((t) => t.id !== "syllabus")
-          .map((tab) => {
-            const Icon = tab.icon;
-            const isActive = selectedTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => handleSelectTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                  isActive
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-              >
-                <Icon size={14} />
-                {tab.label}
-              </button>
-            );
-          })}
-      </div>
 
       {!selectedTab ? (
         <>
+          {/* Header & Search */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 System Settings
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">
-                Manage all school configurations, curriculum syllabuses, permissions, and preferences.
+              <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
+                Configure school profile, academic grading standards, curricula, fee policies, and security controls.
               </p>
             </div>
 
             {/* Quick Search */}
-            <div className="relative min-w-[260px]">
+            <div className="relative min-w-[280px]">
               <Search
                 size={16}
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
@@ -331,41 +411,32 @@ const Settings = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search settings (e.g. syllabus, books)..."
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                placeholder="Search settings (e.g. syllabus, fees, 2FA)..."
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Featured Highlight Banner: Class Syllabus */}
-          <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-700/50">
-            <div className="flex items-start sm:items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-amber-300 shrink-0 border border-white/20 shadow-inner">
-                <BookOpen size={24} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400 text-indigo-950 px-2 py-0.5 rounded-full shadow-sm">
-                    Featured Curriculum Tool
-                  </span>
-                  <h3 className="font-extrabold text-base text-white">
-                    Class Syllabus & Prescribed Textbooks
-                  </h3>
-                </div>
-                <p className="text-xs text-indigo-200 mt-0.5 max-w-2xl">
-                  Configure grade-wise textbooks (e.g. <em>Our English</em>, <em>Math Magic</em>), subjects, full marks & passing marks. Auto-fills during exam scheduling & result entry.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleSelectTab("syllabus")}
-              className="px-4 py-2.5 bg-white text-indigo-900 hover:bg-indigo-50 font-extrabold text-xs rounded-xl shadow transition shrink-0 flex items-center justify-center gap-1.5 self-start sm:self-auto"
-            >
-              Open Class Syllabus &rarr;
-            </button>
+
+          {/* Category Filter Buttons */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveCategoryFilter(cat.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap border ${
+                  activeCategoryFilter === cat.id
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
 
+          {/* Settings Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTabs.map((tab) => (
               <SettingsCard
@@ -374,60 +445,95 @@ const Settings = () => {
                 title={tab.label}
                 badge={tab.badge}
                 description={tab.description}
+                category={tab.category}
                 onClick={() => handleSelectTab(tab.id)}
               />
             ))}
           </div>
 
           {filteredTabs.length === 0 && (
-            <div className="text-center py-12 text-slate-400">
-              <p className="font-semibold text-sm">No settings found matching &quot;{searchQuery}&quot;</p>
+            <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <p className="font-semibold text-sm text-slate-500 dark:text-slate-400">
+                No settings found matching &quot;{searchQuery}&quot;
+              </p>
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="mt-2 text-xs text-indigo-600 font-bold hover:underline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveCategoryFilter("all");
+                }}
+                className="mt-2 text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
               >
-                Clear search
+                Reset search & filters
               </button>
             </div>
           )}
         </>
       ) : (
         <>
+          {/* Subpage Breadcrumb Header */}
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={() => handleSelectTab(null)}
-              className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-semibold text-sm transition"
+              className="flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs sm:text-sm transition"
             >
-              <ArrowLeft size={18} /> Back to Overview
+              <ArrowLeft size={16} /> Back to Settings Overview
             </button>
             {selectedTabObj && (
-              <span className="text-xs font-bold text-slate-400">
-                Settings &gt; {selectedTabObj.label}
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span className="capitalize">{selectedTabObj.category}</span>
+                <span>&gt;</span>
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  {selectedTabObj.label}
+                </span>
               </span>
             )}
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-            <div className="space-y-6">
-              <SelectedComponent settings={settings} handleChange={handleChange} />
-              {selectedTab !== "notice" &&
-                selectedTab !== "masterperiod" &&
-                selectedTab !== "session" &&
-                selectedTab !== "portal" &&
-                selectedTab !== "syllabus" && (
-                  <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <button
-                      onClick={handleSubmit}
-                      type="button"
-                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg text-xs"
-                    >
-                      <Save size={14} /> Save Changes
-                    </button>
-                  </div>
-                )}
+          {/* Settings Detail Container */}
+          {selectedTabObj?.selfManagedSave ? (
+            <div className="w-full space-y-6">
+              {SelectedComponent && (
+                <SelectedComponent
+                  settings={settings}
+                  handleChange={handleChange}
+                  onNavigateToSyllabus={() => handleSelectTab("syllabus")}
+                />
+              )}
             </div>
-          </div>
+          ) : (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+              <div className="space-y-6">
+                {SelectedComponent && (
+                  <SelectedComponent
+                    settings={settings}
+                    handleChange={handleChange}
+                    onNavigateToSyllabus={() => handleSelectTab("syllabus")}
+                  />
+                )}
+
+                {/* Bottom Save Bar for standard configuration modules */}
+                <div className="flex justify-end pt-5 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    onClick={handleSubmit}
+                    type="button"
+                    disabled={saving}
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-indigo-500/20 text-xs transition"
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" /> Saving Changes...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={14} /> Save Configuration
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

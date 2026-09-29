@@ -171,7 +171,6 @@ const LeaveManagement = () => {
 
   return (
     <div className="space-y-6 pb-12 text-slate-800 dark:text-slate-100 font-sans">
-      <ToastContainer position="top-right" theme="colored" />
 
       <PageHeader
         title="Leave Management"

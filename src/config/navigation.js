@@ -101,13 +101,14 @@ export const NAV_SECTIONS = [
         roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT],
         permission: 'attendance',
       },
-      {
-        name:       'Timetable',
-        path:       ROUTES.TIMETABLE,
-        icon:       Clock,
-        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT],
-        permission: 'timetable',
-      },
+      // Timetable — moved to Settings > Class Timetable Builder
+      // {
+      //   name:       'Timetable',
+      //   path:       ROUTES.TIMETABLE,
+      //   icon:       Clock,
+      //   roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT],
+      //   permission: 'timetable',
+      // },
       {
         name:       'Exams',
         path:       ROUTES.EXAMS.LIST,

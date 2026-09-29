@@ -192,8 +192,6 @@ const StudentManagement = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <ToastContainer position="top-right" theme="colored" />
-
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight">Student Management</h2>

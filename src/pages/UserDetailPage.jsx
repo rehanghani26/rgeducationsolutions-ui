@@ -370,8 +370,6 @@ const UserDetailPage = () => {
 
   return (
     <div className="space-y-6 pb-16">
-      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-
       {/* ── Breadcrumb & Back Button ────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <button

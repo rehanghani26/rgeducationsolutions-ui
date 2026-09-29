@@ -392,8 +392,6 @@ const UserManagement = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-
       {/* ── Page Header ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

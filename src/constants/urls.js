@@ -123,8 +123,8 @@ export const HOMEWORK_URLS = {
 // ─── Class Syllabus / Curriculum ──────────────────────────────────────────────
 export const SYLLABUS_URLS = {
   BASE:     '/syllabus',
-  BY_CLASS: (classId) => `/syllabus/${classId}`,
-  RESET:    (classId) => `/syllabus/${classId}/reset`,
+  BY_CLASS: (classId) => `/syllabus/${encodeURIComponent(classId)}`,
+  RESET:    (classId) => `/syllabus/${encodeURIComponent(classId)}/reset`,
 };
 
 // ─── Documents (Certificates & ID Cards) ──────────────────────────────────────

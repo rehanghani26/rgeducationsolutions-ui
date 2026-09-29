@@ -27,7 +27,7 @@ import {
   AttendanceManagement,
   ExamList,
   ExamDetail,
-  TimetableManagement,
+  // TimetableManagement, // Moved to Settings → Class Timetable Builder tab
   ResultsManagement,
   LeaveManagement,
   PayrollManagement,
@@ -99,7 +99,8 @@ const appRoutes = [
   { path: ROUTES.EXAMS.DETAIL_PARAM, element: ExamDetail, name: 'exam-detail', module: 'exams' },
 
   // Other Modules
-  { path: ROUTES.TIMETABLE, element: TimetableManagement, name: 'timetable', module: 'timetable' },
+  // Timetable — moved into Settings > Class Timetable Builder
+  // { path: ROUTES.TIMETABLE, element: TimetableManagement, name: 'timetable', module: 'timetable' },
   { path: ROUTES.RESULTS, element: ResultsManagement, name: 'results', module: 'results' },
   { path: ROUTES.LEAVE, element: LeaveManagement, name: 'leave', module: 'leave' },
   { path: ROUTES.PAYROLL, element: PayrollManagement, name: 'payroll', module: 'payroll' },
