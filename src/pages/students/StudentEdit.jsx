@@ -141,6 +141,7 @@ const StudentEdit = () => {
         contactNumber: student.contactNumber || student.phone || student.mobileNumber || '',
         alternatePhone: student.alternatePhone || student.altPhone || '',
         email: student.email || student.user?.email || student.userDetails?.email || '',
+        isEmailVerified: Boolean(student.isEmailVerified ?? student.user?.isEmailVerified ?? student.userDetails?.isEmailVerified),
         address,
         gender,
         bloodGroup: (student.bloodGroup || '').toUpperCase().trim(),

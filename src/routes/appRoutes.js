@@ -39,6 +39,7 @@ import {
   ReportsManagement,
   AuditLogList,
   Settings,
+  settingPageRoutes,
   OnlineClassesManagement,
   HomeworkManagement,
   UserManagement,
@@ -115,7 +116,7 @@ const appRoutes = [
   { path: ROUTES.USER_MANAGEMENT, element: UserManagement, name: 'user-management', module: 'user-management', allowedRoles: [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin'] },
   { path: ROUTES.USER_DETAIL, element: UserDetailPage, name: 'user-detail', module: 'user-management', allowedRoles: [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin'] },
   { path: ROUTES.AUDIT_LOGS, element: AuditLogList, name: 'audit-logs', allowedRoles: ADMIN_ROLES },
-  { path: ROUTES.SETTINGS, element: Settings, name: 'settings', allowedRoles: [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR] },
+  { path: ROUTES.SETTINGS, element: Settings, name: 'settings', children: settingPageRoutes, allowedRoles: [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT] },
 
   // Learning Modules
   { path: ROUTES.ONLINE_CLASSES, element: OnlineClassesManagement, name: 'online-classes', module: 'online-classes' },

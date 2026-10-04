@@ -23,7 +23,7 @@ export { default as AcademicManagement }    from './AcademicManagement.jsx';
 export { default as FeesManagement }        from './FeesManagement.jsx';
 export { default as InventoryManagement }   from './InventoryManagement.jsx';
 export { default as LeaveManagement }       from './LeaveManagement.jsx';
-export { default as Settings }              from './Settings.jsx';
+export { default as Settings, settingPageRoutes } from './Settings.jsx';
 export { default as StudentManagement }     from './StudentManagement.jsx';
 export { default as TeacherManagement }     from './TeacherManagement.jsx';
 export { default as ModulePlaceholder }     from './ModulePlaceholder.jsx';
@@ -36,6 +36,8 @@ export { default as LibraryManagement }       from './library/LibraryManagement.
 export { default as TransportManagement }     from './transport/TransportManagement.jsx';
 export { default as HostelManagement }        from './hostel/HostelManagement.jsx';
 export { default as CertificatesManagement }  from './certificates/CertificatesManagement.jsx';
+export { default as StudentPageCertification } from './certificates/StudentPageCertification.jsx';
+export { default as studentPageCertification } from './certificates/StudentPageCertification.jsx';
 export { default as NotificationsManagement } from './notifications/NotificationsManagement.jsx';
 export { default as ReportsManagement }       from './reports/ReportsManagement.jsx';
 export { default as AuditLogList }            from './audit-logs/AuditLogList.jsx';

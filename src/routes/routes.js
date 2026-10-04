@@ -96,6 +96,7 @@ export const ROUTES = {
   // ── System ───────────────────────────────────────────────────────────────
   AUDIT_LOGS: '/audit-logs',
   SETTINGS:   '/settings',
+  PASSWORD_REQUESTS: '/settings/password-security',
   USER_MANAGEMENT: '/user-management',
   USERS:           '/user-management',
   USER_DETAIL:     '/user-management/:id',

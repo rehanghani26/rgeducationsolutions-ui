@@ -4,14 +4,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { loginUser, clearError } from "../store/slices/authSlice.js";
 import { Lock, Mail, Loader2, Eye, EyeOff } from "lucide-react";
 import rgLogo from "../assets/logo/RGLOGO.png";
-import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
 import api from "../services/api.js";
 
 const Login = () => {
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { schoolLogo, schoolName, schoolMotto } = useSchoolBranding();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -87,16 +85,16 @@ const Login = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <img
-            src={schoolLogo || rgLogo}
-            alt={`${schoolName || "RG EduCore"} Logo`}
+            src={rgLogo}
+            alt="RG EduCore Logo"
             style={{ mixBlendMode: 'screen' }}
             className="inline-block w-24 h-24 object-contain mb-4"
           />
           <h2 className="text-3xl font-extrabold text-white tracking-tight">
-            {schoolName || "RG EduCore"}
+            RG EduCore
           </h2>
           <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest font-semibold">
-            {schoolMotto || "The Core of Smarter School Management"}
+            The Core of Smarter School Management
           </p>
         </div>
 

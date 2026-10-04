@@ -1,15 +1,33 @@
 import React, { useState } from "react";
-import { Upload, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import {
+  Upload,
+  X,
+  Building2,
+  Globe,
+  Mail,
+  Phone,
+  MapPin,
+  Award,
+  ShieldCheck,
+  School,
+  Info,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import CompanyLogoUpload from "./CompanyLogoUpload";
 import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
+import { getUserFromStorage } from "../../config/access.jsx";
 
 const SchoolProfileSettings = ({ settings, handleChange }) => {
   const { updateBranding } = useSchoolBranding();
-  const [logoPreview, setLogoPreview] = useState(settings.schoolLogo || null);
+  const authUser = useSelector((state) => state.auth?.user);
+  const userRole = (authUser?.role || getUserFromStorage()?.role || "").toLowerCase().replace(/_/g, '-');
+  const isStudent = userRole === 'student';
+
+  const [logoPreview, setLogoPreview] = useState(settings?.schoolLogo || null);
   const [bannerPreview, setBannerPreview] = useState(
-    settings.schoolBanner || null
+    settings?.schoolBanner || null
   );
   const [logoUploading, setLogoUploading] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
@@ -166,6 +184,159 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
     });
     updateBranding({ schoolLogo: companyLogo || "" });
   };
+
+  // Student Read-Only Institutional View
+  if (isStudent) {
+    return (
+      <div className="space-y-6">
+        {/* Banner */}
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
+          {settings?.schoolBanner ? (
+            <div className="h-44 sm:h-52 w-full overflow-hidden relative">
+              <img
+                src={settings.schoolBanner}
+                alt="Campus Banner"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+            </div>
+          ) : (
+            <div className="h-32 sm:h-40 w-full bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 relative">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]" />
+            </div>
+          )}
+
+          <div className="relative p-6 -mt-14 sm:-mt-16 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 z-10">
+            <div className="flex items-end gap-4">
+              <div className="size-20 sm:size-24 rounded-3xl bg-white dark:bg-slate-950 border-4 border-white dark:border-slate-900 shadow-2xl overflow-hidden flex items-center justify-center p-2 flex-shrink-0">
+                {settings?.schoolLogo || settings?.companyLogo ? (
+                  <img
+                    src={settings.schoolLogo || settings.companyLogo}
+                    alt="Logo"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <School size={36} className="text-indigo-600 dark:text-indigo-400" />
+                )}
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                    {settings?.schoolName || "Institutional Profile"}
+                  </h2>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
+                    <ShieldCheck size={12} /> Institutional Verified
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 italic font-medium">
+                  "{settings?.schoolMotto || "Empowering minds, transforming futures"}"
+                </p>
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-400 flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <Info size={14} className="text-indigo-400" />
+              <span>Student Reference View</span>
+            </div>
+          </div>
+        </div>
+
+        {/* School Information Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Institutional Accreditation */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-6 space-y-4 shadow-md">
+            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Award size={18} className="text-indigo-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Affiliation & Accreditation</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Affiliation No.</span>
+                <span className="font-bold text-slate-900 dark:text-white block font-mono">
+                  {settings?.affiliationNumber || "—"}
+                </span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Education Board</span>
+                <span className="font-bold text-slate-900 dark:text-white block">
+                  {settings?.board || "Recognized Board"}
+                </span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">School Code</span>
+                <span className="font-bold text-slate-900 dark:text-white block font-mono">
+                  {settings?.registrationNumber || settings?.schoolCode || "—"}
+                </span>
+              </div>
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Established</span>
+                <span className="font-bold text-slate-900 dark:text-white block font-mono">
+                  {settings?.establishedYear || "—"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Details */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-6 space-y-4 shadow-md">
+            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Phone size={18} className="text-emerald-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Official Communication</h3>
+            </div>
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 flex items-center gap-1.5">
+                  <Mail size={13} className="text-sky-400" /> Official Email
+                </span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono">
+                  {settings?.contactEmail || "info@school.edu"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 flex items-center gap-1.5">
+                  <Phone size={13} className="text-emerald-400" /> Helpline Contact
+                </span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono">
+                  {settings?.schoolPhone || "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 flex items-center gap-1.5">
+                  <Globe size={13} className="text-indigo-400" /> Portal Website
+                </span>
+                <span className="font-bold text-indigo-500 font-mono truncate max-w-[200px]">
+                  {settings?.websiteUrl || "https://school.edu"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Campus Location & Address */}
+          <div className="md:col-span-2 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-6 space-y-4 shadow-md">
+            <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <MapPin size={18} className="text-rose-500" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Campus Location & Postal Address</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="sm:col-span-2 p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Premises & Street Address</span>
+                <p className="font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
+                  {[settings?.addressLine1, settings?.addressLine2].filter(Boolean).join(", ") || "Main Campus Grounds"}
+                </p>
+              </div>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">City, State & Zip</span>
+                <p className="font-medium text-slate-800 dark:text-slate-200 font-mono">
+                  {[settings?.city, settings?.state, settings?.postalCode].filter(Boolean).join(", ") || "—"}
+                </p>
+                <span className="text-[10px] text-slate-500 block">{settings?.country || "India"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

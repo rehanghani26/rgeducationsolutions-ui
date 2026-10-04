@@ -29,6 +29,8 @@ export const STUDENT_URLS = {
   BULK_IMPORT:   '/students/bulk-import',
   EXPORT_CSV:    '/students/export/csv',
   UPLOAD_FILE:   '/students/upload-file',
+  SEND_EMAIL_OTP: '/students/send-email-otp',
+  VERIFY_EMAIL_OTP: '/students/verify-email-otp',
 };
 
 // ─── Teachers ─────────────────────────────────────────────────────────────────

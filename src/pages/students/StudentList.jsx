@@ -13,6 +13,7 @@ import {
   Upload,
   Download,
   CheckCircle2,
+  AlertCircle,
   Edit3,
   ShieldCheck,
   Users,
@@ -26,6 +27,7 @@ import {
   Phone,
   Lock,
   FileText,
+  Bookmark,
 } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
@@ -37,6 +39,10 @@ import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
 import StudentForm, {
   blankStudentForm,
   randomPassword,
+  getStudentDraft,
+  saveStudentDraft,
+  clearStudentDraft,
+  isStudentFormDirty,
 } from "./StudentForm.jsx";
 import {
   getStudents,
@@ -44,6 +50,7 @@ import {
   createStudent,
   bulkImportStudents,
   exportStudentsCsv,
+  studentService,
 } from "../../services";
 import { CLASS_OPTIONS, SECTION_OPTIONS } from "../../constants/academicOptions.js";
 import { mockStudents } from "../../data/mockData.js";
@@ -53,6 +60,7 @@ import { CanButton } from "../../config/buttonAccess.jsx";
 import { useSelector } from "react-redux";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
+import StudentProfileView from "./StudentProfileView.jsx";
 
 const StudentList = () => {
   const navigate = useNavigate();
@@ -61,7 +69,9 @@ const StudentList = () => {
   const userRole = user?.role || (getUserFromStorage()?.role) || "";
 
   const isSuperAdmin = [ROLES.SUPER_ADMIN, "superadmin"].includes(userRole);
-  const canSeeCredentials = isSuperAdmin || userRole === ROLES.STUDENT;
+  const normUserRole = String(userRole || '').trim().toLowerCase().replace(/_/g, '-');
+  const isStudent = normUserRole === 'student' || userRole === ROLES.STUDENT;
+  const canSeeCredentials = isSuperAdmin || isStudent;
 
   const [activeCredentialsModal, setActiveCredentialsModal] = useState(null);
   const [showPasswordText, setShowPasswordText] = useState(false);
@@ -131,6 +141,50 @@ const StudentList = () => {
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState(getInitialStudentForm());
+  const [existingDraft, setExistingDraft] = useState(() => getStudentDraft());
+
+  useEffect(() => {
+    setExistingDraft(getStudentDraft());
+  }, [showCreate]);
+
+  const handleResumeDraft = () => {
+    const draft = getStudentDraft();
+    if (draft?.form) {
+      setForm(draft.form);
+      setExistingDraft(draft);
+      setShowCreate(true);
+      toast.success("Resumed student registration from saved draft!");
+    } else {
+      toast.info("No saved draft found.");
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    clearStudentDraft();
+    setExistingDraft(null);
+    setForm(getInitialStudentForm());
+    toast.info("Draft discarded. Starting fresh registration.");
+  };
+
+  const handleSaveDraftClick = () => {
+    if (!isStudentFormDirty(form)) {
+      toast.info("No student details entered yet to save as draft.");
+      return;
+    }
+    const saved = saveStudentDraft(form);
+    setExistingDraft(saved);
+    toast.success("Student registration saved as draft! You can complete it anytime.");
+    setShowCreate(false);
+  };
+
+  const handleCancelCreate = () => {
+    if (isStudentFormDirty(form)) {
+      saveStudentDraft(form);
+      setExistingDraft(getStudentDraft());
+      toast.info("Registration closed. Filled details saved as a draft.");
+    }
+    setShowCreate(false);
+  };
 
   const fetchStudentsData = async () => {
     setLoading(true);
@@ -165,8 +219,9 @@ const StudentList = () => {
   };
 
   useEffect(() => {
+    if (isStudent) return;
     fetchStudentsData();
-  }, [page, search, status, selectedClass, selectedSection]);
+  }, [page, search, status, selectedClass, selectedSection, isStudent]);
 
   const columns = [
     {
@@ -204,6 +259,27 @@ const StudentList = () => {
                 <span className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.2 rounded border border-indigo-200/50 dark:border-indigo-800/40">
                   {row.admissionNumber || row.studentId || 'ADM-N/A'}
                 </span>
+                {(row.email || row.user?.email) && (
+                  <span
+                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold border ${
+                      row.isEmailVerified || row.user?.isEmailVerified
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                    }`}
+                    title={
+                      row.isEmailVerified || row.user?.isEmailVerified
+                        ? `Email Verified: ${row.email || row.user?.email}`
+                        : `Email Not Verified: ${row.email || row.user?.email}`
+                    }
+                  >
+                    {row.isEmailVerified || row.user?.isEmailVerified ? (
+                      <CheckCircle2 size={10} className="shrink-0" />
+                    ) : (
+                      <AlertCircle size={10} className="shrink-0" />
+                    )}
+                    <span>{row.isEmailVerified || row.user?.isEmailVerified ? "Verified" : "Unverified"}</span>
+                  </span>
+                )}
                 {row.gender && (
                   <span className="text-[10px] text-slate-400 font-semibold">
                     · {row.gender}
@@ -381,8 +457,9 @@ const StudentList = () => {
     },
   ];
 
-  const handleCreateSubmit = (e) => {
-    e.preventDefault();
+  const handleCreateSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
     if (form.confirmPassword && form.password !== form.confirmPassword) {
       return toast.warning("Passwords do not match");
     }
@@ -402,34 +479,39 @@ const StudentList = () => {
       ...form,
       confirmPassword: form.confirmPassword || form.password,
     };
+
     setSubmitting(true);
-    studentService.create(payloadForm)
-      .then((res) => {
-        toast.success(res.data?.message || "Student registered successfully");
-        setShowCreate(false);
-        setForm(getInitialStudentForm());
-        fetchStudentsData();
-      })
-      .catch((err) => {
-        const msg = err.response?.data?.message || err.message || "Failed to register student";
-        toast.error(msg);
-      })
-      .finally(() => setSubmitting(false));
+    try {
+      const res = await createStudent(payloadForm);
+      clearStudentDraft();
+      setExistingDraft(null);
+      toast.success(res?.data?.message || res?.message || "Student registered successfully");
+      setShowCreate(false);
+      setForm(getInitialStudentForm());
+      await fetchStudentsData();
+    } catch (err) {
+      console.error("Failed to register student:", err);
+      const msg = err.response?.data?.message || err.message || "Failed to register student";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleExportCsv = () => {
-    studentService.exportCsv()
-      .then((res) => {
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `Students_${new Date().toISOString().slice(0, 10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        toast.success("Student directory exported to CSV");
-      })
-      .catch(() => toast.error("Export failed"));
+  const handleExportCsv = async () => {
+    try {
+      const data = await exportStudentsCsv();
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Students_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success("Student directory exported to CSV");
+    } catch {
+      toast.error("Export failed");
+    }
   };
 
   // Download Sample CSV Template — admissionNumber and rollNumber are auto-assigned by server
@@ -623,6 +705,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
     }
   };
 
+  // If a student is logged in, show their dedicated, comprehensive profile view
+  if (isStudent) {
+    return <StudentProfileView authUser={user} />;
+  }
+
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
@@ -652,12 +739,28 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                 Export CSV
               </Button>
             </CanButton>
+            {existingDraft && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Bookmark size={14} />}
+                onClick={handleResumeDraft}
+                className="bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
+              >
+                Resume Draft ({existingDraft.studentName || "Student"})
+              </Button>
+            )}
             <CanButton id="ADD_STUDENT">
               <Button
                 variant="primary"
                 size="sm"
                 icon={<Plus size={14} />}
-                onClick={() => setShowCreate(true)}
+                onClick={() => {
+                  if (existingDraft && !isStudentFormDirty(form)) {
+                    setForm(existingDraft.form);
+                  }
+                  setShowCreate(true);
+                }}
               >
                 Register Student
               </Button>
@@ -1211,19 +1314,68 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
       {/* Create Student Modal */}
       <Modal
         open={showCreate}
-        onClose={() => setShowCreate(false)}
-        title="Register New Student"
+        onClose={handleCancelCreate}
+        title={
+          <div className="flex items-center gap-2.5">
+            <span>Register New Student</span>
+            {existingDraft && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                Draft Mode
+              </span>
+            )}
+          </div>
+        }
         size="xl"
       >
         <form onSubmit={handleCreateSubmit}>
-          <StudentForm form={form} onChange={setForm} hideButtons={true} />
-          <div className="flex justify-end gap-2 pt-4 mt-6 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="secondary" onClick={() => setShowCreate(false)} type="button">
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" loading={submitting}>
-              Register Student
-            </Button>
+          <StudentForm
+            form={form}
+            onChange={setForm}
+            hideButtons={true}
+            onSaveDraft={handleSaveDraftClick}
+          />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 mt-6 border-t border-slate-100 dark:border-slate-800">
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              {existingDraft ? (
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
+                    <Bookmark size={13} />
+                    <span>
+                      Draft saved ({new Date(existingDraft.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                    </span>
+                  </span>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={handleDiscardDraft}
+                    className="text-rose-500 hover:underline cursor-pointer font-medium"
+                  >
+                    Discard Draft
+                  </button>
+                </div>
+              ) : (
+                <span className="text-[11px] text-slate-400 italic">
+                  * You can save as draft anytime and complete registration later
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <Button variant="secondary" onClick={handleCancelCreate} type="button">
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleSaveDraftClick}
+                className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100"
+                icon={<Bookmark size={14} />}
+              >
+                Save as Draft
+              </Button>
+              <Button variant="primary" type="submit" loading={submitting} icon={<CheckCircle2 size={14} />}>
+                Register Student
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>

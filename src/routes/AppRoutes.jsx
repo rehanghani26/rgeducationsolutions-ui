@@ -75,6 +75,28 @@ const AppRoutes = () => {
       >
         {protectedRoutes.map((route, idx) => {
           const Component = route.element;
+          if (route.children && Array.isArray(route.children)) {
+            return (
+              <Route
+                key={idx}
+                path={route.path}
+                element={
+                  <RoleGuard allowedRoles={route.allowedRoles} module={route.module}>
+                    <Component />
+                  </RoleGuard>
+                }
+              >
+                {route.children.map((child, cIdx) => (
+                  <Route
+                    key={cIdx}
+                    index={child.index}
+                    path={child.index ? undefined : child.path}
+                    element={<child.Component />}
+                  />
+                ))}
+              </Route>
+            );
+          }
           return (
             <Route
               key={idx}

@@ -77,7 +77,7 @@ export const ROLE_PERMISSIONS = {
   [ROLES.ACCOUNTANT]: {
     modules: [
       'dashboard', 'fees', 'payroll', 'inventory', 'expenses',
-      'transport', 'hostel', 'reports', 'students'
+      'transport', 'hostel', 'reports', 'students', 'certificates'
     ],
     actions: ['create', 'read', 'update', 'manage'],
   },
@@ -86,7 +86,7 @@ export const ROLE_PERMISSIONS = {
   'tg': {
     modules: [
       'dashboard', 'students', 'attendance', 'academics',
-      'timetable', 'results', 'leave', 'notifications'
+      'timetable', 'results', 'leave', 'notifications', 'certificates'
     ],
     actions: ['create', 'read', 'update'],
   },
@@ -137,14 +137,14 @@ export const ROLE_PERMISSIONS = {
 
   // Student: Student portal view (strictly read-only)
   [ROLES.STUDENT]: {
-    modules: ['dashboard', 'academics', 'attendance', 'leave', 'timetable', 'exams', 'results', 'library', 'notifications', 'certificates', 'online-classes', 'homework'],
+    modules: ['dashboard', 'students', 'student-management', 'profile', 'settings', 'academics', 'attendance', 'leave', 'timetable', 'exams', 'results', 'library', 'notifications', 'certificates', 'online-classes', 'homework'],
     actions: ['read'],
     readOnly: true,
   },
 
   // Parent: Parent portal view (strictly read-only)
   [ROLES.PARENT]: {
-    modules: ['dashboard', 'students', 'academics', 'attendance', 'fees', 'exams', 'results', 'notifications', 'online-classes', 'homework'],
+    modules: ['dashboard', 'students', 'academics', 'attendance', 'fees', 'exams', 'results', 'notifications', 'online-classes', 'homework', 'certificates'],
     actions: ['read'],
     readOnly: true,
   },
@@ -207,6 +207,9 @@ export const PERMISSION_ALIASES = {
   teachers: ['teacher-management', 'teachers'],
   'online-classes': ['online-classes'],
   homework: ['homework'],
+  certificates: ['certificates', 'id-cards', 'documents', 'academics'],
+  'id-cards': ['certificates', 'id-cards', 'documents'],
+  documents: ['certificates', 'id-cards', 'documents'],
 };
 
 /**

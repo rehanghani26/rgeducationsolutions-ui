@@ -38,6 +38,25 @@ import {
 import api from "../../../services/api.js";
 import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
+
+const resolveImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  const clean = url.trim().replace(/\\/g, '/');
+  if (!clean) return '';
+  if (
+    clean.startsWith('http://') ||
+    clean.startsWith('https://') ||
+    clean.startsWith('data:') ||
+    clean.startsWith('blob:')
+  ) {
+    return clean;
+  }
+  if (clean.startsWith('/uploads/') || clean.startsWith('uploads/')) {
+    const norm = clean.startsWith('/') ? clean : `/${clean}`;
+    return `http://localhost:5000${norm}`;
+  }
+  return `http://localhost:5000/api/v1/students/file/${clean}?redirect=true`;
+};
 import NoticeBoardTab from "../tabs/NoticeBoardTab.jsx";
 import StudentAttendance from "../components/StudentAttendance.jsx";
 import { getUserFromStorage } from "../../../config/access.jsx";
@@ -201,8 +220,19 @@ const StudentDashboard = () => {
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-indigo-600/30 flex-shrink-0">
-              {studentProfile.fullName.charAt(0)}
+            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-indigo-600/30 flex-shrink-0 border-2 border-indigo-400/20">
+              {(user?.photo || user?.avatar || user?.imagesRef?.img) ? (
+                <img
+                  src={resolveImageUrl(user.photo || user.avatar || user.imagesRef?.img)}
+                  alt={studentProfile.fullName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                studentProfile.fullName.charAt(0)
+              )}
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
@@ -234,6 +264,37 @@ const StudentDashboard = () => {
               <span className="text-[10px] text-slate-500 font-bold uppercase block">Guardian</span>
               <span className="font-bold text-slate-700 dark:text-slate-200">{studentProfile.guardianName}</span>
             </div>
+          </div>
+
+          {/* Quick Credential Action Links */}
+          <div className="flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-800 w-full lg:w-auto lg:border-t-0 lg:pt-0">
+            <button
+              type="button"
+              onClick={() => navigate('/students')}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition shadow-sm cursor-pointer"
+              title="View Complete Academic Profile"
+            >
+              <User size={14} />
+              <span>My Profile</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/certificates?tab=id-cards')}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition shadow-sm cursor-pointer"
+              title="View & Print Official Student Identity Card"
+            >
+              <CreditCard size={14} />
+              <span>My ID Card</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/certificates?tab=certificates')}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition shadow-sm cursor-pointer"
+              title="View & Print Verified Institutional Certificates"
+            >
+              <Award size={14} />
+              <span>My Certificates</span>
+            </button>
           </div>
         </div>
       </div>

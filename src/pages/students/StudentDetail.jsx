@@ -638,13 +638,26 @@ const StudentDetail = () => {
               </a>
             )}
             {student.email && (
-              <a
-                href={`mailto:${student.email}`}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-slate-700 dark:text-slate-200 hover:text-indigo-600 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
-              >
-                <Mail size={13} className="text-indigo-500" />
-                <span className="truncate max-w-[150px]">{student.email}</span>
-              </a>
+              <div className="flex items-center gap-1.5">
+                <a
+                  href={`mailto:${student.email}`}
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-slate-700 dark:text-slate-200 hover:text-indigo-600 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
+                >
+                  <Mail size={13} className="text-indigo-500" />
+                  <span className="truncate max-w-[150px]">{student.email}</span>
+                </a>
+                {student.isEmailVerified ? (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold shadow-xs" title="Student email is verified">
+                    <CheckCircle2 size={13} />
+                    <span>Verified</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold shadow-xs" title="Student email is not verified">
+                    <AlertCircle size={13} />
+                    <span>Not Verified</span>
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>

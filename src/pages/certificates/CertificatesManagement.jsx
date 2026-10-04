@@ -8,7 +8,7 @@
  * 4. Verification — In-app validation of cryptographic verification tokens
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +26,7 @@ import IdCardsModule from './components/IdCardsModule.jsx';
 import CertificatesModule from './components/CertificatesModule.jsx';
 import TemplatesModule from './components/TemplatesModule.jsx';
 import VerifyModule from './components/VerifyModule.jsx';
+import StudentPageCertification from './StudentPageCertification.jsx';
 
 const TABS = [
   {
@@ -61,17 +62,90 @@ const TABS = [
 export default function CertificatesManagement() {
   const [searchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || 'id-cards');
-
-  useEffect(() => {
-    if (urlTab && TABS.some((t) => t.id === urlTab)) {
-      setActiveTab(urlTab);
-    }
-  }, [urlTab]);
   const authUser = useSelector((state) => state.auth?.user);
   const schoolBranding = useSchoolBranding();
 
-  const userRole = authUser?.role || 'student';
+  const userRole = (authUser?.role || 'student').toLowerCase();
+  const isStudent = userRole === 'student';
+  const isParent = userRole === 'parent';
+  const isTeacher = ['teacher', 'faculty', 'instructor', 'head-teacher', 'hod', 'coordinator'].includes(userRole);
+  const isAdmin = ['super-admin', 'school-admin', 'principal', 'director', 'admin', 'superadmin'].includes(userRole);
+
+  const visibleTabs = useMemo(() => {
+    const list = [
+      {
+        id: 'id-cards',
+        label: isStudent ? 'My ID Card' : isParent ? 'Child ID Cards' : isTeacher ? 'ID Cards' : 'ID Cards',
+        icon: CreditCard,
+        badge: isStudent ? 'Student Identity' : isParent ? 'Official ID' : isTeacher ? 'Faculty & Students' : 'Students • Faculty • Staff',
+        color: 'sky',
+      },
+      {
+        id: 'certificates',
+        label: isStudent ? 'My Certificates' : isParent ? 'Child Certificates' : 'Certificates',
+        icon: Award,
+        badge: isStudent ? 'My Credentials' : isParent ? 'Academic Credentials' : 'Official Credentials',
+        color: 'amber',
+      },
+    ];
+
+    if (isAdmin) {
+      list.push({
+        id: 'templates',
+        label: 'Templates & Studio',
+        icon: Palette,
+        badge: '20 Designs',
+        color: 'violet',
+      });
+    }
+
+    list.push({
+      id: 'verify',
+      label: 'Verification',
+      icon: ShieldCheck,
+      badge: 'Audit & QR Validator',
+      color: 'emerald',
+    });
+
+    return list;
+  }, [isStudent, isParent, isTeacher, isAdmin]);
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (urlTab && visibleTabs.some((t) => t.id === urlTab)) return urlTab;
+    return 'id-cards';
+  });
+
+  useEffect(() => {
+    if (urlTab && visibleTabs.some((t) => t.id === urlTab)) {
+      setActiveTab(urlTab);
+    } else if (!visibleTabs.some((t) => t.id === activeTab)) {
+      setActiveTab('id-cards');
+    }
+  }, [urlTab, visibleTabs, activeTab]);
+
+  if (isStudent) {
+    return <StudentPageCertification authUser={authUser} schoolSettings={schoolBranding} />;
+  }
+
+  const headerTitle = isParent
+    ? 'Child ID Cards & Verified Credentials'
+    : isTeacher
+    ? 'Faculty & Student Credentials Portal'
+    : 'ID Cards & Certificate Management';
+
+  const headerSubtitle = isStudent
+    ? 'Instant access to your institutional student identity card with front/back preview and tamper-proof official certificates.'
+    : isParent
+    ? "Review and print authorized student identity cards and verifiable credentials issued for your child."
+    : isTeacher
+    ? "Generate your faculty identity card and inspect/print certified records for your students."
+    : 'Runtime dynamic rendering engine for institutional ID cards, verifiable certificates, and credential audit';
+
+  const breadcrumbs = isStudent
+    ? [{ label: 'Student Portal' }, { label: 'My ID & Certificates' }]
+    : isParent
+    ? [{ label: 'Parent Portal' }, { label: 'Child Credentials' }]
+    : [{ label: 'Administration' }, { label: 'ID Cards & Certificates' }];
 
   return (
     <motion.div
@@ -81,14 +155,14 @@ export default function CertificatesManagement() {
     >
       {/* Top Header */}
       <PageHeader
-        title="ID Cards & Certificate Management"
-        subtitle="Runtime dynamic rendering engine for institutional ID cards, verifiable certificates, and credential audit"
-        breadcrumbs={[{ label: 'Administration' }, { label: 'ID Cards & Certificates' }]}
+        title={headerTitle}
+        subtitle={headerSubtitle}
+        breadcrumbs={breadcrumbs}
       />
 
       {/* Modern Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900/70 border border-slate-800 rounded-2xl backdrop-blur-md shadow-lg">
-        {TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
 
@@ -149,15 +223,26 @@ export default function CertificatesManagement() {
           transition={{ duration: 0.18 }}
         >
           {activeTab === 'id-cards' && (
-            <IdCardsModule schoolSettings={schoolBranding} userRole={userRole} />
+            <IdCardsModule
+              schoolSettings={schoolBranding}
+              userRole={userRole}
+              authUser={authUser}
+            />
           )}
 
           {activeTab === 'certificates' && (
-            <CertificatesModule schoolSettings={schoolBranding} userRole={userRole} />
+            <CertificatesModule
+              schoolSettings={schoolBranding}
+              userRole={userRole}
+              authUser={authUser}
+            />
           )}
 
-          {activeTab === 'templates' && (
-            <TemplatesModule schoolSettings={schoolBranding} userRole={userRole} />
+          {activeTab === 'templates' && isAdmin && (
+            <TemplatesModule
+              schoolSettings={schoolBranding}
+              userRole={userRole}
+            />
           )}
 
           {activeTab === 'verify' && <VerifyModule />}

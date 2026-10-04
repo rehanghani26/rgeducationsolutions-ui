@@ -139,6 +139,25 @@ const TeacherDashboard = () => {
                 <span className="font-bold text-slate-400">N/A</span>
               </div>
             </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+              <button
+                type="button"
+                onClick={() => navigate('/certificates?tab=id-cards')}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 transition text-xs font-bold cursor-pointer"
+              >
+                <span>Faculty & Class ID Cards</span>
+                <span>→</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/certificates?tab=certificates')}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/25 transition text-xs font-bold cursor-pointer"
+              >
+                <span>Student Certificates</span>
+                <span>→</span>
+              </button>
+            </div>
           </SectionCard>
         </div>
       </div>

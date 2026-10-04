@@ -121,7 +121,7 @@ const DashboardLayout = () => {
     (ADMIN_ROLES.includes(user.role) || user.role === "superadmin");
 
   return (
-    <div className="flex min-h-screen bg-slate-100 font-sans text-slate-900 dark:bg-[#080c14] dark:text-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-100 font-sans text-slate-900 dark:bg-[#080c14] dark:text-slate-100">
       <aside
         className={`fixed z-30 flex h-full flex-col border-r border-slate-200 bg-white text-slate-500 transition-all duration-300 dark:border-slate-800/80 dark:bg-[#0f172a] dark:text-slate-400 ${
           sidebarOpen ? "w-64" : "w-20"
@@ -236,49 +236,49 @@ const DashboardLayout = () => {
       </aside>
 
       <div
-        className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${
+        className={`flex h-screen min-w-0 min-h-0 flex-1 flex-col overflow-hidden transition-all duration-300 ${
           sidebarOpen ? "pl-64" : "pl-20"
         }`}
       >
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 dark:border-slate-800/80 dark:bg-[#0f172a]">
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 sm:px-4 dark:border-slate-800/80 dark:bg-[#0f172a]">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white shrink-0"
               aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             >
-              <Menu size={20} />
+              <Menu size={19} />
             </button>
+
+            {canSeeHeaderTabs && (
+              <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
+                {HEADER_TABS.map((tab) => {
+                  const isActive =
+                    location.pathname === ROUTES.DASHBOARD &&
+                    activeDashboardTab === tab.id;
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleHeaderTabClick(tab.id)}
+                      className={`flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-150 ${
+                        isActive
+                          ? "border border-indigo-500/50 bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                          : "border border-slate-200 bg-slate-100 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    >
+                      <Icon size={14} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {canSeeHeaderTabs && (
-            <div className="flex max-w-full items-center gap-2 overflow-x-auto py-1">
-              {HEADER_TABS.map((tab) => {
-                const isActive =
-                  location.pathname === ROUTES.DASHBOARD &&
-                  activeDashboardTab === tab.id;
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => handleHeaderTabClick(tab.id)}
-                    className={`flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-bold transition-all duration-200 ${
-                      isActive
-                        ? "border border-indigo-500/50 bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                        : "border border-slate-200 bg-slate-100 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-950 dark:border-slate-700/60 dark:bg-slate-800/60 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    <Icon size={15} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Full-Page AI Mode Button */}
             <button
               type="button"
@@ -301,7 +301,7 @@ const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-slate-100 p-6 text-slate-900 dark:bg-[#090d16] dark:text-slate-100">
+        <main className="flex-1 min-h-0 overflow-y-auto bg-slate-100 p-2.5 sm:p-3.5 md:p-4 text-slate-900 dark:bg-[#090d16] dark:text-slate-100">
           <ErrorBoundary compact>
             <Outlet context={{ activeDashboardTab, setActiveDashboardTab }} />
           </ErrorBoundary>

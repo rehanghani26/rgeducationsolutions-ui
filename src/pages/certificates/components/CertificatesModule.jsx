@@ -32,7 +32,7 @@ import { getVerificationUrl } from '../utils/qrUtils.js';
 import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
 import { openDocumentInNewTab } from '../utils/printUtils.js';
 
-export default function CertificatesModule({ schoolSettings = {}, userRole = '' }) {
+export default function CertificatesModule({ schoolSettings = {}, userRole = '', authUser = null }) {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,7 +46,14 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
   const [revocationReason, setRevocationReason] = useState('');
   const [submittingRevocation, setSubmittingRevocation] = useState(false);
 
-  const canIssue = ['super-admin', 'school-admin', 'principal', 'director'].includes(userRole);
+  const normalizedRole = String(userRole || authUser?.role || 'student').toLowerCase();
+  const isStudent = normalizedRole === 'student';
+  const isParent = normalizedRole === 'parent';
+  const isTeacher = ['teacher', 'faculty', 'instructor', 'head-teacher', 'hod', 'coordinator'].includes(normalizedRole);
+  const isAdmin = ['super-admin', 'school-admin', 'principal', 'director', 'admin', 'superadmin'].includes(normalizedRole);
+
+  const canIssue = ['super-admin', 'school-admin', 'principal', 'director'].includes(normalizedRole);
+  const canRevoke = canIssue;
 
   useEffect(() => {
     loadCertificates();
@@ -124,7 +131,7 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
         <div className="sm:col-span-1 bg-slate-900/60 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
             <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
-              Total Issued
+              {isStudent ? 'My Certificates' : isParent ? 'Child Certificates' : 'Total Issued'}
             </div>
             <div className="text-2xl font-bold text-white mt-1">{stats.total}</div>
           </div>
@@ -167,9 +174,21 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
               <Plus size={16} strokeWidth={2.5} />
               <span>Issue New Certificate</span>
             </button>
+          ) : isStudent ? (
+            <div className="flex items-center gap-2.5 text-xs text-sky-400 p-2">
+              <ShieldCheck size={20} className="flex-shrink-0" />
+              <div>
+                <span className="font-bold text-white block text-xs">Official Credentials</span>
+                <span className="text-[10px] text-slate-400">Verifiable via Smart QR</span>
+              </div>
+            </div>
           ) : (
-            <div className="text-xs text-slate-500 text-center">
-              Student / Read-Only View
+            <div className="flex items-center gap-2.5 text-xs text-amber-400 p-2">
+              <Award size={20} className="flex-shrink-0" />
+              <div>
+                <span className="font-bold text-white block text-xs">Parent Registry</span>
+                <span className="text-[10px] text-slate-400">Authorized Records</span>
+              </div>
             </div>
           )}
         </div>
@@ -183,7 +202,13 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by Certificate #, Student Name, or Admission ID..."
+            placeholder={
+              isStudent
+                ? 'Search my certificates by number or type...'
+                : isParent
+                ? 'Search child certificates by number or type...'
+                : 'Search by Certificate #, Student Name, or Admission ID...'
+            }
             className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
@@ -242,7 +267,11 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '' 
               ) : filteredCertificates.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-500">
-                    No certificate records found. Click "Issue New Certificate" to create one.
+                    {isStudent
+                      ? 'No certificates have been issued to your student profile yet. When an official credential (such as Bonafide, Character, or Transfer Certificate) is issued by the school administration, it will appear here with instant preview and verification.'
+                      : isParent
+                      ? 'No certificates found for your registered child at this time. Official certificates will be visible here once granted by the school administration.'
+                      : 'No certificate records found matching the criteria. Click "Issue New Certificate" to create one.'}
                   </td>
                 </tr>
               ) : (

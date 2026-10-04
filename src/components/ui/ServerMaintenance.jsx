@@ -15,9 +15,9 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
 import { useTheme } from "../../theme/ThemeContext.jsx";
 import axios from "axios";
+import rgLogo from "../../assets/logo/RGLOGO.png";
 
 const BACKEND_URL = "http://localhost:5000";
 
@@ -65,7 +65,6 @@ function OrbitDot({ angle, delay, color }) {
 }
 
 export default function ServerMaintenance({ errorInfo = null, onRetry = null }) {
-  const { schoolLogo, schoolName } = useSchoolBranding();
   const { isDark } = useTheme();
 
   const [isChecking, setIsChecking] = useState(false);
@@ -190,24 +189,23 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
 
       {/* ── Top Header Bar ─────────────────────────────────────── */}
       <header className="relative z-10 w-full max-w-6xl mx-auto flex items-center justify-between px-6 pt-6 pb-2">
-        {/* Logo + School Name */}
+        {/* Logo + School / Product Name */}
         <div className="flex items-center gap-3">
-          {schoolLogo ? (
-            <div
-              className={`w-10 h-10 rounded-2xl overflow-hidden border ${
-                isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"
-              } p-1 shadow-lg`}
-            >
-              <img src={schoolLogo} alt="Logo" className="w-full h-full object-contain" />
-            </div>
-          ) : (
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-violet-500/30">
-              RG
-            </div>
-          )}
+          <div
+            className={`w-10 h-10 rounded-2xl overflow-hidden border ${
+              isDark ? "border-white/10 bg-slate-950" : "border-slate-200 bg-slate-950"
+            } p-1 shadow-lg flex items-center justify-center flex-shrink-0`}
+          >
+            <img
+              src={rgLogo}
+              alt="RG EduCore Logo"
+              style={{ mixBlendMode: "screen" }}
+              className="w-full h-full object-contain"
+            />
+          </div>
           <div>
             <div className={`font-bold text-sm leading-tight ${isDark ? "text-white" : "text-slate-900"}`}>
-              {schoolName || "RG EduCore ERP"}
+              RG EduCore ERP
             </div>
             <div className={`text-[11px] font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               Campus Management System
@@ -601,7 +599,7 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
         }`}
       >
         <span>
-          &copy; {new Date().getFullYear()} {schoolName || "RG EduCore"} &mdash; Campus ERP
+          &copy; {new Date().getFullYear()} RG EduCore &mdash; Campus ERP
         </span>
         <div className="flex items-center gap-1.5">
           <Clock size={11} />

@@ -12,6 +12,12 @@ import {
   ShieldCheck,
   User,
   Eye,
+  Bookmark,
+  Clock,
+  KeyRound,
+  RefreshCw,
+  X,
+  Mail,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
@@ -27,7 +33,11 @@ import {
   SECTION_OPTIONS,
 } from "../../constants/academicOptions.js";
 import { getDefaultRolePermissions } from "../../config/access.jsx";
-import { uploadStudentFile } from "../../services/studentService.js";
+import {
+  uploadStudentFile,
+  sendStudentEmailOtp,
+  verifyStudentEmailOtp,
+} from "../../services/studentService.js";
 
 export const permissionOptions = [
   ["dashboard", "Dashboard Access"],
@@ -46,6 +56,7 @@ export const initialStudentForm = {
   contactNumber: "",
   alternatePhone: "",
   email: "",
+  isEmailVerified: false,
   address: "",
   joiningDate: new Date().toISOString().slice(0, 10),
   classId: "",
@@ -71,6 +82,67 @@ export const initialStudentForm = {
 };
 
 export const blankStudentForm = initialStudentForm;
+
+// ─── Student Registration Draft Helpers ─────────────────────────────────────
+export const DRAFT_STORAGE_KEY = "student_registration_draft";
+
+export const getStudentDraft = () => {
+  try {
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error("Error reading student draft:", err);
+    return null;
+  }
+};
+
+export const saveStudentDraft = (formData) => {
+  try {
+    const studentName =
+      `${formData.firstName || ""} ${formData.lastName || ""}`.trim() ||
+      formData.parentName ||
+      "Untitled Student";
+    const draftPayload = {
+      form: formData,
+      savedAt: new Date().toISOString(),
+      studentName,
+      className: formData.className || formData.class || "",
+    };
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+    return draftPayload;
+  } catch (err) {
+    console.error("Error saving student draft:", err);
+    return null;
+  }
+};
+
+export const clearStudentDraft = () => {
+  try {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  } catch (err) {
+    console.error("Error clearing student draft:", err);
+  }
+};
+
+export const isStudentFormDirty = (form) => {
+  if (!form) return false;
+  return Boolean(
+    form.firstName?.trim() ||
+      form.lastName?.trim() ||
+      form.contactNumber?.trim() ||
+      form.email?.trim() ||
+      form.parentName?.trim() ||
+      form.parentContact?.trim() ||
+      form.aadhaarNumber?.trim() ||
+      form.photo?.trim() ||
+      form.aadhaarDocument?.trim() ||
+      form.address?.trim() ||
+      form.classId ||
+      form.sectionId
+  );
+};
+
 export const randomPassword = () =>
   `Std@${Math.random().toString(36).slice(2, 8)}${Math.floor(100 + Math.random() * 900)}`;
 
@@ -88,6 +160,7 @@ const StudentForm = ({
   editing = false,
   onSubmit,
   onCancel,
+  onSaveDraft,
   submitting,
   hideButtons = false,
   showAccessControl = false,
@@ -113,8 +186,144 @@ const StudentForm = ({
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingAadhaar, setUploadingAadhaar] = useState(false);
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const [draftInfo, setDraftInfo] = useState(() => (!editing ? getStudentDraft() : null));
   const photoInputRef = useRef(null);
   const aadhaarInputRef = useRef(null);
+
+  // Student Email Verification State
+  const [showOtpBox, setShowOtpBox] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const [otpError, setOtpError] = useState("");
+  const [lastVerifiedEmail, setLastVerifiedEmail] = useState(
+    () => (form?.isEmailVerified ? form.email : "")
+  );
+
+  // Countdown timer for OTP resend
+  useEffect(() => {
+    if (!showOtpBox || countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showOtpBox, countdown]);
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value;
+    const wasVerified = form.isEmailVerified;
+    const isDifferent =
+      lastVerifiedEmail &&
+      val.trim().toLowerCase() !== lastVerifiedEmail.trim().toLowerCase();
+
+    onChange({
+      ...form,
+      email: val,
+      ...(wasVerified && isDifferent ? { isEmailVerified: false } : {}),
+    });
+  };
+
+  const handleSendEmailOtp = async () => {
+    const targetEmail = form.email?.trim();
+    if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+      toast.warning("Please enter a valid student email address first.");
+      return;
+    }
+
+    try {
+      setSendingOtp(true);
+      setOtpError("");
+      const res = await sendStudentEmailOtp(
+        targetEmail,
+        form.firstName || form.name || "Student"
+      );
+      toast.success(res?.message || `Verification code sent to ${targetEmail}`);
+      setShowOtpBox(true);
+      setCountdown(60);
+      setOtpValue("");
+    } catch (err) {
+      console.error("Failed to send student email OTP:", err);
+      const msg =
+        err.message ||
+        err.response?.data?.message ||
+        "Failed to send verification code";
+      setOtpError(msg);
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    const code = otpValue.trim();
+    if (!code || code.length !== 6) {
+      setOtpError("Please enter the 6-digit verification code");
+      return;
+    }
+
+    try {
+      setVerifyingOtp(true);
+      setOtpError("");
+      const targetId = editing ? form._id || form.id : undefined;
+      const res = await verifyStudentEmailOtp({
+        email: form.email.trim(),
+        otp: code,
+        studentId: targetId,
+      });
+
+      if (res?.success || res?.isEmailVerified) {
+        toast.success(res?.message || "Student email verified successfully!");
+        setLastVerifiedEmail(form.email.trim());
+        onChange({
+          ...form,
+          isEmailVerified: true,
+        });
+        setShowOtpBox(false);
+        setOtpValue("");
+      } else {
+        setOtpError(res?.message || "Verification code is incorrect");
+      }
+    } catch (err) {
+      console.error("OTP verification error:", err);
+      const msg =
+        err.message ||
+        err.response?.data?.message ||
+        "Invalid verification code";
+      setOtpError(msg);
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  const handleRestoreDraft = () => {
+    const draft = getStudentDraft();
+    if (draft?.form) {
+      onChange(draft.form);
+      setDraftInfo(draft);
+      toast.success("Saved student registration draft restored!");
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    clearStudentDraft();
+    setDraftInfo(null);
+    onChange(blankStudentForm);
+    toast.info("Draft discarded. Starting fresh registration.");
+  };
+
+  const handleSaveDraftClick = () => {
+    if (onSaveDraft) {
+      onSaveDraft();
+    } else {
+      if (!isStudentFormDirty(form)) {
+        toast.info("No student details entered yet to save as draft.");
+        return;
+      }
+      const saved = saveStudentDraft(form);
+      setDraftInfo(saved);
+      toast.success("Student registration saved as draft! You can complete it later.");
+    }
+  };
 
   const handlePhotoSelect = async (e) => {
     const file = e.target.files?.[0];
@@ -342,8 +551,49 @@ const StudentForm = ({
   const currentAadhaar = form.aadhaarDocument || form.AdharRef?.pdf || "";
   const currentAadhaarId = form.AdharRef?.id || "";
 
+  const FormElement = hideButtons ? "div" : "form";
+  const formProps = hideButtons ? { className: "space-y-6" } : { onSubmit, className: "space-y-6" };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <FormElement {...formProps}>
+      {/* ── Draft Notification Banner ─────────────────────────────────── */}
+      {!editing && draftInfo && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 shadow-xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="size-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Bookmark size={15} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold truncate">
+                {isStudentFormDirty(form) ? "Working on saved draft" : "Unfinished registration draft available"}
+                {draftInfo.studentName ? `: "${draftInfo.studentName}"` : ""}
+              </p>
+              <p className="text-[11px] text-amber-700/80 dark:text-amber-300/80">
+                Saved on {new Date(draftInfo.savedAt).toLocaleDateString([], { month: "short", day: "numeric" })} at {new Date(draftInfo.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • You can save progress and complete registration later.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            {!isStudentFormDirty(form) && (
+              <button
+                type="button"
+                onClick={handleRestoreDraft}
+                className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+              >
+                Resume Draft
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleDiscardDraft}
+              className="px-2.5 py-1 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+            >
+              Discard Draft
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Section: Identity, Photo & Aadhaar Documents ─────────────────── */}
       <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-slate-50 to-sky-50/50 dark:from-slate-800/60 dark:via-slate-900 dark:to-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-indigo-100/80 dark:border-slate-800">
@@ -846,15 +1096,160 @@ const StudentForm = ({
             Student Account &amp; Login Credentials
           </h4>
 
-          <FormInput
-            label="Student Login Email"
-            name="email"
-            type="email"
-            value={form.email || ""}
-            onChange={(e) => updateField("email", e.target.value)}
-            placeholder="e.g. student101@school.com"
-            required
-          />
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                <span>Student Login Email</span>
+                <span className="text-rose-500 font-bold">*</span>
+              </label>
+
+              {form.isEmailVerified ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-bold shadow-xs">
+                  <CheckCircle2 size={12} className="shrink-0" />
+                  <span>Verified</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-bold shadow-xs">
+                  <AlertCircle size={12} className="shrink-0" />
+                  <span>Not Verified</span>
+                </span>
+              )}
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <div className="flex-1 min-w-0">
+                <FormInput
+                  name="email"
+                  type="email"
+                  value={form.email || ""}
+                  onChange={handleEmailChange}
+                  placeholder="e.g. student101@school.com"
+                  required
+                />
+              </div>
+
+              {!form.isEmailVerified && (
+                <button
+                  type="button"
+                  onClick={handleSendEmailOtp}
+                  disabled={sendingOtp || !form.email || !form.email.includes("@")}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                    form.email && form.email.includes("@")
+                      ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20 active:scale-95"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                  }`}
+                  title="Verify student email with 6-digit OTP code"
+                >
+                  {sendingOtp ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound size={13} />
+                      <span>{showOtpBox ? "Resend OTP" : "Verify Email"}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* Inline OTP Verification Panel */}
+            {showOtpBox && !form.isEmailVerified && (
+              <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-br from-indigo-50/80 to-slate-50 dark:from-slate-800 dark:to-indigo-950/40 border border-indigo-200 dark:border-indigo-900/60 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                    <KeyRound size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>Enter 6-Digit Verification Code</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowOtpBox(false);
+                      setOtpValue("");
+                      setOtpError("");
+                    }}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700 transition cursor-pointer"
+                    title="Close verification"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                  A 6-digit verification code was sent to <strong className="text-indigo-600 dark:text-indigo-400">{form.email}</strong>.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={otpValue}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                        setOtpValue(val);
+                        setOtpError("");
+                      }}
+                      placeholder="• • • • • •"
+                      className="w-full px-3 py-2 text-center font-mono font-bold tracking-[8px] text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      autoFocus
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleVerifyEmailOtp}
+                    disabled={verifyingOtp || otpValue.length !== 6}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md ${
+                      otpValue.length === 6 && !verifyingOtp
+                        ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20 active:scale-95"
+                        : "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
+                    }`}
+                  >
+                    {verifyingOtp ? (
+                      <>
+                        <Loader2 size={13} className="animate-spin" />
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 size={13} />
+                        <span>Verify OTP</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {otpError && (
+                  <p className="text-xs text-rose-500 dark:text-rose-400 font-semibold flex items-center gap-1">
+                    <AlertCircle size={12} />
+                    <span>{otpError}</span>
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between pt-1 border-t border-indigo-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span>Didn't receive code?</span>
+                  {countdown > 0 ? (
+                    <span className="font-mono text-slate-400">
+                      Resend in {countdown}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSendEmailOtp}
+                      disabled={sendingOtp}
+                      className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <RefreshCw size={11} className={sendingOtp ? "animate-spin" : ""} />
+                      <span>Resend OTP Code</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {!editing && (
             <div className="space-y-3">
@@ -920,18 +1315,38 @@ const StudentForm = ({
       </div>
 
       {!hideButtons && onCancel && (
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <Button type="button" variant="secondary" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            icon={<Save size={14} />}
-            loading={submitting}
-          >
-            {submitting ? "Saving..." : "Save Student"}
-          </Button>
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div>
+            {!editing && draftInfo && (
+              <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <Bookmark size={12} /> Draft saved locally
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="secondary" onClick={onCancel}>
+              Cancel
+            </Button>
+            {!editing && (
+              <Button
+                type="button"
+                variant="secondary"
+                icon={<Bookmark size={14} />}
+                onClick={handleSaveDraftClick}
+                className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100"
+              >
+                Save as Draft
+              </Button>
+            )}
+            <Button
+              type="submit"
+              variant="primary"
+              icon={<Save size={14} />}
+              loading={submitting}
+            >
+              {submitting ? "Saving..." : editing ? "Update Student" : "Register Student"}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -944,7 +1359,7 @@ const StudentForm = ({
         subtitle={form.aadhaarNumber ? `Aadhaar: ${form.aadhaarNumber}` : ""}
         refId={currentAadhaarId}
       />
-    </form>
+    </FormElement>
   );
 };
 

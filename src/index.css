@@ -8,6 +8,9 @@
     --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
     --border-color: #e2e8f0;
+    --border-soft: #e2e8f0;
+    --surface-1: #ffffff;
+    --surface-2: #f8fafc;
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --glass-bg: rgba(255, 255, 255, 0.7);
@@ -18,16 +21,27 @@
     --bg-primary: #020617;
     --bg-secondary: #0f172a;
     --border-color: #1e293b;
+    --border-soft: #1e293b;
+    --surface-1: #0f172a;
+    --surface-2: #1e293b;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --glass-bg: rgba(15, 23, 42, 0.6);
     --glass-border: rgba(30, 41, 59, 0.4);
   }
 
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 }
 

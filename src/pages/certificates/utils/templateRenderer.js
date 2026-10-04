@@ -106,7 +106,14 @@ export function prepareTemplateData(recipient = {}, recipientType = 'student', s
     subjectsAssigned: recipient.subjectsAssigned || [],
     joiningDate: formatDisplayDate(recipient.joiningDate),
     academicYear: recipient.academicYear || '2025-2026',
-    photo: recipient.photo || recipient.profilePhoto || '',
+    photo:
+      recipient.photo ||
+      recipient.imagesRef?.img ||
+      recipient.avatar ||
+      recipient.photoUrl ||
+      recipient.profilePhoto ||
+      recipient.image ||
+      '',
 
     // Certificate metadata
     certificateNumber: extraMeta.certificateNumber || 'DRAFT-PREVIEW',

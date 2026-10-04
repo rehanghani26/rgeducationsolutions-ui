@@ -31,6 +31,8 @@ import {
   Video,
   NotebookPen,
   UserCog,
+  User,
+  KeyRound,
 } from 'lucide-react';
 
 import { ROUTES }                                   from '../routes/routes.js';
@@ -62,7 +64,7 @@ export const NAV_SECTIONS = [
         name:       'Students',
         path:       ROUTES.STUDENTS.LIST,
         icon:       GraduationCap,
-        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.ACCOUNTANT, ROLES.PARENT],
+        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.ACCOUNTANT, ROLES.PARENT, ROLES.STUDENT],
         permission: 'student-management',
       },
       {
@@ -206,8 +208,8 @@ export const NAV_SECTIONS = [
         name:       'Certificates & ID Cards',
         path:       ROUTES.CERTIFICATES,
         icon:       BadgeCheck,
-        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.STUDENT],
-        permission: 'academics',
+        roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
+        permission: 'certificates',
       },
     ],
   },
@@ -246,10 +248,17 @@ export const NAV_SECTIONS = [
         permission: null,
       },
       {
+        name:       'Password Requests',
+        path:       ROUTES.PASSWORD_REQUESTS,
+        icon:       KeyRound,
+        roles:      [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin', 'superadmin', 'super_admin', 'principal', 'director'],
+        permission: null,
+      },
+      {
         name:       'Settings',
         path:       ROUTES.SETTINGS,
         icon:       SettingsIcon,
-        roles:      [...ADMIN_ROLES, 'admin', 'superadmin', 'super_admin', 'school_admin', ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR],
+        roles:      [...ADMIN_ROLES, 'admin', 'superadmin', 'super_admin', 'school_admin', ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT],
         permission: null,
       },
     ],
@@ -271,31 +280,43 @@ export const PRIVILEGED_ROLES = ADMIN_ROLES;
  */
 export const filterNavForUser = (user) => {
   if (!user) return [];
+  const rawRole = (user.role || '').trim().toLowerCase();
+  const normRole = rawRole.replace(/_/g, '-');
+  const isStudent = normRole === 'student';
+
   return NAV_SECTIONS
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => {
-        const rawRole = (user.role || '').trim().toLowerCase();
-        const normRole = rawRole.replace(/_/g, '-');
+      items: section.items
+        .filter((item) => {
+          // Super-admin has access to everything
+          if (normRole === 'super-admin' || normRole === 'superadmin') return true;
 
-        // Super-admin has access to everything
-        if (normRole === 'super-admin' || normRole === 'superadmin') return true;
+          // User role MUST match an entry in item.roles
+          const itemRoles = (item.roles || []).map((r) => String(r).toLowerCase().replace(/_/g, '-'));
+          if (!itemRoles.includes(rawRole) && !itemRoles.includes(normRole)) return false;
 
-        // User role MUST match an entry in item.roles
-        const itemRoles = (item.roles || []).map((r) => String(r).toLowerCase().replace(/_/g, '-'));
-        if (!itemRoles.includes(rawRole) && !itemRoles.includes(normRole)) return false;
+          // If privileged admin role, allow item
+          const privRoles = PRIVILEGED_ROLES.map((r) => String(r).toLowerCase().replace(/_/g, '-'));
+          if (privRoles.includes(rawRole) || privRoles.includes(normRole)) return true;
 
-        // If privileged admin role, allow item
-        const privRoles = PRIVILEGED_ROLES.map((r) => String(r).toLowerCase().replace(/_/g, '-'));
-        if (privRoles.includes(rawRole) || privRoles.includes(normRole)) return true;
+          // For non-privileged roles, if item requires permission, check user permissions or module access
+          if (item.permission) {
+            return (user.permissions || []).includes(item.permission) || hasModuleAccess(user, item.permission);
+          }
 
-        // For non-privileged roles, if item requires permission, check user permissions or module access
-        if (item.permission) {
-          return (user.permissions || []).includes(item.permission) || hasModuleAccess(user, item.permission);
-        }
-
-        return true;
-      }),
+          return true;
+        })
+        .map((item) => {
+          if (isStudent && item.path === ROUTES.STUDENTS.LIST) {
+            return {
+              ...item,
+              name: 'My Profile',
+              icon: User,
+            };
+          }
+          return item;
+        }),
     }))
     .filter((section) => section.items.length > 0);
 };

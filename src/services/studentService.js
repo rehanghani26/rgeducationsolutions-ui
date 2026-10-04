@@ -227,6 +227,37 @@ export async function getStudentFileById(fileId) {
   }
 }
 
+/**
+ * Send 6-digit verification OTP to student email
+ * @param {string} email
+ * @param {string} name
+ */
+export async function sendStudentEmailOtp(email, name = '') {
+  try {
+    const response = await api.post(STUDENT_URLS.SEND_EMAIL_OTP, { email, name });
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || error.message || 'Failed to send verification code';
+    toast.error(msg);
+    throw { status: error.response?.status, message: msg };
+  }
+}
+
+/**
+ * Verify 6-digit OTP code for student email
+ * @param {object} params - { email, otp, studentId? }
+ */
+export async function verifyStudentEmailOtp(params) {
+  try {
+    const response = await api.post(STUDENT_URLS.VERIFY_EMAIL_OTP, params);
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || error.message || 'Verification failed';
+    toast.error(msg);
+    throw { status: error.response?.status, message: msg };
+  }
+}
+
 const studentService = {
   getAll: getStudents,
   getById: getStudentById,
@@ -241,6 +272,8 @@ const studentService = {
   exportCsv: exportStudentsCsv,
   uploadFile: uploadStudentFile,
   getFileById: getStudentFileById,
+  sendEmailOtp: sendStudentEmailOtp,
+  verifyEmailOtp: verifyStudentEmailOtp,
 };
 
 export default studentService;
