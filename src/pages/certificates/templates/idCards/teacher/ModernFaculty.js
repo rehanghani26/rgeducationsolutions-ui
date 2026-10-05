@@ -16,10 +16,10 @@ export const modernFacultyCard = {
     return `
       <div style="
         width: 70mm; font-family: 'Inter', Arial, sans-serif;
-        background: linear-gradient(145deg, #0f172a, #1e1b4b 60%, #0f172a);
+        background: linear-gradient(145deg, #141312, #26160C 60%, #141312);
         border-radius: 16px; overflow: hidden;
-        box-shadow: 0 8px 32px rgba(99,102,241,0.35);
-        border: 1px solid rgba(99,102,241,0.3);
+        box-shadow: 0 8px 32px rgba(249,115,22,0.25);
+        border: 1px solid rgba(249,115,22,0.25);
       ">
         <!-- Top accent -->
         <div style="height:3px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899,#8b5cf6,#6366f1);"></div>

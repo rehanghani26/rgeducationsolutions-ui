@@ -100,7 +100,7 @@ const withSettingsWrapper = (
               onClick={mergedProps.handleSubmit}
               type="button"
               disabled={mergedProps.saving}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-indigo-500/20 text-xs transition cursor-pointer"
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-60 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-orange-500/25 text-xs transition cursor-pointer"
             >
               {mergedProps.saving ? (
                 <>

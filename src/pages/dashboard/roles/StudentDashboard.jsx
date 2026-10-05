@@ -111,7 +111,7 @@ const StudentDashboard = () => {
   const feePending = stats?.pendingFees ?? 0;
   const feePieSlices = [
     { name: "Tuition Paid", value: feePaid || 12000, color: "#10b981" },
-    { name: "Transport Paid", value: 3000, color: "#06b6d4" },
+    { name: "Transport Paid", value: 3000, color: "#f59e0b" },
     { name: "Pending Dues", value: feePending || 1500, color: "#ef4444" },
   ];
 
@@ -143,8 +143,8 @@ const StudentDashboard = () => {
   // Chart 6: Student Skill & Behavior Competencies Assessment (%)
   const skillCompetencies = [
     { skill: "Punctuality", score: 98, color: "#10b981" },
-    { skill: "Homework", score: 94, color: "#6366f1" },
-    { skill: "Lab Practical", score: 90, color: "#06b6d4" },
+    { skill: "Homework", score: 94, color: "#f97316" },
+    { skill: "Lab Practical", score: 90, color: "#fb923c" },
     { skill: "Class Conduct", score: 96, color: "#f59e0b" },
     { skill: "Extra-Curricular", score: 88, color: "#ec4899" },
   ];
@@ -216,7 +216,7 @@ const StudentDashboard = () => {
       </div>
 
       {/* ─── MODULE 1: PERSONAL STUDENT PROFILE IDENTITY CARD ───────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800/80 dark:bg-[#111827]">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800/80 dark:bg-[#1C1B1A]">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap">
@@ -307,16 +307,16 @@ const StudentDashboard = () => {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={recentGrades}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                   <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} />
                   <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} />
                   <Tooltip
-                    contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "12px", color: "#fff" }}
+                    contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "12px", color: "#fff" }}
                     formatter={(value) => [`${value}% Obtained`, "Grade Score"]}
                   />
-                  <Bar dataKey="obtained" fill="#6366f1" radius={[6, 6, 0, 0]}>
+                  <Bar dataKey="obtained" fill="#f97316" radius={[6, 6, 0, 0]}>
                     {recentGrades.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.obtained >= 90 ? "#10b981" : entry.obtained >= 75 ? "#6366f1" : "#f59e0b"} />
+                      <Cell key={`cell-${index}`} fill={entry.obtained >= 90 ? "#10b981" : entry.obtained >= 75 ? "#f97316" : "#f59e0b"} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -335,7 +335,7 @@ const StudentDashboard = () => {
                     <Cell key={i} fill={e.color} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -360,12 +360,12 @@ const StudentDashboard = () => {
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={termComparison}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                 <XAxis dataKey="term" stroke="#64748b" fontSize={11} />
                 <YAxis stroke="#64748b" fontSize={11} domain={[60, 100]} />
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
                 <Line type="monotone" dataKey="score" stroke="#10b981" strokeWidth={3} name="My Score %" />
-                <Line type="monotone" dataKey="avg" stroke="#6366f1" strokeWidth={2} strokeDasharray="5 5" name="Class Avg %" />
+                <Line type="monotone" dataKey="avg" stroke="#f97316" strokeWidth={2} strokeDasharray="5 5" name="Class Avg %" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -382,10 +382,10 @@ const StudentDashboard = () => {
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                 <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
                 <YAxis stroke="#64748b" fontSize={11} domain={[70, 100]} />
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
                 <Area type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#studentAttGrad)" />
               </AreaChart>
             </ResponsiveContainer>
@@ -400,10 +400,10 @@ const StudentDashboard = () => {
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={libraryReading} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                 <XAxis type="number" stroke="#64748b" fontSize={10} />
                 <YAxis dataKey="category" type="category" stroke="#94a3b8" fontSize={10} width={90} />
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
+                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
                 <Bar dataKey="books" fill="#ec4899" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -415,11 +415,11 @@ const StudentDashboard = () => {
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={skillCompetencies}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                 <XAxis dataKey="skill" stroke="#64748b" fontSize={10} />
                 <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} />
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px" }} />
-                <Bar dataKey="score" fill="#06b6d4" radius={[4, 4, 0, 0]}>
+                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
+                <Bar dataKey="score" fill="#f97316" radius={[4, 4, 0, 0]}>
                   {skillCompetencies.map((entry, index) => (
                     <Cell key={`cell-skill-${index}`} fill={entry.color} />
                   ))}

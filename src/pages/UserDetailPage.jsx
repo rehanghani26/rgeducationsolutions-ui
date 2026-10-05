@@ -409,7 +409,7 @@ const UserDetailPage = () => {
       )}
 
       {/* ── Profile Header Banner ───────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-4">
             <div
@@ -551,7 +551,7 @@ const UserDetailPage = () => {
       {activeTab === 'personal' && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <User className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -616,7 +616,7 @@ const UserDetailPage = () => {
             </div>
 
             {/* Employment Details */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
               <div className="flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
                 <Building className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -659,7 +659,7 @@ const UserDetailPage = () => {
 
           {/* Side Summary Card */}
           <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">Account Status</h3>
               <div className="mt-4 space-y-3 text-xs">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-slate-800">
@@ -690,7 +690,7 @@ const UserDetailPage = () => {
             </div>
 
             {/* Quick Promotion Box */}
-            <div className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-6 shadow-sm dark:border-indigo-900/50 dark:from-indigo-950/30 dark:to-[#0f172a]">
+            <div className="rounded-3xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-6 shadow-sm dark:border-orange-900/50 dark:from-orange-950/30 dark:to-[#121214]">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Role Management</h3>
@@ -713,7 +713,7 @@ const UserDetailPage = () => {
       {/* ── TAB 2: TEACHER & CLASS TEACHER DUTIES ──────────────────────────── */}
       {activeTab === 'academic' && (
         <div className="space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
               <div>
                 <div className="flex items-center gap-2">
@@ -867,7 +867,7 @@ const UserDetailPage = () => {
       {/* ── TAB 3: ROLE & PROMOTION MANAGEMENT ─────────────────────────────── */}
       {activeTab === 'role' && (
         <div className="space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
             <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -939,7 +939,7 @@ const UserDetailPage = () => {
                       className={`flex flex-col justify-between rounded-2xl border p-4 transition ${
                         isCurrent
                           ? 'border-indigo-500 bg-indigo-50/70 shadow-sm dark:border-indigo-500/50 dark:bg-indigo-950/40'
-                          : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-[#0f172a] dark:hover:border-slate-700'
+                          : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-[#1C1B1A] dark:hover:border-slate-700'
                       }`}
                     >
                       <div>
@@ -986,7 +986,7 @@ const UserDetailPage = () => {
       {/* ── TAB 4: CREDENTIALS & SECURITY ─────────────────────────────────── */}
       {activeTab === 'security' && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
               <KeyRound className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -1101,7 +1101,7 @@ const UserDetailPage = () => {
             </form>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0f172a]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
               <Clock className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">

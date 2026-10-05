@@ -46,7 +46,7 @@ const StudentsTab = () => {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm dark:border-slate-800/80 dark:bg-[#0f172a]">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A]">
         <Loader fullPage size="lg" text="Loading student analytics..." />
       </div>
     );
@@ -58,13 +58,13 @@ const StudentsTab = () => {
   const genderStats = data?.genderStats || { Male: 0, Female: 0, Other: 0 };
 
   const genderPieSlices = [
-    { name: "Male Students", value: genderStats.Male || 0, color: "#6366f1" },
+    { name: "Male Students", value: genderStats.Male || 0, color: "#f97316" },
     {
       name: "Female Students",
       value: genderStats.Female || 0,
       color: "#ec4899",
     },
-    { name: "Other", value: genderStats.Other || 0, color: "#a855f7" },
+    { name: "Other", value: genderStats.Other || 0, color: "#f59e0b" },
   ].filter((s) => s.value > 0);
 
   const enrollmentGrowth = data?.enrollmentGrowth || [];
@@ -81,8 +81,8 @@ const StudentsTab = () => {
           label="Total Enrolled Students"
           value={total.toLocaleString()}
           sub={`Active: ${active.toLocaleString()} | Inactive: ${(total - active).toLocaleString()}`}
-          iconBg="bg-indigo-600/20"
-          iconColor="text-indigo-400"
+          iconBg="bg-orange-500/20"
+          iconColor="text-orange-400"
         />
         <StatCard
           icon={Activity}
@@ -97,8 +97,8 @@ const StudentsTab = () => {
           label="New Admissions (30 Days)"
           value={newAdmissions.toLocaleString()}
           sub="Verified DB Applications"
-          iconBg="bg-cyan-600/20"
-          iconColor="text-cyan-400"
+          iconBg="bg-amber-500/20"
+          iconColor="text-amber-400"
         />
         <StatCard
           icon={Clock}
@@ -125,12 +125,12 @@ const StudentsTab = () => {
                       <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                   <XAxis dataKey="month" stroke="#64748b" fontSize={10} />
                   <YAxis stroke="#64748b" fontSize={10} />
                   <Tooltip
                     contentStyle={{
-                      background: "#0f172a",
+                      background: "#1C1B1A",
                       border: "1px solid #334155",
                       borderRadius: "8px",
                     }}
@@ -162,17 +162,17 @@ const StudentsTab = () => {
             {classDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={classDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                   <XAxis dataKey="name" stroke="#64748b" fontSize={10} />
                   <YAxis stroke="#64748b" fontSize={10} />
                   <Tooltip
                     contentStyle={{
-                      background: "#0f172a",
+                      background: "#1C1B1A",
                       border: "1px solid #334155",
                       borderRadius: "8px",
                     }}
                   />
-                  <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -207,7 +207,7 @@ const StudentsTab = () => {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      background: "#0f172a",
+                      background: "#1C1B1A",
                       border: "1px solid #334155",
                       borderRadius: "8px",
                     }}
@@ -225,7 +225,7 @@ const StudentsTab = () => {
           </div>
           <div className="flex justify-center gap-4 border-t border-slate-200 pt-2 text-xs font-semibold dark:border-slate-800">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
               <span>Male: {genderStats.Male}</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -234,7 +234,7 @@ const StudentsTab = () => {
             </div>
             {genderStats.Other > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                 <span>Other: {genderStats.Other}</span>
               </div>
             )}
@@ -250,12 +250,12 @@ const StudentsTab = () => {
               {attendanceByClass.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={attendanceByClass}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
                     <XAxis dataKey="class" stroke="#64748b" fontSize={10} />
                     <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} />
                     <Tooltip
                       contentStyle={{
-                        background: "#0f172a",
+                        background: "#1C1B1A",
                         border: "1px solid #334155",
                         borderRadius: "8px",
                       }}

@@ -43,7 +43,7 @@ const ConfirmDialog = ({
   const Icon = isDanger ? AlertTriangle : Info;
   const iconBg = isDanger
     ? 'bg-rose-500/10 text-rose-500'
-    : 'bg-indigo-500/10 text-indigo-500';
+    : 'bg-orange-500/10 text-orange-500';
 
   return (
     <Modal open={isShow} onClose={handleCancel} title={null} size="sm">

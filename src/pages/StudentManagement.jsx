@@ -50,7 +50,7 @@ const blankForm = {
   confirmPassword: '',
 };
 
-const inputCls = 'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
+const inputCls = 'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none';
 const labelCls = 'block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase';
 const randomPassword = () => `Std@${Math.random().toString(36).slice(2, 8)}${Math.floor(100 + Math.random() * 900)}`;
 
@@ -201,7 +201,7 @@ const StudentManagement = () => {
           <button onClick={() => toast.success('Student directory export prepared')} className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm">
             <FolderDown size={14} /> Export
           </button>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm shadow-orange-500/25">
             <Plus size={14} /> Create Student
           </button>
         </div>
@@ -216,7 +216,7 @@ const StudentManagement = () => {
               placeholder="Search students by name, admission number, email, roll..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
             />
           </div>
 
@@ -244,7 +244,7 @@ const StudentManagement = () => {
                         <p className="font-extrabold">{student.name}</p>
                         <p className="text-slate-400">{student.email || student.contactNumber}</p>
                       </td>
-                      <td className="py-4 font-bold text-indigo-500">{student.admissionNumber}</td>
+                      <td className="py-4 font-bold text-orange-600 dark:text-orange-400">{student.admissionNumber}</td>
                       <td className="py-4">{student.classDetails?.name || student.classId || 'Unassigned'} - {student.sectionDetails?.name || student.sectionId || '-'}</td>
                       <td className="py-4">{student.parentName} ({student.parentContact})</td>
                       <td className="py-4">
@@ -253,8 +253,8 @@ const StudentManagement = () => {
                         </span>
                       </td>
                       <td className="py-4 text-right space-x-1">
-                        <button onClick={() => setSelectedStudent(student)} className="p-1.5 rounded hover:bg-indigo-500/10 text-indigo-500" title="View"><Eye size={14} /></button>
-                        <button onClick={() => openEdit(student)} className="p-1.5 rounded hover:bg-indigo-500/10 text-indigo-500" title="Edit"><Edit3 size={14} /></button>
+                        <button onClick={() => setSelectedStudent(student)} className="p-1.5 rounded hover:bg-orange-500/10 text-orange-500" title="View"><Eye size={14} /></button>
+                        <button onClick={() => openEdit(student)} className="p-1.5 rounded hover:bg-orange-500/10 text-orange-500" title="Edit"><Edit3 size={14} /></button>
                         <button onClick={() => handleResetPassword(student)} className="p-1.5 rounded hover:bg-amber-500/10 text-amber-500" title="Reset password"><KeyRound size={14} /></button>
                         <button onClick={() => handleDeactivate(student)} className="p-1.5 rounded hover:bg-rose-500/10 text-rose-500" title="Deactivate"><UserX size={14} /></button>
                         {['super-admin', 'school-admin'].includes(user?.role) && (
@@ -273,7 +273,7 @@ const StudentManagement = () => {
           {selectedStudent ? (
             <div className="space-y-4 text-xs">
               <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                <div className="w-12 h-12 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xl">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold text-xl shadow-md">
                   {selectedStudent.name?.charAt(0)}
                 </div>
                 <div>

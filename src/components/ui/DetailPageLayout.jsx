@@ -34,7 +34,7 @@ const DetailPageLayout = ({
           )}
           <div className="flex items-center gap-4">
             {avatar && (
-              <div className="w-14 h-14 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-indigo-600/20 overflow-hidden flex-shrink-0">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-orange-500/20 overflow-hidden flex-shrink-0">
                 {typeof avatar === 'string' &&
                 (avatar.startsWith('http://') ||
                   avatar.startsWith('https://') ||
@@ -77,7 +77,7 @@ const DetailPageLayout = ({
 export const EditButton = ({ to }) => (
   <Link
     to={to}
-    className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm shadow-indigo-600/20 transition-all"
+    className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm shadow-orange-500/25 transition-all"
   >
     <Edit3 size={14} /> Edit
   </Link>

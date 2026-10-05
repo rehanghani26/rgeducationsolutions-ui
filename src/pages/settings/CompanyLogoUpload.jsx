@@ -207,7 +207,7 @@ const CompanyLogoUpload = ({ companyLogo, onLogoChange }) => {
             type="button"
             onClick={uploadLogo}
             disabled={uploading}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow-sm shadow-orange-500/25 disabled:opacity-50"
           >
             {uploading ? <Loader2 className="animate-spin" size={15} /> : <UploadCloud size={15} />}
             Upload Logo

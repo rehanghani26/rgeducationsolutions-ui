@@ -20,7 +20,7 @@ const NoticeBoardTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-[#111827]">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A]">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
             <h3 className="flex items-center gap-2 text-xl font-extrabold text-slate-900 dark:text-white">

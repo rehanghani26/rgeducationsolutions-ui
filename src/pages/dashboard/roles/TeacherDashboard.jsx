@@ -144,7 +144,7 @@ const TeacherDashboard = () => {
               <button
                 type="button"
                 onClick={() => navigate('/certificates?tab=id-cards')}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 transition text-xs font-bold cursor-pointer"
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/25 transition text-xs font-bold cursor-pointer"
               >
                 <span>Faculty & Class ID Cards</span>
                 <span>→</span>

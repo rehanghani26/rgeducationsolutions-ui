@@ -5,29 +5,33 @@
 
 @layer base {
   :root {
-    --bg-primary: #f8fafc;
+    --bg-primary: #faf7f2;
     --bg-secondary: #ffffff;
-    --border-color: #e2e8f0;
-    --border-soft: #e2e8f0;
+    --border-color: #efe8dd;
+    --border-soft: #f5efeb;
     --surface-1: #ffffff;
-    --surface-2: #f8fafc;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(241, 245, 249, 0.6);
+    --surface-2: #faf7f2;
+    --text-primary: #1c1917;
+    --text-secondary: #78716c;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(239, 232, 221, 0.8);
+    --brand-primary: #f97316;
+    --brand-gradient: linear-gradient(135deg, #ff7a1a 0%, #f95700 100%);
   }
 
   .dark {
-    --bg-primary: #020617;
-    --bg-secondary: #0f172a;
-    --border-color: #1e293b;
-    --border-soft: #1e293b;
-    --surface-1: #0f172a;
-    --surface-2: #1e293b;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --glass-bg: rgba(15, 23, 42, 0.6);
-    --glass-border: rgba(30, 41, 59, 0.4);
+    --bg-primary: #121214;
+    --bg-secondary: #1c1b1a;
+    --border-color: #2e2c2a;
+    --border-soft: #262423;
+    --surface-1: #1c1b1a;
+    --surface-2: #242220;
+    --text-primary: #faf7f2;
+    --text-secondary: #a8a29e;
+    --glass-bg: rgba(28, 27, 26, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --brand-primary: #fb923c;
+    --brand-gradient: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
   }
 
   html, body {
@@ -68,7 +72,7 @@
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Warm Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -77,14 +81,17 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d6cfc4;
   border-radius: 4px;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #3f3c39;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #f97316;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #fb923c;
 }
 
 /* Custom glassmorphism styles */
@@ -100,16 +107,16 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 24px rgba(249, 115, 22, 0.04);
 }
 
 .dark .glass-card {
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Animated gradient backgrounds */
+/* Animated gradient backgrounds - warm sunset amber tone */
 .animated-bg {
-  background: linear-gradient(-45deg, #0f172a, #1e1b4b, #1e3a8a, #0c4a6e);
+  background: linear-gradient(-45deg, #181716, #2e1c10, #382012, #1f1d1a);
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
 }

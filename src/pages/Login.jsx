@@ -75,13 +75,17 @@ const Login = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center font-sans px-4"
+      className="min-h-screen flex items-center justify-center font-sans px-4 relative overflow-hidden"
       style={{
         background:
-          "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)",
+          "linear-gradient(135deg, #141312 0%, #26160C 50%, #141312 100%)",
       }}
     >
-      <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+      {/* Warm ambient sunset orbs */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-orange-500/10 blur-[100px]" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-500/10 blur-[100px]" />
+
+      <div className="relative z-10 w-full max-w-md bg-[#1C1B1A]/85 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/50">
         {/* Header */}
         <div className="text-center mb-8">
           <img
@@ -93,7 +97,7 @@ const Login = () => {
           <h2 className="text-3xl font-extrabold text-white tracking-tight">
             RG EduCore
           </h2>
-          <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest font-semibold">
+          <p className="text-orange-400/90 text-xs mt-2 uppercase tracking-widest font-bold">
             The Core of Smarter School Management
           </p>
         </div>
@@ -110,12 +114,12 @@ const Login = () => {
         <div className="space-y-5">
           {/* Username */}
           <div>
-            <label className="block text-slate-300 text-xs font-semibold mb-2">
+            <label className="block text-stone-300 text-xs font-semibold mb-2">
               Username / Email
             </label>
             <div className="relative">
               <Mail
-                className="absolute left-3.5 top-3.5 text-slate-500"
+                className="absolute left-3.5 top-3.5 text-stone-500"
                 size={16}
               />
               <input
@@ -124,7 +128,7 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
               />
             </div>
             {localErrors.username && (
@@ -137,19 +141,19 @@ const Login = () => {
           {/* Password */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-slate-300 text-xs font-semibold">
+              <label className="block text-stone-300 text-xs font-semibold">
                 Password
               </label>
               <a
                 href="#"
-                className="text-[10px] text-indigo-400 hover:underline"
+                className="text-[10px] text-orange-400 hover:underline font-medium"
               >
                 Forgot password?
               </a>
             </div>
             <div className="relative">
               <Lock
-                className="absolute left-3.5 top-3.5 text-slate-500"
+                className="absolute left-3.5 top-3.5 text-stone-500"
                 size={16}
               />
               <input
@@ -158,12 +162,12 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-slate-950/40 border border-slate-700/60 rounded-xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-slate-600"
+                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none cursor-pointer"
+                className="absolute right-3.5 top-3.5 text-stone-500 hover:text-stone-300 transition-colors focus:outline-none cursor-pointer"
                 tabIndex={-1}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -182,7 +186,7 @@ const Login = () => {
             type="button"
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50 cursor-pointer transition-all"
           >
             {loading ? (
               <Loader2 className="animate-spin" size={18} />
@@ -194,12 +198,12 @@ const Login = () => {
 
         {/* Register Super Admin Link - Only visible when NO users exist in DB */}
         {isSetupRequired && (
-          <div className="mt-8 border-t border-slate-800 pt-6 text-center">
-            <p className="text-slate-500 text-xs font-semibold">
+          <div className="mt-8 border-t border-stone-800 pt-6 text-center">
+            <p className="text-stone-400 text-xs font-semibold">
               First time here?{" "}
               <Link
                 to="/signup"
-                className="text-indigo-400 hover:underline font-bold"
+                className="text-orange-400 hover:underline font-bold"
               >
                 Register Super Admin
               </Link>

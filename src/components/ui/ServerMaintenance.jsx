@@ -155,8 +155,8 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
     <div
       className={`fixed inset-0 z-[9999] overflow-y-auto flex flex-col ${
         isDark
-          ? "bg-[#080c14] text-white"
-          : "bg-[#f0f4ff] text-slate-900"
+          ? "bg-[#121214] text-[#FAF7F2]"
+          : "bg-[#FAF7F2] text-stone-900"
       }`}
     >
       {/* ── Premium Background ─────────────────────────────────── */}
@@ -169,20 +169,20 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
               : "bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)]"
           } bg-[size:40px_40px]`}
         />
-        {/* Radial glow spots */}
+        {/* Radial warm glow spots */}
         <div
           className={`absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full blur-[120px] ${
-            isDark ? "bg-violet-600/20" : "bg-violet-400/20"
+            isDark ? "bg-orange-500/15" : "bg-orange-400/20"
           }`}
         />
         <div
           className={`absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[100px] ${
-            isDark ? "bg-blue-600/15" : "bg-blue-400/15"
+            isDark ? "bg-amber-600/15" : "bg-amber-400/15"
           }`}
         />
         <div
           className={`absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[90px] ${
-            isDark ? "bg-amber-600/10" : "bg-amber-400/10"
+            isDark ? "bg-orange-600/10" : "bg-orange-400/10"
           }`}
         />
       </div>
@@ -252,17 +252,17 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                   />
 
                   {/* Orbit dots */}
-                  <OrbitDot angle={0} delay={0} color={isDark ? "bg-violet-400" : "bg-violet-600"} />
+                  <OrbitDot angle={0} delay={0} color={isDark ? "bg-orange-400" : "bg-orange-500"} />
                   <OrbitDot angle={120} delay={2} color={isDark ? "bg-amber-400" : "bg-amber-500"} />
-                  <OrbitDot angle={240} delay={4} color={isDark ? "bg-blue-400" : "bg-blue-600"} />
+                  <OrbitDot angle={240} delay={4} color={isDark ? "bg-rose-400" : "bg-rose-500"} />
 
                   {/* Inner glowing circle */}
                   <div className="absolute inset-6">
                     <div
                       className={`w-full h-full rounded-full flex items-center justify-center border-2 shadow-2xl ${
                         isDark
-                          ? "bg-gradient-to-br from-slate-800 to-slate-900 border-violet-500/40 shadow-violet-500/20"
-                          : "bg-gradient-to-br from-white to-slate-100 border-violet-300/60 shadow-violet-300/30"
+                          ? "bg-gradient-to-br from-stone-800 to-stone-900 border-orange-500/40 shadow-orange-500/20"
+                          : "bg-gradient-to-br from-white to-stone-100 border-orange-300/60 shadow-orange-300/30"
                       }`}
                     >
                       {/* Animated gear */}
@@ -272,7 +272,7 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                       >
                         <GearIcon
                           size={36}
-                          className={isDark ? "text-violet-400" : "text-violet-600"}
+                          className={isDark ? "text-orange-400" : "text-orange-500"}
                         />
                       </motion.div>
                     </div>
@@ -290,8 +290,8 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                 <div
                   className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border ${
                     isDark
-                      ? "bg-violet-500/10 border-violet-500/30 text-violet-400"
-                      : "bg-violet-100 border-violet-300 text-violet-700"
+                      ? "bg-orange-500/10 border-orange-500/30 text-orange-400"
+                      : "bg-orange-100 border-orange-300 text-orange-700"
                   }`}
                 >
                   <WifiOff size={12} />
@@ -307,8 +307,8 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                   <span
                     className={`bg-clip-text text-transparent bg-gradient-to-r ${
                       isDark
-                        ? "from-violet-400 via-purple-400 to-blue-400"
-                        : "from-violet-600 via-purple-600 to-blue-600"
+                        ? "from-orange-400 via-amber-400 to-rose-400"
+                        : "from-orange-600 via-amber-600 to-rose-600"
                     }`}
                   >
                     Maintenance
@@ -387,7 +387,7 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                       <circle
                         cx="20" cy="20" r="18"
                         fill="none"
-                        stroke={isDark ? "#8b5cf6" : "#7c3aed"}
+                        stroke={isDark ? "#f97316" : "#ea580c"}
                         strokeWidth="3"
                         strokeDasharray={circumference}
                         strokeDashoffset={strokeDashoffset}
@@ -396,7 +396,7 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className={`text-sm font-black ${isDark ? "text-violet-400" : "text-violet-600"}`}>
+                      <span className={`text-sm font-black ${isDark ? "text-orange-400" : "text-orange-600"}`}>
                         {countdown}
                       </span>
                     </div>
@@ -453,7 +453,7 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
                   type="button"
                   onClick={handleCheckConnection}
                   disabled={isChecking}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm py-3 px-6 rounded-2xl transition-all shadow-lg shadow-violet-600/30 cursor-pointer select-none"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm py-3 px-6 rounded-2xl transition-all shadow-lg shadow-orange-500/25 cursor-pointer select-none"
                 >
                   <RefreshCw size={15} className={isChecking ? "animate-spin" : ""} />
                   {isChecking ? "Pinging Server…" : "Retry Connection Now"}

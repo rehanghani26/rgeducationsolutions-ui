@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { syncDocumentThemeVariables } from "./color.js";
 
 export const THEME_MODES = {
   LIGHT: "light",
@@ -49,6 +50,7 @@ export const applyThemeToDocument = (theme) => {
   root.classList.toggle("dark", nextTheme === THEME_MODES.DARK);
   root.dataset.theme = nextTheme;
   root.style.colorScheme = nextTheme;
+  syncDocumentThemeVariables();
 };
 
 export const ThemeProvider = ({ children }) => {

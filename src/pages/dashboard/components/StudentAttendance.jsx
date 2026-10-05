@@ -108,14 +108,14 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
   return (
     <div className="space-y-6 font-sans text-slate-900 dark:text-slate-100">
       {/* ─── HEADER BAR ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-[#111827] dark:shadow-xl md:flex-row md:items-center">
+      <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A] dark:shadow-xl md:flex-row md:items-center">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <CalendarCheck className="text-indigo-400" size={26} />
+            <CalendarCheck className="text-orange-500 dark:text-orange-400" size={26} />
             <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               My Student Day-Wise Attendance
             </h2>
-            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30">
               Personal Record
             </span>
           </div>
@@ -136,8 +136,8 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
       </div>
 
       {/* ─── TODAY'S ATTENDANCE STATUS WIDGET ──────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800/80 dark:bg-[#111827]">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800/80 dark:bg-[#1C1B1A]">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
@@ -145,7 +145,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
                 Today's Date:
               </span>
-              <span className="text-xs font-bold text-indigo-400">{todayDateFormatted}</span>
+              <span className="text-xs font-bold text-orange-500 dark:text-orange-400">{todayDateFormatted}</span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -204,31 +204,31 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
 
       {/* ─── SUMMARY STATS CARDS ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#111827]">
+        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#1C1B1A]">
           <span className="text-[11px] font-semibold text-slate-400">Total Tracked Days</span>
           <h3 className="text-2xl font-black text-slate-900 dark:text-white">{totalDays} Days</h3>
           <span className="text-[10px] text-indigo-400 font-bold">Academic Session</span>
         </div>
 
-        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#111827]">
+        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#1C1B1A]">
           <span className="text-[11px] font-semibold text-slate-400">Days Present</span>
           <h3 className="text-2xl font-black text-emerald-400">{presentCount} Days</h3>
           <span className="text-[10px] text-emerald-400 font-bold">Full Attendance</span>
         </div>
 
-        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#111827]">
+        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#1C1B1A]">
           <span className="text-[11px] font-semibold text-slate-400">Days Absent</span>
           <h3 className="text-2xl font-black text-rose-400">{absentCount} Days</h3>
           <span className="text-[10px] text-rose-400 font-bold">Unexcused / Leave</span>
         </div>
 
-        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#111827]">
+        <div className="space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#1C1B1A]">
           <span className="text-[11px] font-semibold text-slate-400">Late / Half Day</span>
           <h3 className="text-2xl font-black text-amber-400">{lateCount + halfDayCount} Days</h3>
           <span className="text-[10px] text-amber-400 font-bold">Late Arrival</span>
         </div>
 
-        <div className="col-span-2 space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#111827] sm:col-span-1">
+        <div className="col-span-2 space-y-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800/80 dark:bg-[#1C1B1A] sm:col-span-1">
           <span className="text-[11px] font-semibold text-slate-400">Attendance Percentage</span>
           <h3 className="text-2xl font-black text-indigo-400">{percentage}</h3>
           <span className="text-[10px] text-emerald-400 font-bold">Good Standing Badge</span>
@@ -236,7 +236,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
       </div>
 
       {/* ─── FILTERS & DAY-WISE ATTENDANCE TABLE ───────────────────────────── */}
-      <div className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-[#111827]">
+      <div className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A]">
         {/* Table Controls Header */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">

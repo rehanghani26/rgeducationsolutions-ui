@@ -43,7 +43,7 @@ function FallbackUI({ error: propError, resetErrorBoundary, compact = false }) {
       className={`flex flex-col items-center justify-center p-4 transition-colors ${
         compact
           ? "min-h-[350px] w-full py-12"
-          : "min-h-screen w-full bg-slate-50 dark:bg-[#020617] text-slate-800 dark:text-slate-100"
+          : "min-h-screen w-full bg-[#FAF7F2] dark:bg-[#121214] text-stone-800 dark:text-stone-100"
       }`}
       style={{
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
@@ -74,8 +74,7 @@ function FallbackUI({ error: propError, resetErrorBoundary, compact = false }) {
           <button
             type="button"
             onClick={handleReset}
-            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#000F52] hover:bg-[#001780] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-900/20 transition-all duration-200 hover:shadow-lg active:scale-95"
-            style={{ backgroundColor: "#000F52" }}
+            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-orange-500/25 transition-all duration-200 hover:shadow-lg active:scale-95 cursor-pointer"
           >
             <RefreshCw className="h-4 w-4" />
             <span>Try Again</span>

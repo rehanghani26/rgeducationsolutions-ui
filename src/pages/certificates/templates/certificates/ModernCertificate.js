@@ -15,9 +15,9 @@ export const modernCertificate = {
     return `
       <div style="
         width: 280mm; min-height: 190mm; font-family: 'Inter', Arial, sans-serif;
-        background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        background: linear-gradient(145deg, #141312 0%, #26160C 50%, #141312 100%);
         position: relative; overflow: hidden;
-        box-shadow: 0 8px 40px rgba(99,102,241,0.3);
+        box-shadow: 0 8px 40px rgba(249,115,22,0.25);
       ">
         <!-- Top gradient bar -->
         <div style="height:6px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899,#f59e0b,#10b981,#6366f1);"></div>

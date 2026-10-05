@@ -7,6 +7,7 @@ import AiHeader from "./components/AiHeader.jsx";
 import AiWelcome from "./components/AiWelcome.jsx";
 import AiMessages from "./components/AiMessages.jsx";
 import AiInput from "./components/AiInput.jsx";
+import { bg, text } from "@/theme/color";
 
 export default function AiMode() {
   const { user } = useSelector((state) => state.auth);
@@ -84,19 +85,19 @@ export default function AiMode() {
         }
         .ai-msg-enter { animation: fadeSlideUp 0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
         .gradient-animated {
-          background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899, #6366f1);
+          background: linear-gradient(135deg, #f97316, #ea580c, #f59e0b, #f97316);
           background-size: 300% 300%;
           animation: gradientShift 4s ease infinite;
         }
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 99px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(249,115,22,0.3); border-radius: 99px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(249,115,22,0.5); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
       <div
-        className="flex h-screen w-screen overflow-hidden bg-[#080c14] text-slate-100"
+        className={`flex h-screen w-screen overflow-hidden ${bg.page} ${text.primary}`}
         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
       >
         {/* Left Sidebar */}

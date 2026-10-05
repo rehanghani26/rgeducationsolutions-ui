@@ -595,10 +595,10 @@ const StudentForm = ({
       )}
 
       {/* ── Section: Identity, Photo & Aadhaar Documents ─────────────────── */}
-      <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-slate-50 to-sky-50/50 dark:from-slate-800/60 dark:via-slate-900 dark:to-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 shadow-sm space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-indigo-100/80 dark:border-slate-800">
+      <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/50 dark:from-stone-800/60 dark:via-stone-900 dark:to-orange-950/30 border border-orange-100 dark:border-orange-900/40 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-orange-200/60 dark:border-stone-800">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25">
               <ShieldCheck size={18} />
             </div>
             <div>
@@ -641,7 +641,7 @@ const StudentForm = ({
 
             {currentPhoto ? (
               <div className="flex items-center gap-3">
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-indigo-500/40 shadow-md flex-shrink-0 bg-slate-100 dark:bg-slate-900">
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-orange-500/40 shadow-md flex-shrink-0 bg-slate-100 dark:bg-slate-900">
                   <img
                     src={currentPhoto}
                     alt="Student Photo"
@@ -658,7 +658,7 @@ const StudentForm = ({
                       type="button"
                       onClick={() => photoInputRef.current?.click()}
                       disabled={uploadingPhoto}
-                      className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-orange-600 dark:text-orange-500 hover:underline cursor-pointer"
                     >
                       Change
                     </button>
@@ -702,13 +702,13 @@ const StudentForm = ({
                   !editing && !currentPhoto
                     ? "border-amber-400/80 bg-amber-500/5"
                     : "border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40"
-                } hover:border-indigo-500 dark:hover:border-indigo-400 transition flex flex-col items-center justify-center text-center cursor-pointer min-h-[100px]`}
+                } hover:border-orange-500 dark:hover:border-orange-400 transition flex flex-col items-center justify-center text-center cursor-pointer min-h-[100px]`}
               >
                 {uploadingPhoto ? (
                   <div className="flex flex-col items-center gap-2 py-2">
                     <Loader2
                       size={24}
-                      className="animate-spin text-indigo-600 dark:text-indigo-400"
+                      className="animate-spin text-orange-600 dark:text-orange-500"
                     />
                     <span className="text-xs font-medium text-slate-500">
                       Uploading to Cloudinary...
@@ -716,7 +716,7 @@ const StudentForm = ({
                   </div>
                 ) : (
                   <>
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5">
+                    <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center mb-1.5">
                       <ImageIcon size={20} />
                     </div>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -785,7 +785,7 @@ const StudentForm = ({
                     <button
                       type="button"
                       onClick={() => setPdfPreviewOpen(true)}
-                      className="flex items-center gap-1 font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      className="flex items-center gap-1 font-bold text-orange-600 dark:text-orange-500 hover:underline cursor-pointer"
                     >
                       <Eye size={12} />
                       <span>Preview PDF</span>
@@ -808,7 +808,7 @@ const StudentForm = ({
                       type="button"
                       onClick={() => aadhaarInputRef.current?.click()}
                       disabled={uploadingAadhaar}
-                      className="text-xs font-semibold text-slate-500 hover:text-indigo-600 cursor-pointer"
+                      className="text-xs font-semibold text-slate-500 hover:text-orange-600 cursor-pointer"
                     >
                       Replace
                     </button>
@@ -838,13 +838,13 @@ const StudentForm = ({
                   !editing && !currentAadhaar
                     ? "border-amber-400/80 bg-amber-500/5"
                     : "border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40"
-                } hover:border-indigo-500 dark:hover:border-indigo-400 transition flex flex-col items-center justify-center text-center cursor-pointer min-h-[100px]`}
+                } hover:border-orange-500 dark:hover:border-orange-400 transition flex flex-col items-center justify-center text-center cursor-pointer min-h-[100px]`}
               >
                 {uploadingAadhaar ? (
                   <div className="flex flex-col items-center gap-2 py-2">
                     <Loader2
                       size={24}
-                      className="animate-spin text-indigo-600 dark:text-indigo-400"
+                      className="animate-spin text-orange-600 dark:text-orange-500"
                     />
                     <span className="text-xs font-medium text-slate-500">
                       Uploading PDF to Cloudinary...
@@ -852,7 +852,7 @@ const StudentForm = ({
                   </div>
                 ) : (
                   <>
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5">
+                    <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center mb-1.5">
                       <Upload size={20} />
                     </div>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -895,7 +895,7 @@ const StudentForm = ({
               />
             </div>
             <p className="text-[11px] text-slate-400 flex items-center gap-1">
-              <span className="font-semibold text-indigo-500">Note:</span>
+              <span className="font-semibold text-orange-500">Note:</span>
               UIDAI 12-digit number issued to the student.
             </p>
           </div>
@@ -977,7 +977,7 @@ const StudentForm = ({
           {editing && (form.admissionNumber || form.rollNumber) && (
             <div className="flex flex-wrap gap-2">
               {form.admissionNumber && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-500">
                   <span className="text-[10px] font-bold uppercase text-slate-400">
                     Admission No:
                   </span>
@@ -1092,7 +1092,7 @@ const StudentForm = ({
 
         {/* ── Section 3: Account & Credentials ─────────────────────────── */}
         <section className="space-y-3">
-          <h4 className="font-bold text-sm text-indigo-600 dark:text-indigo-400">
+          <h4 className="font-bold text-sm text-orange-600 dark:text-orange-500">
             Student Account &amp; Login Credentials
           </h4>
 
@@ -1135,7 +1135,7 @@ const StudentForm = ({
                   disabled={sendingOtp || !form.email || !form.email.includes("@")}
                   className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer shadow-xs ${
                     form.email && form.email.includes("@")
-                      ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20 active:scale-95"
+                      ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-orange-500/25 active:scale-95"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
                   }`}
                   title="Verify student email with 6-digit OTP code"
@@ -1157,10 +1157,10 @@ const StudentForm = ({
 
             {/* Inline OTP Verification Panel */}
             {showOtpBox && !form.isEmailVerified && (
-              <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-br from-indigo-50/80 to-slate-50 dark:from-slate-800 dark:to-indigo-950/40 border border-indigo-200 dark:border-indigo-900/60 shadow-sm space-y-3">
+              <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-br from-orange-50/80 to-amber-50/40 dark:from-stone-800 dark:to-orange-950/40 border border-orange-200/80 dark:border-orange-900/60 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-300">
-                    <KeyRound size={14} className="text-indigo-600 dark:text-indigo-400" />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-orange-700 dark:text-orange-400">
+                    <KeyRound size={14} className="text-orange-600 dark:text-orange-500" />
                     <span>Enter 6-Digit Verification Code</span>
                   </div>
                   <button
@@ -1178,7 +1178,7 @@ const StudentForm = ({
                 </div>
 
                 <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                  A 6-digit verification code was sent to <strong className="text-indigo-600 dark:text-indigo-400">{form.email}</strong>.
+                  A 6-digit verification code was sent to <strong className="text-orange-600 dark:text-orange-400">{form.email}</strong>.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
@@ -1193,7 +1193,7 @@ const StudentForm = ({
                         setOtpError("");
                       }}
                       placeholder="• • • • • •"
-                      className="w-full px-3 py-2 text-center font-mono font-bold tracking-[8px] text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 text-center font-mono font-bold tracking-[8px] text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                       autoFocus
                     />
                   </div>
@@ -1229,7 +1229,7 @@ const StudentForm = ({
                   </p>
                 )}
 
-                <div className="flex items-center justify-between pt-1 border-t border-indigo-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-between pt-1 border-t border-orange-200/60 dark:border-stone-800 text-[11px] text-slate-500 dark:text-slate-400">
                   <span>Didn't receive code?</span>
                   {countdown > 0 ? (
                     <span className="font-mono text-slate-400">
@@ -1240,7 +1240,7 @@ const StudentForm = ({
                       type="button"
                       onClick={handleSendEmailOtp}
                       disabled={sendingOtp}
-                      className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer flex items-center gap-1"
+                      className="font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer flex items-center gap-1"
                     >
                       <RefreshCw size={11} className={sendingOtp ? "animate-spin" : ""} />
                       <span>Resend OTP Code</span>
@@ -1272,7 +1272,7 @@ const StudentForm = ({
                   size="sm"
                   icon={<Wand2 size={16} />}
                   onClick={generatePwd}
-                  className="mb-[1px] p-2 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 hover:bg-indigo-100 !rounded-lg"
+                  className="mb-[1px] p-2 bg-orange-50 dark:bg-orange-900/40 text-orange-600 hover:bg-orange-100 !rounded-lg"
                   title="Auto-generate password"
                 />
               </div>

@@ -328,7 +328,7 @@ const SettingsOverview = () => {
   return (
     <div className="space-y-4">
       {/* My Profile Quick-Access Banner (Always visible to all users) */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 p-4 sm:p-5 text-white shadow-md border border-indigo-800/40">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] p-4 sm:p-5 text-white shadow-md border border-orange-500/20">
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             {userPhoto && !photoError ? (
@@ -336,11 +336,11 @@ const SettingsOverview = () => {
                 key={userPhoto}
                 src={resolveImageUrl(userPhoto)}
                 alt={authUser?.name || "User"}
-                className="size-12 sm:size-14 rounded-2xl object-cover ring-2 ring-indigo-400/50 shadow-md"
+                className="size-12 sm:size-14 rounded-2xl object-cover ring-2 ring-orange-400/50 shadow-md"
                 onError={() => setPhotoError(true)}
               />
             ) : (
-              <div className="size-12 sm:size-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg font-black text-white ring-2 ring-indigo-400/30 shadow-md">
+              <div className="size-12 sm:size-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-lg font-black text-white ring-2 ring-orange-400/30 shadow-md">
                 {(authUser?.name || authUser?.username || "U")
                   .slice(0, 2)
                   .toUpperCase()}
@@ -351,11 +351,11 @@ const SettingsOverview = () => {
                 <h3 className="text-base sm:text-lg font-black text-white tracking-tight">
                   {authUser?.name || authUser?.username || "User Account"}
                 </h3>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-300 border border-orange-400/30">
                   {authUser?.role || "Staff"}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5 truncate max-w-xs sm:max-w-md">
+              <p className="text-xs text-stone-300 mt-0.5 truncate max-w-xs sm:max-w-md">
                 {authUser?.email ||
                   "Manage your personal profile, credentials and picture"}
               </p>
@@ -366,7 +366,7 @@ const SettingsOverview = () => {
             <button
               type="button"
               onClick={() => navigate("/settings/my-profile")}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-sm shadow-orange-500/25 transition cursor-pointer"
             >
               <User size={13} />
               <span>My Profile</span>
@@ -399,7 +399,7 @@ const SettingsOverview = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search settings (e.g. syllabus, fees, 2FA)..."
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
           />
         </div>
       </div>
@@ -413,7 +413,7 @@ const SettingsOverview = () => {
             onClick={() => setActiveCategoryFilter(cat.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap border ${
               activeCategoryFilter === cat.id
-                ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-xs"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700"
             }`}
           >

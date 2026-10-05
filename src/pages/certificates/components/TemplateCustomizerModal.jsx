@@ -20,8 +20,8 @@ export default function TemplateCustomizerModal({
 }) {
   const initialBase = editingTemplate ? editingTemplate.baseTemplateId : 'student-id-classic';
   const initialConfig = editingTemplate?.configuration || {
-    primaryColor: '#1e3a8a',
-    secondaryColor: '#3b82f6',
+    primaryColor: '#ea580c',
+    secondaryColor: '#f59e0b',
     fontFamily: 'Inter',
     showQRCode: true,
     showPhoto: true,
@@ -30,8 +30,8 @@ export default function TemplateCustomizerModal({
 
   const [name, setName] = useState(editingTemplate ? editingTemplate.name : 'Custom Template');
   const [baseTemplateId, setBaseTemplateId] = useState(initialBase);
-  const [primaryColor, setPrimaryColor] = useState(initialConfig.primaryColor || '#1e3a8a');
-  const [secondaryColor, setSecondaryColor] = useState(initialConfig.secondaryColor || '#3b82f6');
+  const [primaryColor, setPrimaryColor] = useState(initialConfig.primaryColor || '#ea580c');
+  const [secondaryColor, setSecondaryColor] = useState(initialConfig.secondaryColor || '#f59e0b');
   const [fontFamily, setFontFamily] = useState(initialConfig.fontFamily || 'Inter');
   const [showQRCode, setShowQRCode] = useState(initialConfig.showQRCode !== false);
   const [showPhoto, setShowPhoto] = useState(initialConfig.showPhoto !== false);
@@ -104,7 +104,7 @@ export default function TemplateCustomizerModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-400 border border-violet-500/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center">
               <Palette size={20} />
             </div>
             <div>
@@ -134,8 +134,8 @@ export default function TemplateCustomizerModal({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Modern Navy 2026"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                placeholder="e.g. Sunset Amber 2026"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
                 required
               />
             </div>
@@ -159,7 +159,7 @@ export default function TemplateCustomizerModal({
             {/* Colors */}
             <div className="space-y-3 pt-2 border-t border-slate-800">
               <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <Sliders size={14} className="text-violet-400" />
+                <Sliders size={14} className="text-orange-400" />
                 Color Theme
               </span>
 
@@ -259,7 +259,7 @@ export default function TemplateCustomizerModal({
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg hover:shadow-violet-500/20 transition cursor-pointer disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white text-xs font-bold rounded-xl shadow-lg hover:shadow-orange-500/20 transition cursor-pointer disabled:opacity-50"
               >
                 <Save size={15} />
                 <span>{saving ? 'Saving...' : 'Save Custom Template'}</span>

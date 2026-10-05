@@ -10,7 +10,7 @@ const Tabs = ({ tabs, activeTab, onChange, className = '' }) => (
           type="button"
           onClick={() => onChange(tab.id)}
           className={`relative px-4 py-2.5 text-xs font-bold transition-colors ${
-            isActive ? 'text-indigo-500' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            isActive ? 'text-orange-600 dark:text-orange-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
           }`}
         >
           {tab.icon && <tab.icon size={14} className="inline mr-1.5 -mt-0.5" />}
@@ -21,7 +21,7 @@ const Tabs = ({ tabs, activeTab, onChange, className = '' }) => (
           {isActive && (
             <motion.div
               layoutId="tab-indicator"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full"
             />
           )}
         </button>

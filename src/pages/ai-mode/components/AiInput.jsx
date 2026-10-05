@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { Send, RefreshCw } from "lucide-react";
 import { QUICK_CHIPS } from "../ai.constants.js";
+import { bg, border, text } from "@/theme/color";
 
 export default function AiInput({
   inputPrompt,
@@ -29,14 +30,14 @@ export default function AiInput({
   };
 
   return (
-    <div className="flex-shrink-0 border-t border-white/5 bg-[#080c14]/90 px-3 pb-4 pt-3 backdrop-blur-xl sm:px-6">
+    <div className={`flex-shrink-0 border-t ${border.default} ${bg.header} px-3 pb-4 pt-3 backdrop-blur-xl sm:px-6`}>
       {/* Quick Chips */}
       <div className="mb-2.5 flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
         {QUICK_CHIPS.map(({ emoji, label, prompt }) => (
           <button
             key={label}
             onClick={() => onSendMessage(prompt)}
-            className="flex-shrink-0 flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[11px] text-slate-300 transition-all hover:border-indigo-500/30 hover:bg-indigo-500/10 hover:text-white active:scale-95 whitespace-nowrap"
+            className={`flex-shrink-0 flex items-center gap-1.5 rounded-full border ${border.default} ${bg.card} px-3 py-1.5 text-[11px] ${text.secondary} transition-all hover:border-orange-500/40 hover:${bg.hover} hover:${text.brand} active:scale-95 whitespace-nowrap shadow-2xs cursor-pointer`}
           >
             <span>{emoji}</span>
             <span>{label}</span>
@@ -45,7 +46,7 @@ export default function AiInput({
       </div>
 
       {/* Input Box */}
-      <div className="relative flex items-end gap-2 rounded-2xl border border-white/8 bg-[#111828] p-2 shadow-2xl transition-all focus-within:border-indigo-500/40 focus-within:ring-1 focus-within:ring-indigo-500/20">
+      <div className={`relative flex items-end gap-2 rounded-2xl border ${border.default} ${bg.card} p-2 shadow-lg transition-all focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20`}>
         <textarea
           ref={textareaRef}
           value={inputPrompt}
@@ -53,7 +54,7 @@ export default function AiInput({
           onKeyDown={handleKeyDown}
           placeholder="Ask anything or command an ERP action..."
           rows={1}
-          className="max-h-40 min-h-[36px] flex-1 resize-none bg-transparent px-2 py-2 text-[13px] text-white placeholder-slate-500 focus:outline-none leading-relaxed"
+          className={`max-h-40 min-h-[36px] flex-1 resize-none bg-transparent px-2 py-2 text-[13px] ${text.primary} placeholder:text-stone-400 focus:outline-none leading-relaxed`}
         />
         <div className="flex items-center gap-1.5 pb-0.5 flex-shrink-0">
           <button
@@ -61,13 +62,13 @@ export default function AiInput({
             disabled={!inputPrompt.trim() || loading}
             className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
               inputPrompt.trim() && !loading
-                ? "gradient-animated text-white shadow-lg hover:scale-105 active:scale-95"
-                : "bg-white/5 text-slate-600 cursor-not-allowed"
+                ? "gradient-animated text-white shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                : `${bg.surface} ${text.muted} cursor-not-allowed border ${border.subtle}`
             }`}
             title="Send (Enter)"
           >
             {loading ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
+              <RefreshCw className="h-4 w-4 animate-spin text-orange-500" />
             ) : (
               <Send className="h-4 w-4" />
             )}
@@ -75,7 +76,7 @@ export default function AiInput({
         </div>
       </div>
 
-      <div className="mt-2 text-center text-[10px] text-slate-600">
+      <div className={`mt-2 text-center text-[10px] ${text.muted}`}>
         Powered by Advanced System AI · Real-time ERP operations · Press Enter
         to send, Shift+Enter for new line
       </div>

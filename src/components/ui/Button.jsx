@@ -18,15 +18,15 @@ import { Loader2 } from 'lucide-react';
 
 const variantMap = {
   primary:
-    'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20',
+    'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:from-orange-700 active:to-amber-700 text-white shadow-sm shadow-orange-500/25',
   secondary:
-    'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200',
+    'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200',
   danger:
     'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-sm shadow-rose-600/20',
   ghost:
     'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300',
   outline:
-    'bg-transparent border border-indigo-500/40 hover:border-indigo-500 text-indigo-500 hover:bg-indigo-500/5',
+    'bg-transparent border border-orange-500/40 hover:border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-500/5',
   'outline-danger':
     'bg-transparent border border-rose-500/40 hover:border-rose-500 text-rose-500 hover:bg-rose-500/5',
 };
@@ -67,7 +67,7 @@ const Button = ({
       onClick={onClick}
       disabled={isDisabled}
       className={[
-        'inline-flex items-center justify-center rounded-lg font-bold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 select-none',
+        'inline-flex items-center justify-center rounded-lg font-bold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 select-none',
         variantMap[variant] || variantMap.primary,
         sizeMap[size] || sizeMap.md,
         isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',

@@ -40,7 +40,7 @@ const FinanceTab = () => {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm dark:border-slate-800/80 dark:bg-[#0f172a]">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A]">
         <Loader fullPage size="lg" text="Loading financial analytics & ledger..." />
       </div>
     );

@@ -451,7 +451,7 @@ const StudentDetail = () => {
         </div>
         <Link
           to="/students"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-500 transition"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold hover:from-orange-600 hover:to-amber-600 transition shadow-md shadow-orange-500/20"
         >
           <ArrowLeft size={14} /> Back to Students
         </Link>
@@ -466,7 +466,7 @@ const StudentDetail = () => {
         <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
           <Link
             to="/students"
-            className="hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 transition"
+            className="hover:text-orange-500 dark:hover:text-orange-400 flex items-center gap-1 transition"
           >
             <ArrowLeft size={14} />
             <span>Students</span>
@@ -490,14 +490,14 @@ const StudentDetail = () => {
           )}
           <Link
             to={`/id-cards?studentId=${studentId}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition shadow-sm"
           >
-            <CreditCard size={14} className="text-indigo-500" />
+            <CreditCard size={14} className="text-orange-500" />
             <span>ID Card</span>
           </Link>
           <Link
             to={`/students/${studentId}/edit`}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition shadow-md shadow-indigo-600/20"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:from-orange-700 active:to-amber-700 transition shadow-md shadow-orange-500/25"
           >
             <Edit3 size={13} />
             <span>Edit Profile</span>
@@ -508,15 +508,15 @@ const StudentDetail = () => {
       {/* ── Modern Profile Hero Banner ────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
         {/* Decorative Header Gradient Banner */}
-        <div className="h-36 sm:h-44 w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(99,102,241,0.25),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(56,189,248,0.18),transparent_50%)]" />
-          <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+        <div className="h-36 sm:h-44 w-full bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] relative overflow-hidden border-b border-orange-500/20">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(249,115,22,0.25),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(245,158,11,0.18),transparent_50%)]" />
+          <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
 
           {/* Quick Corner Tag */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white/90 border border-white/10 flex items-center gap-1.5">
-              <School size={12} className="text-indigo-400" />
+              <School size={12} className="text-orange-400" />
               <span>{student.academicYear || "Academic Year 2025-26"}</span>
             </span>
           </div>
@@ -528,7 +528,7 @@ const StudentDetail = () => {
             {/* Avatar with Click-to-Zoom */}
             <div
               onClick={() => photoUrl && setPhotoModalOpen(true)}
-              className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white dark:border-slate-900 shadow-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex-shrink-0 ${
+              className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white dark:border-slate-900 shadow-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex-shrink-0 ${
                 photoUrl ? "cursor-pointer group" : ""
               }`}
             >
@@ -559,7 +559,7 @@ const StudentDetail = () => {
                   student.status === "active"
                     ? "bg-emerald-500"
                     : student.status === "Passout"
-                      ? "bg-indigo-500"
+                      ? "bg-amber-500"
                       : "bg-slate-400"
                 }`}
                 title={`Status: ${student.status || "Active"}`}
@@ -588,10 +588,10 @@ const StudentDetail = () => {
                   onClick={() =>
                     handleCopy(student.admissionNumber, "Admission No")
                   }
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/70 dark:border-indigo-800/40 text-indigo-700 dark:text-indigo-300 font-mono font-bold cursor-pointer hover:bg-indigo-100 transition"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/60 border border-orange-200/70 dark:border-orange-800/40 text-orange-700 dark:text-orange-300 font-mono font-bold cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/40 transition"
                   title="Click to copy admission number"
                 >
-                  <Hash size={12} className="text-indigo-500" />
+                  <Hash size={12} className="text-orange-500" />
                   <span>{student.admissionNumber || "ADM-N/A"}</span>
                   {copiedField === "Admission No" ? (
                     <Check size={11} className="text-emerald-500" />
@@ -602,7 +602,7 @@ const StudentDetail = () => {
 
                 {/* Class & Section Pill */}
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold">
-                  <School size={13} className="text-indigo-500" />
+                  <School size={13} className="text-orange-500" />
                   <span>{classSection}</span>
                 </span>
 
@@ -631,9 +631,9 @@ const StudentDetail = () => {
             {student.contactNumber && (
               <a
                 href={`tel:${student.contactNumber}`}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-slate-700 dark:text-slate-200 hover:text-indigo-600 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
               >
-                <Phone size={13} className="text-indigo-500" />
+                <Phone size={13} className="text-orange-500" />
                 <span>{student.contactNumber}</span>
               </a>
             )}
@@ -641,9 +641,9 @@ const StudentDetail = () => {
               <div className="flex items-center gap-1.5">
                 <a
                   href={`mailto:${student.email}`}
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-slate-700 dark:text-slate-200 hover:text-indigo-600 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
                 >
-                  <Mail size={13} className="text-indigo-500" />
+                  <Mail size={13} className="text-orange-500" />
                   <span className="truncate max-w-[150px]">{student.email}</span>
                 </a>
                 {student.isEmailVerified ? (
@@ -714,7 +714,7 @@ const StudentDetail = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
@@ -731,10 +731,10 @@ const StudentDetail = () => {
           {activeTab === "overview" && (
             <div className="space-y-6">
               {/* Government & Identity Proof Card */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-slate-50 to-sky-50/40 dark:from-slate-800/80 dark:via-slate-900 dark:to-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 shadow-sm space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-indigo-100/80 dark:border-slate-800">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/40 dark:from-stone-800/80 dark:via-stone-900 dark:to-orange-950/40 border border-orange-100 dark:border-orange-900/50 shadow-sm space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-orange-100/80 dark:border-slate-800">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25">
                       <ShieldCheck size={20} />
                     </div>
                     <div>
@@ -758,7 +758,7 @@ const StudentDetail = () => {
                       <button
                         type="button"
                         onClick={() => setPdfModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shadow-md shadow-orange-500/25 transition cursor-pointer"
                       >
                         <Eye size={14} />
                         <span>Preview PDF</span>
@@ -791,7 +791,7 @@ const StudentDetail = () => {
                           onClick={() =>
                             handleCopy(student.aadhaarNumber, "Aadhaar Number")
                           }
-                          className="p-1 text-slate-400 hover:text-indigo-600 transition"
+                          className="p-1 text-slate-400 hover:text-orange-500 transition"
                           title="Copy Aadhaar Number"
                         >
                           {copiedField === "Aadhaar Number" ? (
@@ -819,7 +819,7 @@ const StudentDetail = () => {
                       {photoUrl && (
                         <button
                           onClick={() => setPhotoModalOpen(true)}
-                          className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                          className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
                         >
                           Preview
                         </button>
@@ -844,7 +844,7 @@ const StudentDetail = () => {
                         <button
                           type="button"
                           onClick={() => setPdfModalOpen(true)}
-                          className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                          className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline inline-flex items-center gap-0.5 cursor-pointer"
                         >
                           <span>Preview</span>
                           <Eye size={11} />
@@ -860,7 +860,7 @@ const StudentDetail = () => {
                 {/* Personal Information */}
                 <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    <User size={15} className="text-indigo-500" />
+                    <User size={15} className="text-orange-500" />
                     <span>Personal Information</span>
                   </h4>
 
@@ -890,7 +890,7 @@ const StudentDetail = () => {
                         Date of Birth
                       </span>
                       <p className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                        <Cake size={13} className="text-indigo-500" />
+                        <Cake size={13} className="text-orange-500" />
                         <span>
                           {student.dob
                             ? format(new Date(student.dob), "dd MMM yyyy")
@@ -931,7 +931,7 @@ const StudentDetail = () => {
                   {/* Address */}
                   <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1 text-xs">
                     <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                      <MapPin size={12} className="text-indigo-500" />
+                      <MapPin size={12} className="text-orange-500" />
                       <span>Residential Address</span>
                     </span>
                     <p className="font-semibold text-slate-700 dark:text-slate-200">
@@ -947,7 +947,7 @@ const StudentDetail = () => {
                 {/* Guardian & Contact Information */}
                 <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    <FileText size={15} className="text-indigo-500" />
+                    <FileText size={15} className="text-orange-500" />
                     <span>Parent &amp; Guardian Information</span>
                   </h4>
 
@@ -961,7 +961,7 @@ const StudentDetail = () => {
                           {student.parentName || student.parentId?.name || "—"}
                         </p>
                       </div>
-                      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                      <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
                         <User size={18} />
                       </div>
                     </div>
@@ -981,7 +981,7 @@ const StudentDetail = () => {
                       {(student.parentContact || student.contactNumber) && (
                         <a
                           href={`tel:${student.parentContact || student.contactNumber}`}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 text-xs font-bold flex items-center gap-1 transition"
+                          className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold flex items-center gap-1 transition"
                         >
                           <Phone size={12} />
                           <span>Call</span>
@@ -1003,7 +1003,7 @@ const StudentDetail = () => {
                       {student.parentEmail && (
                         <a
                           href={`mailto:${student.parentEmail}`}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 text-xs font-bold flex items-center gap-1 transition"
+                          className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold flex items-center gap-1 transition"
                         >
                           <Mail size={12} />
                           <span>Email</span>
@@ -1056,7 +1056,7 @@ const StudentDetail = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase">
                     Roll Number
                   </span>
-                  <p className="text-base font-mono font-extrabold text-indigo-600 dark:text-indigo-400">
+                  <p className="text-base font-mono font-extrabold text-orange-600 dark:text-orange-400">
                     {student.rollNumber != null
                       ? `#${student.rollNumber}`
                       : "—"}
@@ -1114,9 +1114,9 @@ const StudentDetail = () => {
           {activeTab === "id-card" && (
             <div className="space-y-6">
               {/* Header card with layout info and action buttons */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-sky-50/70 via-slate-50 to-indigo-50/50 dark:from-slate-800/80 dark:via-slate-900 dark:to-sky-950/40 border border-sky-100 dark:border-sky-900/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/40 dark:from-stone-800/80 dark:via-stone-900 dark:to-orange-950/40 border border-orange-100 dark:border-orange-900/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20">
                     <CreditCard size={22} />
                   </div>
                   <div>
@@ -1157,7 +1157,7 @@ const StudentDetail = () => {
                   {canManage && (
                     <Link
                       to="/certificates?tab=id-cards"
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40 text-xs font-bold transition shadow-sm"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-600 dark:text-orange-400 border border-orange-200/60 dark:border-orange-800/40 text-xs font-bold transition shadow-sm"
                     >
                       <Sparkles size={14} />
                       <span>Edit School Layout in Studio</span>
@@ -1353,7 +1353,7 @@ const StudentDetail = () => {
                                   target="_blank"
                                   rel="noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="p-1 rounded-lg text-slate-400 hover:text-sky-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                                  className="p-1 rounded-lg text-slate-400 hover:text-orange-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                                   title="Public Verification QR Link"
                                 >
                                   <ExternalLink size={13} />
@@ -1403,7 +1403,7 @@ const StudentDetail = () => {
                 <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-4 shadow-sm">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600">
+                      <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
                         <User size={18} />
                       </div>
                       <div>
@@ -1426,7 +1426,7 @@ const StudentDetail = () => {
                     <div className="flex flex-col sm:flex-row items-center gap-4">
                       <div
                         onClick={() => setPhotoModalOpen(true)}
-                        className="w-32 h-32 rounded-xl overflow-hidden border-2 border-indigo-500/30 shadow-md cursor-pointer group relative flex-shrink-0"
+                        className="w-32 h-32 rounded-xl overflow-hidden border-2 border-orange-500/30 shadow-md cursor-pointer group relative flex-shrink-0"
                       >
                         <img
                           src={photoUrl}
@@ -1443,13 +1443,13 @@ const StudentDetail = () => {
                           <span>Stored on Cloudinary CDN</span>
                         </div>
                         <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                          Used dynamically across Vertical ID cards, Modern Blue
+                          Used dynamically across Vertical ID cards, Modern Amber
                           ID cards, and official certificates.
                         </p>
                         <div className="flex items-center gap-2 pt-1">
                           <button
                             onClick={() => setPhotoModalOpen(true)}
-                            className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 text-xs font-bold transition"
+                            className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold transition"
                           >
                             Enlarge View
                           </button>
@@ -1475,7 +1475,7 @@ const StudentDetail = () => {
                       <p>No student photograph uploaded yet.</p>
                       <Link
                         to={`/students/${studentId}/edit`}
-                        className="text-indigo-600 font-bold hover:underline mt-1 inline-block"
+                        className="text-orange-600 dark:text-orange-400 font-bold hover:underline mt-1 inline-block"
                       >
                         Upload in Student Edit
                       </Link>
@@ -1528,7 +1528,7 @@ const StudentDetail = () => {
                           <button
                             type="button"
                             onClick={() => setPdfModalOpen(true)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-sm cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold transition shadow-sm shadow-orange-500/25 cursor-pointer"
                           >
                             <Eye size={13} />
                             <span>Preview</span>
@@ -1557,7 +1557,7 @@ const StudentDetail = () => {
                       <p>No Aadhaar PDF document uploaded.</p>
                       <Link
                         to={`/students/${studentId}/edit`}
-                        className="text-indigo-600 font-bold hover:underline mt-1 inline-block"
+                        className="text-orange-600 dark:text-orange-400 font-bold hover:underline mt-1 inline-block"
                       >
                         Upload in Student Edit
                       </Link>
@@ -1570,7 +1570,7 @@ const StudentDetail = () => {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+                    <div className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
                       <FileText size={16} />
                     </div>
                     <div>
@@ -1587,7 +1587,7 @@ const StudentDetail = () => {
                     <button
                       type="button"
                       onClick={() => setPdfModalOpen(true)}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye size={13} />
                       <span>Full Window View</span>
@@ -1650,7 +1650,7 @@ const StudentDetail = () => {
               <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-slate-100 dark:border-slate-700/80">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
                       <CalendarCheck size={20} />
                     </div>
                     <div>
@@ -1671,7 +1671,7 @@ const StudentDetail = () => {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                       title="Refresh Attendance"
                     >
-                      <RefreshCw size={13} className={attendanceLoading ? "animate-spin text-indigo-600" : ""} />
+                      <RefreshCw size={13} className={attendanceLoading ? "animate-spin text-orange-500" : ""} />
                       <span>Refresh</span>
                     </button>
                     {(attendanceFilterType !== "all" || attStatusFilter !== "all") && (
@@ -1705,7 +1705,7 @@ const StudentDetail = () => {
                         onClick={() => setAttendanceFilterType(mode.id)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                           attendanceFilterType === mode.id
-                            ? "bg-indigo-600 text-white shadow-sm"
+                            ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm shadow-orange-500/25"
                             : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                         }`}
                       >
@@ -1726,7 +1726,7 @@ const StudentDetail = () => {
                           type="date"
                           value={attSpecificDate}
                           onChange={(e) => setAttSpecificDate(e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
                     )}
@@ -1742,7 +1742,7 @@ const StudentDetail = () => {
                             type="date"
                             value={attStartDate}
                             onChange={(e) => setAttStartDate(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
@@ -1753,7 +1753,7 @@ const StudentDetail = () => {
                             type="date"
                             value={attEndDate}
                             onChange={(e) => setAttEndDate(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </>
@@ -1769,7 +1769,7 @@ const StudentDetail = () => {
                           <select
                             value={attMonth}
                             onChange={(e) => setAttMonth(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                           >
                             <option value="">All Months</option>
                             {MONTH_NAMES.map((m) => (
@@ -1786,7 +1786,7 @@ const StudentDetail = () => {
                           <select
                             value={attYear}
                             onChange={(e) => setAttYear(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                           >
                             {YEAR_OPTIONS.map((y) => (
                               <option key={y} value={y.toString()}>
@@ -1806,7 +1806,7 @@ const StudentDetail = () => {
                       <select
                         value={attStatusFilter}
                         onChange={(e) => setAttStatusFilter(e.target.value)}
-                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="all">All Statuses</option>
                         <option value="present">Present Only</option>
@@ -1821,11 +1821,11 @@ const StudentDetail = () => {
 
               {/* KPI Summary Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">
+                <div className="p-4 rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/40 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300">
                     Attendance Rate
                   </p>
-                  <p className="text-2xl font-black text-indigo-700 dark:text-indigo-400 mt-1">
+                  <p className="text-2xl font-black text-orange-600 dark:text-orange-400 mt-1">
                     {attendanceData.summary?.percentage || "0%"}
                   </p>
                 </div>
@@ -1881,7 +1881,7 @@ const StudentDetail = () => {
                     <button
                       type="button"
                       onClick={handleResetAttendanceFilters}
-                      className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 font-bold text-xs hover:bg-indigo-100 transition"
+                      className="px-4 py-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/60 dark:text-orange-400 font-bold text-xs hover:bg-orange-100 dark:hover:bg-orange-900/40 transition"
                     >
                       Clear Filters
                     </button>
@@ -1915,7 +1915,7 @@ const StudentDetail = () => {
                           >
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
-                                <Calendar size={13} className="text-indigo-500" />
+                                <Calendar size={13} className="text-orange-500" />
                                 <span>
                                   {log.date ? format(new Date(log.date), "dd MMM yyyy") : "—"}
                                 </span>
@@ -1937,7 +1937,7 @@ const StudentDetail = () => {
                                     : log.status === "Absent"
                                       ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
                                       : log.status === "Half Day"
-                                        ? "bg-cyan-50 text-cyan-700 border border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20"
+                                        ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
                                         : "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
                                 }`}
                               >
@@ -2096,7 +2096,7 @@ const StudentDetail = () => {
                   <p className="text-[10px] font-bold text-slate-400 uppercase">
                     Login Username / Admission No.
                   </p>
-                  <p className="text-sm font-mono font-bold text-indigo-400">
+                  <p className="text-sm font-mono font-bold text-orange-400">
                     {activeCredentialsModal.username}
                   </p>
                 </div>
@@ -2104,7 +2104,7 @@ const StudentDetail = () => {
                   onClick={() =>
                     handleCopy(activeCredentialsModal.username, "Username")
                   }
-                  className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded-md"
+                  className="flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md"
                 >
                   {copiedField === "Username" ? (
                     <Check size={12} />
@@ -2128,7 +2128,7 @@ const StudentDetail = () => {
                   onClick={() =>
                     handleCopy(activeCredentialsModal.email, "Email")
                   }
-                  className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded-md"
+                  className="flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md"
                 >
                   {copiedField === "Email" ? (
                     <Check size={12} />

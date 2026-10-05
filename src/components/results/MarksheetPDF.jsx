@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 
 // ─── Grade color ────────────────────────────────────────────────────────────
 const gradeColor = (grade) => {
-  const map = { 'A+': '#10b981', 'A': '#10b981', 'B+': '#3b82f6', 'B': '#3b82f6', 'C+': '#f59e0b', 'C': '#f59e0b', 'D': '#f97316', 'F': '#ef4444' };
+  const map = { 'A+': '#10b981', 'A': '#10b981', 'B+': '#ea580c', 'B': '#ea580c', 'C+': '#f59e0b', 'C': '#f59e0b', 'D': '#f97316', 'F': '#ef4444' };
   return map[grade] || '#64748b';
 };
 
@@ -162,9 +162,9 @@ const MarksheetPDF = forwardRef(({ result, schoolName = 'RGES School of Excellen
       }}
     >
       {/* ── Header ── */}
-      <div style={{ textAlign: 'center', borderBottom: '3px solid #4f46e5', paddingBottom: '20px', marginBottom: '24px' }}>
+      <div style={{ textAlign: 'center', borderBottom: '3px solid #ea580c', paddingBottom: '20px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '28px', fontWeight: 900 }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #ea580c, #f59e0b)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '28px', fontWeight: 900 }}>
             🎓
           </div>
           <div>
@@ -172,7 +172,7 @@ const MarksheetPDF = forwardRef(({ result, schoolName = 'RGES School of Excellen
             <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748b' }}>{schoolAddress}</p>
           </div>
         </div>
-        <div style={{ marginTop: '16px', display: 'inline-block', background: '#4f46e5', color: '#fff', padding: '6px 28px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, letterSpacing: '1px' }}>
+        <div style={{ marginTop: '16px', display: 'inline-block', background: '#ea580c', color: '#fff', padding: '6px 28px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, letterSpacing: '1px' }}>
           STUDENT REPORT CARD
         </div>
         <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
@@ -203,7 +203,7 @@ const MarksheetPDF = forwardRef(({ result, schoolName = 'RGES School of Excellen
       {/* ── Subject Marks Table ── */}
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '24px', fontSize: '13px' }}>
         <thead>
-          <tr style={{ background: '#4f46e5', color: '#fff' }}>
+          <tr style={{ background: '#ea580c', color: '#fff' }}>
             {['Subject & Prescribed Book', 'Code', 'Max Marks', 'Obtained', 'Grade', 'Status'].map((h) => (
               <th key={h} style={{ padding: '10px 12px', textAlign: h.startsWith('Subject') ? 'left' : 'center', fontWeight: 700, fontSize: '11px', letterSpacing: '0.5px' }}>{h}</th>
             ))}
@@ -215,7 +215,7 @@ const MarksheetPDF = forwardRef(({ result, schoolName = 'RGES School of Excellen
               <td style={{ padding: '9px 12px', fontWeight: 700, color: '#1e293b' }}>
                 <div>{sub.subjectName}</div>
                 {sub.bookName && (
-                  <div style={{ fontSize: '10px', color: '#6366f1', fontStyle: 'italic', fontWeight: 600, marginTop: '2px' }}>
+                  <div style={{ fontSize: '10px', color: '#ea580c', fontStyle: 'italic', fontWeight: 600, marginTop: '2px' }}>
                     📖 {sub.bookName}
                   </div>
                 )}
@@ -241,10 +241,10 @@ const MarksheetPDF = forwardRef(({ result, schoolName = 'RGES School of Excellen
       {/* ── Summary ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '28px' }}>
         {[
-          { label: 'Total Marks', value: `${result.totalObtained}/${result.totalMaxMarks}`, color: '#4f46e5' },
-          { label: 'Percentage', value: `${totalPct}%`, color: '#3b82f6' },
+          { label: 'Total Marks', value: `${result.totalObtained}/${result.totalMaxMarks}`, color: '#ea580c' },
+          { label: 'Percentage', value: `${totalPct}%`, color: '#f59e0b' },
           { label: 'Overall Grade', value: result.grade || '—', color: gradeColor(result.grade) },
-          { label: 'GPA', value: result.gpa?.toFixed(1) || '—', color: '#8b5cf6' },
+          { label: 'GPA', value: result.gpa?.toFixed(1) || '—', color: '#c2410c' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ textAlign: 'center', padding: '14px', background: color + '12', border: `1px solid ${color}40`, borderRadius: '10px' }}>
             <p style={{ margin: 0, fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{label}</p>
@@ -267,7 +267,7 @@ const MarksheetPDF = forwardRef(({ result, schoolName = 'RGES School of Excellen
 
       {/* ── Remarks ── */}
       {result.remarks && (
-        <div style={{ padding: '12px 16px', background: '#f1f5f9', borderRadius: '8px', borderLeft: '4px solid #4f46e5', marginBottom: '24px' }}>
+        <div style={{ padding: '12px 16px', background: '#f1f5f9', borderRadius: '8px', borderLeft: '4px solid #ea580c', marginBottom: '24px' }}>
           <p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Remarks</p>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#1e293b' }}>{result.remarks}</p>
         </div>

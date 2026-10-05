@@ -1,5 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { THEME_MODES, useTheme } from "../../theme/ThemeContext.jsx";
+import { button, text } from "../../theme/color.js";
 
 const THEME_OPTIONS = [
   { id: THEME_MODES.LIGHT, label: "Light", icon: Sun },
@@ -7,37 +8,22 @@ const THEME_OPTIONS = [
 ];
 
 const ThemeToggle = ({ className = "" }) => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, toggleTheme, isDark } = useTheme();
 
   return (
-    <div
-      role="tablist"
-      aria-label="Color mode"
-      className={`inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-900 ${className}`}
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className={`relative flex items-center justify-center ${button.ghost} ${text.brandHover} ${className}`}
+      title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      aria-label="Toggle theme"
     >
-      {THEME_OPTIONS.map((option) => {
-        const isActive = theme === option.id;
-        const Icon = option.icon;
-
-        return (
-          <button
-            key={option.id}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => setTheme(option.id)}
-            className={`inline-flex h-8 min-w-20 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-bold transition-all ${
-              isActive
-                ? "bg-white text-indigo-600 shadow-sm dark:bg-indigo-600 dark:text-white"
-                : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            }`}
-          >
-            <Icon size={14} />
-            <span>{option.label}</span>
-          </button>
-        );
-      })}
-    </div>
+      {isDark ? (
+        <Sun size={18} className="text-amber-400 hover:rotate-45 transition-transform" />
+      ) : (
+        <Moon size={18} className="text-stone-600 hover:-rotate-12 transition-transform" />
+      )}
+    </button>
   );
 };
 

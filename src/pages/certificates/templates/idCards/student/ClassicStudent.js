@@ -26,7 +26,7 @@ export const classicStudentCard = {
       ">
         <!-- Header -->
         <div style="
-          background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+          background: linear-gradient(135deg, #ea580c 0%, #f59e0b 100%);
           padding: 12px 14px; display: flex; align-items: center; gap: 10px;
         ">
           ${data.schoolLogo
@@ -35,7 +35,7 @@ export const classicStudentCard = {
           }
           <div>
             <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;">${data.schoolName || 'School Name'}</div>
-            <div style="font-size:8px;color:rgba(255,255,255,0.8);margin-top:1px;">STUDENT IDENTITY CARD</div>
+            <div style="font-size:8px;color:rgba(255,255,255,0.9);margin-top:1px;">STUDENT IDENTITY CARD</div>
           </div>
         </div>
 
@@ -44,8 +44,8 @@ export const classicStudentCard = {
           <!-- Photo -->
           <div style="flex-shrink:0;">
             ${data.photo
-              ? `<img src="${data.photo}" style="width:60px;height:72px;object-fit:cover;border-radius:8px;border:2px solid #3b82f6;" />`
-              : `<div style="width:60px;height:72px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:8px;border:2px solid #3b82f6;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#1e3a8a;">${initials}</div>`
+              ? `<img src="${data.photo}" style="width:60px;height:72px;object-fit:cover;border-radius:8px;border:2px solid #f97316;" />`
+              : `<div style="width:60px;height:72px;background:linear-gradient(135deg,#ffedd5,#fed7aa);border-radius:8px;border:2px solid #f97316;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#ea580c;">${initials}</div>`
             }
           </div>
 

@@ -235,7 +235,7 @@ const StudentList = () => {
         return (
           <div className="flex items-center gap-3">
             {/* Student Photo Avatar */}
-            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm border border-indigo-200/50 dark:border-indigo-800/40">
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-orange-500 to-amber-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm border border-orange-200/50 dark:border-orange-800/40">
               {photo ? (
                 <img
                   src={photo}
@@ -252,11 +252,11 @@ const StudentList = () => {
 
             {/* Name & Admission Number */}
             <div className="min-w-0">
-              <div className="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition truncate text-xs">
+              <div className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 transition truncate text-xs">
                 {fullName}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.2 rounded border border-indigo-200/50 dark:border-indigo-800/40">
+                <span className="font-mono text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-1.5 py-0.2 rounded border border-orange-200/50 dark:border-orange-800/40">
                   {row.admissionNumber || row.studentId || 'ADM-N/A'}
                 </span>
                 {(row.email || row.user?.email) && (
@@ -303,12 +303,12 @@ const StudentList = () => {
         return (
           <div className="flex flex-col gap-0.5">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold w-fit">
-              <School size={12} className="text-indigo-500" />
+              <School size={12} className="text-orange-500" />
               <span>{cls}</span>
               {sec !== "N/A" && (
                 <>
                   <span className="w-1 h-1 rounded-full bg-slate-400" />
-                  <span className="text-indigo-600 dark:text-indigo-400">{sec}</span>
+                  <span className="text-orange-600 dark:text-orange-400">{sec}</span>
                 </>
               )}
             </span>
@@ -356,7 +356,7 @@ const StudentList = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded border border-indigo-200/50 dark:border-indigo-800/40"
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-600 dark:text-orange-400 hover:underline bg-orange-50 dark:bg-orange-950/50 px-1.5 py-0.5 rounded border border-orange-200/50 dark:border-orange-800/40"
               >
                 <span>Aadhaar PDF</span>
                 <ExternalLink size={9} />
@@ -423,21 +423,21 @@ const StudentList = () => {
             )}
             <button
               onClick={() => navigate(`/students/${targetId}`)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
               title="View Profile"
             >
               <Eye size={15} />
             </button>
             <button
               onClick={() => navigate(`/students/${targetId}/edit`)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
               title="Edit Student"
             >
               <Edit3 size={15} />
             </button>
             <button
               onClick={() => navigate(`/students/${targetId}?tab=id-card`)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
               title="Student ID Card"
             >
               <CreditCard size={15} />
@@ -776,7 +776,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Enrolled</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white">{pagination.total || students.length}</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center">
             <Users size={24} />
           </div>
         </div>
@@ -796,11 +796,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Aadhaar Verified</p>
-            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+            <p className="text-2xl font-black text-orange-600 dark:text-orange-500">
               {students.filter((s) => Boolean(s.aadhaarNumber)).length}
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center">
             <ShieldCheck size={24} />
           </div>
         </div>
@@ -906,11 +906,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Login Username / Admission No.</p>
-                  <p className="text-sm font-mono font-bold text-indigo-400">{activeCredentialsModal.username}</p>
+                  <p className="text-sm font-mono font-bold text-orange-400">{activeCredentialsModal.username}</p>
                 </div>
                 <button
                   onClick={() => handleCopyText(activeCredentialsModal.username, "Username")}
-                  className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded-md"
+                  className="flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md"
                 >
                   {copiedField === "Username" ? <Check size={12} /> : <Copy size={12} />}
                   <span>{copiedField === "Username" ? "Copied" : "Copy"}</span>
@@ -924,7 +924,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                 </div>
                 <button
                   onClick={() => handleCopyText(activeCredentialsModal.email, "Email")}
-                  className="flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded-md"
+                  className="flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md"
                 >
                   {copiedField === "Email" ? <Check size={12} /> : <Copy size={12} />}
                   <span>{copiedField === "Email" ? "Copied" : "Copy"}</span>
@@ -963,7 +963,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
             <div className="flex items-center justify-between pt-2 border-t border-slate-800">
               <button
                 onClick={() => handleCopyAll(activeCredentialsModal)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-md shadow-orange-500/25"
               >
                 {copiedField === "all" ? <Check size={14} /> : <Copy size={14} />}
                 <span>{copiedField === "all" ? "All Credentials Copied!" : "Copy All Credentials"}</span>
@@ -995,12 +995,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
           <div className="space-y-6 text-xs font-sans">
             {/* Step Wizard Header Bar */}
             <div className="grid grid-cols-3 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
-              <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">1</span>
+              <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold">
+                <span className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-[10px]">1</span>
                 <span>Format Guidelines</span>
               </div>
-              <div className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importFileName ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-400' : 'bg-slate-800/40 text-slate-500'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${importFileName ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400'}`}>2</span>
+              <div className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importFileName ? 'bg-orange-500/10 border border-orange-500/20 text-orange-400' : 'bg-slate-800/40 text-slate-500'}`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${importFileName ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400'}`}>2</span>
                 <span>Select &amp; Parse File</span>
               </div>
               <div className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importedData.length > 0 ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-slate-800/40 text-slate-500'}`}>
@@ -1039,7 +1039,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                     size="sm"
                     icon={<Download size={14} />}
                     onClick={downloadSampleExcelTemplate}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold border-none shadow-md"
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold border-none shadow-md shadow-orange-500/25"
                   >
                     Download Template (.csv)
                   </Button>
@@ -1055,7 +1055,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   <button
                     type="button"
                     onClick={handleCopyHeaderLine}
-                    className="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 rounded-md text-[10px] font-bold flex items-center gap-1 transition"
+                    className="px-2.5 py-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 rounded-md text-[10px] font-bold flex items-center gap-1 transition"
                   >
                     <Copy size={12} /> Copy Header Line
                   </button>
@@ -1068,7 +1068,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               {/* Format Reference Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div className="p-2.5 bg-slate-950/60 border border-slate-800 rounded-lg">
-                  <span className="text-[10px] text-indigo-400 font-bold uppercase block">FirstName &amp; LastName</span>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase block">FirstName &amp; LastName</span>
                   <span className="text-white font-mono text-[11px]">Required</span>
                 </div>
                 <div className="p-2.5 bg-emerald-950/40 border border-emerald-800/40 rounded-lg">
@@ -1076,11 +1076,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   <span className="text-emerald-300 font-mono text-[11px]">Auto-Assigned ✓</span>
                 </div>
                 <div className="p-2.5 bg-slate-950/60 border border-slate-800 rounded-lg">
-                  <span className="text-[10px] text-indigo-400 font-bold uppercase block">classId &amp; sectionId</span>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase block">classId &amp; sectionId</span>
                   <span className="text-slate-400 font-mono text-[11px]">Use ID from grid below</span>
                 </div>
                 <div className="p-2.5 bg-slate-950/60 border border-slate-800 rounded-lg">
-                  <span className="text-[10px] text-indigo-400 font-bold uppercase block">Email &amp; Password</span>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase block">Email &amp; Password</span>
                   <span className="text-slate-400 font-mono text-[11px]">Auto-Provisioned</span>
                 </div>
               </div>
@@ -1095,7 +1095,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   <button
                     type="button"
                     onClick={() => setShowRefTables(!showRefTables)}
-                    className="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold underline"
+                    className="text-[11px] text-orange-400 hover:text-orange-300 font-bold underline"
                   >
                     {showRefTables ? "Hide Reference Grid" : "Show Reference Grid"}
                   </button>
@@ -1106,8 +1106,8 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                     {/* Class Options Reference List */}
                     <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
                       <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                        <span className="font-extrabold text-xs text-indigo-400">Class Name</span>
-                        <span className="font-extrabold text-xs text-indigo-400 font-mono">classId</span>
+                        <span className="font-extrabold text-xs text-orange-400">Class Name</span>
+                        <span className="font-extrabold text-xs text-orange-400 font-mono">classId</span>
                       </div>
                       <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                         {CLASS_OPTIONS.map((cls) => (
@@ -1122,7 +1122,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                                 navigator.clipboard.writeText(cls.id);
                                 toast.success(`Copied classId "${cls.id}" to clipboard!`);
                               }}
-                              className="font-mono text-[10px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded flex items-center gap-1 font-bold cursor-pointer"
+                              className="font-mono text-[10px] bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded flex items-center gap-1 font-bold cursor-pointer"
                               title={`Click to copy "${cls.id}"`}
                             >
                               <code>{cls.id}</code>
@@ -1168,8 +1168,8 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
             </div>
 
             {/* Step 2: Interactive Upload Dropzone */}
-            <div className="p-8 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/60 rounded-2xl bg-slate-900/40 transition-all text-center space-y-4 relative overflow-hidden group">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+            <div className="p-8 border-2 border-dashed border-orange-500/30 hover:border-orange-500/60 rounded-2xl bg-slate-900/40 transition-all text-center space-y-4 relative overflow-hidden group">
+              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                 <Upload size={26} />
               </div>
               <div className="space-y-1">
@@ -1177,7 +1177,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   {importFileName ? `Selected: ${importFileName}` : "Click or Drag & Drop your Excel / CSV file here"}
                 </p>
                 <p className="text-[11px] text-slate-400 max-w-md mx-auto">
-                  Supports <span className="text-indigo-400 font-bold">.CSV</span>, <span className="text-indigo-400 font-bold">.XLSX</span>, <span className="text-indigo-400 font-bold">.XLS</span> format files with up to 1,000+ student rows per batch.
+                  Supports <span className="text-orange-400 font-bold">.CSV</span>, <span className="text-orange-400 font-bold">.XLSX</span>, <span className="text-orange-400 font-bold">.XLS</span> format files with up to 1,000+ student rows per batch.
                 </p>
               </div>
 
@@ -1190,7 +1190,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               />
               <label
                 htmlFor="excelFileInput"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs cursor-pointer shadow-lg transition"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs cursor-pointer shadow-lg shadow-orange-500/25 transition"
               >
                 <Upload size={14} />
                 <span>{importFileName ? "Choose Another File" : "Select CSV / Excel File"}</span>
@@ -1213,12 +1213,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   </div>
 
                   <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center">
                       <FileSpreadsheet size={20} />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase">Target Accounts</p>
-                      <p className="text-lg font-black text-indigo-400">DB Student + User + Parent</p>
+                      <p className="text-lg font-black text-orange-400">DB Student + User + Parent</p>
                     </div>
                   </div>
 
@@ -1262,7 +1262,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                           <tr key={idx} className="hover:bg-slate-800/50 transition">
                             <td className="p-3 text-slate-500 font-bold">{idx + 1}</td>
                             <td className="p-3 font-bold text-white font-sans">{row.firstName} {row.lastName}</td>
-                            <td className="p-3 text-indigo-400">{row.classId || row.class || '—'} / {row.sectionId || row.section || '—'}</td>
+                            <td className="p-3 text-orange-400">{row.classId || row.class || '—'} / {row.sectionId || row.section || '—'}</td>
                             <td className="p-3 text-emerald-400 italic text-[10px]">Auto-Assigned</td>
                             <td className="p-3 text-emerald-400 italic text-[10px]">Auto-Assigned</td>
                             <td className="p-3 text-slate-300">{row.email || <span className="text-emerald-400 italic">Auto</span>}</td>

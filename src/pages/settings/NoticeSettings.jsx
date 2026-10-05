@@ -71,7 +71,7 @@ const NoticeSettings = () => {
 
   return (
     <div className="space-y-6 text-slate-100">
-      <div className="bg-[#111827] border border-slate-800/80 rounded-2xl p-6 shadow-sm">
+      <div className="bg-[#1C1B1A] border border-slate-800/80 rounded-2xl p-6 shadow-sm">
         <h3 className="text-lg font-extrabold text-white mb-1 flex items-center gap-2">
           <Megaphone className="text-indigo-400" size={20} /> Publish New Notice
         </h3>
@@ -150,7 +150,7 @@ const NoticeSettings = () => {
       </div>
 
       {/* Active Notices List */}
-      <div className="bg-[#111827] border border-slate-800/80 rounded-2xl p-6 shadow-sm">
+      <div className="bg-[#1C1B1A] border border-slate-800/80 rounded-2xl p-6 shadow-sm">
         <h4 className="font-extrabold text-sm text-white mb-4">Active Published Notices</h4>
         {loading ? (
           <div className="text-center py-8 text-slate-400 text-xs font-semibold">

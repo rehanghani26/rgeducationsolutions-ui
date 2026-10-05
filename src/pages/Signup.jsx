@@ -212,11 +212,11 @@ const Signup = () => {
       <div
         className="min-h-screen flex items-center justify-center font-sans px-4"
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+          background: 'linear-gradient(135deg, #141312 0%, #26160C 50%, #141312 100%)',
         }}
       >
-        <div className="flex flex-col items-center gap-3 text-slate-300">
-          <Loader2 className="animate-spin text-indigo-400" size={32} />
+        <div className="flex flex-col items-center gap-3 text-stone-300">
+          <Loader2 className="animate-spin text-orange-400" size={32} />
           <p className="text-xs uppercase tracking-widest font-semibold">Checking system setup status...</p>
         </div>
       </div>
@@ -225,12 +225,16 @@ const Signup = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center font-sans px-4 py-12"
+      className="min-h-screen flex items-center justify-center font-sans px-4 py-12 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+        background: 'linear-gradient(135deg, #141312 0%, #26160C 50%, #141312 100%)',
       }}
     >
-      <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all duration-300">
+      {/* Warm ambient glows */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-orange-500/10 blur-[100px]" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-500/10 blur-[100px]" />
+
+      <div className="relative z-10 w-full max-w-md bg-[#1C1B1A]/85 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all duration-300">
         {/* Header */}
         <div className="text-center mb-8">
           <img
@@ -242,7 +246,7 @@ const Signup = () => {
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             RG EduCore
           </h2>
-          <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-semibold">
+          <p className="text-orange-400/90 text-xs mt-1 uppercase tracking-widest font-bold">
             {step === 1 && 'Super Admin Initial Setup'}
             {step === 2 && 'Email OTP Verification'}
             {step === 3 && 'Setup Completed'}

@@ -16,7 +16,7 @@ export const classicCertificate = {
       <div style="
         width: 280mm; min-height: 190mm; font-family: 'Georgia', serif;
         background: #fff; padding: 0; position: relative; overflow: hidden;
-        border: 8px double #1e3a8a; box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+        border: 8px double #c2410c; box-shadow: 0 4px 30px rgba(0,0,0,0.1);
       ">
         <!-- Gold decorative inner border -->
         <div style="
@@ -31,10 +31,10 @@ export const classicCertificate = {
           <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:16px;">
             ${data.schoolLogo
               ? `<img src="${data.schoolLogo}" style="height:56px;width:56px;object-fit:contain;border-radius:8px;" />`
-              : `<div style="width:56px;height:56px;background:#dbeafe;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#1e3a8a;">S</div>`
+              : `<div style="width:56px;height:56px;background:#ffedd5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#c2410c;">S</div>`
             }
             <div style="text-align:left;">
-              <div style="font-size:20px;font-weight:700;color:#1e3a8a;letter-spacing:0.5px;">${data.schoolName || 'School Name'}</div>
+              <div style="font-size:20px;font-weight:700;color:#c2410c;letter-spacing:0.5px;">${data.schoolName || 'School Name'}</div>
               ${data.schoolAddress ? `<div style="font-size:10px;color:#64748b;margin-top:2px;">${data.schoolAddress}</div>` : ''}
               ${data.schoolPhone ? `<div style="font-size:10px;color:#64748b;">Tel: ${data.schoolPhone}</div>` : ''}
             </div>
@@ -46,7 +46,7 @@ export const classicCertificate = {
           <!-- Certificate Title -->
           <div style="margin-bottom:16px;">
             <div style="font-size:11px;color:#d4af37;letter-spacing:6px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;">Certificate of</div>
-            <div style="font-size:32px;font-weight:700;color:#1e3a8a;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">${typeLabel}</div>
+            <div style="font-size:32px;font-weight:700;color:#c2410c;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">${typeLabel}</div>
           </div>
 
           <!-- Body Text -->
@@ -71,7 +71,7 @@ export const classicCertificate = {
           <!-- Signatures Row -->
           <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:20px;padding:0 40px;">
             <div style="text-align:center;">
-              <div style="width:120px;border-top:1px solid #1e3a8a;padding-top:6px;">
+              <div style="width:120px;border-top:1px solid #c2410c;padding-top:6px;">
                 <div style="font-size:10px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">${data.principalName || 'Principal'}</div>
                 <div style="font-size:9px;color:#64748b;font-family:'Inter',sans-serif;">Principal</div>
               </div>
@@ -81,7 +81,7 @@ export const classicCertificate = {
               <div style="font-size:11px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">${data.issueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
             </div>
             <div style="text-align:center;">
-              <div style="width:120px;border-top:1px solid #1e3a8a;padding-top:6px;">
+              <div style="width:120px;border-top:1px solid #c2410c;padding-top:6px;">
                 <div style="font-size:10px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">Class Teacher</div>
                 <div style="font-size:9px;color:#64748b;font-family:'Inter',sans-serif;">Signature</div>
               </div>
@@ -92,7 +92,7 @@ export const classicCertificate = {
           <div style="margin-top:20px;font-size:10px;color:#94a3b8;font-style:italic;">
             ${data.schoolMotto || ''}
           </div>
-          ${data.schoolWebsite ? `<div style="font-size:9px;color:#3b82f6;font-family:'Inter',sans-serif;margin-top:2px;">${data.schoolWebsite}</div>` : ''}
+          ${data.schoolWebsite ? `<div style="font-size:9px;color:#ea580c;font-family:'Inter',sans-serif;margin-top:2px;">${data.schoolWebsite}</div>` : ''}
         </div>
       </div>
     `;

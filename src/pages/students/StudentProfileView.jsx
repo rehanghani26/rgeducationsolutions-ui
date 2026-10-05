@@ -241,7 +241,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-28 text-center space-y-3">
-        <Loader2 size={36} className="animate-spin text-sky-400" />
+        <Loader2 size={36} className="animate-spin text-orange-500" />
         <span className="text-xs text-slate-400 font-semibold tracking-wide">
           Loading your student profile details...
         </span>
@@ -261,11 +261,11 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           <button
             type="button"
             onClick={() => navigate('/settings')}
-            className="flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-bold text-xs transition cursor-pointer"
+            className="flex items-center gap-2 text-slate-400 hover:text-orange-400 font-bold text-xs transition cursor-pointer"
           >
             <ArrowLeft size={16} /> Back to Settings Overview
           </button>
-          <span className="text-xs font-bold text-indigo-400">Settings &gt; My Profile</span>
+          <span className="text-xs font-bold text-orange-400">Settings &gt; My Profile</span>
         </div>
       )}
 
@@ -277,13 +277,13 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
       />
 
       {/* ─── PROFILE HERO BANNER ──────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-950 p-6 md:p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] p-6 md:p-8 shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           
           {/* Avatar & Core Identity */}
           <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-sky-500/20 flex-shrink-0 border-2 border-sky-400/30">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-orange-500/20 flex-shrink-0 border-2 border-orange-400/30">
               {studentPhoto ? (
                 <img
                   src={resolveImageUrl(studentPhoto)}
@@ -307,7 +307,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                   <CheckCircle2 size={12} /> Active Enrolled
                 </span>
                 {student?.isEmailVerified ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/15 text-orange-400 border border-orange-500/25 flex items-center gap-1">
                     <ShieldCheck size={12} /> Verified Email
                   </span>
                 ) : (
@@ -318,7 +318,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               </div>
 
               <div className="flex items-center gap-3 text-xs text-slate-300 font-medium flex-wrap">
-                <span className="bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700 font-bold text-sky-300">
+                <span className="bg-stone-800/80 px-2.5 py-1 rounded-xl border border-stone-700 font-bold text-orange-400">
                   {student?.class} · {student?.section}
                 </span>
                 <span>
@@ -327,7 +327,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                 <span className="text-slate-500">•</span>
                 <div className="flex items-center gap-1 font-mono text-slate-300">
                   <span>Adm No:</span>
-                  <span className="font-bold text-indigo-400">{student?.admissionNumber}</span>
+                  <span className="font-bold text-orange-400">{student?.admissionNumber}</span>
                   <button
                     type="button"
                     onClick={() => handleCopy(student?.admissionNumber, 'Admission Number')}
@@ -351,7 +351,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
             <button
               type="button"
               onClick={() => navigate('/certificates?tab=id-cards')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 transition shadow-lg shadow-sky-500/10 cursor-pointer"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-none transition shadow-lg shadow-orange-500/20 cursor-pointer"
             >
               <CreditCard size={15} />
               <span>View My ID Card</span>
@@ -376,7 +376,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer flex items-center justify-center"
               title="Refresh Profile Details"
             >
-              <RefreshCw size={15} className={refreshing ? 'animate-spin text-sky-400' : ''} />
+              <RefreshCw size={15} className={refreshing ? 'animate-spin text-orange-500' : ''} />
             </button>
           </div>
         </div>
@@ -391,7 +391,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           {/* SECTION 1: Personal & Demographic Details */}
           <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-5 shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/25 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/25 flex items-center justify-center">
                 <User size={16} />
               </div>
               <div>
@@ -421,7 +421,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-white">{formattedDob}</span>
                   {studentAge !== null && (
-                    <span className="text-[10px] bg-sky-500/10 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/20">
+                    <span className="text-[10px] bg-orange-500/10 text-orange-400 font-semibold px-2 py-0.5 rounded-full border border-orange-500/20">
                       {studentAge} Years Old
                     </span>
                   )}
@@ -461,7 +461,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold block">Registered Student Email</span>
                 <div className="flex items-center justify-between gap-1">
-                  <span className="font-bold text-sky-400 truncate font-mono">{student?.email}</span>
+                  <span className="font-bold text-orange-400 truncate font-mono">{student?.email}</span>
                   {student?.email && student?.email !== '—' && (
                     <button
                       type="button"
@@ -479,7 +479,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
             {/* Address Row */}
             <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1 text-xs">
               <span className="text-[10px] text-slate-500 uppercase font-bold block flex items-center gap-1">
-                <MapPin size={12} className="text-sky-400" /> Residential & Permanent Address
+                <MapPin size={12} className="text-orange-400" /> Residential & Permanent Address
               </span>
               <p className="font-medium text-slate-300 leading-relaxed">
                 {student?.address && student.address !== '—' ? student.address : 'Address records not specified.'}
@@ -490,7 +490,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           {/* SECTION 2: Academic & Institutional Enrollment */}
           <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-5 shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/25 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center">
                 <GraduationCap size={16} />
               </div>
               <div>
@@ -512,12 +512,12 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
 
               <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold block">Roll Number</span>
-                <span className="font-bold text-indigo-400 font-mono text-sm">{student?.rollNumber || '01'}</span>
+                <span className="font-bold text-amber-400 font-mono text-sm">{student?.rollNumber || '01'}</span>
               </div>
 
               <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold block">Admission Number</span>
-                <span className="font-bold text-sky-400 font-mono">{student?.admissionNumber}</span>
+                <span className="font-bold text-orange-400 font-mono">{student?.admissionNumber}</span>
               </div>
 
               <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
@@ -719,7 +719,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               <button
                 type="button"
                 onClick={() => navigate('/settings/password-security')}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-bold transition cursor-pointer text-xs mt-2"
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold transition cursor-pointer text-xs mt-2"
               >
                 <KeyRound size={13} />
                 <span>Request Password Change</span>

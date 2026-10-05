@@ -8,6 +8,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { bg, border, text } from "@/theme/color";
 
 export default function AiSidebar({
   isOpen,
@@ -26,7 +27,7 @@ export default function AiSidebar({
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
@@ -35,8 +36,8 @@ export default function AiSidebar({
       <aside
         className={`
           fixed inset-y-0 left-0 z-50 flex flex-col
-          border-r border-white/5
-          bg-[#0d1120]/95 backdrop-blur-xl
+          border-r ${border.default}
+          ${bg.sidebar} backdrop-blur-xl
           transition-all duration-300 ease-in-out
           ${isOpen ? "w-[280px] translate-x-0" : "w-[280px] -translate-x-full"}
           lg:static lg:z-auto lg:flex-shrink-0
@@ -44,23 +45,23 @@ export default function AiSidebar({
         `}
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b border-white/5 px-4">
+        <div className={`flex h-16 items-center justify-between border-b ${border.default} px-4`}>
           <div className="flex items-center gap-2.5">
             <div className="gradient-animated flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl shadow-lg">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div>
-              <div className="text-[13px] font-bold text-white tracking-tight">
+              <div className={`text-[13px] font-bold ${text.primary} tracking-tight`}>
                 RGES ERP AI
               </div>
-              <div className="text-[10px] text-slate-400">
+              <div className={`text-[10px] ${text.muted}`}>
                 School ERP Assistant
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white lg:hidden"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg ${text.muted} hover:${bg.hover} hover:${text.primary} lg:hidden`}
           >
             <X className="h-4 w-4" />
           </button>
@@ -70,7 +71,7 @@ export default function AiSidebar({
         <div className="p-3">
           <button
             onClick={onNewChat}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 px-4 py-2.5 text-[12px] font-semibold text-indigo-300 transition-all hover:border-indigo-500/60 hover:from-indigo-600/30 hover:to-purple-600/30 hover:text-white active:scale-95"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/15 to-amber-500/15 px-4 py-2.5 text-[12px] font-semibold text-orange-600 dark:text-orange-400 transition-all hover:border-orange-500/60 hover:from-orange-500/25 hover:to-amber-500/25 active:scale-95 cursor-pointer shadow-xs"
           >
             <Plus className="h-3.5 w-3.5" />
             New Conversation
@@ -80,13 +81,13 @@ export default function AiSidebar({
         {/* Search */}
         <div className="px-3 pb-2">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
+            <Search className={`absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 ${text.muted}`} />
             <input
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full rounded-lg bg-white/5 py-1.5 pl-7 pr-3 text-[11px] text-slate-300 placeholder-slate-500 outline-none focus:ring-1 focus:ring-indigo-500/40"
+              className={`w-full rounded-lg ${bg.input} py-1.5 pl-7 pr-3 text-[11px] ${text.primary} placeholder:text-stone-400 border ${border.subtle} outline-none focus:ring-1 focus:ring-orange-500/40`}
             />
           </div>
         </div>
@@ -94,12 +95,12 @@ export default function AiSidebar({
         {/* Session List */}
         <div className="flex-1 overflow-y-auto px-3 py-1 scrollbar-thin">
           {sessions.length === 0 ? (
-            <div className="py-8 text-center text-[11px] text-slate-500">
+            <div className={`py-8 text-center text-[11px] ${text.muted}`}>
               No conversations found
             </div>
           ) : (
             <>
-              <div className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              <div className={`mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest ${text.muted}`}>
                 Conversations
               </div>
               {sessions.map((sess) => {
@@ -109,34 +110,38 @@ export default function AiSidebar({
                   <button
                     key={sess.id}
                     onClick={() => onSelectSession(sess.id)}
-                    className={`group mb-0.5 flex w-full items-start justify-between rounded-xl px-3 py-2.5 text-left transition-all ${
+                    className={`group mb-1 flex w-full items-start justify-between rounded-xl px-3 py-2.5 text-left transition-all cursor-pointer ${
                       isActive
-                        ? "bg-indigo-600/20 border border-indigo-500/30 shadow-sm"
-                        : "hover:bg-white/5 border border-transparent"
+                        ? "bg-orange-500/15 border border-orange-500/30 shadow-xs"
+                        : `hover:${bg.hover} border border-transparent`
                     }`}
                   >
                     <div className="flex min-w-0 items-start gap-2.5">
                       <div
                         className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md ${
-                          isActive ? "bg-indigo-500/30" : "bg-white/5"
+                          isActive
+                            ? "bg-orange-500/25"
+                            : "bg-stone-200/70 dark:bg-stone-800"
                         }`}
                       >
                         <MessageSquare
                           className={`h-2.5 w-2.5 ${
-                            isActive ? "text-indigo-300" : "text-slate-500"
+                            isActive ? "text-orange-500 dark:text-orange-400" : "text-stone-500"
                           }`}
                         />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div
-                          className={`truncate text-[12px] font-medium ${
-                            isActive ? "text-white" : "text-slate-300"
+                          className={`truncate text-[12px] ${
+                            isActive
+                              ? "font-bold text-orange-600 dark:text-orange-300"
+                              : `font-medium ${text.primary}`
                           }`}
                         >
                           {sess.title}
                         </div>
                         {lastMsg && (
-                          <div className="mt-0.5 truncate text-[10px] text-slate-500">
+                          <div className={`mt-0.5 truncate text-[10px] ${text.muted}`}>
                             {lastMsg.content.slice(0, 35)}...
                           </div>
                         )}
@@ -144,7 +149,7 @@ export default function AiSidebar({
                     </div>
                     <button
                       onClick={(e) => onDeleteSession(sess.id, e)}
-                      className="ml-1 flex-shrink-0 rounded p-0.5 text-slate-600 opacity-0 transition-all hover:text-rose-400 group-hover:opacity-100"
+                      className="ml-1 flex-shrink-0 rounded p-0.5 text-stone-400 opacity-0 transition-all hover:text-rose-500 group-hover:opacity-100"
                       title="Delete Conversation"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -157,16 +162,16 @@ export default function AiSidebar({
         </div>
 
         {/* Sidebar Footer */}
-        <div className="border-t border-white/5 p-3 space-y-2">
-          <div className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
-            <Zap className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />
+        <div className={`border-t ${border.default} p-3 space-y-2`}>
+          <div className={`flex items-center gap-2 rounded-xl ${bg.card} border ${border.default} px-3 py-2 shadow-2xs`}>
+            <Zap className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
             <div className="min-w-0 flex-1">
-              <div className="text-[10px] text-slate-500">{providerName}</div>
-              <div className="truncate text-[11px] font-medium text-slate-300">
+              <div className={`text-[10px] ${text.muted}`}>{providerName}</div>
+              <div className={`truncate text-[11px] font-medium ${text.primary}`}>
                 Online
               </div>
             </div>
-            <div className="h-2 w-2 rounded-full flex-shrink-0 bg-emerald-400 animate-pulse" />
+            <div className="h-2 w-2 rounded-full flex-shrink-0 bg-emerald-500 animate-pulse" />
           </div>
         </div>
       </aside>

@@ -2,7 +2,7 @@ import React from "react";
 
 /**
  * Lightweight, safe markdown renderer tailored for ERP AI responses.
- * Supports bold, italic, inline code, headers, unordered & ordered lists, and tables.
+ * Fully styled for both Light and Dark mode.
  */
 export default function MarkdownRenderer({ text }) {
   if (!text) return null;
@@ -16,23 +16,23 @@ export default function MarkdownRenderer({ text }) {
   const flushList = (key) => {
     if (listBuffer.length > 0) {
       elements.push(
-        <ul key={`list-${key}`} className="my-2 space-y-1 pl-1">
+        <ul key={`list-${key}`} className="my-2 space-y-1.5 pl-1">
           {listBuffer.map((item, i) => (
             <li
               key={i}
-              className="flex items-start gap-2 text-[13px] leading-relaxed text-slate-200"
+              className="flex items-start gap-2 text-[13px] leading-relaxed text-stone-800 dark:text-stone-200"
             >
-              <span className="mt-[5px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-400" />
+              <span className="mt-[6px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-orange-500" />
               <span
                 dangerouslySetInnerHTML={{
                   __html: item
                     .replace(
                       /\*\*(.*?)\*\*/g,
-                      "<strong class='text-white font-semibold'>$1</strong>"
+                      "<strong class='text-stone-900 dark:text-white font-bold'>$1</strong>"
                     )
                     .replace(
                       /`(.*?)`/g,
-                      "<code class='bg-slate-700/80 text-indigo-300 px-1 py-0.5 rounded text-[12px] font-mono'>$1</code>"
+                      "<code class='bg-stone-100 dark:bg-stone-800 text-orange-600 dark:text-orange-400 border border-stone-200/80 dark:border-stone-700 px-1.5 py-0.5 rounded text-[12px] font-mono'>$1</code>"
                     ),
                 }}
               />
@@ -51,29 +51,29 @@ export default function MarkdownRenderer({ text }) {
       elements.push(
         <div
           key={`table-${key}`}
-          className="my-3 overflow-x-auto rounded-xl border border-slate-700/50 shadow-lg"
+          className="my-3 overflow-x-auto rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm"
         >
           <table className="w-full min-w-full text-left text-[12px]">
-            <thead className="border-b border-slate-700/80 bg-slate-800/80">
+            <thead className="border-b border-stone-200 dark:border-stone-800 bg-stone-100/90 dark:bg-stone-800/80">
               <tr>
                 {headerRow.cols.map((col, ci) => (
                   <th
                     key={ci}
-                    className="px-4 py-2.5 font-semibold text-slate-200 whitespace-nowrap"
+                    className="px-4 py-2.5 font-bold text-stone-800 dark:text-stone-200 whitespace-nowrap"
                   >
                     {col.trim()}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-slate-900/40">
+            <tbody className="bg-white dark:bg-stone-900/40 divide-y divide-stone-100 dark:divide-stone-800/60">
               {bodyRows.map((row, ri) => (
                 <tr
                   key={ri}
-                  className="border-b border-slate-800/60 hover:bg-indigo-500/5 transition-colors"
+                  className="hover:bg-orange-500/5 dark:hover:bg-orange-500/10 transition-colors"
                 >
                   {row.cols.map((cell, ci) => (
-                    <td key={ci} className="px-4 py-2 text-slate-300">
+                    <td key={ci} className="px-4 py-2 text-stone-700 dark:text-stone-300">
                       {cell.trim()}
                     </td>
                   ))}
@@ -129,7 +129,7 @@ export default function MarkdownRenderer({ text }) {
       elements.push(
         <h4
           key={index}
-          className="mt-4 mb-1.5 text-[13px] font-bold text-indigo-300 tracking-wide"
+          className="mt-4 mb-1.5 text-[13px] font-bold text-orange-600 dark:text-orange-400 tracking-wide"
         >
           {line.replace("### ", "")}
         </h4>
@@ -140,7 +140,7 @@ export default function MarkdownRenderer({ text }) {
       elements.push(
         <h3
           key={index}
-          className="mt-4 mb-2 text-sm font-bold text-white tracking-tight border-b border-slate-700/50 pb-1"
+          className="mt-4 mb-2 text-sm font-bold text-stone-900 dark:text-white tracking-tight border-b border-stone-200 dark:border-stone-800 pb-1"
         >
           {line.replace("## ", "")}
         </h3>
@@ -151,7 +151,7 @@ export default function MarkdownRenderer({ text }) {
       elements.push(
         <h2
           key={index}
-          className="mt-4 mb-2 text-base font-extrabold text-white"
+          className="mt-4 mb-2 text-base font-extrabold text-stone-900 dark:text-white"
         >
           {line.replace("# ", "")}
         </h2>
@@ -161,7 +161,7 @@ export default function MarkdownRenderer({ text }) {
 
     // Horizontal rule
     if (line.trim() === "---" || line.trim() === "***") {
-      elements.push(<hr key={index} className="my-3 border-slate-700/50" />);
+      elements.push(<hr key={index} className="my-3 border-stone-200 dark:border-stone-800" />);
       return;
     }
 
@@ -175,17 +175,17 @@ export default function MarkdownRenderer({ text }) {
     elements.push(
       <p
         key={index}
-        className="text-[13px] leading-relaxed text-slate-200"
+        className="text-[13px] leading-relaxed text-stone-800 dark:text-stone-200"
         dangerouslySetInnerHTML={{
           __html: line
             .replace(
               /\*\*(.*?)\*\*/g,
-              "<strong class='text-white font-semibold'>$1</strong>"
+              "<strong class='text-stone-900 dark:text-white font-bold'>$1</strong>"
             )
-            .replace(/\*(.*?)\*/g, "<em class='text-slate-300'>$1</em>")
+            .replace(/\*(.*?)\*/g, "<em class='text-stone-600 dark:text-stone-300'>$1</em>")
             .replace(
               /`(.*?)`/g,
-              "<code class='bg-slate-700/80 text-indigo-300 px-1 py-0.5 rounded text-[12px] font-mono'>$1</code>"
+              "<code class='bg-stone-100 dark:bg-stone-800 text-orange-600 dark:text-orange-400 border border-stone-200/80 dark:border-stone-700 px-1.5 py-0.5 rounded text-[12px] font-mono'>$1</code>"
             ),
         }}
       />
@@ -195,5 +195,5 @@ export default function MarkdownRenderer({ text }) {
   flushList("final");
   flushTable("final");
 
-  return <div className="space-y-1">{elements}</div>;
+  return <div className="space-y-1.5">{elements}</div>;
 }

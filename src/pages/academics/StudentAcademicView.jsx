@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Modal from '../../components/ui/Modal.jsx';
 import curriculumService from '../../services/curriculumService.js';
+import { COLOR, bg, border, shadow, text, button, card, badge } from '@/theme/color';
 
 // ─── Enriched Student Subjects with Syllabus & Progress ──────────────────────
 export const ENRICHED_STUDENT_SUBJECTS = [];
@@ -28,11 +29,11 @@ const STUDENT_PERFORMANCE = [];
 
 // ─── Color Palettes for Dynamically Assigned Courses ─────────────────────────
 const PALETTES = [
-  { color: 'from-blue-600 to-indigo-600', accentText: 'text-blue-500', accentBg: 'bg-blue-500/10 border-blue-500/20' },
-  { color: 'from-cyan-600 to-blue-600', accentText: 'text-cyan-500', accentBg: 'bg-cyan-500/10 border-cyan-500/20' },
+  { color: 'from-orange-500 to-amber-600', accentText: 'text-orange-500', accentBg: 'bg-orange-500/10 border-orange-500/20' },
+  { color: 'from-amber-500 to-yellow-600', accentText: 'text-amber-500', accentBg: 'bg-amber-500/10 border-amber-500/20' },
   { color: 'from-emerald-600 to-teal-600', accentText: 'text-emerald-500', accentBg: 'bg-emerald-500/10 border-emerald-500/20' },
   { color: 'from-amber-600 to-orange-600', accentText: 'text-amber-500', accentBg: 'bg-amber-500/10 border-amber-500/20' },
-  { color: 'from-purple-600 to-pink-600', accentText: 'text-purple-500', accentBg: 'bg-purple-500/10 border-purple-500/20' },
+  { color: 'from-orange-600 to-rose-600', accentText: 'text-orange-500', accentBg: 'bg-orange-500/10 border-orange-500/20' },
   { color: 'from-rose-600 to-pink-600', accentText: 'text-rose-500', accentBg: 'bg-rose-500/10 border-rose-500/20' },
 ];
 
@@ -304,14 +305,14 @@ export const StudentAcademicView = ({ currentUser }) => {
   return (
     <div className="space-y-6 pb-12 animate-fadeIn">
       {/* ─── Hero Academic Student Banner ─────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-indigo-700/40">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute right-1/3 bottom-0 w-64 h-64 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#181716] via-[#2A180C] to-[#1F140A] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-orange-500/20">
+        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-1/3 bottom-0 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-indigo-200 text-xs font-bold tracking-wide border border-white/10">
-              <GraduationCap size={14} className="text-indigo-300" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-orange-200 text-xs font-bold tracking-wide border border-white/10">
+              <GraduationCap size={14} className="text-orange-400" />
               <span>Student Academic Hub • Session 2025–2026</span>
             </div>
 
@@ -319,19 +320,19 @@ export const StudentAcademicView = ({ currentUser }) => {
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                 Academic Curriculum & Courses
               </h1>
-              <p className="text-indigo-200/80 text-xs sm:text-sm mt-1 max-w-xl">
+              <p className="text-stone-300 text-xs sm:text-sm mt-1 max-w-xl">
                 Track your active courses, syllabus progress, weekly lecture schedule, and study materials for <span className="text-white font-semibold">{className} · {sectionName}</span>.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-              <span className="bg-indigo-950/60 border border-indigo-400/20 px-3 py-1 rounded-lg text-indigo-200 font-semibold">
+              <span className="bg-stone-900/80 border border-orange-500/20 px-3 py-1 rounded-lg text-stone-200 font-semibold">
                 👤 Student: <span className="text-white font-bold">{studentName}</span>
               </span>
-              <span className="bg-indigo-950/60 border border-indigo-400/20 px-3 py-1 rounded-lg text-indigo-200 font-semibold">
+              <span className="bg-stone-900/80 border border-orange-500/20 px-3 py-1 rounded-lg text-stone-200 font-semibold">
                 🏫 Class: <span className="text-white font-bold">{className} ({sectionName})</span>
               </span>
-              <span className="bg-indigo-950/60 border border-indigo-400/20 px-3 py-1 rounded-lg text-indigo-200 font-semibold">
+              <span className="bg-stone-900/80 border border-orange-500/20 px-3 py-1 rounded-lg text-stone-200 font-semibold">
                 🎫 Roll No: <span className="text-white font-bold">#{rollNumber}</span>
               </span>
             </div>
@@ -339,17 +340,17 @@ export const StudentAcademicView = ({ currentUser }) => {
 
           {/* Class Teacher Card */}
           <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 w-full sm:w-auto min-w-[280px] shadow-lg shrink-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-300">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-orange-300">
               Assigned Class Teacher
             </p>
             <div className="flex items-center gap-3 mt-2">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-extrabold text-white text-base shadow-md">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center font-extrabold text-white text-base shadow-md">
                 {classTeacher.charAt(0)}
               </div>
               <div>
                 <p className="text-sm font-bold text-white">{classTeacher}</p>
-                <p className="text-[11px] text-indigo-200">Head of Academic Guidance</p>
-                <p className="text-[10px] text-indigo-300/80 mt-0.5">Room 101 • Academic Block A</p>
+                <p className="text-[11px] text-stone-300">Head of Academic Guidance</p>
+                <p className="text-[10px] text-orange-300/80 mt-0.5">Room 101 • Academic Block A</p>
               </div>
             </div>
           </div>
@@ -358,10 +359,10 @@ export const StudentAcademicView = ({ currentUser }) => {
         {/* Top Metric Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/10">
           {[
-            { label: 'Enrolled Courses', value: `${subjects.length} Subjects`, icon: BookOpen, color: 'text-blue-300' },
+            { label: 'Enrolled Courses', value: `${subjects.length} Subjects`, icon: BookOpen, color: 'text-orange-400' },
             { label: 'Overall Attendance', value: '96.4%', icon: CheckCircle2, color: 'text-emerald-300' },
             { label: 'Cumulative GPA', value: performanceData.gpa, icon: Award, color: 'text-amber-300' },
-            { label: 'Total Term Credits', value: `${totalCredits} Credits`, icon: Sparkles, color: 'text-purple-300' },
+            { label: 'Total Term Credits', value: `${totalCredits} Credits`, icon: Sparkles, color: 'text-amber-400' },
           ].map((item) => (
             <div key={item.label} className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
@@ -369,7 +370,7 @@ export const StudentAcademicView = ({ currentUser }) => {
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-black text-white leading-tight">{item.value}</p>
-                <p className="text-[10px] text-indigo-200/80 font-medium">{item.label}</p>
+                <p className="text-[10px] text-stone-300 font-medium">{item.label}</p>
               </div>
             </div>
           ))}
@@ -377,7 +378,7 @@ export const StudentAcademicView = ({ currentUser }) => {
       </div>
 
       {/* ─── Navigation Tabs for Student ──────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+      <div className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b ${border.default} pb-3`}>
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
             { id: 'subjects', label: 'My Subjects', count: subjects.length, icon: BookOpen },
@@ -394,8 +395,8 @@ export const StudentAcademicView = ({ currentUser }) => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 scale-[1.02]'
-                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    ? `${bg.brandGradient} text-white shadow-md ${shadow.brand} scale-[1.02]`
+                    : `${card.base} ${text.secondary} ${bg.hover}`
                 }`}
               >
                 <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
@@ -416,7 +417,7 @@ export const StudentAcademicView = ({ currentUser }) => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => navigate('/online-classes')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors border border-indigo-200 dark:border-indigo-800/50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 hover:bg-orange-100 transition-colors border border-orange-200 dark:border-orange-800/50"
             title="Go to Live Classes"
           >
             <Video size={13} />
@@ -424,7 +425,7 @@ export const StudentAcademicView = ({ currentUser }) => {
           </button>
           <button
             onClick={() => navigate('/homework')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 transition-colors border border-purple-200 dark:border-purple-800/50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 transition-colors border border-amber-200 dark:border-amber-800/50"
             title="Go to Homework"
           >
             <Send size={13} />
