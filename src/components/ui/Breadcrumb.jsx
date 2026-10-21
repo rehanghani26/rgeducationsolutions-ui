@@ -12,13 +12,14 @@ const Breadcrumb = ({ data = ["Settings"] }) => {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium p-1"
+      className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium px-2.5 py-1 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/80 mb-2 w-fit shadow-2xs"
     >
       <Link
         to="/"
-        className="flex items-center gap-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+        className="flex items-center gap-1 text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition"
+        title="Dashboard Home"
       >
-        <Home size={14} />
+        <Home size={13} />
       </Link>
 
       {data.map((item, index) => {
@@ -28,12 +29,12 @@ const Breadcrumb = ({ data = ["Settings"] }) => {
 
         return (
           <React.Fragment key={index}>
-            <ChevronRight size={13} className="text-slate-300 dark:text-slate-600 shrink-0" />
+            <ChevronRight size={12} className="text-slate-300 dark:text-slate-600 shrink-0" />
             {isLast || !path ? (
               <span
                 className={`truncate ${
                   isLast
-                    ? "font-bold text-slate-800 dark:text-slate-100"
+                    ? "font-extrabold text-slate-900 dark:text-slate-100"
                     : "text-slate-500 dark:text-slate-400"
                 }`}
               >
@@ -42,7 +43,7 @@ const Breadcrumb = ({ data = ["Settings"] }) => {
             ) : (
               <Link
                 to={path}
-                className="hover:text-indigo-600 dark:hover:text-indigo-400 transition truncate"
+                className="hover:text-orange-500 dark:hover:text-orange-400 transition truncate font-medium"
               >
                 {label}
               </Link>
@@ -55,3 +56,4 @@ const Breadcrumb = ({ data = ["Settings"] }) => {
 };
 
 export default Breadcrumb;
+

@@ -19,7 +19,6 @@ import {
   Users,
   Wallet,
   Sparkles,
-  Search,
   Bell,
   Maximize2,
   Minimize2,
@@ -34,6 +33,8 @@ import api from "../services/api.js";
 import MandatorySchoolProfileModal, {
   checkIsSchoolProfileIncomplete,
 } from "../components/modals/MandatorySchoolProfileModal.jsx";
+import SetupWizardModal from "../pages/setup/SetupWizardModal.jsx";
+import useSetupWizard from "../hooks/useSetupWizard.js";
 
 const HEADER_TABS = [
   { id: "home", label: "Home", icon: LayoutDashboard },
@@ -49,6 +50,7 @@ const DashboardLayout = () => {
   const [collapsedSections, setCollapsedSections] = useState({});
   const [settingsData, setSettingsData] = useState(null);
   const [showMandatoryModal, setShowMandatoryModal] = useState(false);
+  const [wizardModalOpen, setWizardModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -66,6 +68,8 @@ const DashboardLayout = () => {
     userRole === ROLES.SCHOOL_ADMIN ||
     userRole === "admin" ||
     userRole === ROLES.PRINCIPAL;
+
+  const wizard = useSetupWizard(canManageSettings);
 
   React.useEffect(() => {
     refreshBranding();
@@ -315,21 +319,6 @@ const DashboardLayout = () => {
               <Menu size={18} />
             </button>
 
-            {/* Global Search Bar (From Mockup) */}
-            <div className="relative hidden md:flex items-center flex-1 max-w-md">
-              <Search
-                size={15}
-                className={`absolute left-3.5 ${text.muted} pointer-events-none`}
-              />
-              <input
-                type="text"
-                placeholder="Search students, teachers, classes, exams..."
-                className={`w-full pl-9 pr-14 py-2 ${input.base} text-xs shadow-2xs`}
-              />
-              <span className={`absolute right-3 px-1.5 py-0.5 rounded text-[10px] font-semibold ${bg.card} ${text.muted} border ${border.default} shadow-2xs pointer-events-none`}>
-                Ctrl K
-              </span>
-            </div>
 
             {/* Header Tabs if on dashboard */}
             {canSeeHeaderTabs && (
@@ -463,6 +452,16 @@ const DashboardLayout = () => {
           </ErrorBoundary>
         </main>
       </div>
+
+      {/* ── Initial ERP Setup Wizard Modal ── */}
+      <SetupWizardModal
+        isOpen={wizardModalOpen}
+        onClose={() => setWizardModalOpen(false)}
+        onComplete={() => {
+          setWizardModalOpen(false);
+          wizard.refreshStatus();
+        }}
+      />
 
       {/* ── Mandatory School Profile Modal (Shown immediately after login if mandatory details are missing) ── */}
       {showMandatoryModal && (

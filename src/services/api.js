@@ -29,6 +29,7 @@ api.interceptors.request.use(
         url.includes("/auth/login") ||
         url.includes("/auth/signup") ||
         url.includes("/auth/setup-status") ||
+        url.includes("/auth/has-users") ||
         url.includes("/auth/send-otp") ||
         url.includes("/auth/verify-otp") ||
         url.includes("/auth/forgot") ||

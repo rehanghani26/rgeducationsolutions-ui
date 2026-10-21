@@ -4,10 +4,7 @@ import {
   User as UserIcon,
   Copy,
   Check,
-  Zap,
-  ExternalLink,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import MarkdownRenderer from "./MarkdownRenderer.jsx";
 import { bg, border, text } from "@/theme/color";
 
@@ -28,7 +25,6 @@ function TypingDots() {
 }
 
 export default function AiMessages({ messages, loading, messagesEndRef }) {
-  const navigate = useNavigate();
   const [copiedIndex, setCopiedIndex] = useState(null);
 
   const handleCopy = (textContent, idx) => {
@@ -67,40 +63,6 @@ export default function AiMessages({ messages, loading, messagesEndRef }) {
                 isUser ? "items-end" : "items-start"
               } flex flex-col gap-1`}
             >
-              {/* Tool Execution Cards */}
-              {!isUser && msg.actionsExecuted?.length > 0 && (
-                <div className="mb-2 w-full space-y-2">
-                  {msg.actionsExecuted.map((act, ai) => (
-                    <div
-                      key={ai}
-                      className="rounded-xl border border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/30 p-3 shadow-2xs"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
-                          <Zap className="h-3 w-3 text-emerald-500" />
-                          {act.tool || act.toolName}
-                        </span>
-                        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                          {act.status || "Executed"}
-                        </span>
-                      </div>
-                      {act.result?.message && (
-                        <p className="text-[12px] text-stone-700 dark:text-stone-300">
-                          {act.result.message}
-                        </p>
-                      )}
-                      {act.result?.actionLink && (
-                        <button
-                          onClick={() => navigate(act.result.actionLink)}
-                          className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors cursor-pointer"
-                        >
-                          View in ERP <ExternalLink className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {/* Message Content */}
               <div

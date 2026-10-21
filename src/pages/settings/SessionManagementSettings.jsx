@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   Calendar,
@@ -17,11 +18,110 @@ import {
   Layers,
   Search,
   Filter,
+  ChevronRight,
+  ArrowRight,
+  Bell,
+  LayoutGrid,
 } from 'lucide-react';
 import api from '../../services/api.js';
 import { CLASS_OPTIONS } from '../../constants/academicOptions.js';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Academic Progress Stepper — shared 3-step indicator rendered at the top of
+// all three scheduling settings pages (Session, Master Period, Class Timetable).
+// activeStep: 1 | 2 | 3
+// ─────────────────────────────────────────────────────────────────────────────
+const AcademicScheduleStepper = ({ activeSession, onNavigate }) => {
+  const steps = [
+    {
+      num: 1,
+      label: 'Academic Session',
+      sublabel: activeSession
+        ? `✓ ${activeSession.sessionName} (Active)`
+        : 'Not yet configured',
+      done: !!activeSession,
+      path: '/settings/session',
+    },
+    {
+      num: 2,
+      label: 'Master Bell Schedule',
+      sublabel: activeSession?.hasMasterSchedule
+        ? '✓ Configured'
+        : activeSession
+        ? 'Awaiting configuration'
+        : 'Requires Step 1',
+      done: !!activeSession?.hasMasterSchedule,
+      path: '/settings/master-period',
+    },
+    {
+      num: 3,
+      label: 'Class Timetable Builder',
+      sublabel: activeSession?.timetableCount
+        ? `✓ ${activeSession.timetableCount} Class(es) Built`
+        : activeSession?.hasMasterSchedule
+        ? 'Ready to assign'
+        : 'Requires Step 2',
+      done: (activeSession?.timetableCount || 0) > 0,
+      path: '/settings/class-timetable',
+    },
+  ];
+
+  return (
+    <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 sm:p-5 backdrop-blur-sm">
+      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-3">
+        Academic Setup Workflow
+      </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+        {steps.map((step, idx) => (
+          <React.Fragment key={step.num}>
+            <button
+              onClick={() => onNavigate(step.path)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group ${
+                step.num === 1
+                  ? 'bg-indigo-600/30 border border-indigo-500/50 ring-1 ring-indigo-500/30'
+                  : step.done
+                  ? 'bg-emerald-900/30 border border-emerald-700/50 hover:bg-emerald-900/50 cursor-pointer'
+                  : 'bg-slate-700/30 border border-slate-600/30 hover:bg-slate-700/50 cursor-pointer'
+              }`}
+            >
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                  step.num === 1
+                    ? 'bg-indigo-500 text-white'
+                    : step.done
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-600 text-slate-300'
+                }`}
+              >
+                {step.done && step.num !== 1 ? '✓' : step.num}
+              </div>
+              <div className="min-w-0">
+                <p className={`text-xs font-black leading-tight ${
+                  step.num === 1 ? 'text-indigo-200' : step.done ? 'text-emerald-200' : 'text-slate-300'
+                }`}>
+                  {step.label}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium mt-0.5 truncate max-w-[140px]">
+                  {step.sublabel}
+                </p>
+              </div>
+            </button>
+            {idx < steps.length - 1 && (
+              <ChevronRight
+                size={16}
+                className="text-slate-600 shrink-0 mx-1 sm:block hidden"
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 const SessionManagementSettings = () => {
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -309,6 +409,43 @@ const SessionManagementSettings = () => {
 
   return (
     <div className="space-y-8 pb-10">
+      {/* ── ACADEMIC SETUP STEPPER ── */}
+      <AcademicScheduleStepper
+        activeSession={activeSession}
+        onNavigate={(path) => navigate(path)}
+      />
+
+      {/* ── SESSION ACTIVATED COMPLETION BANNER ── */}
+      {activeSession && (
+        <div className="bg-gradient-to-r from-emerald-900/70 via-slate-900 to-slate-900 rounded-2xl p-5 border border-emerald-500/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <CheckCircle2 size={20} className="text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-emerald-300">
+                Academic Session <span className="text-white">{activeSession.sessionName}</span> is active!
+              </p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {activeSession.hasMasterSchedule
+                  ? 'Master Bell Schedule is configured. Next: Build class timetables.'
+                  : 'Next Step: Configure the Master Bell Schedule so all classes share the same daily bell rings.'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate(activeSession.hasMasterSchedule ? '/settings/class-timetable' : '/settings/master-period')}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg transition-all shrink-0 whitespace-nowrap"
+          >
+            {activeSession.hasMasterSchedule ? (
+              <><LayoutGrid size={14} /> Open Class Timetable Builder <ArrowRight size={14} /></>
+            ) : (
+              <><Bell size={14} /> Configure Master Bell Schedule <ArrowRight size={14} /></>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* ── HEADER BANNER ── */}
       <div className="bg-gradient-to-r from-indigo-900 via-slate-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-indigo-500/20">
         <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />

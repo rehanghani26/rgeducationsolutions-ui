@@ -10,11 +10,21 @@ import {
   Award,
   Sliders,
   FileSpreadsheet,
+  Calendar,
 } from "lucide-react";
 
 export const STORAGE_KEY_SESSIONS = "GEMINI_ERP_CHAT_SESSIONS_V2";
 
 export const SUGGESTED_PROMPTS = [
+  {
+    icon: Calendar,
+    title: "Academic Session & Setup",
+    prompt:
+      "What is the active academic session and what is the progress of our 3-step academic setup (Session -> Master Period -> Timetables)?",
+    gradient: "from-indigo-600 to-violet-600",
+    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-indigo-500/5 dark:hover:bg-indigo-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-indigo-500/40",
+    textColor: "text-indigo-700 dark:text-indigo-300",
+  },
   {
     icon: BookOpen,
     title: "Exam Schedule & Papers",
@@ -88,6 +98,11 @@ export const SUGGESTED_PROMPTS = [
 ];
 
 export const QUICK_CHIPS = [
+  {
+    emoji: "🗓️",
+    label: "Academic Session",
+    prompt: "Show the active academic session and 3-step setup progress",
+  },
   {
     emoji: "📝",
     label: "Exams",

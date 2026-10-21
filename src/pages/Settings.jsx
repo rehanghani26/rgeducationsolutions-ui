@@ -8,8 +8,7 @@ import {
   useOutlet,
   useOutletContext,
 } from "react-router-dom";
-import { toast } from "react-toastify";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, ChevronRight } from "lucide-react";
 
 import { checkVisibility } from "../utils";
 import { AccessDeniedPage, Breadcrumb } from "../components";
@@ -40,6 +39,7 @@ import {
 
 import StudentProfileView from "./students/StudentProfileView.jsx";
 import { getUserFromStorage } from "../config/access.jsx";
+import SetupWizardPage from "./setup/SetupWizardPage.jsx";
 
 // Re-export all SVG icons following requested pattern
 export * from "./settings/settingIcons";
@@ -71,20 +71,35 @@ const withSettingsWrapper = (
 
     return (
       <div className="space-y-6">
-        {/* Subpage Header with Navigation Back to Overview */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-          <button
-            type="button"
-            onClick={() => navigate("/settings")}
-            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold text-xs sm:text-sm transition cursor-pointer"
-          >
-            <ArrowLeft size={16} /> Back to Settings Overview
-          </button>
-          {title && (
-            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-              {title}
-            </span>
-          )}
+        {/* Unified Subpage Header & Breadcrumb */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200/70 dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => navigate("/settings")}
+              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition shadow-2xs cursor-pointer border border-slate-200/60 dark:border-slate-700/60"
+              title="Return to Settings Overview"
+            >
+              <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back to Settings</span>
+            </button>
+
+            <span className="text-slate-300 dark:text-slate-700 select-none">/</span>
+
+            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
+              <button
+                type="button"
+                onClick={() => navigate("/settings")}
+                className="text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 font-semibold transition cursor-pointer"
+              >
+                Settings
+              </button>
+              <ChevronRight size={12} className="text-slate-300 dark:text-slate-600 shrink-0" />
+              <span className="font-extrabold text-slate-900 dark:text-white truncate">
+                {title}
+              </span>
+            </nav>
+          </div>
         </div>
 
         {/* Setting Page Component Body */}
@@ -134,6 +149,11 @@ export const settingPageRoutes = [
     title: "Overview",
   },
   {
+    path: "wizard",
+    Component: SetupWizardPage,
+    title: "Initial Setup Wizard",
+  },
+  {
     path: "my-profile",
     Component: MyProfileSettingRoute,
     title: "My Profile",
@@ -171,12 +191,20 @@ export const settingPageRoutes = [
     title: "School Profile & Identity",
   },
   {
+    path: "session",
+    Component: withSettingsWrapper(SessionManagementSettings, {
+      selfManaged: true,
+      title: "Academic Session & Calendar",
+    }),
+    title: "Academic Session & Calendar",
+  },
+  {
     path: "master-period",
     Component: withSettingsWrapper(MasterPeriodSettings, {
       selfManaged: true,
-      title: "Master Period & Timetable",
+      title: "Master Period & Bell Schedule",
     }),
-    title: "Master Period & Timetable",
+    title: "Master Period & Bell Schedule",
   },
   {
     path: "class-timetable",
@@ -185,14 +213,6 @@ export const settingPageRoutes = [
       title: "Class Timetable Builder",
     }),
     title: "Class Timetable Builder",
-  },
-  {
-    path: "session",
-    Component: withSettingsWrapper(SessionManagementSettings, {
-      selfManaged: true,
-      title: "Session & Student Upgrade",
-    }),
-    title: "Session & Student Upgrade",
   },
   {
     path: "syllabus",
@@ -485,12 +505,9 @@ const Settings = () => {
   };
 
   return (
-    <>
-      <Breadcrumb data={breadcrumbData} />
-      <div className="p-3 sm:p-4 min-h-full bg-[var(--surface-1)] border border-[var(--border-soft)] rounded-xl shadow-xs space-y-4">
-        {outlet ? <Outlet context={outletContext} /> : <SettingsOverview />}
-      </div>
-    </>
+    <div className="p-3 sm:p-4 min-h-full bg-[var(--surface-1)] border border-[var(--border-soft)] rounded-xl shadow-xs space-y-4">
+      {outlet ? <Outlet context={outletContext} /> : <SettingsOverview />}
+    </div>
   );
 };
 
