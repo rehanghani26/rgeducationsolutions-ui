@@ -577,13 +577,13 @@ const StudentDetail = () => {
       {/* ── Modern Profile Hero Banner ────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
         {/* Decorative Header Gradient Banner */}
-        <div className="h-36 sm:h-44 w-full bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] relative overflow-hidden border-b border-orange-500/20">
+        <div className="h-20 sm:h-44 w-full bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] relative overflow-hidden border-b border-orange-500/20">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(249,115,22,0.25),transparent_60%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(245,158,11,0.18),transparent_50%)]" />
           <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
 
-          {/* Quick Corner Tag */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+          {/* Quick Corner Tag — Desktop only */}
+          <div className="hidden sm:flex absolute top-4 right-4 items-center gap-2">
             <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white/90 border border-white/10 flex items-center gap-1.5">
               <School size={12} className="text-orange-400" />
               <span>{student.academicYear || "Academic Year 2025-26"}</span>
@@ -592,12 +592,12 @@ const StudentDetail = () => {
         </div>
 
         {/* Profile Details overlapping the banner */}
-        <div className="px-6 pb-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-4 -mt-16 sm:-mt-20">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-4 -mt-10 sm:-mt-20">
+          <div className="flex items-center sm:items-end gap-3.5 sm:gap-5 w-full md:w-auto">
             {/* Avatar with Click-to-Zoom */}
             <div
               onClick={() => photoUrl && setPhotoModalOpen(true)}
-              className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white dark:border-slate-900 shadow-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex-shrink-0 ${
+              className={`relative w-16 h-16 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden border-2 sm:border-4 border-white dark:border-slate-900 shadow-xl sm:shadow-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex-shrink-0 ${
                 photoUrl ? "cursor-pointer group" : ""
               }`}
             >
@@ -615,16 +615,17 @@ const StudentDetail = () => {
                 </>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-white">
-                  <User size={40} className="text-white/80 mb-1" />
-                  <span className="font-extrabold text-xs uppercase tracking-wider">
+                  <User size={24} className="sm:hidden text-white/80" />
+                  <User size={40} className="hidden sm:block text-white/80 mb-1" />
+                  <span className="font-extrabold text-[10px] sm:text-xs uppercase tracking-wider">
                     {student.name?.slice(0, 2) || "ST"}
                   </span>
                 </div>
               )}
 
-              {/* Status Dot */}
+              {/* Status Dot — Desktop only */}
               <div
-                className={`absolute bottom-2 right-2 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 ${
+                className={`hidden sm:block absolute bottom-2 right-2 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 ${
                   student.status === "active"
                     ? "bg-emerald-500"
                     : student.status === "Passout"
@@ -635,23 +636,33 @@ const StudentDetail = () => {
               />
             </div>
 
-            {/* Student Name & Meta Pills */}
-            <div className="space-y-2 mb-1">
+            {/* Student Name & Meta */}
+            <div className="space-y-1 sm:space-y-2 mb-0.5 sm:mb-1 min-w-0 flex-1 sm:flex-initial">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate sm:whitespace-normal">
                   {student.name}
                 </h1>
-                <StatusBadge status={student.status || "active"} />
+                <div className="hidden sm:inline-flex">
+                  <StatusBadge status={student.status || "active"} />
+                </div>
                 {student.aadhaarNumber && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                     <CheckCircle2 size={12} />
                     <span>Aadhaar Verified</span>
                   </span>
                 )}
               </div>
 
-              {/* Badges Row */}
-              <div className="flex flex-wrap items-center gap-2 text-xs">
+              {/* Mobile-only small class tag */}
+              <div className="flex sm:hidden items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-bold border border-orange-500/20">
+                  <School size={11} className="text-orange-500" />
+                  <span>{classSection}</span>
+                </span>
+              </div>
+
+              {/* Desktop Badges Row */}
+              <div className="hidden sm:flex flex-wrap items-center gap-2 text-xs">
                 {/* Admission No with Copy */}
                 <div
                   onClick={() =>
@@ -695,8 +706,8 @@ const StudentDetail = () => {
             </div>
           </div>
 
-          {/* Quick Contact Chips */}
-          <div className="flex flex-wrap items-center gap-2 self-stretch md:self-end pt-2 md:pt-0">
+          {/* Quick Contact Chips — Desktop only */}
+          <div className="hidden sm:flex flex-wrap items-center gap-2 self-stretch md:self-end pt-2 md:pt-0">
             {student.contactNumber && (
               <a
                 href={`tel:${student.contactNumber}`}
