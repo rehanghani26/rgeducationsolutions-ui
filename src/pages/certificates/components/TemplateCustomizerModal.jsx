@@ -10,6 +10,7 @@ import { ALL_TEMPLATES, getTemplateById } from '../templates/registry.js';
 import { createCustomTemplate, updateCustomTemplate } from '../services/documentService.js';
 import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
 import { MOCK_STUDENT_DATA, MOCK_CERTIFICATE_DATA } from '../constants/documentConstants.js';
+import Modal from '../../../components/ui/Modal.jsx';
 
 export default function TemplateCustomizerModal({
   isOpen,
@@ -99,8 +100,15 @@ export default function TemplateCustomizerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="2xl"
+      noPadding
+      showCloseButton={false}
+      className="bg-slate-900 border-slate-800 text-white"
+    >
+      <div className="w-full h-[88vh] flex flex-col overflow-hidden text-white">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
           <div className="flex items-center gap-3">
@@ -295,6 +303,6 @@ export default function TemplateCustomizerModal({
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

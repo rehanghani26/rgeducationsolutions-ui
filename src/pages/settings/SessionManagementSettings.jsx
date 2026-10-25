@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api.js';
 import { CLASS_OPTIONS } from '../../constants/academicOptions.js';
+import Modal from '../../components/ui/Modal.jsx';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Academic Progress Stepper — shared 3-step indicator rendered at the top of
@@ -771,12 +772,18 @@ const SessionManagementSettings = () => {
       </div>
 
       {/* ── MODAL: CREATE ACADEMIC SESSION ── */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <Calendar className="text-indigo-600" /> Create New Academic Session
-            </h3>
+      <Modal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        size="sm"
+        title={
+          <div className="flex items-center gap-2">
+            <Calendar className="text-indigo-600" />
+            <span>Create New Academic Session</span>
+          </div>
+        }
+      >
+        <div className="space-y-5">
 
             <form onSubmit={handleCreateSession} className="space-y-4 text-xs">
               <div>
@@ -854,25 +861,29 @@ const SessionManagementSettings = () => {
                 </button>
               </div>
             </form>
-          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── MODAL: BULK WHOLE SCHOOL SESSION UPGRADE ── */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-amber-500/30 shadow-2xl space-y-6">
-            <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center font-black text-xl">
-                ⚡
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  Confirm Whole School Session Upgrade
-                </h3>
-                <p className="text-xs text-slate-500">Bulk promote all students across all classes</p>
-              </div>
+      <Modal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        size="md"
+        title={
+          <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center font-black text-lg">
+              ⚡
             </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
+                Confirm Whole School Session Upgrade
+              </h3>
+              <p className="text-xs text-slate-500 font-normal">Bulk promote all students across all classes</p>
+            </div>
+          </div>
+        }
+      >
+        <div className="space-y-6">
 
             <div className="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
               <p className="font-extrabold flex items-center gap-1.5">
@@ -902,13 +913,19 @@ const SessionManagementSettings = () => {
                 {submittingUpgrade || isPromoting ? 'Promoting All Students...' : '⚡ Upgrade Whole School Now'}
               </button>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── DYNAMIC PROMOTION PROGRESS BAR OVERLAY ── */}
-      {isPromoting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <Modal
+        open={isPromoting}
+        showCloseButton={false}
+        closeOnOverlayClick={false}
+        closeOnEsc={false}
+        size="sm"
+        noPadding
+        className="border-indigo-500/30"
+      >
           <div className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-indigo-500/30 shadow-2xl space-y-6 text-white text-center relative overflow-hidden">
             <div className="absolute -right-12 -top-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none" />
@@ -947,8 +964,7 @@ const SessionManagementSettings = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

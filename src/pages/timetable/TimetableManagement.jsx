@@ -31,6 +31,7 @@ import {
 import { toast } from "react-toastify";
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import Button from "../../components/ui/Button.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 import api from "../../services/api.js";
 import { CLASS_OPTIONS } from "../../constants/academicOptions.js";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
@@ -1645,48 +1646,37 @@ const TimetableManagement = () => {
         </>
       )}
 
-      {/* Slot Editor Modal / Drawer */}
-      <AnimatePresence>
-        {editSlotModal.isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl w-full max-w-lg space-y-5"
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold uppercase border border-indigo-200 dark:border-indigo-900/50">
-                      {selectedClass}
-                    </span>
-                    <span className="text-xs font-bold text-slate-400 uppercase">
-                      {editSlotModal.day}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-white mt-1">
-                    Assign Slot #{editSlotModal.periodIndex + 1} (
-                    {editSlotModal.period?.startTime} -{" "}
-                    {editSlotModal.period?.endTime})
-                  </h3>
-                </div>
-
-                <button
-                  onClick={() =>
-                    setEditSlotModal({
-                      isOpen: false,
-                      day: "monday",
-                      periodIndex: 0,
-                      period: null,
-                    })
-                  }
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+      {/* Slot Editor Modal */}
+      <Modal
+        open={editSlotModal.isOpen}
+        onClose={() =>
+          setEditSlotModal({
+            isOpen: false,
+            day: "monday",
+            periodIndex: 0,
+            period: null,
+          })
+        }
+        size="md"
+        title={
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold uppercase border border-indigo-200 dark:border-indigo-900/50">
+                {selectedClass}
+              </span>
+              <span className="text-xs font-bold text-slate-400 uppercase">
+                {editSlotModal.day}
+              </span>
+            </div>
+            <h3 className="text-base font-black text-slate-900 dark:text-white mt-1">
+              Assign Slot #{editSlotModal.periodIndex + 1} (
+              {editSlotModal.period?.startTime} -{" "}
+              {editSlotModal.period?.endTime})
+            </h3>
+          </div>
+        }
+      >
+        <div className="space-y-5">
 
               {/* Form inputs */}
               <div className="space-y-4">
@@ -1857,10 +1847,8 @@ const TimetableManagement = () => {
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+        </div>
+      </Modal>
     </motion.div>
   );
 };

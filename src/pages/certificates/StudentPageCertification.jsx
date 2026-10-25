@@ -33,6 +33,7 @@ import {
   Lock,
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader.jsx';
+import Modal from '../../components/ui/Modal.jsx';
 import { useSchoolBranding } from '../../context/SchoolBrandingContext.jsx';
 import IdCardPreview from './components/IdCardPreview.jsx';
 import CertificatePreview from './components/CertificatePreview.jsx';
@@ -587,55 +588,48 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
       </AnimatePresence>
 
       {/* ─── CERTIFICATE PREVIEW MODAL ────────────────────────────────────── */}
-      {activePreviewCert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 bg-slate-950/80 border-b border-slate-800">
-              <div className="flex items-center gap-3">
-                <Award size={18} className="text-amber-400" />
-                <div>
-                  <h3 className="text-sm font-bold text-white">
-                    {activePreviewCert.certificateType} Certificate
-                  </h3>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {activePreviewCert.certificateNumber}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handlePrintCertificate(activePreviewCert)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition cursor-pointer"
-                >
-                  <Printer size={14} />
-                  <span>Open Full Document</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActivePreviewCert(null)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
+      <Modal
+        open={Boolean(activePreviewCert)}
+        onClose={() => setActivePreviewCert(null)}
+        size="2xl"
+        title={
+          activePreviewCert ? (
+            <div className="flex items-center gap-3">
+              <Award size={18} className="text-amber-400" />
+              <div>
+                <h3 className="text-sm font-bold text-white">
+                  {activePreviewCert.certificateType} Certificate
+                </h3>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {activePreviewCert.certificateNumber}
+                </span>
               </div>
             </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-auto p-4 bg-slate-950/40">
-              <CertificatePreview
-                template={getTemplateById(activePreviewCert.templateId || 'certificate-classic')}
-                certificateData={activePreviewCert}
-                schoolSettings={schoolSettings}
-                title={`${activePreviewCert.certificateType} CERTIFICATE`}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+          ) : null
+        }
+        headerActions={
+          activePreviewCert ? (
+            <button
+              type="button"
+              onClick={() => handlePrintCertificate(activePreviewCert)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition cursor-pointer mr-1"
+            >
+              <Printer size={14} />
+              <span>Open Full Document</span>
+            </button>
+          ) : null
+        }
+        contentClassName="bg-slate-950/40"
+      >
+        {activePreviewCert && (
+          <CertificatePreview
+            template={getTemplateById(activePreviewCert.templateId || 'certificate-classic')}
+            certificateData={activePreviewCert}
+            schoolSettings={schoolSettings}
+            title={`${activePreviewCert.certificateType} CERTIFICATE`}
+          />
+        )}
+      </Modal>
     </motion.div>
   );
 }

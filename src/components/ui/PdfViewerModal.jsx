@@ -11,6 +11,7 @@ import {
   Eye,
   CheckCircle2,
 } from 'lucide-react';
+import Modal from './Modal.jsx';
 
 /**
  * Normalizes a PDF URL so it renders cleanly in iframes:
@@ -107,14 +108,15 @@ export default function PdfViewerModal({
   };
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
+    <Modal
+      open={true}
+      onClose={onClose}
+      size="2xl"
+      noPadding
+      showCloseButton={false}
+      className="h-[92vh] bg-slate-900 border-slate-800 text-white"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-5xl h-[92vh] max-h-[92vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
-      >
+      <div className="relative w-full h-full flex flex-col overflow-hidden text-white">
         {/* ── Top Header Toolbar ────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
           <div className="flex items-center gap-3 min-w-0">
@@ -292,6 +294,6 @@ export default function PdfViewerModal({
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

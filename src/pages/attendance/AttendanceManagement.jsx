@@ -6,6 +6,7 @@ import PageHeader from "../../components/ui/PageHeader.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
 import SearchFilters from "../../components/ui/SearchFilters.jsx";
 import StatsCard from "../../components/ui/StatsCard.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 import {
   getAttendanceRecords,
   getAttendanceById,
@@ -19,6 +20,7 @@ import {
   CLASS_OPTIONS,
   SECTION_OPTIONS,
 } from "../../constants/academicOptions.js";
+import { getActiveLeavesOnDate } from "../../services/leaveService.js";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
 import {
@@ -244,7 +246,7 @@ const AttendanceManagement = () => {
       (s.roll && String(s.roll).toLowerCase().includes(studentSearch.toLowerCase()))
   );
 
-  // ── Load students for selected class + section from API ──────────────────
+  // ── Load students for selected class + section from API & Pre-populate Leaves ──
   const loadRosterStudents = useCallback(async (className, sectionName) => {
     if (!className || !sectionName) {
       toast.warning("Please select both Class and Section first.");
@@ -253,31 +255,81 @@ const AttendanceManagement = () => {
     setRosterLoading(true);
     setRoster([]);
     try {
-      const res = await getStudents({
-        class: className,
-        section: sectionName,
-        limit: 200,
-      });
-      const students = res?.students || res?.data?.students || [];
+      const [studentsRes, leavesRes] = await Promise.all([
+        getStudents({
+          class: className,
+          section: sectionName,
+          limit: 200,
+        }).catch(() => null),
+        getActiveLeavesOnDate({
+          date: attDate,
+          className,
+          sectionName,
+          role: "student",
+        }).catch(() => null),
+      ]);
+
+      const students = studentsRes?.students || studentsRes?.data?.students || [];
+      const activeLeaves = leavesRes?.data || leavesRes?.leaves || [];
+
       if (students.length === 0) {
         toast.info(`No students found for ${className} - ${sectionName}`);
       } else {
-        toast.success(
-          `Loaded ${students.length} students for ${className} - ${sectionName}`
-        );
+        const leaveCount = activeLeaves.length;
+        if (leaveCount > 0) {
+          toast.success(
+            `Loaded ${students.length} students (${leaveCount} approved on leave for ${attDate})`
+          );
+        } else {
+          toast.success(
+            `Loaded ${students.length} students for ${className} - ${sectionName}`
+          );
+        }
       }
+
       setRoster(
-        students.map((s) => ({
-          id: s._id || s.id,
-          roll: s.rollNumber || s.admissionNumber || s._id,
-          name:
-            `${s.firstName || ""} ${s.lastName || ""}`.trim() ||
-            s.name ||
-            "Unknown",
-          classSection: `${s.class || className} - ${s.section || sectionName}`,
-          status: "Present",
-          remarks: "",
-        }))
+        students.map((s) => {
+          const studentIdStr = String(s._id || s.id || "");
+          const admNoStr = String(s.admissionNumber || "");
+          const rollStr = String(s.rollNumber || "");
+
+          const matchingLeave = activeLeaves.find(
+            (l) =>
+              (l.applicantId && String(l.applicantId) === studentIdStr) ||
+              (l.admissionNumber && String(l.admissionNumber) === admNoStr) ||
+              (l.rollNumber && String(l.rollNumber) === rollStr)
+          );
+
+          if (matchingLeave) {
+            return {
+              id: s._id || s.id,
+              roll: s.rollNumber || s.admissionNumber || s._id,
+              name:
+                `${s.firstName || ""} ${s.lastName || ""}`.trim() ||
+                s.name ||
+                "Unknown",
+              classSection: `${s.class || className} - ${s.section || sectionName}`,
+              status: matchingLeave.isHalfDay ? "Half Day" : "Leave",
+              remarks: `Approved Leave: ${matchingLeave.category}${matchingLeave.isHalfDay ? ` (${matchingLeave.halfDaySession || "1st"})` : ""}${matchingLeave.reason ? ` — ${matchingLeave.reason}` : ""}`,
+              isOnLeave: true,
+              leaveCategory: matchingLeave.category,
+              leaveRef: matchingLeave.leaveCode,
+            };
+          }
+
+          return {
+            id: s._id || s.id,
+            roll: s.rollNumber || s.admissionNumber || s._id,
+            name:
+              `${s.firstName || ""} ${s.lastName || ""}`.trim() ||
+              s.name ||
+              "Unknown",
+            classSection: `${s.class || className} - ${s.section || sectionName}`,
+            status: "Present",
+            remarks: "",
+            isOnLeave: false,
+          };
+        })
       );
     } catch (err) {
       toast.error("Failed to load students. Check your connection.");
@@ -285,7 +337,7 @@ const AttendanceManagement = () => {
     } finally {
       setRosterLoading(false);
     }
-  }, []);
+  }, [attDate]);
 
   const handleAttendeeTypeChange = (newType) => {
     setAttendeeType(newType);
@@ -296,8 +348,9 @@ const AttendanceManagement = () => {
   };
 
   const handleMarkAllStatus = (targetStatus) => {
+    // Preserve students with authorized approved leave to prevent accidental marking as absent/present
     setRoster((prev) =>
-      prev.map((item) => ({ ...item, status: targetStatus }))
+      prev.map((item) => (item.isOnLeave ? item : { ...item, status: targetStatus }))
     );
   };
 
@@ -326,6 +379,7 @@ const AttendanceManagement = () => {
     const presentCount = roster.filter((r) => r.status === "Present").length;
     const absentCount = roster.filter((r) => r.status === "Absent").length;
     const lateCount = roster.filter((r) => r.status === "Late").length;
+    const leaveCount = roster.filter((r) => r.status === "Leave" || r.status === "Half Day").length;
 
     // Build payload matching exact requested JSON structure:
     const payload = {
@@ -349,6 +403,7 @@ const AttendanceManagement = () => {
       present: presentCount,
       absent: absentCount,
       late: lateCount,
+      leaveCount: leaveCount,
       // Exact requested 'students' array structure:
       students: roster.map((item) => ({
         studentId: item.id,
@@ -1221,6 +1276,9 @@ const AttendanceManagement = () => {
                   <span className="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">
                     Late: {roster.filter((r) => r.status === "Late").length}
                   </span>
+                  <span className="text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800/40">
+                    On Leave: {roster.filter((r) => r.status === "Leave" || r.status === "Half Day").length}
+                  </span>
                 </div>
               </div>
             )}
@@ -1296,18 +1354,35 @@ const AttendanceManagement = () => {
                             >
                               L
                             </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleStatusChange(item.id, "Leave")
+                              }
+                              className={`px-3 py-1 rounded-md transition-all ${item.status === "Leave" || item.status === "Half Day" ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-purple-600"}`}
+                            >
+                              LV
+                            </button>
                           </div>
-                          <span
-                            className={`ml-2 text-[10px] font-bold ${
-                              item.status === "Present"
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : item.status === "Absent"
-                                  ? "text-rose-600 dark:text-rose-400"
-                                  : "text-amber-600 dark:text-amber-400"
-                            }`}
-                          >
-                            {item.status}
-                          </span>
+                          {item.isOnLeave ? (
+                            <span className="ml-2 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                              Approved Leave ({item.leaveCategory || "Leave"})
+                            </span>
+                          ) : (
+                            <span
+                              className={`ml-2 text-[10px] font-bold ${
+                                item.status === "Present"
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : item.status === "Absent"
+                                    ? "text-rose-600 dark:text-rose-400"
+                                    : item.status === "Late"
+                                      ? "text-amber-600 dark:text-amber-400"
+                                      : "text-purple-600 dark:text-purple-400"
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          )}
                         </td>
                         <td className="py-3 px-4">
                           <input
@@ -1398,31 +1473,30 @@ const AttendanceManagement = () => {
       )}
 
       {/* ── INSPECT STUDENT ATTENDANCE HISTORY MODAL ───────────────────────── */}
-      {inspectStudentHistory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-4 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black border border-indigo-100 dark:border-indigo-900/50">
-                  <GraduationCap size={20} />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">
-                    {inspectStudentHistory.name}
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Roll: {inspectStudentHistory.roll} ·{" "}
-                    {inspectStudentHistory.classSection || "Class 10-A"}
-                  </p>
-                </div>
+      <Modal
+        open={Boolean(inspectStudentHistory)}
+        onClose={() => setInspectStudentHistory(null)}
+        size="lg"
+        title={
+          inspectStudentHistory ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black border border-indigo-100 dark:border-indigo-900/50">
+                <GraduationCap size={20} />
               </div>
-              <button
-                onClick={() => setInspectStudentHistory(null)}
-                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
-              >
-                <X size={18} />
-              </button>
+              <div>
+                <h4 className="font-extrabold text-slate-900 dark:text-white text-base">
+                  {inspectStudentHistory.name}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Roll: {inspectStudentHistory.roll} ·{" "}
+                  {inspectStudentHistory.classSection || "Class 10-A"}
+                </p>
+              </div>
             </div>
+          ) : null
+        }
+      >
+        <div className="space-y-4">
 
             {/* Quick Stats for this Student */}
             <div className="grid grid-cols-3 gap-3 text-center text-xs">
@@ -1498,9 +1572,8 @@ const AttendanceManagement = () => {
                 Close Student Record
               </button>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

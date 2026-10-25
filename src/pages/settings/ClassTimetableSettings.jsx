@@ -13,6 +13,7 @@ import { CLASS_OPTIONS, SECTION_OPTIONS } from "../../constants/academicOptions.
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { useSelector } from "react-redux";
 import DataTable from "../../components/ui/DataTable.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 
 // ─── Period type display metadata ────────────────────────────────────────────
 const PERIOD_META = {
@@ -1638,23 +1639,23 @@ const ClassTimetableSettings = () => {
       )}
 
       {/* ── Slot Edit Modal ──────────────────────────────────────────────── */}
-      {editSlotModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl w-full max-w-lg space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 text-[10px] font-extrabold uppercase border border-indigo-200">{classSectionKey}</span>
-                  <span className="text-xs font-bold text-slate-400 uppercase">{editSlotModal.day}</span>
-                </div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white mt-1">
-                  Assign Slot #{editSlotModal.periodIndex + 1} ({editSlotModal.period?.startTime} – {editSlotModal.period?.endTime})
-                </h3>
-              </div>
-              <button onClick={() => setEditSlotModal({ isOpen: false, day: "monday", periodIndex: 0, period: null })} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-                <X size={18} />
-              </button>
+      <Modal
+        open={editSlotModal.isOpen}
+        onClose={() => setEditSlotModal({ isOpen: false, day: "monday", periodIndex: 0, period: null })}
+        size="md"
+        title={
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 text-[10px] font-extrabold uppercase border border-indigo-200">{classSectionKey}</span>
+              <span className="text-xs font-bold text-slate-400 uppercase">{editSlotModal.day}</span>
             </div>
+            <h3 className="text-base font-black text-slate-900 dark:text-white mt-1">
+              Assign Slot #{editSlotModal.periodIndex + 1} ({editSlotModal.period?.startTime} – {editSlotModal.period?.endTime})
+            </h3>
+          </div>
+        }
+      >
+        <div className="space-y-5">
 
             <div className="space-y-4">
               {/* Teacher */}
@@ -1821,39 +1822,34 @@ const ClassTimetableSettings = () => {
                 </button>
               </div>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── Class Syllabus & Prescribed Books Modal ──────────────────────── */}
-      {showSyllabusModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center">
-                  <BookOpen size={20} />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    {selectedClass} — Syllabus & Prescribed Books
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
-                      {syllabusData?.isDefaultTemplate ? "National Standard" : "Custom School Config"}
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    These subjects and prescribed books populate the Timetable Builder for {selectedClass}.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowSyllabusModal(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
+      <Modal
+        open={showSyllabusModal}
+        onClose={() => setShowSyllabusModal(false)}
+        size="lg"
+        title={
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+              <BookOpen size={20} />
             </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                {selectedClass} — Syllabus & Prescribed Books
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                  {syllabusData?.isDefaultTemplate ? "National Standard" : "Custom School Config"}
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                These subjects and prescribed books populate the Timetable Builder for {selectedClass}.
+              </p>
+            </div>
+          </div>
+        }
+      >
+        <div className="flex flex-col space-y-4">
 
             {/* Content List */}
             <div className="overflow-y-auto space-y-3 flex-1 pr-1">
@@ -1935,9 +1931,8 @@ const ClassTimetableSettings = () => {
                 </button>
               </div>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

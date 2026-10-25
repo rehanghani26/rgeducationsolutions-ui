@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
 import {
   User,
   BookOpen,
@@ -8,7 +9,17 @@ import {
   DollarSign,
   Lock,
   Activity,
-  FileText
+  FileText,
+  School,
+  Clock,
+  ExternalLink,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  RefreshCw,
+  Check,
+  X,
+  Calendar,
 } from "lucide-react";
 import DetailPageLayout, {
   EditButton,
@@ -16,8 +27,10 @@ import DetailPageLayout, {
 import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
 import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
 import StatsCard from "../../components/ui/StatsCard.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 import { permissionOptions } from "./TeacherForm.jsx";
-import { getTeacherById, getTeacherActivity } from "../../services";
+import { getTeacherById, getTeacherActivity, getTeacherClassHistory } from "../../services";
+import { getApplicantLeaveProfile, reviewLeave, requestLeave } from "../../services/leaveService.js";
 import api from "../../services/api.js";
 import { mockTeachers } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
@@ -47,12 +60,69 @@ const TeacherDetail = () => {
   const userRole = user?.role || (getUserFromStorage()?.role) || "";
 
   const canSeeCredentials = [ROLES.SUPER_ADMIN, "superadmin", ROLES.STUDENT].includes(userRole);
+  const canReview = [ROLES.SUPER_ADMIN, "superadmin", "school-admin", "admin", "principal", "director"].includes(
+    String(userRole || "").toLowerCase()
+  );
 
   const [activeTab, setActiveTab] = useState("overview");
   const [teacher, setTeacher] = useState(null);
   const [activity, setActivity] = useState(null);
   const [timetables, setTimetables] = useState([]);
+  const [classHistory, setClassHistory] = useState({ currentClassRoom: null, history: [] });
   const [loading, setLoading] = useState(false);
+
+  // Live Teacher Leave Management State
+  const [leaveData, setLeaveData] = useState({
+    profile: null,
+    summary: { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+    activeLeave: null,
+    requests: [],
+  });
+  const [leaveLoading, setLeaveLoading] = useState(false);
+
+  // Review Modal State
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedLeaveForReview, setSelectedLeaveForReview] = useState(null);
+  const [reviewAction, setReviewAction] = useState("approved"); // "approved" | "rejected"
+  const [reviewRemarks, setReviewRemarks] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  // Apply Leave Modal State
+  const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [applySubmitting, setApplySubmitting] = useState(false);
+  const [leaveForm, setLeaveForm] = useState({
+    category: "Casual Leave",
+    startDate: "",
+    endDate: "",
+    isHalfDay: false,
+    halfDaySession: "first-half",
+    reason: "",
+  });
+
+  // Fetch Teacher Leave Profile
+  const fetchTeacherLeaves = useCallback(async () => {
+    if (!teacherId) return;
+    setLeaveLoading(true);
+    try {
+      const res = await getApplicantLeaveProfile(teacherId);
+      const payload = res?.data || res;
+      if (payload && (payload.success || payload.summary)) {
+        setLeaveData({
+          profile: payload.applicant || null,
+          summary: payload.summary || { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+          activeLeave: payload.activeLeave || payload.activeLeaveNow || null,
+          requests: payload.requests || payload.records || [
+            ...(payload.pendingRequests || []),
+            ...(payload.history || []),
+          ],
+        });
+      }
+    } catch (e) {
+      console.error("Failed to load teacher leave data:", e);
+    } finally {
+      setLeaveLoading(false);
+    }
+  }, [teacherId]);
 
   // Direct useEffect API Fetch
   useEffect(() => {
@@ -60,10 +130,12 @@ const TeacherDetail = () => {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const [res, actRes, ttRes] = await Promise.all([
+        const [res, actRes, ttRes, chRes, leaveRes] = await Promise.all([
           getTeacherById(teacherId).catch(() => null),
           getTeacherActivity(teacherId).catch(() => null),
           api.get('/periods/timetable').catch(() => null),
+          getTeacherClassHistory(teacherId).catch(() => null),
+          getApplicantLeaveProfile(teacherId).catch(() => null),
         ]);
         const foundTeacher =
           res?.teacher ||
@@ -75,6 +147,21 @@ const TeacherDetail = () => {
         if (ttRes?.data?.timetables) {
           setTimetables(ttRes.data.timetables);
         }
+        if (chRes) {
+          setClassHistory(chRes);
+        }
+        const lPayload = leaveRes?.data || leaveRes;
+        if (lPayload && (lPayload.success || lPayload.summary)) {
+          setLeaveData({
+            profile: lPayload.applicant || null,
+            summary: lPayload.summary || { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+            activeLeave: lPayload.activeLeave || lPayload.activeLeaveNow || null,
+            requests: lPayload.requests || lPayload.records || [
+              ...(lPayload.pendingRequests || []),
+              ...(lPayload.history || []),
+            ],
+          });
+        }
       } catch (err) {
         console.error("Error loading teacher detail:", err);
       } finally {
@@ -83,6 +170,79 @@ const TeacherDetail = () => {
     };
     fetchDetail();
   }, [teacherId]);
+
+  // Handle Review Leave Request (Approve / Reject)
+  const handleReviewLeave = async (e) => {
+    e.preventDefault();
+    if (!selectedLeaveForReview) return;
+    setReviewSubmitting(true);
+    try {
+      const leaveId = selectedLeaveForReview._id || selectedLeaveForReview.id;
+      const res = await reviewLeave(leaveId, {
+        status: reviewAction,
+        remarks: reviewRemarks,
+      });
+      if (res && res.success) {
+        toast.success(`Leave request ${reviewAction} successfully! Attendance synced.`);
+        setReviewModalOpen(false);
+        setSelectedLeaveForReview(null);
+        setReviewRemarks("");
+        fetchTeacherLeaves();
+      } else {
+        toast.error(res?.message || `Failed to ${reviewAction} leave request.`);
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Error processing leave review.");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  // Handle Apply Leave on Behalf of Faculty
+  const handleApplyLeave = async (e) => {
+    e.preventDefault();
+    if (!leaveForm.startDate || !leaveForm.endDate) {
+      toast.error("Please provide both start and end date.");
+      return;
+    }
+    setApplySubmitting(true);
+    try {
+      const payload = {
+        applicantId: teacher?._id || teacher?.id || teacherId,
+        applicantModel: "Teacher",
+        applicantName: teacher?.name,
+        role: "teacher",
+        employeeId: teacher?.teacherId || teacher?.employeeId,
+        department: teacher?.department,
+        category: leaveForm.category,
+        startDate: leaveForm.startDate,
+        endDate: leaveForm.endDate,
+        isHalfDay: leaveForm.isHalfDay,
+        halfDaySession: leaveForm.isHalfDay ? leaveForm.halfDaySession : undefined,
+        reason: leaveForm.reason,
+      };
+      const res = await requestLeave(payload);
+      if (res && res.success) {
+        toast.success("Teacher leave submitted successfully!");
+        setApplyModalOpen(false);
+        setLeaveForm({
+          category: "Casual Leave",
+          startDate: "",
+          endDate: "",
+          isHalfDay: false,
+          halfDaySession: "first-half",
+          reason: "",
+        });
+        fetchTeacherLeaves();
+      } else {
+        toast.error(res?.message || "Failed to submit teacher leave.");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Error submitting leave request.");
+    } finally {
+      setApplySubmitting(false);
+    }
+  };
 
   // Derive dynamic teacher allocations from Class Timetables
   const teacherAllocations = useMemo(() => {
@@ -246,6 +406,86 @@ const TeacherDetail = () => {
               ]}
             />
 
+            {/* Class Teacher Appointment & History */}
+            <div className="bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
+                    <School size={16} className="text-indigo-500" />
+                    Class Teacher Appointments & History
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Class mentor assignments tracked per academic session
+                  </p>
+                </div>
+              </div>
+
+              {/* Current Classroom */}
+              {classHistory?.currentClassRoom ? (
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-extrabold flex items-center justify-center">
+                      <School size={20} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">
+                        Current Class Teacher Appointment
+                      </span>
+                      <h5 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                        {classHistory.currentClassRoom.displayName || `${classHistory.currentClassRoom.className} - ${classHistory.currentClassRoom.sectionName}`}
+                      </h5>
+                      <p className="text-[11px] text-slate-400">
+                        Session: {classHistory.currentClassRoom.sessionName} · Room: {classHistory.currentClassRoom.room || '—'}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={`/academics/classes/${classHistory.currentClassRoom._id || classHistory.currentClassRoom.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1.5 rounded-lg"
+                  >
+                    <span>View Class</span>
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 text-xs text-slate-500">
+                  Not currently appointed as active class teacher for any session classroom.
+                </div>
+              )}
+
+              {/* Past Class Teacher History Log */}
+              {classHistory?.history?.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-slate-200/60 dark:border-slate-700">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                    <Clock size={12} className="text-indigo-500" />
+                    <span>Past Class Teacher History ({classHistory.history.length})</span>
+                  </span>
+                  <div className="space-y-1.5">
+                    {classHistory.history.map((h, hIdx) => (
+                      <div
+                        key={hIdx}
+                        className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs"
+                      >
+                        <div>
+                          <p className="font-bold text-slate-800 dark:text-slate-200">
+                            {h.className} · {h.sectionName} ({h.sessionName})
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            Tenure: {new Date(h.startDate).toLocaleDateString()} — {h.endDate ? new Date(h.endDate).toLocaleDateString() : 'Present'}
+                          </p>
+                        </div>
+                        {h.reasonForRemoval && (
+                          <span className="text-[10px] text-slate-500 italic max-w-xs truncate">
+                            {h.reasonForRemoval}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
@@ -348,14 +588,201 @@ const TeacherDetail = () => {
       case "attendance":
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatsCard title="Working Days" value="24 Days / Mo" />
-              <StatsCard title="Present Days" value="23 Days" />
-              <StatsCard title="Approved Leaves" value="1 Day" />
+            {/* Active Leave Notification Banner */}
+            {leaveData.activeLeave && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-amber-500/10 border border-purple-500/30 flex items-center justify-between gap-4 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-md">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                      Currently On Approved Leave
+                    </p>
+                    <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">
+                      {leaveData.activeLeave.category} &bull; {leaveData.activeLeave.startDate} to {leaveData.activeLeave.endDate} ({leaveData.activeLeave.totalDays} day{leaveData.activeLeave.totalDays > 1 ? "s" : ""})
+                    </p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-600 text-white shadow-sm">
+                  Active On Leave
+                </span>
+              </div>
+            )}
+
+            {/* Header & Quick Actions */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-extrabold flex items-center justify-center">
+                  <CalendarCheck size={20} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    Faculty Leave &amp; Attendance Records
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Verified leave requests with idempotent institutional attendance synchronization.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={fetchTeacherLeaves}
+                  disabled={leaveLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                >
+                  <RefreshCw size={13} className={leaveLoading ? "animate-spin text-indigo-500" : ""} />
+                  <span>Refresh</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApplyModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Apply Leave</span>
+                </button>
+              </div>
             </div>
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-              ✅ Faculty Attendance Rate: 96% (Fully Compliant)
+
+            {/* Live Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatsCard title="Total Applications" value={leaveData.summary?.totalApplications || 0} />
+              <StatsCard title="Approved Leave Days" value={leaveData.summary?.approvedDays || 0} />
+              <StatsCard title="Pending Approval" value={leaveData.summary?.pendingCount || 0} />
+              <StatsCard title="Rejected Requests" value={leaveData.summary?.rejectedCount || 0} />
             </div>
+
+            {/* Leave Applications Table */}
+            {leaveLoading ? (
+              <div className="p-12 text-center">
+                <Loader size="md" text="Loading faculty leave records..." />
+              </div>
+            ) : (leaveData.requests || []).length === 0 ? (
+              <div className="py-12 text-center text-xs text-slate-400 space-y-2 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800">
+                <Calendar size={32} className="mx-auto text-slate-300 dark:text-slate-600" />
+                <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
+                  No Leave Records Found
+                </p>
+                <p>This teacher does not have any recorded leave applications.</p>
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3 px-4">Ref Code</th>
+                        <th className="py-3 px-4">Category</th>
+                        <th className="py-3 px-4">Duration &amp; Dates</th>
+                        <th className="py-3 px-4">Reason</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4">Attendance Sync</th>
+                        <th className="py-3 px-4">Reviewer Remarks</th>
+                        {canReview && <th className="py-3 px-4 text-right">Actions</th>}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/80">
+                      {leaveData.requests.map((req) => (
+                        <tr key={req._id || req.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-850 transition">
+                          <td className="py-3 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                            {req.leaveCode || req._id?.slice(-6) || "—"}
+                          </td>
+                          <td className="py-3 px-4 font-extrabold text-slate-900 dark:text-white">
+                            {req.category}
+                            {req.isHalfDay && (
+                              <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                                Half Day ({req.halfDaySession || "1st"})
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-semibold text-slate-700 dark:text-slate-200">
+                              {req.startDate} {req.endDate && req.endDate !== req.startDate ? `to ${req.endDate}` : ""}
+                            </p>
+                            <p className="text-[10px] font-bold text-slate-400">
+                              {req.totalDays} working day{req.totalDays > 1 ? "s" : ""}
+                            </p>
+                          </td>
+                          <td className="py-3 px-4 max-w-[180px] truncate text-slate-600 dark:text-slate-300" title={req.reason}>
+                            {req.reason || "—"}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                                req.status === "approved"
+                                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                  : req.status === "pending"
+                                  ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                  : req.status === "rejected"
+                                  ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                                  : "bg-slate-500/10 text-slate-600 border-slate-500/20"
+                              }`}
+                            >
+                              {req.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {req.status === "approved" ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <CheckCircle2 size={13} />
+                                <span>{req.attendanceSync?.isSynced ? "Synced" : "Pending"}</span>
+                              </span>
+                            ) : (
+                              <span className="text-[11px] text-slate-400">—</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
+                            {req.reviewRemarks ? (
+                              <span>
+                                <strong className="text-slate-700 dark:text-slate-300">{req.reviewedBy?.name || "Admin"}:</strong> {req.reviewRemarks}
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                          {canReview && (
+                            <td className="py-3 px-4 text-right">
+                              {req.status === "pending" ? (
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedLeaveForReview(req);
+                                      setReviewAction("approved");
+                                      setReviewRemarks("");
+                                      setReviewModalOpen(true);
+                                    }}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold transition cursor-pointer"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedLeaveForReview(req);
+                                      setReviewAction("rejected");
+                                      setReviewRemarks("");
+                                      setReviewModalOpen(true);
+                                    }}
+                                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[11px] font-bold transition cursor-pointer"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-[11px] text-slate-400 font-semibold">Reviewed</span>
+                              )}
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         );
       case "activity":
@@ -384,6 +811,198 @@ const TeacherDetail = () => {
       onTabChange={setActiveTab}
     >
       {renderTab()}
+
+      {/* Review Modal */}
+      <Modal
+        open={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        title={reviewAction === "approved" ? "Approve Faculty Leave Request" : "Reject Faculty Leave Request"}
+        subtitle={`Applicant: ${teacher?.name} &bull; Code: ${selectedLeaveForReview?.leaveCode || ""}`}
+        size="md"
+      >
+        <form onSubmit={handleReviewLeave} className="space-y-4 text-xs font-sans">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-1">
+            <p className="text-[10px] uppercase font-bold text-slate-400">Leave Duration</p>
+            <p className="font-extrabold text-slate-800 dark:text-slate-100">
+              {selectedLeaveForReview?.category} &bull; {selectedLeaveForReview?.startDate} to {selectedLeaveForReview?.endDate} ({selectedLeaveForReview?.totalDays} working day{selectedLeaveForReview?.totalDays > 1 ? "s" : ""})
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] pt-1">
+              <strong>Reason:</strong> {selectedLeaveForReview?.reason || "—"}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              Reviewer Remarks / Decision Note *
+            </label>
+            <textarea
+              required
+              rows={3}
+              value={reviewRemarks}
+              onChange={(e) => setReviewRemarks(e.target.value)}
+              placeholder={reviewAction === "approved" ? "E.g. Approved as per academic calendar. Substitute teacher scheduled." : "E.g. Rejected due to scheduled examination duty."}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setReviewModalOpen(false)}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={reviewSubmitting}
+              className={`px-5 py-2 rounded-xl text-white font-bold transition shadow-md flex items-center gap-1.5 ${
+                reviewAction === "approved"
+                  ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+                  : "bg-rose-600 hover:bg-rose-700 shadow-rose-600/25"
+              }`}
+            >
+              {reviewSubmitting ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+              <span>{reviewSubmitting ? "Processing..." : `Confirm ${reviewAction === "approved" ? "Approval" : "Rejection"}`}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Apply Leave Modal */}
+      <Modal
+        open={applyModalOpen}
+        onClose={() => setApplyModalOpen(false)}
+        title={`Apply Leave — ${teacher?.name || "Teacher"}`}
+        subtitle={`Emp ID: ${teacher?.teacherId || teacher?.employeeId || "—"} &bull; Dept: ${teacher?.department || "Academic"}`}
+        size="md"
+      >
+        <form onSubmit={handleApplyLeave} className="space-y-4 text-xs font-sans">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              Leave Category *
+            </label>
+            <select
+              required
+              value={leaveForm.category}
+              onChange={(e) => setLeaveForm({ ...leaveForm, category: e.target.value })}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="Casual Leave">Casual Leave</option>
+              <option value="Medical Leave">Medical Leave</option>
+              <option value="Emergency Leave">Emergency Leave</option>
+              <option value="Academic Duty / Olympiad">Academic Duty / Olympiad</option>
+              <option value="Family / Personal Event">Family / Personal Event</option>
+              <option value="Maternity / Paternity">Maternity / Paternity</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Start Date *
+              </label>
+              <input
+                type="date"
+                required
+                value={leaveForm.startDate}
+                onChange={(e) => {
+                  const s = e.target.value;
+                  setLeaveForm({
+                    ...leaveForm,
+                    startDate: s,
+                    endDate: leaveForm.endDate && leaveForm.endDate < s ? s : leaveForm.endDate,
+                  });
+                }}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                End Date *
+              </label>
+              <input
+                type="date"
+                required
+                min={leaveForm.startDate}
+                value={leaveForm.endDate}
+                onChange={(e) => setLeaveForm({ ...leaveForm, endDate: e.target.value })}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Half Day Check */}
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-800 dark:text-slate-200">
+              <input
+                type="checkbox"
+                checked={leaveForm.isHalfDay}
+                onChange={(e) => setLeaveForm({ ...leaveForm, isHalfDay: e.target.checked })}
+                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span>Apply as Half-Day Leave (0.5 day)</span>
+            </label>
+            {leaveForm.isHalfDay && (
+              <div className="flex items-center gap-4 pt-1">
+                <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300">
+                  <input
+                    type="radio"
+                    name="halfDaySession"
+                    value="first-half"
+                    checked={leaveForm.halfDaySession === "first-half"}
+                    onChange={(e) => setLeaveForm({ ...leaveForm, halfDaySession: e.target.value })}
+                  />
+                  <span>First Half</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300">
+                  <input
+                    type="radio"
+                    name="halfDaySession"
+                    value="second-half"
+                    checked={leaveForm.halfDaySession === "second-half"}
+                    onChange={(e) => setLeaveForm({ ...leaveForm, halfDaySession: e.target.value })}
+                  />
+                  <span>Second Half</span>
+                </label>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              Reason *
+            </label>
+            <textarea
+              required
+              rows={3}
+              value={leaveForm.reason}
+              onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
+              placeholder="State reason for faculty leave application..."
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setApplyModalOpen(false)}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-200 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={applySubmitting}
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold transition shadow-md shadow-indigo-600/25 flex items-center gap-1.5"
+            >
+              {applySubmitting ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+              <span>{applySubmitting ? "Submitting..." : "Submit Application"}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
     </DetailPageLayout>
   );
 };

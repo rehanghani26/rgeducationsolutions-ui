@@ -56,7 +56,7 @@ const HomeTab = () => {
     Promise.all([
       api.get("/dashboard/stats").catch(() => null),
       api.get("/dashboard/charts").catch(() => null),
-      api.get("/notices").catch(() => null),
+      api.get("/erp/notices").catch(() => null),
     ])
       .then(([statsRes, chartsRes, noticesRes]) => {
         if (isMounted) {

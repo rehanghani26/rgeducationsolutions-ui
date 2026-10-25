@@ -33,6 +33,7 @@ import {
   UserCog,
   User,
   KeyRound,
+  School,
 } from 'lucide-react';
 
 import { ROUTES }                                   from '../routes/routes.js';
@@ -87,13 +88,6 @@ export const NAV_SECTIONS = [
         path:       ROUTES.ACADEMICS.BASE,
         icon:       BookOpen,
         roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT, ROLES.PARENT],
-        permission: 'academics',
-      },
-      {
-        name:       'Class Syllabus',
-        path:       ROUTES.ACADEMICS.SYLLABUS,
-        icon:       BookOpen,
-        roles:      [...ADMIN_ROLES, 'admin', 'superadmin', 'super_admin', 'school_admin', ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR],
         permission: 'academics',
       },
       {

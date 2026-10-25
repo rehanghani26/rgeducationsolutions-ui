@@ -129,6 +129,24 @@ export const SYLLABUS_URLS = {
   RESET:    (classId) => `/syllabus/${encodeURIComponent(classId)}/reset`,
 };
 
+// ─── ClassRooms & Sessions ────────────────────────────────────────────────────
+export const CLASSROOM_URLS = {
+  BASE:             '/classes',
+  BY_ID:            (id) => `/classes/${id}`,
+  BY_SESSION:       (sessionId) => `/classes/session/${sessionId}`,
+  STUDENT_HISTORY:  (studentId) => `/classes/student/${studentId}/history`,
+  TEACHER_HISTORY:  (teacherId) => `/classes/teacher/${teacherId}/class-history`,
+  STUDENTS:         (id) => `/classes/${id}/students`,
+  TIMETABLE:        (id) => `/classes/${id}/timetable`,
+  TEACHER_LOGS:     (id) => `/classes/${id}/teacher-history`,
+  ASSIGN_TEACHER:   (id) => `/classes/${id}/assign-teacher`,
+  REMOVE_TEACHER:   (id) => `/classes/${id}/remove-teacher`,
+  ASSIGN_TIMETABLE: (id) => `/classes/${id}/assign-timetable`,
+  ENROLL:           (id) => `/classes/${id}/enroll`,
+  REMOVE_STUDENT:   (id, studentId) => `/classes/${id}/students/${studentId}`,
+  PROMOTE:          (id) => `/classes/${id}/promote`,
+};
+
 // ─── Documents (Certificates & ID Cards) ──────────────────────────────────────
 export const DOCUMENT_URLS = {
   CERTIFICATES:            '/documents/certificates',
@@ -143,11 +161,24 @@ export const DOCUMENT_URLS = {
   SET_DEFAULT_TEMPLATE:    '/documents/templates/default',
 };
 
+// ─── Leaves ───────────────────────────────────────────────────────────────────
+export const LEAVE_URLS = {
+  BASE:           '/leaves',
+  MY:             '/leaves/my',
+  ALL:            '/leaves/all',
+  REQUEST:        '/leaves/request',
+  BY_ID:          (id)  => `/leaves/${id}`,
+  APPLICANT:      (id)  => `/leaves/applicant/${id}`,
+  REVIEW:         (id)  => `/leaves/${id}/review`,
+  ACTIVE_ON_DATE: '/leaves/active-on-date',
+};
+
 // ─── Aggregated export ────────────────────────────────────────────────────────
 export const API_URLS = {
   AUTH:           AUTH_URLS,
   STUDENTS:       STUDENT_URLS,
   TEACHERS:       TEACHER_URLS,
+  CLASSES:        CLASSROOM_URLS,
   FEES:           FEE_URLS,
   EXPENSES:       EXPENSE_URLS,
   INVENTORY:      INVENTORY_URLS,
@@ -155,6 +186,7 @@ export const API_URLS = {
   RESULTS:        RESULT_URLS,
   SYLLABUS:       SYLLABUS_URLS,
   ATTENDANCE:     ATTENDANCE_URLS,
+  LEAVES:         LEAVE_URLS,
   AUDIT_LOGS:     AUDIT_LOG_URLS,
   ERP:            ERP_URLS,
   ONLINE_CLASSES: ONLINE_CLASS_URLS,

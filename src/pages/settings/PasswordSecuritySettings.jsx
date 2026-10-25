@@ -41,6 +41,7 @@ import {
 } from '../../services/passwordRequestService.js';
 import { getStudents } from '../../services/studentService.js';
 import { getUserFromStorage } from '../../config/access.jsx';
+import Modal from '../../components/ui/Modal.jsx';
 
 export default function PasswordSecuritySettings() {
   const authUserFromStore = useSelector((state) => state.auth?.user);
@@ -1127,42 +1128,34 @@ export default function PasswordSecuritySettings() {
       )}
 
       {/* ─── ADMIN REVIEW CONFIRMATION MODAL ─────────────────────────────────── */}
-      {reviewModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 space-y-5 shadow-2xl text-white"
-          >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 font-bold text-sm">
-                {reviewModal.action === 'approve' ? (
-                  <>
-                    <CheckCircle2 size={18} className="text-emerald-400" />
-                    <span>Approve Password Change</span>
-                  </>
-                ) : (
-                  <>
-                    <XCircle size={18} className="text-rose-400" />
-                    <span>Reject Password Request</span>
-                  </>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setReviewModal({ isOpen: false, request: null, action: 'approve', adminNotes: '' })}
-                className="text-slate-400 hover:text-white"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
+      <Modal
+        open={reviewModal.isOpen}
+        onClose={() => setReviewModal({ isOpen: false, request: null, action: 'approve', adminNotes: '' })}
+        size="sm"
+        title={
+          <div className="flex items-center gap-2 font-bold text-sm">
+            {reviewModal.action === 'approve' ? (
+              <>
+                <CheckCircle2 size={18} className="text-emerald-400" />
+                <span>Approve Password Change</span>
+              </>
+            ) : (
+              <>
+                <XCircle size={18} className="text-rose-400" />
+                <span>Reject Password Request</span>
+              </>
+            )}
+          </div>
+        }
+      >
+        {reviewModal.request && (
+          <div className="space-y-5 text-white">
             <div className="space-y-3 text-xs">
               <div className="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800/80 space-y-1">
                 <span className="text-[10px] text-slate-500 uppercase font-bold">Target Account</span>
-                <div className="font-bold text-white text-sm">{reviewModal.request?.userName}</div>
-                <div className="text-slate-400 font-mono text-[11px]">{reviewModal.request?.userEmail}</div>
-                {reviewModal.request?.admissionNumber && (
+                <div className="font-bold text-white text-sm">{reviewModal.request.userName}</div>
+                <div className="text-slate-400 font-mono text-[11px]">{reviewModal.request.userEmail}</div>
+                {reviewModal.request.admissionNumber && (
                   <div className="text-sky-400 font-mono text-[10px]">
                     Admission: {reviewModal.request.admissionNumber}
                   </div>
@@ -1213,32 +1206,24 @@ export default function PasswordSecuritySettings() {
                 Confirm {reviewModal.action === 'approve' ? 'Approval' : 'Rejection'}
               </button>
             </div>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        )}
+      </Modal>
 
       {/* ─── AUDIT TRAIL TIMELINE MODAL ─────────────────────────────────────── */}
-      {detailModal.isOpen && detailModal.request && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900 p-6 space-y-5 shadow-2xl text-white max-h-[85vh] overflow-y-auto"
-          >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 font-bold text-sm">
-                <History size={18} className="text-sky-400" />
-                <span>Request Audit Trail & History</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDetailModal({ isOpen: false, request: null })}
-                className="text-slate-400 hover:text-white"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
+      <Modal
+        open={Boolean(detailModal.isOpen && detailModal.request)}
+        onClose={() => setDetailModal({ isOpen: false, request: null })}
+        size="md"
+        title={
+          <div className="flex items-center gap-2 font-bold text-sm">
+            <History size={18} className="text-sky-400" />
+            <span>Request Audit Trail & History</span>
+          </div>
+        }
+      >
+        {detailModal.request && (
+          <div className="space-y-5 text-white">
             <div className="space-y-4 text-xs">
               {/* Account Card */}
               <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
@@ -1333,9 +1318,9 @@ export default function PasswordSecuritySettings() {
                 Close Audit View
               </button>
             </div>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

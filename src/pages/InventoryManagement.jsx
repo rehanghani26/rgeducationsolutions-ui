@@ -7,6 +7,7 @@ import {
   ArrowUpRight, ArrowDownRight, Tag, Truck, Coins
 } from 'lucide-react';
 import api from '../services/api.js';
+import Modal from '../components/ui/Modal.jsx';
 
 const InventoryManagement = () => {
   const [search, setSearch] = useState('');
@@ -242,13 +243,14 @@ const InventoryManagement = () => {
       )}
 
       {/* Adjust Stock Dialog */}
-      {adjustingItem && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
-            <h3 className="text-lg font-bold mb-4">Adjust Stock Level</h3>
-            <p className="text-xs text-slate-400 mb-4">Product: <strong className="text-slate-700 dark:text-slate-300">{adjustingItem.name}</strong> (SKU: {adjustingItem.sku})</p>
-            
-            <div className="space-y-4">
+      <Modal
+        open={Boolean(adjustingItem)}
+        onClose={() => setAdjustingItem(null)}
+        size="xs"
+        title="Adjust Stock Level"
+        subtitle={adjustingItem ? `Product: ${adjustingItem.name} (SKU: ${adjustingItem.sku})` : ''}
+      >
+        <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -303,9 +305,7 @@ const InventoryManagement = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
     </div>
   );

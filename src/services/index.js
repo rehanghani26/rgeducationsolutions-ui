@@ -45,5 +45,13 @@ export { default as userService } from './userService.js';
 export * from './curriculumService.js';
 export { default as curriculumService } from './curriculumService.js';
 
+export * from './classService.js';
+export { default as classService } from './classService.js';
+
 export * from '../pages/certificates/services/documentService.js';
 export { default as documentService } from '../pages/certificates/services/documentService.js';
+
+export * from './leaveService.js';
+export { default as leaveService } from './leaveService.js';
+
+

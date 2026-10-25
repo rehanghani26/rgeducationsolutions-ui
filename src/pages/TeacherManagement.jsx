@@ -11,6 +11,7 @@ import {
 import api from '../services/api.js';
 import Button from '../components/ui/Button.jsx';
 import Loader from '../components/ui/Loader.jsx';
+import Modal from '../components/ui/Modal.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
 
@@ -297,13 +298,13 @@ const TeacherManagement = () => {
       </div>
 
       {/* Create / Edit Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-lg shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xl font-extrabold">{editing ? 'Edit Teacher' : 'Create Teacher'}</h3>
-              <Button type="button" variant="ghost" size="sm" icon={<X size={18} />} onClick={() => setShowForm(false)} />
-            </div>
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        size="2xl"
+        title={editing ? 'Edit Teacher' : 'Create Teacher'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <section className="space-y-3">
@@ -380,8 +381,7 @@ const TeacherManagement = () => {
               <Button type="submit" variant="primary" icon={<Save size={14} />}>Save Teacher</Button>
             </div>
           </form>
-        </div>
-      )}
+      </Modal>
 
       {/* Deactivate Confirmation */}
       <ConfirmDialog

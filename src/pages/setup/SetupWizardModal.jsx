@@ -17,6 +17,7 @@ import useSetupWizard from '../../hooks/useSetupWizard.js';
 import Step1SchoolProfile from './steps/Step1SchoolProfile.jsx';
 import Step2AcademicSession from './steps/Step2AcademicSession.jsx';
 import SetupWizardAI from './SetupWizardAI.jsx';
+import Modal from '../../components/ui/Modal.jsx';
 
 const STEPS_META = [
   { id: 1, key: 'schoolProfile', title: 'School Profile', icon: Building2, color: 'text-indigo-500' },
@@ -90,13 +91,15 @@ export default function SetupWizardModal({ isOpen, onClose, onComplete, initialM
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto"
-      >
+    <Modal
+      open={true}
+      onClose={handleDismiss}
+      size="xl"
+      noPadding
+      showCloseButton={false}
+      className="border-indigo-900/50"
+    >
+      <div className="relative w-full bg-white dark:bg-slate-900 overflow-hidden">
         {/* Top Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-indigo-900/50">
           <div className="flex items-center gap-3">
@@ -306,7 +309,7 @@ export default function SetupWizardModal({ isOpen, onClose, onComplete, initialM
             </div>
           )}
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </Modal>
   );
 }

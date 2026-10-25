@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   BookOpen, Layers, School, Plus, X, GraduationCap, Search, FileText,
   Download, CheckCircle, Clock, Trash2, Edit3, User, Sparkles, Filter,
-  ChevronRight, CheckSquare, Calendar
+  ChevronRight, CheckSquare, Calendar, ExternalLink
 } from "lucide-react";
 import erpService from "../services/erpService.js";
 import curriculumService from "../services/curriculumService.js";
 import { getTeachers } from "../services/teacherService.js";
 import { CLASS_OPTIONS, SECTION_OPTIONS } from "../constants/academicOptions.js";
 import Loader from "../components/ui/Loader.jsx";
+import Modal from "../components/ui/Modal.jsx";
 import { Can, CanButton, getUserFromStorage } from "../config/access.jsx";
 import { useSelector } from "react-redux";
 import StudentAcademicView, { buildDynamicTimetable, ENRICHED_STUDENT_SUBJECTS } from "./academics/StudentAcademicView.jsx";
@@ -696,16 +697,36 @@ const AcademicManagement = () => {
         ) : (
           <div className="overflow-x-auto text-xs">
             {activeTab === "classes" && (
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
-                    <th className="pb-3">Class Level Name</th>
-                    <th className="pb-3">Registry Code</th>
-                    <th className="pb-3">Allocated Lecture Room</th>
-                    <th className="pb-3">Total Students / Capacity</th>
-                    <th className="pb-3">Class Teacher</th>
-                  </tr>
-                </thead>
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-indigo-100/50 dark:from-indigo-950/40 dark:to-slate-900 border border-indigo-200/60 dark:border-indigo-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-sm"><School size={18} /></span>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Session-Scoped ClassRooms Hub</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Manage active session classrooms, assign class teachers from the faculty module, and link weekly timetables.
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href="/academics/classes"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm shrink-0"
+                  >
+                    <span>Open ClassRooms Hub</span>
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
+
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="pb-3">Class Level Name</th>
+                      <th className="pb-3">Registry Code</th>
+                      <th className="pb-3">Allocated Lecture Room</th>
+                      <th className="pb-3">Total Students / Capacity</th>
+                      <th className="pb-3">Class Teacher</th>
+                    </tr>
+                  </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {classesList.map((cls) => (
                     <tr
@@ -732,6 +753,7 @@ const AcademicManagement = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
             )}
 
             {activeTab === "sections" && (
@@ -1239,26 +1261,22 @@ const AcademicManagement = () => {
       </div>
 
       {/* Base Creation Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl max-w-lg w-full space-y-5 relative">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                {activeTab === "classes" && <School size={18} className="text-indigo-600" />}
-                {activeTab === "sections" && <Layers size={18} className="text-indigo-600" />}
-                {activeTab === "subjects" && <BookOpen size={18} className="text-indigo-600" />}
-                <span>
-                  Add New {activeTab === "classes" ? "Class Level" : activeTab === "sections" ? "Section Catalog" : "Course Subject"}
-                </span>
-              </h3>
-              <button
-                onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Modal
+        open={isModalOpen}
+        onClose={closeModal}
+        size="md"
+        title={
+          <div className="flex items-center gap-2">
+            {activeTab === "classes" && <School size={18} className="text-indigo-600" />}
+            {activeTab === "sections" && <Layers size={18} className="text-indigo-600" />}
+            {activeTab === "subjects" && <BookOpen size={18} className="text-indigo-600" />}
+            <span>
+              Add New {activeTab === "classes" ? "Class Level" : activeTab === "sections" ? "Section Catalog" : "Course Subject"}
+            </span>
+          </div>
+        }
+      >
+        <div className="space-y-5">
 
             {/* Error Message */}
             {error && (
@@ -1535,29 +1553,24 @@ const AcademicManagement = () => {
                 </button>
               </div>
             </form>
-          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ─── MODAL 2: ASSIGN / EDIT CURRICULUM & COURSE ────────────────────── */}
-      {isCurriculumModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl max-w-xl w-full space-y-5 relative max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <GraduationCap size={20} className="text-indigo-600" />
-                <span>
-                  {editingCurriculum ? "Edit Academic Course & Curriculum" : "Assign Academic Curriculum & Course"}
-                </span>
-              </h3>
-              <button
-                onClick={handleCloseCurriculumModal}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Modal
+        open={isCurriculumModalOpen}
+        onClose={handleCloseCurriculumModal}
+        size="lg"
+        title={
+          <div className="flex items-center gap-2">
+            <GraduationCap size={20} className="text-indigo-600" />
+            <span>
+              {editingCurriculum ? "Edit Academic Course & Curriculum" : "Assign Academic Curriculum & Course"}
+            </span>
+          </div>
+        }
+      >
+        <div className="space-y-5">
 
             {/* Error banner */}
             {error && (
@@ -1793,35 +1806,31 @@ const AcademicManagement = () => {
                 </button>
               </div>
             </form>
-          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ─── MODAL 3: MANAGE SYLLABUS UNITS ───────────────────────────────── */}
-      {isUnitsModalOpen && activeCurriculumForUnits && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl max-w-lg w-full space-y-5 relative max-h-[85vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                  <CheckSquare size={18} className="text-indigo-600" />
-                  <span>Syllabus Units Management</span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {activeCurriculumForUnits.name} ({activeCurriculumForUnits.code}) • {activeCurriculumForUnits.className}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsUnitsModalOpen(false);
-                  setActiveCurriculumForUnits(null);
-                }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Modal
+        open={Boolean(isUnitsModalOpen && activeCurriculumForUnits)}
+        onClose={() => {
+          setIsUnitsModalOpen(false);
+          setActiveCurriculumForUnits(null);
+        }}
+        size="md"
+        title={
+          <div className="flex items-center gap-2">
+            <CheckSquare size={18} className="text-indigo-600" />
+            <span>Syllabus Units Management</span>
+          </div>
+        }
+        subtitle={
+          activeCurriculumForUnits
+            ? `${activeCurriculumForUnits.name} (${activeCurriculumForUnits.code}) • ${activeCurriculumForUnits.className}`
+            : ''
+        }
+      >
+        {activeCurriculumForUnits && (
+          <div className="space-y-5">
 
             {/* Units List */}
             <div className="space-y-2">
@@ -1935,34 +1944,31 @@ const AcademicManagement = () => {
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* ─── MODAL 4: ATTACH STUDY MATERIAL ───────────────────────────────── */}
-      {isMaterialModalOpen && activeCurriculumForMaterials && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl max-w-lg w-full space-y-5 relative max-h-[85vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                  <FileText size={18} className="text-indigo-600" />
-                  <span>Course Study Resources</span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {activeCurriculumForMaterials.name} • {activeCurriculumForMaterials.className}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsMaterialModalOpen(false);
-                  setActiveCurriculumForMaterials(null);
-                }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
+      <Modal
+        open={Boolean(isMaterialModalOpen && activeCurriculumForMaterials)}
+        onClose={() => {
+          setIsMaterialModalOpen(false);
+          setActiveCurriculumForMaterials(null);
+        }}
+        size="md"
+        title={
+          <div className="flex items-center gap-2">
+            <FileText size={18} className="text-indigo-600" />
+            <span>Course Study Resources</span>
+          </div>
+        }
+        subtitle={
+          activeCurriculumForMaterials
+            ? `${activeCurriculumForMaterials.name} • ${activeCurriculumForMaterials.className}`
+            : ''
+        }
+      >
+        {activeCurriculumForMaterials && (
+          <div className="space-y-5">
 
             {/* Existing Materials List */}
             <div className="space-y-2">
@@ -2076,8 +2082,8 @@ const AcademicManagement = () => {
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 };

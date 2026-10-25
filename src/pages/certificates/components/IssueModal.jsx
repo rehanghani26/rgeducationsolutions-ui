@@ -11,6 +11,7 @@ import { issueCertificate, bulkIssueCertificates } from '../services/documentSer
 import { getStudents } from '../../../services/studentService.js';
 import { getTeachers } from '../../../services/teacherService.js';
 import { getClasses } from '../../../services/erpService.js';
+import Modal from '../../../components/ui/Modal.jsx';
 
 export default function IssueModal({
   isOpen,
@@ -155,8 +156,15 @@ export default function IssueModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="lg"
+      noPadding
+      showCloseButton={false}
+      className="bg-slate-900 border-slate-800 text-white"
+    >
+      <div className="w-full flex flex-col overflow-hidden text-white">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
           <div className="flex items-center gap-3">
@@ -435,6 +443,6 @@ export default function IssueModal({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

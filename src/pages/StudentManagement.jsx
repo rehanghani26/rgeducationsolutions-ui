@@ -10,6 +10,7 @@ import {
   updateStudent,
 } from '../store/slices/erpSlice.js';
 import { CLASS_OPTIONS, SECTION_OPTIONS } from '../constants/academicOptions.js';
+import Modal from '../components/ui/Modal.jsx';
 
 const permissionOptions = [
   ['dashboard', 'Dashboard Access'],
@@ -297,13 +298,14 @@ const StudentManagement = () => {
         </aside>
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-lg shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xl font-extrabold">{editing ? 'Edit Student' : 'Create Student'}</h3>
-              <button type="button" onClick={() => setShowForm(false)} className="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>
-            </div>
+      {/* Create / Edit Form Modal */}
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        size="2xl"
+        title={editing ? 'Edit Student' : 'Create Student'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
 
             <div className={`grid grid-cols-1 ${editing ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6`}>
               <section className="space-y-3">
@@ -392,8 +394,7 @@ const StudentManagement = () => {
               <button type="submit" className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold flex items-center gap-2"><Save size={14} /> Save Student</button>
             </div>
           </form>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

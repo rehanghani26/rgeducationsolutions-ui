@@ -23,6 +23,7 @@ import {
 import { ALL_TEMPLATES, getTemplateById, applyTemplateOverrides } from '../templates/registry.js';
 import { getCustomTemplates, deleteCustomTemplate } from '../services/documentService.js';
 import TemplateCustomizerModal from './TemplateCustomizerModal.jsx';
+import Modal from '../../../components/ui/Modal.jsx';
 import IdCardPreview from './IdCardPreview.jsx';
 import CertificatePreview from './CertificatePreview.jsx';
 import { MOCK_STUDENT_DATA, MOCK_CERTIFICATE_DATA } from '../constants/documentConstants.js';
@@ -245,43 +246,32 @@ export default function TemplatesModule({ schoolSettings = {}, userRole = '' }) 
       </div>
 
       {/* Preview Modal */}
-      {previewingTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-slate-950/60">
-              <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                <span>Template Preview: {previewingTemplate.name}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewingTemplate(null)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg transition"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-hidden p-4">
-              {previewingTemplate.category === 'certificate' ? (
-                <CertificatePreview
-                  template={previewingTemplate}
-                  certificateData={MOCK_CERTIFICATE_DATA}
-                  schoolSettings={schoolSettings}
-                  title={previewingTemplate.name}
-                />
-              ) : (
-                <IdCardPreview
-                  template={previewingTemplate}
-                  recipient={MOCK_STUDENT_DATA}
-                  recipientType="student"
-                  schoolSettings={schoolSettings}
-                  title={previewingTemplate.name}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={Boolean(previewingTemplate)}
+        onClose={() => setPreviewingTemplate(null)}
+        size="2xl"
+        title={previewingTemplate ? `Template Preview: ${previewingTemplate.name}` : ''}
+        contentClassName="overflow-hidden p-4"
+      >
+        {previewingTemplate && (
+          previewingTemplate.category === 'certificate' ? (
+            <CertificatePreview
+              template={previewingTemplate}
+              certificateData={MOCK_CERTIFICATE_DATA}
+              schoolSettings={schoolSettings}
+              title={previewingTemplate.name}
+            />
+          ) : (
+            <IdCardPreview
+              template={previewingTemplate}
+              recipient={MOCK_STUDENT_DATA}
+              recipientType="student"
+              schoolSettings={schoolSettings}
+              title={previewingTemplate.name}
+            />
+          )
+        )}
+      </Modal>
 
       {/* Visual Customizer Studio Modal */}
       <TemplateCustomizerModal

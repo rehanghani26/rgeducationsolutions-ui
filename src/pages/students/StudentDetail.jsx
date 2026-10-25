@@ -62,7 +62,9 @@ import {
   getStudentActivity,
   getStudentCredentials,
   getStudentAttendance,
+  getStudentSessionHistory,
 } from "../../services";
+import { getApplicantLeaveProfile } from "../../services/leaveService.js";
 import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
 import IdCardPreview from "../certificates/components/IdCardPreview.jsx";
 import CertificatePreview from "../certificates/components/CertificatePreview.jsx";
@@ -171,6 +173,51 @@ const StudentDetail = () => {
   const [attYear, setAttYear] = useState(new Date().getFullYear().toString());
   const [attMonth, setAttMonth] = useState((new Date().getMonth() + 1).toString());
   const [attStatusFilter, setAttStatusFilter] = useState("all");
+
+  // Student Academic Session History
+  const [sessionHistoryData, setSessionHistoryData] = useState(null);
+  const [sessionHistoryLoading, setSessionHistoryLoading] = useState(false);
+
+  // Student Leave Management State
+  const [leaveData, setLeaveData] = useState({
+    profile: null,
+    summary: { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+    activeLeave: null,
+    requests: [],
+  });
+  const [leaveLoading, setLeaveLoading] = useState(false);
+
+  // Fetch Student Leave Profile and Records (View Only by ID)
+  const fetchStudentLeaves = useCallback(async () => {
+    const targetId = student?._id || student?.id || studentId || student?.admissionNumber;
+    if (!targetId) return;
+    setLeaveLoading(true);
+    try {
+      const res = await getApplicantLeaveProfile(targetId);
+      const payload = res?.data || res;
+      if (payload && (payload.success || payload.summary)) {
+        setLeaveData({
+          profile: payload.applicant || null,
+          summary: payload.summary || { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+          activeLeave: payload.activeLeave || payload.activeLeaveNow || null,
+          requests: payload.requests || payload.records || [
+            ...(payload.pendingRequests || []),
+            ...(payload.history || []),
+          ],
+        });
+      }
+    } catch (e) {
+      console.error("Failed to load student leave profile:", e);
+    } finally {
+      setLeaveLoading(false);
+    }
+  }, [student, studentId]);
+
+  useEffect(() => {
+    if (activeTab === "leaves" && (student || studentId)) {
+      fetchStudentLeaves();
+    }
+  }, [activeTab, student, studentId, fetchStudentLeaves]);
 
   // Fetch Institutional Finalized Default ID Template
   const fetchDefaultIdTemplate = useCallback(async () => {
@@ -308,6 +355,27 @@ const StudentDetail = () => {
     }
   }, [activeTab, fetchAttendance]);
 
+  // Fetch Student Academic Session History
+  const fetchSessionHistory = useCallback(async () => {
+    const targetId = student?._id || student?.id || studentId || student?.admissionNumber;
+    if (!targetId) return;
+    setSessionHistoryLoading(true);
+    try {
+      const res = await getStudentSessionHistory(targetId);
+      setSessionHistoryData(res);
+    } catch (err) {
+      console.warn("Could not load student session history:", err);
+    } finally {
+      setSessionHistoryLoading(false);
+    }
+  }, [student, studentId]);
+
+  useEffect(() => {
+    if (activeTab === "academic") {
+      fetchSessionHistory();
+    }
+  }, [activeTab, fetchSessionHistory]);
+
   const handleResetAttendanceFilters = () => {
     setAttendanceFilterType("all");
     setAttSpecificDate("");
@@ -418,6 +486,7 @@ const StudentDetail = () => {
     { id: "documents", label: "Identity & Documents", icon: ShieldCheck },
     { id: "parent", label: "Guardian & Family", icon: FileText },
     { id: "attendance", label: "Attendance", icon: CalendarCheck },
+    { id: "leaves", label: "Leave History", icon: Calendar },
     { id: "fees", label: "Fee & Dues", icon: DollarSign },
     { id: "permissions", label: "Portal Access", icon: Lock },
     { id: "activity", label: "Audit Timeline", icon: Activity },
@@ -1035,13 +1104,14 @@ const StudentDetail = () => {
           {/* ── 2. ACADEMIC TAB ─────────────────────────────────────────── */}
           {activeTab === "academic" && (
             <div className="space-y-6">
+              {/* Enrolled Class & Section Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase">
                     Enrolled Class
                   </span>
                   <p className="text-base font-extrabold text-slate-900 dark:text-white">
-                    {className || "Not Assigned"}
+                    {className || sessionHistoryData?.student?.className || "Not Assigned"}
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
@@ -1049,7 +1119,7 @@ const StudentDetail = () => {
                     Assigned Section
                   </span>
                   <p className="text-base font-extrabold text-slate-900 dark:text-white">
-                    {sectionName || "Not Assigned"}
+                    {sectionName || sessionHistoryData?.student?.sectionName || "Not Assigned"}
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
@@ -1064,10 +1134,86 @@ const StudentDetail = () => {
                 </div>
               </div>
 
-              {/* Academic History Timeline */}
+              {/* Current Class Teacher & Session Card */}
+              {sessionHistoryData?.currentClassTeacher && (
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-200/70 dark:border-orange-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold flex items-center justify-center text-sm shadow-md shrink-0">
+                      {sessionHistoryData.currentClassTeacher.name?.slice(0, 2).toUpperCase() || "CT"}
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-orange-600 dark:text-orange-400 tracking-wider">
+                        Assigned Class Teacher
+                      </span>
+                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        {sessionHistoryData.currentClassTeacher.name}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {sessionHistoryData.currentClassTeacher.email || sessionHistoryData.currentClassTeacher.phone || "Faculty Mentor"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {sessionHistoryData.currentClassRoom?._id && (
+                    <Link
+                      to={`/academics/classes/${sessionHistoryData.currentClassRoom._id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:border-orange-500 transition shadow-xs"
+                    >
+                      <School size={14} className="text-orange-500" />
+                      <span>View ClassRoom Hub</span>
+                    </Link>
+                  )}
+                </div>
+              )}
+
+              {/* Session Progression Journey Timeline */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Clock size={15} className="text-orange-500" />
+                    <span>Academic Session Progression Journey</span>
+                  </h4>
+                  {sessionHistoryLoading && <Loader size="sm" />}
+                </div>
+
+                {sessionHistoryData?.history?.length > 0 ? (
+                  <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-orange-200 dark:before:bg-orange-950">
+                    {sessionHistoryData.history.map((h, idx) => (
+                      <div key={idx} className="relative group">
+                        <div className="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full bg-orange-500 border-2 border-white dark:border-slate-900 shadow-xs" />
+                        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-1 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-sm text-slate-900 dark:text-white">
+                              {h.className} · {h.sectionName}
+                            </span>
+                            <span className="font-mono font-bold text-[11px] px-2.5 py-0.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
+                              {h.sessionName}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-slate-500 text-[11px]">
+                            <span>Roll Number: <strong className="text-slate-700 dark:text-slate-300">#{h.rollNumber || "—"}</strong></span>
+                            <span>Status: <strong className="text-emerald-600 dark:text-emerald-400">{h.status || "Enrolled"}</strong></span>
+                          </div>
+                          {h.promotedTo && (
+                            <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold pt-1 border-t border-slate-100 dark:border-slate-700">
+                              ↗ Promoted to: {h.promotedTo.className} ({h.promotedTo.sessionName})
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-6 text-center text-xs text-slate-400">
+                    No multi-session promotion history recorded yet. Current active session is active.
+                  </div>
+                )}
+              </div>
+
+              {/* Prior Academic History Timeline */}
               <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-4">
                 <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Prior Academic History &amp; Records
+                  Prior School Admission Records
                 </h4>
 
                 {student.academicHistory?.length > 0 ? (
@@ -1103,7 +1249,7 @@ const StudentDetail = () => {
                       size={28}
                       className="mx-auto mb-2 text-slate-300 dark:text-slate-600"
                     />
-                    <p>No prior academic history recorded.</p>
+                    <p>No prior school history recorded.</p>
                   </div>
                 )}
               </div>
@@ -1861,6 +2007,14 @@ const StudentDetail = () => {
                     {(attendanceData.summary?.lateCount || 0) + (attendanceData.summary?.halfDayCount || 0)}
                   </p>
                 </div>
+                <div className="p-4 rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                    Approved Leave
+                  </p>
+                  <p className="text-2xl font-black text-purple-700 dark:text-purple-400 mt-1">
+                    {attendanceData.summary?.leaveCount || 0}
+                  </p>
+                </div>
               </div>
 
               {/* Records Table View */}
@@ -2030,48 +2184,221 @@ const StudentDetail = () => {
               )}
             </div>
           )}
+
+          {/* ── 9. LEAVE HISTORY TAB ─────────────────────────────────────── */}
+          {activeTab === "leaves" && (
+            <div className="space-y-6">
+              {/* Active Leave Notification Banner */}
+              {leaveData.activeLeave && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-amber-500/10 border border-purple-500/30 flex items-center justify-between gap-4 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-md">
+                      <Calendar size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                        Currently On Approved Leave
+                      </p>
+                      <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">
+                        {leaveData.activeLeave.category} &bull; {leaveData.activeLeave.startDate} to {leaveData.activeLeave.endDate} ({leaveData.activeLeave.totalDays} day{leaveData.activeLeave.totalDays > 1 ? "s" : ""})
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-600 text-white shadow-sm">
+                    Active
+                  </span>
+                </div>
+              )}
+
+              {/* Header Card & Actions */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                      Leave History &amp; Applications
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Complete verified leave applications, approval records, and institutional attendance sync.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={fetchStudentLeaves}
+                    disabled={leaveLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                  >
+                    <RefreshCw size={13} className={leaveLoading ? "animate-spin text-purple-600" : ""} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Leave Metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Total Applications
+                  </p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                    {leaveData.summary?.totalApplications || 0}
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                    Approved Leave Days
+                  </p>
+                  <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
+                    {leaveData.summary?.approvedDays || 0}
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                    Pending Requests
+                  </p>
+                  <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mt-1">
+                    {leaveData.summary?.pendingCount || 0}
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 text-center shadow-xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">
+                    Rejected Requests
+                  </p>
+                  <p className="text-2xl font-black text-rose-700 dark:text-rose-400 mt-1">
+                    {leaveData.summary?.rejectedCount || 0}
+                  </p>
+                </div>
+              </div>
+
+              {/* Leave Applications Table */}
+              {leaveLoading ? (
+                <div className="p-12 text-center">
+                  <Loader size="md" text="Loading student leave records..." />
+                </div>
+              ) : (leaveData.requests || []).length === 0 ? (
+                <div className="py-16 text-center text-xs text-slate-400 space-y-3 bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                  <Calendar size={36} className="mx-auto text-slate-300 dark:text-slate-600" />
+                  <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
+                    No Leave Applications Recorded
+                  </p>
+                  <p className="max-w-xs mx-auto text-slate-500">
+                    This student does not have any pending or historical leave applications on file.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3 px-4">Ref Code</th>
+                          <th className="py-3 px-4">Category</th>
+                          <th className="py-3 px-4">Duration &amp; Dates</th>
+                          <th className="py-3 px-4">Reason</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4">Attendance Sync</th>
+                          <th className="py-3 px-4">Reviewer Remarks</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                        {leaveData.requests.map((req) => (
+                          <tr key={req._id || req.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                            <td className="py-3 px-4 font-mono font-bold text-purple-600 dark:text-purple-400">
+                              {req.leaveCode || req._id?.slice(-6) || "—"}
+                            </td>
+                            <td className="py-3 px-4 font-extrabold text-slate-900 dark:text-white">
+                              {req.category}
+                              {req.isHalfDay && (
+                                <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                                  Half Day ({req.halfDaySession || "1st"})
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <p className="font-semibold text-slate-700 dark:text-slate-200">
+                                {req.startDate} {req.endDate && req.endDate !== req.startDate ? `to ${req.endDate}` : ""}
+                              </p>
+                              <p className="text-[10px] font-bold text-slate-400">
+                                {req.totalDays} working day{req.totalDays > 1 ? "s" : ""}
+                              </p>
+                            </td>
+                            <td className="py-3 px-4 max-w-[200px] truncate text-slate-600 dark:text-slate-300" title={req.reason}>
+                              {req.reason || "—"}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                                  req.status === "approved"
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                    : req.status === "pending"
+                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                    : req.status === "rejected"
+                                    ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20"
+                                }`}
+                              >
+                                {req.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              {req.status === "approved" ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                  <CheckCircle2 size={13} />
+                                  <span>{req.attendanceSync?.isSynced ? "Synced to Roster" : "Pending Sync"}</span>
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-slate-400">—</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
+                              {req.reviewRemarks ? (
+                                <span>
+                                  <strong className="text-slate-700 dark:text-slate-300">{req.reviewedBy?.name || "Admin"}:</strong> {req.reviewRemarks}
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Photo Enlarge Modal ──────────────────────────────────────────── */}
-      {photoModalOpen && photoUrl && (
-        <div
-          onClick={() => setPhotoModalOpen(false)}
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative max-w-lg w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-3 p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-bold text-white">{student.name}</h4>
-                <p className="text-[11px] text-slate-400 font-mono">
-                  Admission No: {student.admissionNumber}
-                </p>
-              </div>
-              <button
-                onClick={() => setPhotoModalOpen(false)}
-                className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="w-full max-h-[70vh] rounded-xl overflow-hidden bg-black flex items-center justify-center">
-              <img
-                src={photoUrl}
-                alt={student.name}
-                className="max-w-full max-h-[65vh] object-contain"
-              />
-            </div>
-            {photoId && (
-              <p className="text-[11px] font-mono text-slate-400 text-center">
-                Cloudinary Asset ID: {photoId}
-              </p>
-            )}
+      <Modal
+        open={Boolean(photoModalOpen && photoUrl)}
+        onClose={() => setPhotoModalOpen(false)}
+        size="md"
+        title={student.name}
+        subtitle={`Admission No: ${student.admissionNumber}`}
+      >
+        <div className="space-y-3">
+          <div className="w-full max-h-[70vh] rounded-xl overflow-hidden bg-black flex items-center justify-center">
+            <img
+              src={photoUrl}
+              alt={student.name}
+              className="max-w-full max-h-[65vh] object-contain"
+            />
           </div>
+          {photoId && (
+            <p className="text-[11px] font-mono text-slate-400 text-center">
+              Cloudinary Asset ID: {photoId}
+            </p>
+          )}
         </div>
-      )}
+      </Modal>
 
       {/* ── Super Admin DB Credentials Modal ─────────────────────────────── */}
       {activeCredentialsModal && (
@@ -2208,5 +2535,6 @@ const StudentDetail = () => {
     </div>
   );
 };
+
 
 export default StudentDetail;

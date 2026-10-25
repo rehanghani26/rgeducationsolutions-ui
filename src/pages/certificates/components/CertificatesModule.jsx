@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import IssueModal from './IssueModal.jsx';
 import CertificatePreview from './CertificatePreview.jsx';
+import Modal from '../../../components/ui/Modal.jsx';
 import { getIssuedCertificates, revokeCertificate } from '../services/documentService.js';
 import { getTemplateById } from '../templates/registry.js';
 import { CERTIFICATE_TYPES } from '../constants/documentConstants.js';
@@ -383,52 +384,54 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '',
         </div>
       </div>
 
-      {/* Live Preview Drawer / Modal */}
-      {activePreviewCert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-slate-950/60">
-              <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                <ShieldCheck size={16} className="text-amber-400" />
-                <span>Certificate Live Render — {activePreviewCert.certificateNumber}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActivePreviewCert(null)}
-                className="p-1 text-slate-400 hover:text-white rounded-lg transition"
-              >
-                <X size={18} />
-              </button>
+      {/* Live Preview Modal */}
+      <Modal
+        open={Boolean(activePreviewCert)}
+        onClose={() => setActivePreviewCert(null)}
+        size="2xl"
+        title={
+          activePreviewCert ? (
+            <div className="flex items-center gap-2 text-xs font-semibold text-white">
+              <ShieldCheck size={16} className="text-amber-400" />
+              <span>Certificate Live Render — {activePreviewCert.certificateNumber}</span>
             </div>
-
-            <div className="flex-1 overflow-hidden p-4">
-              <CertificatePreview
-                template={getTemplateById(activePreviewCert.templateId || 'certificate-classic')}
-                certificateData={activePreviewCert}
-                schoolSettings={schoolSettings}
-                title={activePreviewCert.certificateNumber}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+          ) : null
+        }
+        contentClassName="overflow-hidden p-4"
+      >
+        {activePreviewCert && (
+          <CertificatePreview
+            template={getTemplateById(activePreviewCert.templateId || 'certificate-classic')}
+            certificateData={activePreviewCert}
+            schoolSettings={schoolSettings}
+            title={activePreviewCert.certificateNumber}
+          />
+        )}
+      </Modal>
 
       {/* Revocation Reason Prompt Modal */}
-      {revokingCert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <Modal
+        open={Boolean(revokingCert)}
+        onClose={() => setRevokingCert(null)}
+        size="sm"
+        title={
+          revokingCert ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center">
                 <Ban size={20} />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">Revoke Certificate</h3>
-                <p className="text-xs text-slate-400 font-mono">
+                <p className="text-xs text-slate-400 font-mono font-normal">
                   {revokingCert.certificateNumber}
                 </p>
               </div>
             </div>
-
+          ) : null
+        }
+      >
+        {revokingCert && (
+          <div className="space-y-4">
             <p className="text-xs text-slate-300">
               Are you sure you want to revoke this certificate for{' '}
               <strong className="text-white">{revokingCert.recipientNameSnapshot}</strong>? Once revoked, the
@@ -468,8 +471,8 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '',
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Issue Modal */}
       <IssueModal
