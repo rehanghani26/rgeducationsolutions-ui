@@ -86,7 +86,8 @@ api.interceptors.response.use(
             url: originalRequest?.url,
             status: error.response?.status || 0,
             message:
-              error.message || "ERR_CONNECTION_REFUSED - Server is currently offline",
+              error.message ||
+              "ERR_CONNECTION_REFUSED - Server is currently offline",
             timestamp: new Date().toISOString(),
           },
         })
