@@ -9,7 +9,7 @@ const DEFAULT_SESSION = {
   createdAt: Date.now(),
 };
 
-export function useAiChat() {
+export function useAiChat({ onAiResponse } = {}) {
   /* ── Sessions State ── */
   const [sessions, setSessions] = useState(() => {
     try {
@@ -118,7 +118,13 @@ export function useAiChat() {
       minute: "2-digit",
     });
 
-    const userMessage = { role: "user", content: prompt, timestamp: timeStr };
+    const userMessageId = `msg-user-${Date.now()}`;
+    const userMessage = {
+      id: userMessageId,
+      role: "user",
+      content: prompt,
+      timestamp: timeStr,
+    };
     const updatedMessages = [...messages, userMessage];
 
     setSessions((prev) =>
@@ -143,7 +149,9 @@ export function useAiChat() {
         prompt
       );
 
+      const aiMessageId = `msg-ai-${Date.now()}`;
       const aiMessage = {
+        id: aiMessageId,
         role: "model",
         content: response.reply,
         actionsExecuted: response.actionsExecuted || [],
@@ -160,8 +168,15 @@ export function useAiChat() {
             : s
         )
       );
+
+      if (typeof onAiResponse === "function") {
+        onAiResponse(aiMessage);
+      }
+      return aiMessage;
     } catch (err) {
+      const errorMessageId = `msg-err-${Date.now()}`;
       const errorMessage = {
+        id: errorMessageId,
         role: "model",
         content: `⚠️ **Unable to reach System AI**\n\n${err.message}\n\nPlease verify your connection and configuration and try again.`,
         timestamp: new Date().toLocaleTimeString([], {
@@ -178,6 +193,11 @@ export function useAiChat() {
             : s
         )
       );
+
+      if (typeof onAiResponse === "function") {
+        onAiResponse(errorMessage);
+      }
+      return errorMessage;
     } finally {
       setLoading(false);
     }
