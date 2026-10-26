@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInYears } from "date-fns";
@@ -47,6 +47,7 @@ import {
   Award,
   Star,
   Plus,
+  MoreHorizontal,
 } from "lucide-react";
 import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
 import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
@@ -148,6 +149,26 @@ const StudentDetail = () => {
   // Credentials Modal State
   const [activeCredentialsModal, setActiveCredentialsModal] = useState(null);
   const [showPasswordText, setShowPasswordText] = useState(false);
+
+  // Mobile navigation menus state
+  const [mobileTabsMenuOpen, setMobileTabsMenuOpen] = useState(false);
+  const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
+  const mobileTabsRef = useRef(null);
+  const mobileActionsRef = useRef(null);
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (mobileTabsRef.current && !mobileTabsRef.current.contains(e.target)) {
+        setMobileTabsMenuOpen(false);
+      }
+      if (mobileActionsRef.current && !mobileActionsRef.current.contains(e.target)) {
+        setMobileActionsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   // Student ID Card Tab State (Finalized School Format)
   const [defaultIdTemplate, setDefaultIdTemplate] = useState(null);
@@ -479,18 +500,23 @@ const StudentDetail = () => {
     : null;
 
   const tabs = [
-    { id: "overview", label: "Overview", icon: User },
-    { id: "academic", label: "Academic & Enrollment", icon: ClipboardList },
-    { id: "id-card", label: "Student ID Card", icon: CreditCard },
-    { id: "certificates", label: "Certificates", icon: Award },
-    { id: "documents", label: "Identity & Documents", icon: ShieldCheck },
-    { id: "parent", label: "Guardian & Family", icon: FileText },
-    { id: "attendance", label: "Attendance", icon: CalendarCheck },
-    { id: "leaves", label: "Leave History", icon: Calendar },
-    { id: "fees", label: "Fee & Dues", icon: DollarSign },
-    { id: "permissions", label: "Portal Access", icon: Lock },
-    { id: "activity", label: "Audit Timeline", icon: Activity },
+    { id: "overview", label: "Overview", shortLabel: "Overview", icon: User },
+    { id: "academic", label: "Academic & Enrollment", shortLabel: "Academic", icon: ClipboardList },
+    { id: "id-card", label: "Student ID Card", shortLabel: "ID Card", icon: CreditCard },
+    { id: "certificates", label: "Certificates", shortLabel: "Certificates", icon: Award },
+    { id: "documents", label: "Identity & Documents", shortLabel: "Documents", icon: ShieldCheck },
+    { id: "parent", label: "Guardian & Family", shortLabel: "Family", icon: FileText },
+    { id: "attendance", label: "Attendance", shortLabel: "Attendance", icon: CalendarCheck },
+    { id: "leaves", label: "Leave History", shortLabel: "Leaves", icon: Calendar },
+    { id: "fees", label: "Fee & Dues", shortLabel: "Fees", icon: DollarSign },
+    { id: "permissions", label: "Portal Access", shortLabel: "Access", icon: Lock },
+    { id: "activity", label: "Audit Timeline", shortLabel: "Timeline", icon: Activity },
   ];
+
+  const primaryTabs = tabs.slice(0, 2);
+  const overflowTabs = tabs.slice(2);
+  const isOverflowTabActive = overflowTabs.some((t) => t.id === activeTab);
+  const activeOverflowTab = overflowTabs.find((t) => t.id === activeTab);
 
   if (loading) {
     return (
@@ -531,22 +557,23 @@ const StudentDetail = () => {
   return (
     <div className="space-y-6 pb-16">
       {/* ── Top Navigation Bar ────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 min-w-0">
           <Link
             to="/students"
-            className="hover:text-orange-500 dark:hover:text-orange-400 flex items-center gap-1 transition"
+            className="hover:text-orange-500 dark:hover:text-orange-400 flex items-center gap-1 transition shrink-0"
           >
             <ArrowLeft size={14} />
             <span>Students</span>
           </Link>
-          <ChevronRight size={12} className="text-slate-400" />
-          <span className="text-slate-900 dark:text-slate-200 font-bold">
+          <ChevronRight size={12} className="text-slate-400 shrink-0" />
+          <span className="text-slate-900 dark:text-slate-200 font-bold truncate max-w-[120px] sm:max-w-none">
             {student.name}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Desktop Actions */}
+        <div className="hidden sm:flex items-center gap-2">
           {canSeeCredentials && (
             <button
               onClick={handleFetchCredentials}
@@ -571,6 +598,58 @@ const StudentDetail = () => {
             <Edit3 size={13} />
             <span>Edit Profile</span>
           </Link>
+        </div>
+
+        {/* Mobile Actions: Edit Profile + Three-dot dropdown for DB Credentials & ID Card */}
+        <div className="flex sm:hidden items-center gap-1.5 shrink-0" ref={mobileActionsRef}>
+          <Link
+            to={`/students/${studentId}/edit`}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 transition shadow-sm"
+          >
+            <Edit3 size={12} />
+            <span>Edit</span>
+          </Link>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMobileActionsOpen((prev) => !prev)}
+              className={`p-1.5 rounded-lg transition border ${
+                mobileActionsOpen
+                  ? "border-orange-400 bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                  : "text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+              }`}
+              aria-label="More actions"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+
+            {mobileActionsOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 p-1 space-y-1 animate-in fade-in zoom-in-95">
+                {canSeeCredentials && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileActionsOpen(false);
+                      handleFetchCredentials();
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left transition"
+                  >
+                    <Eye size={14} />
+                    <span>DB Credentials</span>
+                  </button>
+                )}
+                <Link
+                  to={`/id-cards?studentId=${studentId}`}
+                  onClick={() => setMobileActionsOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition"
+                >
+                  <CreditCard size={14} className="text-orange-500" />
+                  <span>ID Card</span>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -783,8 +862,9 @@ const StudentDetail = () => {
       </div>
 
       {/* ── Navigation Tabs ──────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center gap-1 p-2 border-b border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm">
+        {/* Desktop Tab Row: all tabs visible & scrollable */}
+        <div className="hidden sm:flex items-center gap-1 p-2 border-b border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -803,6 +883,108 @@ const StudentDetail = () => {
               </button>
             );
           })}
+        </div>
+
+        {/* Mobile Tab Row with Three-Dot Overflow */}
+        <div className="flex sm:hidden items-center justify-between gap-1.5 p-2 border-b border-slate-200/80 dark:border-slate-800 relative" ref={mobileTabsRef}>
+          {/* Visible primary tabs (Overview & Academic) */}
+          <div className="flex items-center gap-1 flex-1 min-w-0">
+            {primaryTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setMobileTabsMenuOpen(false);
+                  }}
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold transition truncate ${
+                    isActive
+                      ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <Icon size={14} className="shrink-0" />
+                  <span className="truncate">{tab.shortLabel || tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Three-Dot Menu button */}
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setMobileTabsMenuOpen((prev) => !prev)}
+              className={`flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                isOverflowTabActive
+                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 ring-1 ring-orange-500/40"
+                  : mobileTabsMenuOpen
+                  ? "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-300 dark:border-orange-800"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50"
+              }`}
+              aria-expanded={mobileTabsMenuOpen}
+              aria-label="More tabs"
+            >
+              {isOverflowTabActive && activeOverflowTab ? (
+                <>
+                  <activeOverflowTab.icon size={14} className="shrink-0" />
+                  <span className="max-w-[70px] truncate">{activeOverflowTab.shortLabel || activeOverflowTab.label}</span>
+                  <MoreHorizontal size={13} className="shrink-0 opacity-80" />
+                </>
+              ) : (
+                <>
+                  <MoreHorizontal size={15} className="shrink-0" />
+                  <span className="text-[11px] font-bold">More</span>
+                </>
+              )}
+            </button>
+
+            {/* Dropdown Menu */}
+            {mobileTabsMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 max-h-80 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 scrollbar-thin">
+                <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    More Modules
+                  </span>
+                  <span className="text-[9px] font-bold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
+                    {overflowTabs.length} tabs
+                  </span>
+                </div>
+                {overflowTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setMobileTabsMenuOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                        isActive
+                          ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold shadow-xs"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                            isActive ? "bg-white/20 text-white" : "bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                          }`}
+                        >
+                          <Icon size={13} />
+                        </div>
+                        <span className="truncate">{tab.label}</span>
+                      </div>
+                      {isActive && <Check size={14} className="text-white shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Tab Content Area */}
@@ -1271,25 +1453,27 @@ const StudentDetail = () => {
           {activeTab === "id-card" && (
             <div className="space-y-6">
               {/* Header card with layout info and action buttons */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/40 dark:from-stone-800/80 dark:via-stone-900 dark:to-orange-950/40 border border-orange-100 dark:border-orange-900/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20">
-                    <CreditCard size={22} />
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/40 dark:from-stone-800/80 dark:via-stone-900 dark:to-orange-950/40 border border-orange-100 dark:border-orange-900/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
+                  <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 shrink-0">
+                    <CreditCard size={20} className="sm:w-[22px] sm:h-[22px]" />
                   </div>
-                  <div>
-                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      Institutional Student Identity Card
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                        <Star size={10} className="fill-emerald-500" />
-                        Finalized School Layout
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
+                        Student Identity Card
+                      </h4>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 whitespace-nowrap shrink-0">
+                        <Star size={10} className="fill-emerald-500 shrink-0" />
+                        <span>Finalized Layout</span>
                       </span>
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Rendered at runtime with active layout:{" "}
-                      <strong className="text-slate-700 dark:text-slate-200">
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                      Active layout:{" "}
+                      <strong className="text-slate-700 dark:text-slate-200 font-semibold">
                         {defaultIdTemplate?.name || resolvedIdTemplate?.name || "Classic Student Card"}
                       </strong>{" "}
-                      ({resolvedIdTemplate?.orientation || "portrait"})
+                      <span className="text-slate-400">({resolvedIdTemplate?.orientation || "portrait"})</span>
                     </p>
                   </div>
                 </div>
@@ -1379,14 +1563,16 @@ const StudentDetail = () => {
                   <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20">
                     <Award size={22} />
                   </div>
-                  <div>
-                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      Official Institutional Certificates
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
+                        Institutional Certificates
+                      </h4>
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap shrink-0">
                         {studentCertificates.length} Issued
                       </span>
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Cryptographically verifiable institutional credentials issued to {student.name}.
                     </p>
                   </div>

@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Search, User, KeyRound, Camera, ChevronRight, CheckCircle2, ArrowRight, Clock, Sparkles, Bot, ShieldCheck } from "lucide-react";
+import {
+  Search,
+  User,
+  ChevronRight,
+  ArrowRight,
+  Sparkles,
+  Bot,
+  MoreHorizontal,
+  Check,
+  X,
+} from "lucide-react";
 import api from "../../services/api.js";
 import { updateUserProfile } from "../../store/slices/authSlice.js";
 import { getUserFromStorage } from "../../config/access.jsx";
@@ -223,13 +233,13 @@ export const SETTINGS_ITEMS = [
 ];
 
 export const CATEGORIES = [
-  { id: "all", label: "All Settings" },
-  { id: "account", label: "My Account" },
-  { id: "institution", label: "School Identity" },
-  { id: "academic", label: "Academic & Schedules" },
-  { id: "operations", label: "Operations & HR" },
-  { id: "portal", label: "Portal & Notices" },
-  { id: "system", label: "Security & System" },
+  { id: "all", label: "All Settings", shortLabel: "All" },
+  { id: "account", label: "My Account", shortLabel: "Account" },
+  { id: "institution", label: "School Identity", shortLabel: "School" },
+  { id: "academic", label: "Academic & Schedules", shortLabel: "Academic" },
+  { id: "operations", label: "Operations & HR", shortLabel: "Operations" },
+  { id: "portal", label: "Portal & Notices", shortLabel: "Portal" },
+  { id: "system", label: "Security & System", shortLabel: "System" },
 ];
 
 const SettingsOverview = () => {
@@ -238,11 +248,35 @@ const SettingsOverview = () => {
   const { user: authUser } = useSelector((state) => state.auth);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategoryFilter, setActiveCategoryFilter] = useState("all");
-  const userRole = (authUser?.role || getUserFromStorage()?.role || "").toLowerCase().replace(/_/g, '-');
-  const isStudent = userRole === 'student';
+  const [mobileCatMenuOpen, setMobileCatMenuOpen] = useState(false);
+  const mobileCatRef = useRef(null);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (mobileCatRef.current && !mobileCatRef.current.contains(e.target)) {
+        setMobileCatMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const primaryCategories = CATEGORIES.slice(0, 3);
+  const overflowCategories = CATEGORIES.slice(3);
+  const isOverflowCategoryActive = overflowCategories.some(
+    (c) => c.id === activeCategoryFilter
+  );
+  const activeOverflowCat = overflowCategories.find(
+    (c) => c.id === activeCategoryFilter
+  );
+
+  const userRole = (authUser?.role || getUserFromStorage()?.role || "")
+    .toLowerCase()
+    .replace(/_/g, "-");
+  const isStudent = userRole === "student";
   const wizard = useSetupWizard(!isStudent);
   const [wizardModalOpen, setWizardModalOpen] = useState(false);
-  const [wizardModalMode, setWizardModalMode] = useState('manual');
+  const [wizardModalMode, setWizardModalMode] = useState("manual");
 
   // ── Academic Setup live state (for the progress banner) ──
   const [activeSession, setActiveSession] = useState(null);
@@ -252,12 +286,14 @@ const SettingsOverview = () => {
     const fetchSetupState = async () => {
       try {
         // Try the fast /active endpoint first, fall back to full list
-        const res = await api.get('/sessions/active').catch(() => null)
-          || await api.get('/sessions').catch(() => null);
-        const session = res?.data?.session
-          || (res?.data?.sessions || []).find((s) => s.isCurrent)
-          || (res?.data?.sessions || [])[0]
-          || null;
+        const res =
+          (await api.get("/sessions/active").catch(() => null)) ||
+          (await api.get("/sessions").catch(() => null));
+        const session =
+          res?.data?.session ||
+          (res?.data?.sessions || []).find((s) => s.isCurrent) ||
+          (res?.data?.sessions || [])[0] ||
+          null;
         setActiveSession(session);
       } catch (_) {
         // non-critical — banner is cosmetic
@@ -290,10 +326,7 @@ const SettingsOverview = () => {
 
   useEffect(() => {
     const current =
-      authUser?.photo ||
-      authUser?.avatar ||
-      authUser?.imagesRef?.img ||
-      "";
+      authUser?.photo || authUser?.avatar || authUser?.imagesRef?.img || "";
     if (current) {
       setUserPhoto(current);
       setPhotoError(false);
@@ -308,18 +341,25 @@ const SettingsOverview = () => {
 
         // 1. Fetch by profile me / userId (works for all roles including student)
         try {
-          const res = await api.get(`/profile/${authUser?._id || authUser?.id || "me"}`);
+          const res = await api.get(
+            `/profile/${authUser?._id || authUser?.id || "me"}`
+          );
           const p = res.data?.profile;
           resolved = p?.avatar || p?.photo || p?.imagesRef?.img || "";
         } catch (e) {}
 
         // 2. If student and has profileId, fetch student by id
-        const targetProfileId = authUser?.profileId || userFromStorage?.profileId;
+        const targetProfileId =
+          authUser?.profileId || userFromStorage?.profileId;
         if (!resolved && isStudent && targetProfileId) {
           try {
             const sRes = await getStudentById(targetProfileId);
             const std = sRes?.student || sRes?.data || sRes;
-            resolved = std?.photo || std?.imagesRef?.img || std?.avatar || (std?.imagesRef?.id ? std.imagesRef.id : "");
+            resolved =
+              std?.photo ||
+              std?.imagesRef?.img ||
+              std?.avatar ||
+              (std?.imagesRef?.id ? std.imagesRef.id : "");
           } catch (e) {}
         }
 
@@ -327,17 +367,30 @@ const SettingsOverview = () => {
         if (!resolved && isStudent) {
           try {
             const sRes = await getStudents({ limit: 10 });
-            const list = Array.isArray(sRes?.students) && sRes.students.length > 0
-              ? sRes.students
-              : (Array.isArray(sRes?.data) ? sRes.data : []);
-            
-            const matched = list.find((s) =>
-              (s.email && authUser?.email && s.email.toLowerCase() === authUser.email.toLowerCase()) ||
-              (s.admissionNumber && authUser?.admissionNumber && s.admissionNumber === authUser.admissionNumber)
-            ) || list[0];
+            const list =
+              Array.isArray(sRes?.students) && sRes.students.length > 0
+                ? sRes.students
+                : Array.isArray(sRes?.data)
+                  ? sRes.data
+                  : [];
+
+            const matched =
+              list.find(
+                (s) =>
+                  (s.email &&
+                    authUser?.email &&
+                    s.email.toLowerCase() === authUser.email.toLowerCase()) ||
+                  (s.admissionNumber &&
+                    authUser?.admissionNumber &&
+                    s.admissionNumber === authUser.admissionNumber)
+              ) || list[0];
 
             if (matched) {
-              resolved = matched.photo || matched.imagesRef?.img || matched.avatar || (matched.imagesRef?.id ? matched.imagesRef.id : "");
+              resolved =
+                matched.photo ||
+                matched.imagesRef?.img ||
+                matched.avatar ||
+                (matched.imagesRef?.id ? matched.imagesRef.id : "");
             }
           } catch (e) {}
         }
@@ -347,8 +400,11 @@ const SettingsOverview = () => {
           setPhotoError(false);
           dispatch(updateUserProfile({ avatar: resolved, photo: resolved }));
           try {
-            const stored = JSON.parse(localStorage.getItem('user') || '{}');
-            localStorage.setItem('user', JSON.stringify({ ...stored, avatar: resolved, photo: resolved }));
+            const stored = JSON.parse(localStorage.getItem("user") || "{}");
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...stored, avatar: resolved, photo: resolved })
+            );
           } catch (_) {}
         }
       } catch (e) {
@@ -357,7 +413,9 @@ const SettingsOverview = () => {
     };
 
     fetchFreshPhoto();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [authUser?._id, authUser?.profileId, authUser?.email, isStudent]);
 
   const studentAllowedPaths = ["profile", "password-security", "my-profile"];
@@ -386,101 +444,118 @@ const SettingsOverview = () => {
   }).sort((a, b) => (a.priority || 99) - (b.priority || 99));
 
   // Determine stepDone per item from live session and wizard state
-  const profileDone = wizard.steps.find((s) => s.key === 'schoolProfile')?.complete;
-  const academicRulesDone = wizard.steps.find((s) => s.key === 'academicRules')?.complete;
-  const financePoliciesDone = wizard.steps.find((s) => s.key === 'financePolicies')?.complete;
+  const profileDone = wizard.steps.find(
+    (s) => s.key === "schoolProfile"
+  )?.complete;
+  const academicRulesDone = wizard.steps.find(
+    (s) => s.key === "academicRules"
+  )?.complete;
+  const financePoliciesDone = wizard.steps.find(
+    (s) => s.key === "financePolicies"
+  )?.complete;
 
   const getStepDone = (item) => {
-    if (item.path === 'profile') return profileDone;
-    if (item.path === 'session') return step1Done;
-    if (item.path === 'master-period') return step2Done;
-    if (item.path === 'class-timetable') return step3Done;
-    if (item.path === 'academic') return academicRulesDone;
-    if (item.path === 'finance') return financePoliciesDone;
+    if (item.path === "profile") return profileDone;
+    if (item.path === "session") return step1Done;
+    if (item.path === "master-period") return step2Done;
+    if (item.path === "class-timetable") return step3Done;
+    if (item.path === "academic") return academicRulesDone;
+    if (item.path === "finance") return financePoliciesDone;
     return false;
   };
 
   // Determine next incomplete step for CTA
   const nextStep = !step1Done
-    ? { label: 'Set up Academic Session', path: '/settings/session', num: 1 }
+    ? { label: "Set up Academic Session", path: "/settings/session", num: 1 }
     : !step2Done
-    ? { label: 'Configure Master Bell Schedule', path: '/settings/master-period', num: 2 }
-    : !step3Done
-    ? { label: 'Build Class Timetables', path: '/settings/class-timetable', num: 3 }
-    : null;
+      ? {
+          label: "Configure Master Bell Schedule",
+          path: "/settings/master-period",
+          num: 2,
+        }
+      : !step3Done
+        ? {
+            label: "Build Class Timetables",
+            path: "/settings/class-timetable",
+            num: 3,
+          }
+        : null;
 
   // Show academic banner when academic category is visible
   const showAcademicBanner =
     !isStudent &&
     !setupLoading &&
-    (activeCategoryFilter === 'all' || activeCategoryFilter === 'academic') &&
+    (activeCategoryFilter === "all" || activeCategoryFilter === "academic") &&
     !searchQuery.trim();
 
   return (
     <div className="space-y-4">
       {/* My Profile Quick-Access Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] p-4 sm:p-5 text-white shadow-md border border-orange-500/20">
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#181716] via-[#24160C] to-[#1A130D] p-3.5 sm:p-5 text-white shadow-md border border-orange-500/20">
+        <div className="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {userPhoto && !photoError ? (
               <img
                 key={userPhoto}
                 src={resolveImageUrl(userPhoto)}
                 alt={authUser?.name || "User"}
-                className="size-12 sm:size-14 rounded-2xl object-cover ring-2 ring-orange-400/50 shadow-md"
+                className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl object-cover ring-2 ring-orange-500/40 shadow-md shrink-0"
                 onError={() => setPhotoError(true)}
               />
             ) : (
-              <div className="size-12 sm:size-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-lg font-black text-white ring-2 ring-orange-400/30 shadow-md">
+              <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-sm sm:text-base font-black text-white ring-2 ring-orange-500/30 shadow-md shrink-0">
                 {(authUser?.name || authUser?.username || "U")
+                  .trim()
+                  .split(/\s+/)
+                  .map((n) => n[0])
+                  .join("")
                   .slice(0, 2)
-                  .toUpperCase()}
+                  .toUpperCase() || "US"}
               </div>
             )}
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base sm:text-lg font-black text-white tracking-tight">
-                  {authUser?.name || authUser?.username || "User Account"}
+                <h3 className="text-sm sm:text-base font-extrabold text-white tracking-tight truncate max-w-[150px] sm:max-w-none">
+                  {authUser?.name || authUser?.username || "Administrator"}
                 </h3>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-300 border border-orange-400/30">
-                  {authUser?.role || "Staff"}
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-300 border border-orange-400/30 shrink-0">
+                  {authUser?.role || "Super Admin"}
                 </span>
               </div>
-              <p className="text-xs text-stone-300 mt-0.5 truncate max-w-xs sm:max-w-md">
+              <p className="text-[11px] sm:text-xs text-stone-300 mt-0.5 truncate max-w-[200px] sm:max-w-md">
                 {authUser?.email ||
-                  "Manage your personal profile, credentials and picture"}
+                  "Manage your personal profile & credentials"}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate("/settings/my-profile")}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-sm shadow-orange-500/25 transition cursor-pointer"
-            >
-              <User size={13} />
-              <span>My Profile</span>
-              <ChevronRight size={13} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/settings/my-profile")}
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-sm shadow-orange-500/25 transition shrink-0 cursor-pointer"
+          >
+            <User size={13} className="shrink-0" />
+            <span className="hidden min-[380px]:inline">My Profile</span>
+            <ChevronRight size={13} className="shrink-0" />
+          </button>
         </div>
       </div>
 
       {/* Header & Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             System Settings
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-0.5">
             Configure school profile, academic grading standards, curricula, fee
             policies, and security controls.
           </p>
         </div>
 
         {/* Quick Search */}
-        <div className="relative min-w-[280px]">
+        <div className="relative w-full md:w-auto md:min-w-[280px]">
           <Search
             size={16}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
@@ -490,19 +565,29 @@ const SettingsOverview = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search settings (e.g. syllabus, fees, 2FA, Priority 3)..."
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
+            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-9 py-2 sm:py-2.5 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-orange-500 focus:outline-none"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Category Filter Buttons */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      {/* Category Filter Tabs: Desktop full row, Mobile three-dot menu */}
+      {/* Desktop view */}
+      <div className="hidden sm:flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             type="button"
             onClick={() => setActiveCategoryFilter(cat.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap border cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap border cursor-pointer ${
               activeCategoryFilter === cat.id
                 ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-xs"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -513,21 +598,112 @@ const SettingsOverview = () => {
         ))}
       </div>
 
-      {/* 2-Step Foundational Initial Setup & Priority Hub */}
+      {/* Mobile view with Three-Dot Overflow */}
+      <div
+        className="flex sm:hidden items-center justify-between gap-1.5 relative"
+        ref={mobileCatRef}
+      >
+        <div className="flex items-center gap-1 flex-1 min-w-0">
+          {primaryCategories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setActiveCategoryFilter(cat.id)}
+              className={`flex-1 min-w-0 py-1.5 px-2 rounded-xl text-xs font-bold transition text-center truncate border ${
+                activeCategoryFilter === cat.id
+                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-xs"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/80"
+              }`}
+            >
+              <span className="truncate">{cat.shortLabel || cat.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setMobileCatMenuOpen((prev) => !prev)}
+            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition border ${
+              isOverflowCategoryActive
+                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent shadow-xs"
+                : mobileCatMenuOpen
+                  ? "border-orange-400 bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700/80"
+            }`}
+            aria-expanded={mobileCatMenuOpen}
+            aria-label="More categories"
+          >
+            {isOverflowCategoryActive && activeOverflowCat ? (
+              <>
+                <span className="max-w-[70px] truncate">
+                  {activeOverflowCat.shortLabel || activeOverflowCat.label}
+                </span>
+                <MoreHorizontal size={13} className="shrink-0 opacity-80" />
+              </>
+            ) : (
+              <>
+                <MoreHorizontal size={14} className="shrink-0" />
+                <span className="text-[11px] font-bold">More</span>
+              </>
+            )}
+          </button>
+
+          {/* Dropdown Menu */}
+          {mobileCatMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  More Categories
+                </span>
+                <span className="text-[9px] font-bold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
+                  {overflowCategories.length} categories
+                </span>
+              </div>
+              {overflowCategories.map((cat) => {
+                const isActive = activeCategoryFilter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveCategoryFilter(cat.id);
+                      setMobileCatMenuOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                      isActive
+                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold shadow-xs"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                    {isActive && (
+                      <Check size={14} className="text-white shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Foundational Setup & Priority Hub */}
       {!isStudent && !searchQuery.trim() && (
-        <div className="rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 bg-gradient-to-r from-indigo-50/90 via-purple-50/50 to-slate-50 dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-slate-900 p-5 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-2xl border border-orange-200/70 dark:border-orange-900/40 bg-gradient-to-br from-orange-50/70 via-stone-50/50 to-amber-50/40 dark:from-stone-900/90 dark:via-stone-900 dark:to-orange-950/20 p-4 sm:p-5 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-indigo-600 text-white shadow-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 text-[10px] font-black uppercase rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs">
                   Initial Setup Wizard
                 </span>
-                <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                <span className="text-xs font-bold text-orange-700 dark:text-orange-400">
                   2 Core Steps • Priority Settings Indexed Below
                 </span>
               </div>
-              <p className="text-sm font-black text-slate-900 dark:text-white">
-                Configure School Profile (P1) & Academic Year (P2) via the wizard, or manage all Priority 1–6 settings below.
+              <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug">
+                Configure School Profile (P1) & Academic Year (P2) via the
+                wizard, or manage all Priority 1–6 settings below.
               </p>
             </div>
 
@@ -535,21 +711,21 @@ const SettingsOverview = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setWizardModalMode('ai');
+                  setWizardModalMode("ai");
                   setWizardModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition cursor-pointer"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-800 border border-orange-200 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 font-bold text-xs hover:bg-orange-50 dark:hover:bg-orange-950/40 shadow-xs transition cursor-pointer"
               >
-                <Bot size={14} />
-                <span>✨ AI Setup Mode</span>
+                <Bot size={14} className="text-orange-500" />
+                <span>✨ AI Setup</span>
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setWizardModalMode('manual');
+                  setWizardModalMode("manual");
                   setWizardModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition cursor-pointer"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-sm shadow-orange-500/20 transition cursor-pointer"
               >
                 <Sparkles size={14} />
                 <span>2-Step Wizard</span>
@@ -559,47 +735,85 @@ const SettingsOverview = () => {
           </div>
 
           {/* Priority setup quick-access pills */}
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1">
             {[
-              { num: 1, key: 'profile', label: '1. School Profile', path: '/settings/profile' },
-              { num: 2, key: 'session', label: '2. Academic Year', path: '/settings/session' },
-              { num: 3, key: 'master-period', label: '3. Bell Schedule', path: '/settings/master-period' },
-              { num: 4, key: 'class-timetable', label: '4. Timetables', path: '/settings/class-timetable' },
-              { num: 5, key: 'academic', label: '5. Academic Rules', path: '/settings/academic' },
-              { num: 6, key: 'finance', label: '6. Fee Policies', path: '/settings/finance' },
+              {
+                num: 1,
+                key: "profile",
+                label: "School Profile",
+                path: "/settings/profile",
+              },
+              {
+                num: 2,
+                key: "session",
+                label: "Academic Year",
+                path: "/settings/session",
+              },
+              {
+                num: 3,
+                key: "master-period",
+                label: "Bell Schedule",
+                path: "/settings/master-period",
+              },
+              {
+                num: 4,
+                key: "class-timetable",
+                label: "Timetables",
+                path: "/settings/class-timetable",
+              },
+              {
+                num: 5,
+                key: "academic",
+                label: "Academic Rules",
+                path: "/settings/academic",
+              },
+              {
+                num: 6,
+                key: "finance",
+                label: "Fee Policies",
+                path: "/settings/finance",
+              },
             ].map((s) => {
               const isDone =
-                s.key === 'profile'
+                s.key === "profile"
                   ? profileDone
-                  : s.key === 'session'
-                  ? step1Done
-                  : s.key === 'master-period'
-                  ? step2Done
-                  : s.key === 'class-timetable'
-                  ? step3Done
-                  : s.key === 'academic'
-                  ? academicRulesDone
-                  : financePoliciesDone;
+                  : s.key === "session"
+                    ? step1Done
+                    : s.key === "master-period"
+                      ? step2Done
+                      : s.key === "class-timetable"
+                        ? step3Done
+                        : s.key === "academic"
+                          ? academicRulesDone
+                          : financePoliciesDone;
 
               return (
                 <button
                   key={s.num}
                   type="button"
                   onClick={() => navigate(s.path)}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                     isDone
-                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400'
-                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-300'
+                      ? "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800/60 hover:border-emerald-500"
+                      : "bg-white/80 dark:bg-stone-800/60 border-stone-200 dark:border-stone-800 hover:border-orange-300 dark:hover:border-orange-800"
                   }`}
                 >
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                    isDone ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                  }`}>
-                    {isDone ? '✓' : `P${s.num}`}
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                      isDone
+                        ? "bg-emerald-500 text-white"
+                        : "bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold"
+                    }`}
+                  >
+                    {isDone ? "✓" : `P${s.num}`}
                   </div>
-                  <span className={`text-[11px] font-bold truncate ${
-                    isDone ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'
-                  }`}>
+                  <span
+                    className={`text-[11px] font-bold truncate ${
+                      isDone
+                        ? "text-emerald-700 dark:text-emerald-300"
+                        : "text-stone-700 dark:text-stone-300"
+                    }`}
+                  >
                     {s.label}
                   </span>
                 </button>

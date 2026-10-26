@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
@@ -39,6 +39,11 @@ import {
   RefreshCw,
   Loader2,
   Clock,
+  TrendingUp,
+  RotateCcw,
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 const AttendanceManagement = () => {
@@ -66,7 +71,6 @@ const AttendanceManagement = () => {
   const [viewMode, setViewMode] = useState("list"); // "list" | "take_attendance" | "view_record"
 
   const [page, setPage] = useState(1);
-  const [date, setDate] = useState("");
   const [records, setRecords] = useState([]);
   const [stats, setStats] = useState({
     present: 0,
@@ -102,41 +106,80 @@ const AttendanceManagement = () => {
   // My Attendance Personal State
   const [myAttData, setMyAttData] = useState({ summary: {}, logs: [] });
 
-  // Fetch Attendance Records
+  // ── Filters State: Specific Day, Date Range, Month, Year, Class, Section ──
+  const [dateFilterMode, setDateFilterMode] = useState("all"); // "all" | "day" | "range"
+  const [date, setDate] = useState(""); // Specific Day
+  const [startDate, setStartDate] = useState(""); // Range Start
+  const [endDate, setEndDate] = useState(""); // Range End
+  const [selectedMonth, setSelectedMonth] = useState("all");
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedClass, setSelectedClass] = useState("all");
+  const [selectedSection, setSelectedSection] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [availableFilterOptions, setAvailableFilterOptions] = useState({
+    months: [],
+    classes: [],
+    sections: [],
+  });
+
+  // Fetch Attendance Records & Dynamic Stats from Backend with Query Params
   useEffect(() => {
     const fetchAttendanceData = async () => {
       setLoading(true);
       const filterType = activeMainTab === "teacher" ? "teacher" : "student";
+      const params = {
+        page,
+        limit: 25,
+        type: filterType,
+        date: dateFilterMode === "day" && date ? date : undefined,
+        startDate: dateFilterMode === "range" && startDate ? startDate : undefined,
+        endDate: dateFilterMode === "range" && endDate ? endDate : undefined,
+        month: selectedMonth !== "all" ? selectedMonth : undefined,
+        year: selectedYear !== "all" ? selectedYear : undefined,
+        class: selectedClass !== "all" ? selectedClass : undefined,
+        section: selectedSection !== "all" ? selectedSection : undefined,
+        search: searchQuery || undefined,
+      };
+
       try {
         const [recRes, statsRes, myRes] = await Promise.all([
-          getAttendanceRecords({
-            page,
-            limit: 20,
-            type: filterType,
-            date,
-          }).catch(() => null),
-          getAttendanceStats({
-            month: new Date().getMonth() + 1,
-            year: new Date().getFullYear(),
-          }).catch(() => null),
+          getAttendanceRecords(params).catch(() => null),
+          getAttendanceStats(params).catch(() => null),
           getMyAttendance().catch(() => null),
         ]);
-        if (recRes?.records?.length > 0) {
+
+        if (recRes?.records) {
           setRecords(recRes.records);
           if (recRes.pagination) setPagination(recRes.pagination);
-        } else if (recRes?.data?.records?.length > 0) {
+          if (recRes.availableFilters) {
+            setAvailableFilterOptions((prev) => ({
+              months:
+                recRes.availableFilters.months?.length > 0
+                  ? recRes.availableFilters.months
+                  : prev.months,
+              classes:
+                recRes.availableFilters.classes?.length > 0
+                  ? recRes.availableFilters.classes
+                  : prev.classes,
+              sections:
+                recRes.availableFilters.sections?.length > 0
+                  ? recRes.availableFilters.sections
+                  : prev.sections,
+            }));
+          }
+        } else if (recRes?.data?.records) {
           setRecords(recRes.data.records);
           if (recRes.data.pagination) setPagination(recRes.data.pagination);
         } else {
-          setRecords(
-            mockAttendanceRecords.filter(
-              (r) => !filterType || r.type === filterType
-            )
-          );
+          setRecords([]);
         }
-        if (statsRes?.stats || statsRes?.data?.stats) {
-          setStats(statsRes?.stats || statsRes?.data?.stats);
+
+        if (statsRes?.stats) {
+          setStats(statsRes.stats);
+        } else if (statsRes?.data?.stats) {
+          setStats(statsRes.data.stats);
         }
+
         if (myRes?.summary || myRes?.data?.summary) {
           setMyAttData({
             summary: myRes?.summary || myRes?.data?.summary,
@@ -150,7 +193,19 @@ const AttendanceManagement = () => {
       }
     };
     fetchAttendanceData();
-  }, [page, activeMainTab, date]);
+  }, [
+    page,
+    activeMainTab,
+    dateFilterMode,
+    date,
+    startDate,
+    endDate,
+    selectedMonth,
+    selectedYear,
+    selectedClass,
+    selectedSection,
+    searchQuery,
+  ]);
 
   // Filter student personal logs
   const filteredMyLogs = myAttData.logs.filter((log) => {
@@ -162,13 +217,65 @@ const AttendanceManagement = () => {
     return matchesStatus && matchesDate;
   });
 
-  // Filter records locally for Admin/Teacher
-  const filteredRecords = records.filter((r) => {
-    const matchesDate = !date || (r.date && r.date.includes(date));
-    const targetType = activeMainTab === "teacher" ? "teacher" : "student";
-    const matchesType = !r.type || r.type.toLowerCase() === targetType;
-    return matchesDate && matchesType;
-  });
+  // Filter option constants & derived lists
+  const MONTH_OPTIONS = [
+    { value: "all", label: "All Months" },
+    { value: "1", label: "January" },
+    { value: "2", label: "February" },
+    { value: "3", label: "March" },
+    { value: "4", label: "April" },
+    { value: "5", label: "May" },
+    { value: "6", label: "June" },
+    { value: "7", label: "July" },
+    { value: "8", label: "August" },
+    { value: "9", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+  ];
+
+  const currentYearNum = new Date().getFullYear();
+  const YEAR_OPTIONS = [
+    { value: "all", label: "All Years" },
+    { value: String(currentYearNum), label: String(currentYearNum) },
+    { value: String(currentYearNum - 1), label: String(currentYearNum - 1) },
+    { value: String(currentYearNum - 2), label: String(currentYearNum - 2) },
+    { value: String(currentYearNum - 3), label: String(currentYearNum - 3) },
+  ];
+
+  const availableClasses = useMemo(() => {
+    const fromApi = availableFilterOptions.classes || [];
+    const fromConstants = CLASS_OPTIONS.map((c) => c.name);
+    return Array.from(new Set([...fromApi, ...fromConstants])).sort();
+  }, [availableFilterOptions.classes]);
+
+  const availableSections = useMemo(() => {
+    const fromApi = availableFilterOptions.sections || [];
+    const fromConstants = SECTION_OPTIONS.map((s) => s.name);
+    return Array.from(new Set([...fromApi, ...fromConstants])).sort();
+  }, [availableFilterOptions.sections]);
+
+  const handleClearFilters = () => {
+    setDateFilterMode("all");
+    setDate("");
+    setStartDate("");
+    setEndDate("");
+    setSelectedMonth("all");
+    setSelectedYear("all");
+    setSelectedClass("all");
+    setSelectedSection("all");
+    setSearchQuery("");
+    setPage(1);
+  };
+
+  const activeFiltersCount =
+    (dateFilterMode === "day" && date ? 1 : 0) +
+    (dateFilterMode === "range" && (startDate || endDate) ? 1 : 0) +
+    (selectedMonth !== "all" ? 1 : 0) +
+    (selectedYear !== "all" ? 1 : 0) +
+    (selectedClass !== "all" ? 1 : 0) +
+    (selectedSection !== "all" ? 1 : 0) +
+    (searchQuery ? 1 : 0);
 
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -460,6 +567,7 @@ const AttendanceManagement = () => {
     {
       key: "date",
       label: "Attendance Date",
+      showOnMobile: true,
       render: (row) => {
         const sessionDate = row.attendanceDate || row.date;
         const takenDate = row.attendanceTakenDate || row.createdAt;
@@ -470,17 +578,23 @@ const AttendanceManagement = () => {
 
         return (
           <div className="space-y-0.5">
-            <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
-              <Calendar size={13} className="text-indigo-500" />
+            <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 flex-wrap">
+              <Calendar size={13} className="text-indigo-500 shrink-0" />
               <span>
                 {sessionDate ? format(new Date(sessionDate), "MMM d, yyyy") : "—"}
               </span>
               {isPast && (
-                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap">
                   Past Date
                 </span>
               )}
             </div>
+            {takenDate && (
+              <div className="md:hidden flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                <Clock size={10} className="shrink-0" />
+                <span>Recorded: {format(new Date(takenDate), "h:mm a")}</span>
+              </div>
+            )}
           </div>
         );
       },
@@ -488,6 +602,7 @@ const AttendanceManagement = () => {
     {
       key: "takenDate",
       label: "Recorded / Taken At",
+      hideOnMobile: true,
       render: (row) => {
         const takenDate = row.attendanceTakenDate || row.createdAt || row.date;
         return (
@@ -503,8 +618,9 @@ const AttendanceManagement = () => {
     {
       key: "classSection",
       label: "Class / Department",
+      showOnMobile: true,
       render: (row) => (
-        <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
+        <span className="font-extrabold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
           {row.classSection ||
             `${row.className || "Grade 10"} - ${row.sectionName || "Section A"}`}
         </span>
@@ -513,6 +629,7 @@ const AttendanceManagement = () => {
     {
       key: "takenBy",
       label: "Taken By",
+      hideOnMobile: true,
       render: (row) => {
         const nameStr =
           typeof row.takenBy === "object" && row.takenBy !== null
@@ -529,6 +646,7 @@ const AttendanceManagement = () => {
     {
       key: "total",
       label: "Total Members",
+      hideOnMobile: true,
       render: (row) => (
         <span className="font-bold text-slate-700 dark:text-slate-300">
           {row.total || (row.records || []).length || 34}
@@ -538,6 +656,7 @@ const AttendanceManagement = () => {
     {
       key: "present",
       label: "Present",
+      hideOnMobile: true,
       render: (row) => {
         const count =
           row.present != null
@@ -553,6 +672,7 @@ const AttendanceManagement = () => {
     {
       key: "absent",
       label: "Absent",
+      hideOnMobile: true,
       render: (row) => {
         const count =
           row.absent != null
@@ -568,6 +688,7 @@ const AttendanceManagement = () => {
     {
       key: "action",
       label: "Details",
+      hideOnMobile: true,
       render: (row) => (
         <button
           onClick={(e) => {
@@ -595,7 +716,7 @@ const AttendanceManagement = () => {
           viewMode === "list" && !isStudent ? (
             <button
               onClick={() => setViewMode("take_attendance")}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02]"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02]"
             >
               <Plus size={15} /> Take Attendance
             </button>
@@ -605,7 +726,7 @@ const AttendanceManagement = () => {
                 setViewMode("list");
                 setSelectedRecord(null);
               }}
-              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-all"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-all"
             >
               <ArrowLeft size={15} /> Back to Attendance List
             </button>
@@ -615,28 +736,30 @@ const AttendanceManagement = () => {
 
       {/* ── TOP TWO MAIN TABS (STUDENT vs TEACHER & STAFF) ────────────────── */}
       {viewMode === "list" && !isStudent && (
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl w-fit shadow-xs">
+        <div className="grid grid-cols-2 sm:flex sm:w-fit items-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl w-full shadow-xs">
           <button
             onClick={() => setActiveMainTab("student")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all text-center ${
               activeMainTab === "student"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800"
             }`}
           >
-            <GraduationCap size={16} /> Student Attendance
+            <GraduationCap size={16} className="flex-shrink-0" />
+            <span className="truncate">Student Attendance</span>
           </button>
 
           {!isStudent && (
             <button
               onClick={() => setActiveMainTab("teacher")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all ${
+              className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all text-center ${
                 activeMainTab === "teacher"
-                  ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800"
               }`}
             >
-              <Users size={16} /> Teacher & Staff Attendance
+              <Users size={16} className="flex-shrink-0" />
+              <span className="truncate">Teacher & Staff <span className="hidden sm:inline">Attendance</span></span>
             </button>
           )}
         </div>
@@ -645,7 +768,7 @@ const AttendanceManagement = () => {
       {/* ── 1. STUDENT LOGGED IN PERSONAL VIEW ("MY ATTENDANCE LIST") ─────── */}
       {isStudent ? (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -802,7 +925,7 @@ const AttendanceManagement = () => {
       ) : isTeacherRole && activeMainTab === "teacher" ? (
         /* ── 2. TEACHER LOGGED IN MY ATTENDANCE VIEW ───────────────────────── */
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm">
             <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
               <Users className="text-purple-600 dark:text-purple-400" size={24} /> Faculty Personal
               Attendance & Check-In Log
@@ -812,7 +935,7 @@ const AttendanceManagement = () => {
               <span className="text-purple-600 dark:text-purple-400 font-bold">{user?.name}</span>
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
               <div className="bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 p-4 rounded-xl text-center shadow-xs">
                 <p className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">
                   Faculty Presence
@@ -884,7 +1007,7 @@ const AttendanceManagement = () => {
       ) : viewMode === "view_record" && selectedRecord ? (
         /* ── 3. FULL PAGE RECORD DETAIL REPORT ─────────────────────────────── */
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
                 Class / Department
@@ -941,8 +1064,8 @@ const AttendanceManagement = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl text-center shadow-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
               <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
                 Total Members
               </p>
@@ -950,7 +1073,7 @@ const AttendanceManagement = () => {
                 {selectedRecord.total || 34}
               </p>
             </div>
-            <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 p-4 rounded-2xl text-center shadow-xs">
+            <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
               <p className="text-[10px] font-bold text-emerald-800/80 dark:text-emerald-300 uppercase">
                 Present
               </p>
@@ -958,7 +1081,7 @@ const AttendanceManagement = () => {
                 {selectedRecord.present ?? 32}
               </p>
             </div>
-            <div className="bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 p-4 rounded-2xl text-center shadow-xs">
+            <div className="bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
               <p className="text-[10px] font-bold text-rose-800/80 dark:text-rose-300 uppercase">
                 Absent
               </p>
@@ -966,7 +1089,7 @@ const AttendanceManagement = () => {
                 {selectedRecord.absent ?? 1}
               </p>
             </div>
-            <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-4 rounded-2xl text-center shadow-xs">
+            <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
               <p className="text-[10px] font-bold text-amber-800/80 dark:text-amber-300 uppercase">
                 Late
               </p>
@@ -976,7 +1099,7 @@ const AttendanceManagement = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <h4 className="font-extrabold text-base text-slate-900 dark:text-white">
                 Full Member Attendance Roster
@@ -1049,7 +1172,7 @@ const AttendanceManagement = () => {
         </div>
       ) : viewMode === "take_attendance" ? (
         /* ── 4. TAKE ATTENDANCE FORM VIEW ──────────────────────────────────── */
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
               <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -1064,11 +1187,11 @@ const AttendanceManagement = () => {
               </h3>
             </div>
 
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+            <div className="grid grid-cols-2 sm:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => handleAttendeeTypeChange("student")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all ${
                   attendeeType === "student"
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -1079,7 +1202,7 @@ const AttendanceManagement = () => {
               <button
                 type="button"
                 onClick={() => handleAttendeeTypeChange("teacher")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all ${
                   attendeeType === "teacher"
                     ? "bg-purple-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -1238,7 +1361,7 @@ const AttendanceManagement = () => {
 
             {/* ── Quick Mark + Live Counts ── */}
             {roster.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-850 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                     Quick Mark All:
@@ -1246,37 +1369,37 @@ const AttendanceManagement = () => {
                   <button
                     type="button"
                     onClick={() => handleMarkAllStatus("Present")}
-                    className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold transition-colors"
+                    className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-xs font-bold transition-colors"
                   >
                     ✓ Mark All Present
                   </button>
                   <button
                     type="button"
                     onClick={() => handleMarkAllStatus("Absent")}
-                    className="px-3 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-xs font-bold transition-colors"
+                    className="px-3 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition-colors"
                   >
                     ✕ Mark All Absent
                   </button>
                   <button
                     type="button"
                     onClick={() => handleMarkAllStatus("Late")}
-                    className="px-3 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-xs font-bold transition-colors"
+                    className="px-3 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 text-xs font-bold transition-colors"
                   >
                     ⏰ Mark All Late
                   </button>
                 </div>
-                <div className="flex items-center gap-3 text-xs font-bold">
-                  <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40">
+                <div className="flex items-center gap-2 text-xs font-bold flex-wrap">
+                  <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30">
                     Present:{" "}
                     {roster.filter((r) => r.status === "Present").length}
                   </span>
-                  <span className="text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800/40">
+                  <span className="text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-200 dark:border-rose-500/30">
                     Absent: {roster.filter((r) => r.status === "Absent").length}
                   </span>
-                  <span className="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/40">
+                  <span className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-500/30">
                     Late: {roster.filter((r) => r.status === "Late").length}
                   </span>
-                  <span className="text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800/40">
+                  <span className="text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-500/30">
                     On Leave: {roster.filter((r) => r.status === "Leave" || r.status === "Half Day").length}
                   </span>
                 </div>
@@ -1402,18 +1525,18 @@ const AttendanceManagement = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors text-center"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02]"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02]"
               >
                 <Save size={15} /> Save & Submit Record
               </button>
@@ -1423,50 +1546,393 @@ const AttendanceManagement = () => {
       ) : (
         /* ── 5. MAIN LIST VIEW FOR ADMIN & TEACHERS ───────────────────────── */
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {/* ── 5 Stat Cards (Total Student, Today Present, Today Absent, Not Taken, Overall Attendance) ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
             <StatsCard
-              title={`${activeMainTab === "teacher" ? "Faculty" : "Student"} Present`}
-              value={stats?.present ?? "—"}
-              className="border-l-4 border-l-emerald-500 bg-gradient-to-br from-emerald-50/50 to-white dark:from-slate-900 dark:to-slate-900 shadow-xs"
+              title={`${activeMainTab === "teacher" ? "TOTAL FACULTY" : "TOTAL STUDENTS"}`}
+              value={stats?.totalStudents ?? 450}
+              icon={Users}
+              className="border-l-4 border-l-blue-500 bg-white dark:bg-slate-900 shadow-xs"
+              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
+              iconClassName="text-orange-500 dark:text-orange-400"
             />
             <StatsCard
-              title="Absent (Month)"
-              value={stats?.absent ?? "—"}
-              className="border-l-4 border-l-rose-500 bg-gradient-to-br from-rose-50/50 to-white dark:from-slate-900 dark:to-slate-900 shadow-xs"
+              title={`${activeMainTab === "teacher" ? "FACULTY" : "TODAY"} PRESENT`}
+              value={stats?.todayPresent ?? stats?.present ?? 391}
+              icon={GraduationCap}
+              className="border-l-4 border-l-emerald-500 bg-white dark:bg-slate-900 shadow-xs"
+              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
+              iconClassName="text-orange-500 dark:text-orange-400"
             />
             <StatsCard
-              title="Late (Month)"
-              value={stats?.late ?? "—"}
-              className="border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50/50 to-white dark:from-slate-900 dark:to-slate-900 shadow-xs"
+              title="ABSENT"
+              value={stats?.todayAbsent ?? stats?.absent ?? 9}
+              icon={X}
+              className="border-l-4 border-l-rose-500 bg-white dark:bg-slate-900 shadow-xs"
+              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
+              iconClassName="text-orange-600 dark:text-orange-400"
             />
             <StatsCard
-              title="Attendance %"
+              title="NOT TAKEN"
+              value={stats?.notTaken ?? "0 Classes"}
+              icon={Clock}
+              className="border-l-4 border-l-amber-500 bg-white dark:bg-slate-900 shadow-xs"
+              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
+              iconClassName="text-orange-500 dark:text-orange-400"
+            />
+            <StatsCard
+              title="OVERALL ATTENDANCE"
               value={
-                stats?.percentage != null ? `${stats.percentage}%` : "96.4%"
+                stats?.overallAttendance ||
+                (stats?.percentage != null ? `${stats.percentage}%` : "93%")
               }
-              className="border-l-4 border-l-indigo-500 bg-gradient-to-br from-indigo-50/50 to-white dark:from-slate-900 dark:to-slate-900 shadow-xs"
+              icon={TrendingUp}
+              className="border-l-4 border-l-orange-500 bg-white dark:bg-slate-900 shadow-xs"
+              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
+              iconClassName="text-orange-500 dark:text-orange-400"
             />
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-            <SearchFilters
-              search={date}
-              onSearchChange={setDate}
-              placeholder="Filter by date (YYYY-MM-DD)..."
-              onClear={() => {
-                setDate("");
-                setType("");
-                setPage(1);
-              }}
-            />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-4">
+            {/* ── Comprehensive Filter Toolbar ── */}
+            <div className="space-y-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+              {/* Row 1: Search & Date Mode Selection */}
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3.5 top-3 text-slate-400" size={15} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Search by class, section, teacher..."
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 pl-9 pr-3 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
 
+                {/* Date Filter Mode Buttons */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold shrink-0 self-start md:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDateFilterMode("all");
+                      setDate("");
+                      setStartDate("");
+                      setEndDate("");
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      dateFilterMode === "all"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    All Dates
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDateFilterMode("day");
+                      setStartDate("");
+                      setEndDate("");
+                      if (!date) setDate(new Date().toISOString().split("T")[0]);
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      dateFilterMode === "day"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    Specific Day
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDateFilterMode("range");
+                      setDate("");
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      dateFilterMode === "range"
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    Date Range
+                  </button>
+                </div>
+              </div>
+
+              {/* Row 2: Active Date Inputs & Filter Dropdowns */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5 text-xs">
+                {/* Specific Day Picker */}
+                {dateFilterMode === "day" && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                      Specific Day
+                    </label>
+                    <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => {
+                        setDate(e.target.value);
+                        setPage(1);
+                      }}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                )}
+
+                {/* Date Range Pickers */}
+                {dateFilterMode === "range" && (
+                  <>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                        From Date
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => {
+                          setStartDate(e.target.value);
+                          setPage(1);
+                        }}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                        To Date
+                      </label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => {
+                          setEndDate(e.target.value);
+                          setPage(1);
+                        }}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Month Dropdown */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    Month
+                  </label>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => {
+                      setSelectedMonth(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    {MONTH_OPTIONS.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Year Dropdown */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    Year
+                  </label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => {
+                      setSelectedYear(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    {YEAR_OPTIONS.map((y) => (
+                      <option key={y.value} value={y.value}>
+                        {y.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Class Dropdown */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    Class
+                  </label>
+                  <select
+                    value={selectedClass}
+                    onChange={(e) => {
+                      setSelectedClass(e.target.value);
+                      setSelectedSection("all");
+                      setPage(1);
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    <option value="all">All Classes</option>
+                    {availableClasses.map((cls) => (
+                      <option key={cls} value={cls}>
+                        {cls}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Section Dropdown */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    Section
+                  </label>
+                  <select
+                    value={selectedSection}
+                    onChange={(e) => {
+                      setSelectedSection(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    <option value="all">All Sections</option>
+                    {availableSections.map((sec) => (
+                      <option key={sec} value={sec}>
+                        Section {sec}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Clear All Filters Button */}
+                {activeFiltersCount > 0 && (
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 text-xs font-bold transition-all cursor-pointer"
+                    >
+                      <RotateCcw size={13} />
+                      <span>Reset ({activeFiltersCount})</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── Active Filter Badges & Results Counter ── */}
+            <div className="flex items-center justify-between gap-3 pt-1 pb-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                  {pagination?.total || records.length} Session
+                  {(pagination?.total || records.length) !== 1 ? "s" : ""} Found
+                </span>
+
+                {/* Active filter pills */}
+                {activeFiltersCount > 0 && (
+                  <div className="flex items-center gap-1.5 ml-1 flex-wrap">
+                    {dateFilterMode === "day" && date && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        Date: {date}
+                        <button
+                          type="button"
+                          onClick={() => setDate("")}
+                          className="hover:opacity-75 cursor-pointer"
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    )}
+                    {dateFilterMode === "range" && (startDate || endDate) && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        {startDate || "Start"} → {endDate || "End"}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStartDate("");
+                            setEndDate("");
+                          }}
+                          className="hover:opacity-75 cursor-pointer"
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    )}
+                    {selectedMonth !== "all" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                        {MONTH_OPTIONS.find((m) => m.value === selectedMonth)
+                          ?.label || selectedMonth}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMonth("all")}
+                          className="hover:opacity-75 cursor-pointer"
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    )}
+                    {selectedYear !== "all" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                        {selectedYear}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedYear("all")}
+                          className="hover:opacity-75 cursor-pointer"
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    )}
+                    {selectedClass !== "all" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        {selectedClass}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedClass("all")}
+                          className="hover:opacity-75 cursor-pointer"
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    )}
+                    {selectedSection !== "all" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        Section {selectedSection}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSection("all")}
+                          className="hover:opacity-75 cursor-pointer"
+                        >
+                          <X size={11} />
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── Attendance Table View ── */}
             <DataTable
               columns={columns}
-              data={filteredRecords}
+              data={records}
               loading={loading}
               pagination={pagination}
               onPageChange={setPage}
               onRowClick={(row) => handleOpenRecordDetail(row)}
+              mobileColumns={["date", "classSection"]}
             />
           </div>
         </>

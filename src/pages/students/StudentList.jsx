@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
 import { toast } from "react-toastify";
 import {
   Plus,
@@ -18,16 +17,15 @@ import {
   ShieldCheck,
   Users,
   GraduationCap,
-  Sparkles,
   ExternalLink,
   CreditCard,
   UserCheck,
-  Search,
   School,
   Phone,
   Lock,
   FileText,
   Bookmark,
+  MoreVertical,
 } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
@@ -50,9 +48,11 @@ import {
   createStudent,
   bulkImportStudents,
   exportStudentsCsv,
-  studentService,
 } from "../../services";
-import { CLASS_OPTIONS, SECTION_OPTIONS } from "../../constants/academicOptions.js";
+import {
+  CLASS_OPTIONS,
+  SECTION_OPTIONS,
+} from "../../constants/academicOptions.js";
 import { mockStudents } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
@@ -62,15 +62,271 @@ import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
 import StudentProfileView from "./StudentProfileView.jsx";
 
+// ── Student Avatar with Robust Image & Initials Fallback ───────────────────
+const StudentAvatar = ({ row }) => {
+  const [imgError, setImgError] = useState(false);
+
+  const rawPhoto =
+    row?.photo ||
+    row?.avatar ||
+    row?.imagesRef?.img ||
+    row?.user?.photo ||
+    row?.user?.avatar ||
+    row?.user?.imagesRef?.img ||
+    row?.image ||
+    row?.profileImage ||
+    "";
+
+  const photo =
+    typeof rawPhoto === "string" &&
+    rawPhoto.trim() &&
+    rawPhoto !== "undefined" &&
+    rawPhoto !== "null" &&
+    rawPhoto !== "N/A"
+      ? rawPhoto.trim()
+      : "";
+
+  useEffect(() => {
+    setImgError(false);
+  }, [photo]);
+
+  const fullName =
+    row?.name ||
+    `${row?.firstName || ""} ${row?.lastName || ""}`.trim() ||
+    "Student";
+
+  const initials = useMemo(() => {
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "ST";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (
+      (parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")
+    ).toUpperCase();
+  }, [fullName]);
+
+  const showImage = Boolean(photo && !imgError);
+
+  return (
+    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-gradient-to-br from-orange-500 to-amber-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm border border-orange-200/50 dark:border-orange-800/40 select-none">
+      {showImage ? (
+        <img
+          src={photo}
+          alt={fullName}
+          className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
+          loading="lazy"
+        />
+      ) : (
+        <span className="uppercase tracking-wider font-extrabold text-[11px] sm:text-xs text-white">
+          {initials}
+        </span>
+      )}
+    </div>
+  );
+};
+
+// ── Student Row Actions (Full buttons on desktop, 3-dot dropdown on mobile/tablet) ─
+const StudentRowActions = ({
+  row,
+  navigate,
+  setActivePdfDoc,
+  handleFetchCredentials,
+  canSeeCredentials,
+}) => {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
+  }, [open]);
+
+  const targetId = row._id || row.id || row.admissionNumber;
+  const pdfDoc = row.aadhaarDocument || row.AdharRef?.pdf || row.aadhaarPdf;
+
+  return (
+    <div
+      className="flex items-center justify-end"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Desktop Quick Action Icons (md:flex) */}
+      <div className="hidden md:flex items-center gap-1">
+        {pdfDoc && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setActivePdfDoc({
+                url: pdfDoc,
+                title: `${row.name} — UIDAI Aadhaar Document`,
+                subtitle: row.aadhaarNumber
+                  ? `Aadhaar: ${row.aadhaarNumber}`
+                  : "",
+                refId: row.AdharRef?.id || row.aadhaarDocId || "",
+              });
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 transition"
+            title="Preview Aadhaar PDF"
+          >
+            <FileText size={15} />
+          </button>
+        )}
+        <button
+          onClick={() => navigate(`/students/${targetId}`)}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
+          title="View Profile"
+        >
+          <Eye size={15} />
+        </button>
+        <button
+          onClick={() => navigate(`/students/${targetId}/edit`)}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
+          title="Edit Student"
+        >
+          <Edit3 size={15} />
+        </button>
+        <button
+          onClick={() => navigate(`/students/${targetId}?tab=id-card`)}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
+          title="Student ID Card"
+        >
+          <CreditCard size={15} />
+        </button>
+        {canSeeCredentials && (
+          <button
+            onClick={(e) => handleFetchCredentials(row, e)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition"
+            title="Reveal DB Password"
+          >
+            <Lock size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* Mobile & Tablet Three-Dot Menu (md:hidden) */}
+      <div className="md:hidden relative" ref={menuRef}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((prev) => !prev);
+          }}
+          className={`p-1.5 rounded-lg border transition shadow-xs flex items-center justify-center focus:outline-none ${
+            open
+              ? "bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-800"
+              : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+          }`}
+          aria-label="Student Actions"
+        >
+          <MoreVertical size={16} />
+        </button>
+
+        {open && (
+          <div
+            className="absolute right-0 top-full mt-1.5 w-44 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 py-1 divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100 text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="py-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  navigate(`/students/${targetId}`);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-600 dark:hover:text-orange-400 transition"
+              >
+                <Eye size={14} className="text-slate-400" />
+                <span>View Profile</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  navigate(`/students/${targetId}/edit`);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-600 dark:hover:text-orange-400 transition"
+              >
+                <Edit3 size={14} className="text-slate-400" />
+                <span>Edit Student</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  navigate(`/students/${targetId}?tab=id-card`);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-600 dark:hover:text-orange-400 transition"
+              >
+                <CreditCard size={14} className="text-slate-400" />
+                <span>ID Card</span>
+              </button>
+            </div>
+
+            {(pdfDoc || canSeeCredentials) && (
+              <div className="py-1">
+                {pdfDoc && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      setActivePdfDoc({
+                        url: pdfDoc,
+                        title: `${row.name} — UIDAI Aadhaar Document`,
+                        subtitle: row.aadhaarNumber
+                          ? `Aadhaar: ${row.aadhaarNumber}`
+                          : "",
+                        refId: row.AdharRef?.id || row.aadhaarDocId || "",
+                      });
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 transition"
+                  >
+                    <FileText size={14} className="text-rose-500" />
+                    <span>Aadhaar PDF</span>
+                  </button>
+                )}
+                {canSeeCredentials && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      setOpen(false);
+                      handleFetchCredentials(row, e);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition"
+                  >
+                    <Lock size={14} className="text-emerald-500" />
+                    <span>Reveal Password</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const StudentList = () => {
   const navigate = useNavigate();
   const authUser = useSelector((state) => state.auth?.user);
   const user = authUser || getUserFromStorage() || { role: "super-admin" };
-  const userRole = user?.role || (getUserFromStorage()?.role) || "";
+  const userRole = user?.role || getUserFromStorage()?.role || "";
 
   const isSuperAdmin = [ROLES.SUPER_ADMIN, "superadmin"].includes(userRole);
-  const normUserRole = String(userRole || '').trim().toLowerCase().replace(/_/g, '-');
-  const isStudent = normUserRole === 'student' || userRole === ROLES.STUDENT;
+  const normUserRole = String(userRole || "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, "-");
+  const isStudent = normUserRole === "student" || userRole === ROLES.STUDENT;
   const canSeeCredentials = isSuperAdmin || isStudent;
 
   const [activeCredentialsModal, setActiveCredentialsModal] = useState(null);
@@ -84,7 +340,11 @@ const StudentList = () => {
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
   const [students, setStudents] = useState(mockStudents);
-  const [pagination, setPagination] = useState({ total: mockStudents.length, page: 1, pages: 1 });
+  const [pagination, setPagination] = useState({
+    total: mockStudents.length,
+    page: 1,
+    pages: 1,
+  });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -95,19 +355,46 @@ const StudentList = () => {
   const [importing, setImporting] = useState(false);
   const [showRefTables, setShowRefTables] = useState(true);
 
+  // Mobile Action Menu (Three-dot) state
+  const [mobileActionMenuOpen, setMobileActionMenuOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target)
+      ) {
+        setMobileActionMenuOpen(false);
+      }
+    };
+    if (mobileActionMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [mobileActionMenuOpen]);
+
   const handleFetchCredentials = async (row, e) => {
     if (e) e.stopPropagation();
     setShowPasswordText(false);
     try {
-      const targetId = row._id || row.id || row.admissionNumber || row.studentId;
+      const targetId =
+        row._id || row.id || row.admissionNumber || row.studentId;
       const res = await getStudentCredentials(targetId).catch(() => null);
 
-      const creds = res?.credentials || res?.data?.credentials || {
-        username: row.admissionNumber || row.studentId || "std-001",
-        email: row.email || `${(row.admissionNumber || 'std').toLowerCase()}@school.local`,
-        password: row.password || row.tempPassword || "Std@2026!pass",
-        name: row.name,
-      };
+      const creds = res?.credentials ||
+        res?.data?.credentials || {
+          username: row.admissionNumber || row.studentId || "std-001",
+          email:
+            row.email ||
+            `${(row.admissionNumber || "std").toLowerCase()}@school.local`,
+          password: row.password || row.tempPassword || "Std@2026!pass",
+          name: row.name,
+        };
 
       setActiveCredentialsModal(creds);
     } catch (err) {
@@ -173,7 +460,9 @@ const StudentList = () => {
     }
     const saved = saveStudentDraft(form);
     setExistingDraft(saved);
-    toast.success("Student registration saved as draft! You can complete it anytime.");
+    toast.success(
+      "Student registration saved as draft! You can complete it anytime."
+    );
     setShowCreate(false);
   };
 
@@ -227,41 +516,29 @@ const StudentList = () => {
     {
       key: "name",
       label: "Student",
+      showOnMobile: true,
       render: (row) => {
-        const fullName = row.name || `${row.firstName || ''} ${row.lastName || ''}`.trim() || 'Student';
-        const photo = row.photo || row.imagesRef?.img || '';
-        const initials = (row.firstName?.[0] || fullName?.[0] || 'S') + (row.lastName?.[0] || fullName?.split(' ')?.[1]?.[0] || '');
+        const fullName =
+          row.name ||
+          `${row.firstName || ""} ${row.lastName || ""}`.trim() ||
+          "Student";
 
         return (
-          <div className="flex items-center gap-3">
-            {/* Student Photo Avatar */}
-            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-orange-500 to-amber-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm border border-orange-200/50 dark:border-orange-800/40">
-              {photo ? (
-                <img
-                  src={photo}
-                  alt={fullName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <span className="uppercase tracking-wider">{initials.slice(0, 2)}</span>
-              )}
-            </div>
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <StudentAvatar row={row} />
 
             {/* Name & Admission Number */}
             <div className="min-w-0">
-              <div className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 transition truncate text-xs">
+              <div className="font-bold text-slate-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 transition truncate text-xs leading-snug">
                 {fullName}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="font-mono text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-1.5 py-0.2 rounded border border-orange-200/50 dark:border-orange-800/40">
-                  {row.admissionNumber || row.studentId || 'ADM-N/A'}
+                <span className="font-mono text-[10px] sm:text-[11px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-1.5 py-0.2 rounded border border-orange-200/50 dark:border-orange-800/40 truncate max-w-[120px] sm:max-w-none">
+                  {row.admissionNumber || row.studentId || "ADM-N/A"}
                 </span>
                 {(row.email || row.user?.email) && (
                   <span
-                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold border ${
+                    className={`hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold border ${
                       row.isEmailVerified || row.user?.isEmailVerified
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                         : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
@@ -277,11 +554,15 @@ const StudentList = () => {
                     ) : (
                       <AlertCircle size={10} className="shrink-0" />
                     )}
-                    <span>{row.isEmailVerified || row.user?.isEmailVerified ? "Verified" : "Unverified"}</span>
+                    <span>
+                      {row.isEmailVerified || row.user?.isEmailVerified
+                        ? "Verified"
+                        : "Unverified"}
+                    </span>
                   </span>
                 )}
                 {row.gender && (
-                  <span className="text-[10px] text-slate-400 font-semibold">
+                  <span className="hidden sm:inline text-[10px] text-slate-400 font-semibold">
                     · {row.gender}
                   </span>
                 )}
@@ -294,26 +575,61 @@ const StudentList = () => {
     {
       key: "class",
       label: "Class & Section",
+      showOnMobile: true,
+      className: "text-right sm:text-left",
       render: (row) => {
-        const rawCls = row.className || row.classDetails?.name || row.classId?.name || row.class;
-        const rawSec = row.sectionName || row.sectionDetails?.name || row.sectionId?.name || row.section;
-        const cls = (rawCls && rawCls !== "null" && rawCls !== "undefined") ? rawCls : "N/A";
-        const sec = (rawSec && rawSec !== "null" && rawSec !== "undefined") ? rawSec : "N/A";
+        const rawCls =
+          row.className ||
+          row.classDetails?.name ||
+          row.classId?.name ||
+          row.class;
+        const rawSec =
+          row.sectionName ||
+          row.sectionDetails?.name ||
+          row.sectionId?.name ||
+          row.section;
+        const cls =
+          rawCls && rawCls !== "null" && rawCls !== "undefined"
+            ? rawCls
+            : "N/A";
+        const sec =
+          rawSec && rawSec !== "null" && rawSec !== "undefined"
+            ? rawSec
+            : "N/A";
+        const cleanSec =
+          sec !== "N/A" ? sec.replace(/^sec(tion)?\s*[-_]?/i, "").trim() : "";
 
         return (
-          <div className="flex flex-col gap-0.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold w-fit">
+          <div className="flex flex-col gap-0.5 items-end sm:items-start text-right sm:text-left">
+            {/* Desktop badge */}
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold w-fit">
               <School size={12} className="text-orange-500" />
               <span>{cls}</span>
               {sec !== "N/A" && (
                 <>
                   <span className="w-1 h-1 rounded-full bg-slate-400" />
-                  <span className="text-orange-600 dark:text-orange-400">{sec}</span>
+                  <span className="text-orange-600 dark:text-orange-400">
+                    {sec}
+                  </span>
                 </>
               )}
             </span>
+
+            {/* Mobile badge: super compact and clean */}
+            <span className="sm:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap">
+              <span>{cls}</span>
+              {cleanSec && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-slate-400" />
+                  <span className="text-orange-600 dark:text-orange-400 font-bold">
+                    {cleanSec}
+                  </span>
+                </>
+              )}
+            </span>
+
             {row.academicYear && (
-              <span className="text-[10px] text-slate-400 font-mono pl-0.5">
+              <span className="hidden sm:inline text-[10px] text-slate-400 font-mono pl-0.5">
                 {row.academicYear}
               </span>
             )}
@@ -326,7 +642,7 @@ const StudentList = () => {
       label: "Roll No",
       render: (row) => (
         <span className="inline-flex items-center justify-center font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-          {row.rollNumber != null ? `#${row.rollNumber}` : '—'}
+          {row.rollNumber != null ? `#${row.rollNumber}` : "—"}
         </span>
       ),
     },
@@ -345,7 +661,10 @@ const StudentList = () => {
           <div className="space-y-1">
             {aadhaar ? (
               <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-300">
-                <ShieldCheck size={13} className="text-emerald-500 flex-shrink-0" />
+                <ShieldCheck
+                  size={13}
+                  className="text-emerald-500 flex-shrink-0"
+                />
                 <span>•••• {String(aadhaar).slice(-4)}</span>
               </div>
             ) : null}
@@ -362,7 +681,9 @@ const StudentList = () => {
                 <ExternalLink size={9} />
               </a>
             ) : (
-              <span className="text-[10px] text-amber-500 font-semibold">No PDF</span>
+              <span className="text-[10px] text-amber-500 font-semibold">
+                No PDF
+              </span>
             )}
           </div>
         );
@@ -372,8 +693,9 @@ const StudentList = () => {
       key: "parent",
       label: "Guardian & Phone",
       render: (row) => {
-        const parentName = row.parentName || row.parentId?.name || '—';
-        const contact = row.contactNumber || row.parentContact || row.phone || '';
+        const parentName = row.parentName || row.parentId?.name || "—";
+        const contact =
+          row.contactNumber || row.parentContact || row.phone || "";
 
         return (
           <div className="space-y-0.5">
@@ -398,62 +720,17 @@ const StudentList = () => {
     {
       key: "actions",
       label: "Actions",
-      className: "text-right",
-      render: (row) => {
-        const targetId = row._id || row.id || row.admissionNumber;
-        const pdfDoc = row.aadhaarDocument || row.AdharRef?.pdf || row.aadhaarPdf;
-        return (
-          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-            {pdfDoc && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActivePdfDoc({
-                    url: pdfDoc,
-                    title: `${row.name} — UIDAI Aadhaar Document`,
-                    subtitle: row.aadhaarNumber ? `Aadhaar: ${row.aadhaarNumber}` : '',
-                    refId: row.AdharRef?.id || row.aadhaarDocId || '',
-                  });
-                }}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 transition"
-                title="Preview Aadhaar PDF"
-              >
-                <FileText size={15} />
-              </button>
-            )}
-            <button
-              onClick={() => navigate(`/students/${targetId}`)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
-              title="View Profile"
-            >
-              <Eye size={15} />
-            </button>
-            <button
-              onClick={() => navigate(`/students/${targetId}/edit`)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
-              title="Edit Student"
-            >
-              <Edit3 size={15} />
-            </button>
-            <button
-              onClick={() => navigate(`/students/${targetId}?tab=id-card`)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
-              title="Student ID Card"
-            >
-              <CreditCard size={15} />
-            </button>
-            {canSeeCredentials && (
-              <button
-                onClick={(e) => handleFetchCredentials(row, e)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition"
-                title="Reveal DB Password"
-              >
-                <Lock size={14} />
-              </button>
-            )}
-          </div>
-        );
-      },
+      showOnMobile: true,
+      className: "text-right w-12 sm:w-auto",
+      render: (row) => (
+        <StudentRowActions
+          row={row}
+          navigate={navigate}
+          setActivePdfDoc={setActivePdfDoc}
+          handleFetchCredentials={handleFetchCredentials}
+          canSeeCredentials={canSeeCredentials}
+        />
+      ),
     },
   ];
 
@@ -466,13 +743,19 @@ const StudentList = () => {
 
     // Manual single registration: Aadhaar Number, Photo, and Aadhaar PDF are mandatory
     if (!form.aadhaarNumber || !form.aadhaarNumber.trim()) {
-      return toast.warning("Aadhaar Number is mandatory for student registration.");
+      return toast.warning(
+        "Aadhaar Number is mandatory for student registration."
+      );
     }
     if (!form.photo || !form.photo.trim()) {
-      return toast.warning("Student Photo is mandatory (Max 1MB). Please upload a student photo.");
+      return toast.warning(
+        "Student Photo is mandatory (Max 1MB). Please upload a student photo."
+      );
     }
     if (!form.aadhaarDocument || !form.aadhaarDocument.trim()) {
-      return toast.warning("Aadhaar PDF Document is mandatory (Max 1MB). Please upload the Aadhaar PDF.");
+      return toast.warning(
+        "Aadhaar PDF Document is mandatory (Max 1MB). Please upload the Aadhaar PDF."
+      );
     }
 
     const payloadForm = {
@@ -485,13 +768,18 @@ const StudentList = () => {
       const res = await createStudent(payloadForm);
       clearStudentDraft();
       setExistingDraft(null);
-      toast.success(res?.data?.message || res?.message || "Student registered successfully");
+      toast.success(
+        res?.data?.message || res?.message || "Student registered successfully"
+      );
       setShowCreate(false);
       setForm(getInitialStudentForm());
       await fetchStudentsData();
     } catch (err) {
       console.error("Failed to register student:", err);
-      const msg = err.response?.data?.message || err.message || "Failed to register student";
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to register student";
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -504,7 +792,10 @@ const StudentList = () => {
       const url = window.URL.createObjectURL(new Blob([data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `Students_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute(
+        "download",
+        `Students_${new Date().toISOString().slice(0, 10)}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -516,7 +807,8 @@ const StudentList = () => {
 
   // Download Sample CSV Template — admissionNumber and rollNumber are auto-assigned by server
   const downloadSampleExcelTemplate = () => {
-    const header = "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password";
+    const header =
+      "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password";
     const sampleClasses = ["cls-9", "cls-10", "cls-11", "cls-12"];
     const sampleSections = ["sec-a", "sec-b", "sec-c"];
 
@@ -524,10 +816,10 @@ const StudentList = () => {
     for (let i = 1; i <= 10; i++) {
       const cls = sampleClasses[i % sampleClasses.length];
       const sec = sampleSections[i % sampleSections.length];
-      csvContent += `Student${i},User${i},Male,2010-05-${String(i).padStart(2,'0')},O+,+91987654${String(i).padStart(4,'0')},+91987654${String(i).padStart(4,'0')},student${i}@school.local,Building ${i} School Road,2026-06-01,${cls},${sec},Parent Of Student${i},+91987654${String(i).padStart(4,'0')},parent${i}@school.local,1234567890${String(i).padStart(2,'0')},Std@2026pass${i}\n`;
+      csvContent += `Student${i},User${i},Male,2010-05-${String(i).padStart(2, "0")},O+,+91987654${String(i).padStart(4, "0")},+91987654${String(i).padStart(4, "0")},student${i}@school.local,Building ${i} School Road,2026-06-01,${cls},${sec},Parent Of Student${i},+91987654${String(i).padStart(4, "0")},parent${i}@school.local,1234567890${String(i).padStart(2, "0")},Std@2026pass${i}\n`;
     }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -569,17 +861,18 @@ Do NOT include them in your CSV.
 - password      (Optional): Login password (auto-generated if blank)
 
 3. VALID CLASS IDs:
-${CLASS_OPTIONS.map(c => `- ${c.name.padEnd(12)} => classId: "${c.id}"`).join("\n")}
+${CLASS_OPTIONS.map((c) => `- ${c.name.padEnd(12)} => classId: "${c.id}"`).join("\n")}
 
 4. VALID SECTION IDs:
-${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).join("\n")}
+${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).join("\n")}
 `;
     navigator.clipboard.writeText(text);
     toast.success("Full CSV import instructions copied to clipboard!");
   };
 
   const handleCopyHeaderLine = () => {
-    const header = "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password";
+    const header =
+      "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password";
     navigator.clipboard.writeText(header);
     toast.success("CSV Header line copied to clipboard!");
   };
@@ -587,7 +880,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
   // Helper function to split CSV lines respecting quoted fields containing commas
   const parseCSVLine = (line) => {
     const result = [];
-    let cur = '';
+    let cur = "";
     let inQuotes = false;
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
@@ -599,14 +892,14 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (char === ',' && !inQuotes) {
-        result.push(cur.trim().replace(/^"|"$/g, ''));
-        cur = '';
+      } else if (char === "," && !inQuotes) {
+        result.push(cur.trim().replace(/^"|"$/g, ""));
+        cur = "";
       } else {
         cur += char;
       }
     }
-    result.push(cur.trim().replace(/^"|"$/g, ''));
+    result.push(cur.trim().replace(/^"|"$/g, ""));
     return result;
   };
 
@@ -620,9 +913,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
     reader.onload = (event) => {
       try {
         const text = event.target.result;
-        const lines = text.split(/\r\n|\n/).filter((line) => line.trim() !== '');
+        const lines = text
+          .split(/\r\n|\n/)
+          .filter((line) => line.trim() !== "");
         if (lines.length < 2) {
-          return toast.error('File is empty or missing data rows');
+          return toast.error("File is empty or missing data rows");
         }
 
         const headers = parseCSVLine(lines[0]);
@@ -630,43 +925,81 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
 
         for (let i = 1; i < lines.length; i++) {
           const cols = parseCSVLine(lines[i]);
-          if (cols.length === 0 || cols.every((c) => c === '')) continue;
+          if (cols.length === 0 || cols.every((c) => c === "")) continue;
 
           const rowObj = {};
           headers.forEach((h, idx) => {
-            const val = (cols[idx] || '').trim();
-            const key = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const val = (cols[idx] || "").trim();
+            const key = h.toLowerCase().replace(/[^a-z0-9]/g, "");
 
             // Skip admission number and roll number — server auto-assigns these
-            if (key.includes('admission') || key.includes('roll')) return;
+            if (key.includes("admission") || key.includes("roll")) return;
 
-            if (key === 'firstname' || key === 'first') rowObj.firstName = val;
-            else if (key === 'lastname' || key === 'last') rowObj.lastName = val;
-            else if (key.includes('email') && !key.includes('parent')) rowObj.email = val;
-            else if (key === 'password' || key === 'pass') rowObj.password = val;
-            else if (key === 'gender') rowObj.gender = val;
-            else if (key === 'dob' || key === 'dateofbirth' || key === 'birth') rowObj.dob = val;
-            else if (key === 'bloodgroup' || key === 'blood') rowObj.bloodGroup = val;
-            else if (key === 'phone' || key === 'contact' || key === 'contactnumber') rowObj.contactNumber = val;
-            else if (key === 'alternatephone' || key === 'alternate') rowObj.alternatePhone = val;
-            else if (key === 'address') rowObj.address = val;
-            else if (key === 'joiningdate' || key === 'joining' || key === 'joined') rowObj.joiningDate = val;
-            else if (key === 'classid' || key === 'class' || key === 'classname') {
+            if (key === "firstname" || key === "first") rowObj.firstName = val;
+            else if (key === "lastname" || key === "last")
+              rowObj.lastName = val;
+            else if (key.includes("email") && !key.includes("parent"))
+              rowObj.email = val;
+            else if (key === "password" || key === "pass")
+              rowObj.password = val;
+            else if (key === "gender") rowObj.gender = val;
+            else if (key === "dob" || key === "dateofbirth" || key === "birth")
+              rowObj.dob = val;
+            else if (key === "bloodgroup" || key === "blood")
+              rowObj.bloodGroup = val;
+            else if (
+              key === "phone" ||
+              key === "contact" ||
+              key === "contactnumber"
+            )
+              rowObj.contactNumber = val;
+            else if (key === "alternatephone" || key === "alternate")
+              rowObj.alternatePhone = val;
+            else if (key === "address") rowObj.address = val;
+            else if (
+              key === "joiningdate" ||
+              key === "joining" ||
+              key === "joined"
+            )
+              rowObj.joiningDate = val;
+            else if (
+              key === "classid" ||
+              key === "class" ||
+              key === "classname"
+            ) {
               rowObj.classId = val;
               rowObj.class = val;
-            } else if (key === 'sectionid' || key === 'section' || key === 'sectionname') {
+            } else if (
+              key === "sectionid" ||
+              key === "section" ||
+              key === "sectionname"
+            ) {
               rowObj.sectionId = val;
               rowObj.section = val;
-            } else if (key === 'parentname' || key === 'guardian' || key === 'parent') rowObj.parentName = val;
-            else if (key === 'parentcontact' || key === "parentphone" || key === "parentnumber") rowObj.parentContact = val;
-            else if (key === 'parentemail') rowObj.parentEmail = val;
-            else if (key.includes('aadhaar') || key.includes('adhar')) {
-              if (key.includes('pdf') || key.includes('doc')) {
+            } else if (
+              key === "parentname" ||
+              key === "guardian" ||
+              key === "parent"
+            )
+              rowObj.parentName = val;
+            else if (
+              key === "parentcontact" ||
+              key === "parentphone" ||
+              key === "parentnumber"
+            )
+              rowObj.parentContact = val;
+            else if (key === "parentemail") rowObj.parentEmail = val;
+            else if (key.includes("aadhaar") || key.includes("adhar")) {
+              if (key.includes("pdf") || key.includes("doc")) {
                 rowObj.aadhaarDocument = val;
               } else {
                 rowObj.aadhaarNumber = val;
               }
-            } else if (key.includes('photo') || key.includes('img') || key.includes('picture')) {
+            } else if (
+              key.includes("photo") ||
+              key.includes("img") ||
+              key.includes("picture")
+            ) {
               rowObj.photo = val;
             }
           });
@@ -678,9 +1011,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
         }
 
         setImportedData(parsedRows);
-        toast.success(`Parsed ${parsedRows.length} student records from ${file.name}`);
+        toast.success(
+          `Parsed ${parsedRows.length} student records from ${file.name}`
+        );
       } catch (err) {
-        toast.error('Failed to parse file. Please verify CSV formatting.');
+        toast.error("Failed to parse file. Please verify CSV formatting.");
       }
     };
     reader.readAsText(file);
@@ -717,55 +1052,181 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
         subtitle="Manage student admissions, profiles, roll numbers, and academic records."
         breadcrumbs={[{ label: "Students" }]}
         actions={
-          <div className="flex gap-2 flex-wrap">
-            <CanButton id="ADD_STUDENT">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<FileSpreadsheet size={14} />}
-                onClick={() => setShowExcelImport(true)}
-                className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100"
+          <>
+            {/* Desktop Actions - Preserved without disturbing desktop layout */}
+            <div className="hidden md:flex gap-2 flex-wrap">
+              <CanButton id="ADD_STUDENT">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<FileSpreadsheet size={14} />}
+                  onClick={() => setShowExcelImport(true)}
+                  className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100"
+                >
+                  Import Excel / CSV
+                </Button>
+              </CanButton>
+              <CanButton id="EXPORT_STUDENTS">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<FolderDown size={14} />}
+                  onClick={handleExportCsv}
+                >
+                  Export CSV
+                </Button>
+              </CanButton>
+              {existingDraft && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Bookmark size={14} />}
+                  onClick={handleResumeDraft}
+                  className="bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
+                >
+                  Resume Draft ({existingDraft.studentName || "Student"})
+                </Button>
+              )}
+              <CanButton id="ADD_STUDENT">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={14} />}
+                  onClick={() => {
+                    if (existingDraft && !isStudentFormDirty(form)) {
+                      setForm(existingDraft.form);
+                    }
+                    setShowCreate(true);
+                  }}
+                >
+                  Register Student
+                </Button>
+              </CanButton>
+            </div>
+
+            {/* Mobile Actions: Three-dot dropdown menu */}
+            <div
+              className="md:hidden absolute top-0 right-0"
+              ref={mobileMenuRef}
+            >
+              <button
+                type="button"
+                onClick={() => setMobileActionMenuOpen((prev) => !prev)}
+                className={`p-2.5 rounded-xl border transition-all shadow-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-500/30 ${
+                  mobileActionMenuOpen
+                    ? "bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-800"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95"
+                }`}
+                aria-label="More options"
+                aria-expanded={mobileActionMenuOpen}
               >
-                Import Excel / CSV
-              </Button>
-            </CanButton>
-            <CanButton id="EXPORT_STUDENTS">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<FolderDown size={14} />}
-                onClick={handleExportCsv}
-              >
-                Export CSV
-              </Button>
-            </CanButton>
-            {existingDraft && (
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Bookmark size={14} />}
-                onClick={handleResumeDraft}
-                className="bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-bold"
-              >
-                Resume Draft ({existingDraft.studentName || "Student"})
-              </Button>
-            )}
-            <CanButton id="ADD_STUDENT">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Plus size={14} />}
-                onClick={() => {
-                  if (existingDraft && !isStudentFormDirty(form)) {
-                    setForm(existingDraft.form);
-                  }
-                  setShowCreate(true);
-                }}
-              >
-                Register Student
-              </Button>
-            </CanButton>
-          </div>
+                <MoreVertical size={18} />
+              </button>
+
+              {mobileActionMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xl z-50 py-1.5 divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="py-1">
+                    <CanButton id="ADD_STUDENT">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileActionMenuOpen(false);
+                          if (existingDraft && !isStudentFormDirty(form)) {
+                            setForm(existingDraft.form);
+                          }
+                          setShowCreate(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition text-left"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                          <Plus size={16} />
+                        </div>
+                        <div>
+                          <div className="leading-tight font-bold">
+                            Register Student
+                          </div>
+                          <div className="text-[10px] font-normal text-slate-400 mt-0.5">
+                            Single admission
+                          </div>
+                        </div>
+                      </button>
+                    </CanButton>
+
+                    <CanButton id="ADD_STUDENT">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileActionMenuOpen(false);
+                          setShowExcelImport(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                          <FileSpreadsheet size={16} />
+                        </div>
+                        <div>
+                          <div className="leading-tight font-bold">
+                            Import Excel / CSV
+                          </div>
+                          <div className="text-[10px] font-normal text-slate-400 mt-0.5">
+                            Bulk onboarding
+                          </div>
+                        </div>
+                      </button>
+                    </CanButton>
+
+                    <CanButton id="EXPORT_STUDENTS">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileActionMenuOpen(false);
+                          handleExportCsv();
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+                          <FolderDown size={16} />
+                        </div>
+                        <div>
+                          <div className="leading-tight font-bold">
+                            Export CSV
+                          </div>
+                          <div className="text-[10px] font-normal text-slate-400 mt-0.5">
+                            Download directory
+                          </div>
+                        </div>
+                      </button>
+                    </CanButton>
+                  </div>
+
+                  {existingDraft && (
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileActionMenuOpen(false);
+                          handleResumeDraft();
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition text-left"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                          <Bookmark size={16} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="leading-tight font-bold">
+                            Resume Draft
+                          </div>
+                          <div className="text-[10px] font-normal text-slate-400 mt-0.5 truncate">
+                            {existingDraft.studentName || "Saved draft"}
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         }
       />
 
@@ -773,8 +1234,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Enrolled</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{pagination.total || students.length}</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Total Enrolled
+            </p>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">
+              {pagination.total || students.length}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center">
             <Users size={24} />
@@ -783,9 +1248,14 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Students</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Active Students
+            </p>
             <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              {students.filter((s) => (s.status || 'active') === 'active').length}
+              {
+                students.filter((s) => (s.status || "active") === "active")
+                  .length
+              }
             </p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -795,7 +1265,9 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Aadhaar Verified</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Aadhaar Verified
+            </p>
             <p className="text-2xl font-black text-orange-600 dark:text-orange-500">
               {students.filter((s) => Boolean(s.aadhaarNumber)).length}
             </p>
@@ -807,9 +1279,15 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Passout / Graduated</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Passout / Graduated
+            </p>
             <p className="text-2xl font-black text-slate-700 dark:text-slate-300">
-              {students.filter((s) => (s.status || '').toLowerCase().includes('passout')).length}
+              {
+                students.filter((s) =>
+                  (s.status || "").toLowerCase().includes("passout")
+                ).length
+              }
             </p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center">
@@ -818,7 +1296,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {
@@ -848,7 +1326,10 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               },
               options: [
                 { value: "", label: "All Sections" },
-                ...SECTION_OPTIONS.map((s) => ({ value: s.name, label: s.name })),
+                ...SECTION_OPTIONS.map((s) => ({
+                  value: s.name,
+                  label: s.name,
+                })),
               ],
             },
             {
@@ -881,6 +1362,7 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
           <DataTable
             columns={columns}
             data={students}
+            mobileColumns={["name", "class", "actions"]}
             loading={loading}
             pagination={pagination}
             onPageChange={setPage}
@@ -899,47 +1381,79 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
           <div className="space-y-4 text-xs font-sans">
             <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-3">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Student Name</p>
-                <p className="text-sm font-extrabold text-white">{activeCredentialsModal.name}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">
+                  Student Name
+                </p>
+                <p className="text-sm font-extrabold text-white">
+                  {activeCredentialsModal.name}
+                </p>
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Login Username / Admission No.</p>
-                  <p className="text-sm font-mono font-bold text-orange-400">{activeCredentialsModal.username}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">
+                    Login Username / Admission No.
+                  </p>
+                  <p className="text-sm font-mono font-bold text-orange-400">
+                    {activeCredentialsModal.username}
+                  </p>
                 </div>
                 <button
-                  onClick={() => handleCopyText(activeCredentialsModal.username, "Username")}
+                  onClick={() =>
+                    handleCopyText(activeCredentialsModal.username, "Username")
+                  }
                   className="flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md"
                 >
-                  {copiedField === "Username" ? <Check size={12} /> : <Copy size={12} />}
+                  {copiedField === "Username" ? (
+                    <Check size={12} />
+                  ) : (
+                    <Copy size={12} />
+                  )}
                   <span>{copiedField === "Username" ? "Copied" : "Copy"}</span>
                 </button>
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Login Email Address</p>
-                  <p className="text-sm font-mono text-slate-200">{activeCredentialsModal.email}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">
+                    Login Email Address
+                  </p>
+                  <p className="text-sm font-mono text-slate-200">
+                    {activeCredentialsModal.email}
+                  </p>
                 </div>
                 <button
-                  onClick={() => handleCopyText(activeCredentialsModal.email, "Email")}
+                  onClick={() =>
+                    handleCopyText(activeCredentialsModal.email, "Email")
+                  }
                   className="flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded-md"
                 >
-                  {copiedField === "Email" ? <Check size={12} /> : <Copy size={12} />}
+                  {copiedField === "Email" ? (
+                    <Check size={12} />
+                  ) : (
+                    <Copy size={12} />
+                  )}
                   <span>{copiedField === "Email" ? "Copied" : "Copy"}</span>
                 </button>
               </div>
 
               <div className="pt-2 border-t border-slate-800">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase">Actual Password from Database</p>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase">
+                    Actual Password from Database
+                  </p>
                   <button
                     onClick={() => setShowPasswordText(!showPasswordText)}
                     className="flex items-center gap-1 text-[11px] font-bold text-slate-400 hover:text-white"
                   >
-                    {showPasswordText ? <EyeOff size={13} /> : <Eye size={13} />}
-                    <span>{showPasswordText ? "Hide Password" : "Reveal Password"}</span>
+                    {showPasswordText ? (
+                      <EyeOff size={13} />
+                    ) : (
+                      <Eye size={13} />
+                    )}
+                    <span>
+                      {showPasswordText ? "Hide Password" : "Reveal Password"}
+                    </span>
                   </button>
                 </div>
 
@@ -950,11 +1464,22 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                       : `•••••••••••• (${activeCredentialsModal.password ? "Encrypted DB Hash" : "Hidden"})`}
                   </span>
                   <button
-                    onClick={() => handleCopyText(activeCredentialsModal.password, "Password")}
+                    onClick={() =>
+                      handleCopyText(
+                        activeCredentialsModal.password,
+                        "Password"
+                      )
+                    }
                     className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/20 px-2.5 py-1 rounded"
                   >
-                    {copiedField === "Password" ? <Check size={13} /> : <Copy size={13} />}
-                    <span>{copiedField === "Password" ? "Copied!" : "Copy Pass"}</span>
+                    {copiedField === "Password" ? (
+                      <Check size={13} />
+                    ) : (
+                      <Copy size={13} />
+                    )}
+                    <span>
+                      {copiedField === "Password" ? "Copied!" : "Copy Pass"}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -965,8 +1490,16 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                 onClick={() => handleCopyAll(activeCredentialsModal)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-md shadow-orange-500/25"
               >
-                {copiedField === "all" ? <Check size={14} /> : <Copy size={14} />}
-                <span>{copiedField === "all" ? "All Credentials Copied!" : "Copy All Credentials"}</span>
+                {copiedField === "all" ? (
+                  <Check size={14} />
+                ) : (
+                  <Copy size={14} />
+                )}
+                <span>
+                  {copiedField === "all"
+                    ? "All Credentials Copied!"
+                    : "Copy All Credentials"}
+                </span>
               </button>
 
               <button
@@ -996,15 +1529,29 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
             {/* Step Wizard Header Bar */}
             <div className="grid grid-cols-3 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
               <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold">
-                <span className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-[10px]">1</span>
+                <span className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-[10px]">
+                  1
+                </span>
                 <span>Format Guidelines</span>
               </div>
-              <div className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importFileName ? 'bg-orange-500/10 border border-orange-500/20 text-orange-400' : 'bg-slate-800/40 text-slate-500'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${importFileName ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-400'}`}>2</span>
+              <div
+                className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importFileName ? "bg-orange-500/10 border border-orange-500/20 text-orange-400" : "bg-slate-800/40 text-slate-500"}`}
+              >
+                <span
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${importFileName ? "bg-orange-500 text-white" : "bg-slate-700 text-slate-400"}`}
+                >
+                  2
+                </span>
                 <span>Select &amp; Parse File</span>
               </div>
-              <div className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importedData.length > 0 ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-slate-800/40 text-slate-500'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${importedData.length > 0 ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-400'}`}>3</span>
+              <div
+                className={`flex items-center justify-center gap-2 p-2 rounded-lg font-bold ${importedData.length > 0 ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-slate-800/40 text-slate-500"}`}
+              >
+                <span
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${importedData.length > 0 ? "bg-emerald-600 text-white" : "bg-slate-700 text-slate-400"}`}
+                >
+                  3
+                </span>
                 <span>Preview &amp; Commit</span>
               </div>
             </div>
@@ -1021,7 +1568,8 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                     </span>
                   </h4>
                   <p className="text-slate-400 text-[11px] mt-1">
-                    Copy complete instructions, copy header row, or click any Class ID / Section ID to copy value.
+                    Copy complete instructions, copy header row, or click any
+                    Class ID / Section ID to copy value.
                   </p>
                 </div>
 
@@ -1050,7 +1598,8 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
                   <span className="flex items-center gap-1 text-emerald-400">
-                    <CheckCircle2 size={14} /> Standard CSV Header Line (Line 1):
+                    <CheckCircle2 size={14} /> Standard CSV Header Line (Line
+                    1):
                   </span>
                   <button
                     type="button"
@@ -1068,20 +1617,36 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               {/* Format Reference Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div className="p-2.5 bg-slate-950/60 border border-slate-800 rounded-lg">
-                  <span className="text-[10px] text-orange-400 font-bold uppercase block">FirstName &amp; LastName</span>
-                  <span className="text-white font-mono text-[11px]">Required</span>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase block">
+                    FirstName &amp; LastName
+                  </span>
+                  <span className="text-white font-mono text-[11px]">
+                    Required
+                  </span>
                 </div>
                 <div className="p-2.5 bg-emerald-950/40 border border-emerald-800/40 rounded-lg">
-                  <span className="text-[10px] text-emerald-400 font-bold uppercase block">Admission No. &amp; Roll</span>
-                  <span className="text-emerald-300 font-mono text-[11px]">Auto-Assigned ✓</span>
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase block">
+                    Admission No. &amp; Roll
+                  </span>
+                  <span className="text-emerald-300 font-mono text-[11px]">
+                    Auto-Assigned ✓
+                  </span>
                 </div>
                 <div className="p-2.5 bg-slate-950/60 border border-slate-800 rounded-lg">
-                  <span className="text-[10px] text-orange-400 font-bold uppercase block">classId &amp; sectionId</span>
-                  <span className="text-slate-400 font-mono text-[11px]">Use ID from grid below</span>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase block">
+                    classId &amp; sectionId
+                  </span>
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    Use ID from grid below
+                  </span>
                 </div>
                 <div className="p-2.5 bg-slate-950/60 border border-slate-800 rounded-lg">
-                  <span className="text-[10px] text-orange-400 font-bold uppercase block">Email &amp; Password</span>
-                  <span className="text-slate-400 font-mono text-[11px]">Auto-Provisioned</span>
+                  <span className="text-[10px] text-orange-400 font-bold uppercase block">
+                    Email &amp; Password
+                  </span>
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    Auto-Provisioned
+                  </span>
                 </div>
               </div>
 
@@ -1089,15 +1654,21 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               <div className="space-y-3 pt-2 border-t border-slate-800/80">
                 <div className="flex items-center justify-between">
                   <h5 className="font-extrabold text-xs text-white uppercase tracking-wider flex items-center gap-2">
-                    <span>Valid Class IDs &amp; Section IDs Reference Grid</span>
-                    <span className="text-[10px] text-slate-400 font-normal normal-case">(Click any badge to copy ID)</span>
+                    <span>
+                      Valid Class IDs &amp; Section IDs Reference Grid
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-normal normal-case">
+                      (Click any badge to copy ID)
+                    </span>
                   </h5>
                   <button
                     type="button"
                     onClick={() => setShowRefTables(!showRefTables)}
                     className="text-[11px] text-orange-400 hover:text-orange-300 font-bold underline"
                   >
-                    {showRefTables ? "Hide Reference Grid" : "Show Reference Grid"}
+                    {showRefTables
+                      ? "Hide Reference Grid"
+                      : "Show Reference Grid"}
                   </button>
                 </div>
 
@@ -1106,8 +1677,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                     {/* Class Options Reference List */}
                     <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
                       <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                        <span className="font-extrabold text-xs text-orange-400">Class Name</span>
-                        <span className="font-extrabold text-xs text-orange-400 font-mono">classId</span>
+                        <span className="font-extrabold text-xs text-orange-400">
+                          Class Name
+                        </span>
+                        <span className="font-extrabold text-xs text-orange-400 font-mono">
+                          classId
+                        </span>
                       </div>
                       <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                         {CLASS_OPTIONS.map((cls) => (
@@ -1115,12 +1690,16 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                             key={cls.id}
                             className="flex items-center justify-between text-[11px] py-1 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800/80 transition"
                           >
-                            <span className="font-bold text-slate-200">{cls.name}</span>
+                            <span className="font-bold text-slate-200">
+                              {cls.name}
+                            </span>
                             <button
                               type="button"
                               onClick={() => {
                                 navigator.clipboard.writeText(cls.id);
-                                toast.success(`Copied classId "${cls.id}" to clipboard!`);
+                                toast.success(
+                                  `Copied classId "${cls.id}" to clipboard!`
+                                );
                               }}
                               className="font-mono text-[10px] bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded flex items-center gap-1 font-bold cursor-pointer"
                               title={`Click to copy "${cls.id}"`}
@@ -1136,8 +1715,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                     {/* Section Options Reference List */}
                     <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
                       <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                        <span className="font-extrabold text-xs text-emerald-400">Section Name</span>
-                        <span className="font-extrabold text-xs text-emerald-400 font-mono">sectionId</span>
+                        <span className="font-extrabold text-xs text-emerald-400">
+                          Section Name
+                        </span>
+                        <span className="font-extrabold text-xs text-emerald-400 font-mono">
+                          sectionId
+                        </span>
                       </div>
                       <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                         {SECTION_OPTIONS.map((sec) => (
@@ -1145,12 +1728,16 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                             key={sec.id}
                             className="flex items-center justify-between text-[11px] py-1 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800/80 transition"
                           >
-                            <span className="font-bold text-slate-200">{sec.name}</span>
+                            <span className="font-bold text-slate-200">
+                              {sec.name}
+                            </span>
                             <button
                               type="button"
                               onClick={() => {
                                 navigator.clipboard.writeText(sec.id);
-                                toast.success(`Copied sectionId "${sec.id}" to clipboard!`);
+                                toast.success(
+                                  `Copied sectionId "${sec.id}" to clipboard!`
+                                );
                               }}
                               className="font-mono text-[10px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded flex items-center gap-1 font-bold cursor-pointer"
                               title={`Click to copy "${sec.id}"`}
@@ -1174,10 +1761,16 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               </div>
               <div className="space-y-1">
                 <p className="font-extrabold text-sm text-white">
-                  {importFileName ? `Selected: ${importFileName}` : "Click or Drag & Drop your Excel / CSV file here"}
+                  {importFileName
+                    ? `Selected: ${importFileName}`
+                    : "Click or Drag & Drop your Excel / CSV file here"}
                 </p>
                 <p className="text-[11px] text-slate-400 max-w-md mx-auto">
-                  Supports <span className="text-orange-400 font-bold">.CSV</span>, <span className="text-orange-400 font-bold">.XLSX</span>, <span className="text-orange-400 font-bold">.XLS</span> format files with up to 1,000+ student rows per batch.
+                  Supports{" "}
+                  <span className="text-orange-400 font-bold">.CSV</span>,{" "}
+                  <span className="text-orange-400 font-bold">.XLSX</span>,{" "}
+                  <span className="text-orange-400 font-bold">.XLS</span> format
+                  files with up to 1,000+ student rows per batch.
                 </p>
               </div>
 
@@ -1193,7 +1786,11 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs cursor-pointer shadow-lg shadow-orange-500/25 transition"
               >
                 <Upload size={14} />
-                <span>{importFileName ? "Choose Another File" : "Select CSV / Excel File"}</span>
+                <span>
+                  {importFileName
+                    ? "Choose Another File"
+                    : "Select CSV / Excel File"}
+                </span>
               </label>
             </div>
 
@@ -1207,8 +1804,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                       <CheckCircle2 size={20} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Parsed Records</p>
-                      <p className="text-lg font-black text-white">{importedData.length} Students</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">
+                        Parsed Records
+                      </p>
+                      <p className="text-lg font-black text-white">
+                        {importedData.length} Students
+                      </p>
                     </div>
                   </div>
 
@@ -1217,8 +1818,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                       <FileSpreadsheet size={20} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Target Accounts</p>
-                      <p className="text-lg font-black text-orange-400">DB Student + User + Parent</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">
+                        Target Accounts
+                      </p>
+                      <p className="text-lg font-black text-orange-400">
+                        DB Student + User + Parent
+                      </p>
                     </div>
                   </div>
 
@@ -1227,8 +1832,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                       <Check size={20} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Import Status</p>
-                      <p className="text-lg font-black text-purple-300">Ready to Commit</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">
+                        Import Status
+                      </p>
+                      <p className="text-lg font-black text-purple-300">
+                        Ready to Commit
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1251,7 +1860,9 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                           <th className="p-3">#</th>
                           <th className="p-3">Student Name</th>
                           <th className="p-3">classId / sectionId</th>
-                          <th className="p-3 text-emerald-400">Adm No. (Auto)</th>
+                          <th className="p-3 text-emerald-400">
+                            Adm No. (Auto)
+                          </th>
                           <th className="p-3 text-emerald-400">Roll (Auto)</th>
                           <th className="p-3">Email</th>
                           <th className="p-3">Parent</th>
@@ -1259,14 +1870,36 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                       </thead>
                       <tbody className="divide-y divide-slate-800/80 font-mono text-slate-200">
                         {importedData.slice(0, 5).map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-800/50 transition">
-                            <td className="p-3 text-slate-500 font-bold">{idx + 1}</td>
-                            <td className="p-3 font-bold text-white font-sans">{row.firstName} {row.lastName}</td>
-                            <td className="p-3 text-orange-400">{row.classId || row.class || '—'} / {row.sectionId || row.section || '—'}</td>
-                            <td className="p-3 text-emerald-400 italic text-[10px]">Auto-Assigned</td>
-                            <td className="p-3 text-emerald-400 italic text-[10px]">Auto-Assigned</td>
-                            <td className="p-3 text-slate-300">{row.email || <span className="text-emerald-400 italic">Auto</span>}</td>
-                            <td className="p-3 font-sans text-slate-300">{row.parentName || '—'}</td>
+                          <tr
+                            key={idx}
+                            className="hover:bg-slate-800/50 transition"
+                          >
+                            <td className="p-3 text-slate-500 font-bold">
+                              {idx + 1}
+                            </td>
+                            <td className="p-3 font-bold text-white font-sans">
+                              {row.firstName} {row.lastName}
+                            </td>
+                            <td className="p-3 text-orange-400">
+                              {row.classId || row.class || "—"} /{" "}
+                              {row.sectionId || row.section || "—"}
+                            </td>
+                            <td className="p-3 text-emerald-400 italic text-[10px]">
+                              Auto-Assigned
+                            </td>
+                            <td className="p-3 text-emerald-400 italic text-[10px]">
+                              Auto-Assigned
+                            </td>
+                            <td className="p-3 text-slate-300">
+                              {row.email || (
+                                <span className="text-emerald-400 italic">
+                                  Auto
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 font-sans text-slate-300">
+                              {row.parentName || "—"}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1276,11 +1909,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               </div>
             )}
 
-
             {/* Modal Footer Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-slate-800">
               <span className="text-[11px] text-slate-500 italic">
-                {importedData.length > 0 ? `* ${importedData.length} records will be imported into the database` : "* Select a CSV file to proceed"}
+                {importedData.length > 0
+                  ? `* ${importedData.length} records will be imported into the database`
+                  : "* Select a CSV file to proceed"}
               </span>
 
               <div className="flex items-center gap-2">
@@ -1303,7 +1937,9 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   disabled={importedData.length === 0}
                   className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5"
                 >
-                  {importing ? "Importing Students..." : `Bulk Import (${importedData.length}) Students`}
+                  {importing
+                    ? "Importing Students..."
+                    : `Bulk Import (${importedData.length}) Students`}
                 </Button>
               </div>
             </div>
@@ -1341,7 +1977,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                   <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
                     <Bookmark size={13} />
                     <span>
-                      Draft saved ({new Date(existingDraft.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                      Draft saved (
+                      {new Date(existingDraft.savedAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      )
                     </span>
                   </span>
                   <span>•</span>
@@ -1355,12 +1996,17 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
                 </div>
               ) : (
                 <span className="text-[11px] text-slate-400 italic">
-                  * You can save as draft anytime and complete registration later
+                  * You can save as draft anytime and complete registration
+                  later
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <Button variant="secondary" onClick={handleCancelCreate} type="button">
+              <Button
+                variant="secondary"
+                onClick={handleCancelCreate}
+                type="button"
+              >
                 Cancel
               </Button>
               <Button
@@ -1372,7 +2018,12 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
               >
                 Save as Draft
               </Button>
-              <Button variant="primary" type="submit" loading={submitting} icon={<CheckCircle2 size={14} />}>
+              <Button
+                variant="primary"
+                type="submit"
+                loading={submitting}
+                icon={<CheckCircle2 size={14} />}
+              >
                 Register Student
               </Button>
             </div>
@@ -1384,10 +2035,10 @@ ${SECTION_OPTIONS.map(s => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).joi
       <PdfViewerModal
         open={Boolean(activePdfDoc)}
         onClose={() => setActivePdfDoc(null)}
-        url={activePdfDoc?.url || ''}
-        title={activePdfDoc?.title || 'Aadhaar Document'}
-        subtitle={activePdfDoc?.subtitle || ''}
-        refId={activePdfDoc?.refId || ''}
+        url={activePdfDoc?.url || ""}
+        title={activePdfDoc?.title || "Aadhaar Document"}
+        subtitle={activePdfDoc?.subtitle || ""}
+        refId={activePdfDoc?.refId || ""}
       />
     </div>
   );

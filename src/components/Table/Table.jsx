@@ -57,6 +57,8 @@ const Table = ({
   totalDataValue = "",
   isFilterMultiple = false,
   additionalButtons = <></>,
+  mobileColumns = undefined,
+  mobileColumnsCount = 3,
 }) => {
   const company = useSelector(
     (state) => state?.authentication?.logInCompanyDetails
@@ -149,15 +151,27 @@ const Table = ({
               className={`bg-[#000F52] border-b-2 border-[#3e8b8250] ${tableHeadClassName}`}
             >
               <tr>
-                {tableLayout?.filter(Boolean)?.map((layout, index) => (
-                  <th
-                    key={index}
-                    scope="col"
-                    className={`px-4 py-3 text-xs font-bold uppercase tracking-widest ${textClass} select-none whitespace-nowrap`}
-                  >
-                    {layout?.headData}
-                  </th>
-                ))}
+                {tableLayout?.filter(Boolean)?.map((layout, index) => {
+                  const isVisibleOnMobile =
+                    layout?.showOnMobile !== undefined
+                      ? Boolean(layout.showOnMobile)
+                      : layout?.hideOnMobile !== undefined
+                      ? !layout.hideOnMobile
+                      : Array.isArray(mobileColumns) && mobileColumns.length > 0
+                      ? mobileColumns.includes(layout?.key) || mobileColumns.includes(layout?.headData) || mobileColumns.includes(index)
+                      : index < mobileColumnsCount;
+                  const mobileClass = isVisibleOnMobile ? "" : "hidden md:table-cell";
+
+                  return (
+                    <th
+                      key={index}
+                      scope="col"
+                      className={`px-4 py-3 text-xs font-bold uppercase tracking-widest ${textClass} select-none whitespace-nowrap ${mobileClass}`}
+                    >
+                      {layout?.headData}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-[#F0F4F8]">
@@ -189,6 +203,16 @@ const Table = ({
                         {tableLayout
                           ?.filter(Boolean)
                           ?.map((layout, layoutIndex) => {
+                            const isVisibleOnMobile =
+                              layout?.showOnMobile !== undefined
+                                ? Boolean(layout.showOnMobile)
+                                : layout?.hideOnMobile !== undefined
+                                ? !layout.hideOnMobile
+                                : Array.isArray(mobileColumns) && mobileColumns.length > 0
+                                ? mobileColumns.includes(layout?.key) || mobileColumns.includes(layout?.headData) || mobileColumns.includes(layoutIndex)
+                                : layoutIndex < mobileColumnsCount;
+                            const mobileClass = isVisibleOnMobile ? "" : "hidden md:table-cell";
+
                             // Get the rendered cell value
                             const cellValue = layout?.bodyData(
                               dataItem,
@@ -208,7 +232,7 @@ const Table = ({
                             return (
                               <td
                                 key={layoutIndex}
-                                className="px-4 py-3.5 text-sm font-medium text-[#374151] whitespace-nowrap max-w-[260px]  text-ellipsis"
+                                className={`px-4 py-3.5 text-sm font-medium text-[#374151] whitespace-nowrap max-w-[260px] text-ellipsis ${mobileClass}`}
                                 title={tooltipTitle}
                               >
                                 {displayValue}

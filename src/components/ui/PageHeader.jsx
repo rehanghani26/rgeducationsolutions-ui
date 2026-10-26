@@ -3,8 +3,8 @@ import { ChevronRight } from 'lucide-react';
 import { text } from '@/theme/color';
 
 const PageHeader = ({ title, subtitle, breadcrumbs = [], actions }) => (
-  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-    <div>
+  <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div className="pr-12 md:pr-0">
       {breadcrumbs.length > 0 && (
         <nav className={`flex items-center gap-1 text-[11px] ${text.muted} mb-2`}>
           {breadcrumbs.map((crumb, i) => (

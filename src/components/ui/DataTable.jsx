@@ -77,6 +77,10 @@ const DataTable = ({
   pageSize = 10,
   pageSizeOptions = [5, 10, 25, 50],
   onPageChange = undefined,
+
+  // Responsive / Mobile Columns (defaults to first 3 columns on mobile)
+  mobileColumns = undefined,
+  mobileColumnsCount = 3,
 }) => {
   // ─── Local State for Uncontrolled Search, Sort & Pagination ─────────────────
   const [internalSearch, setInternalSearch] = useState('');
@@ -105,6 +109,18 @@ const DataTable = ({
       setSortKey(key);
       setSortDir('asc');
     }
+  };
+
+  // ─── Mobile Column Visibility Helper ──────────────────────────────────────
+  const isColVisibleOnMobile = (col, idx) => {
+    if (col.showOnMobile !== undefined) return Boolean(col.showOnMobile);
+    if (col.hideOnMobile !== undefined) return !col.hideOnMobile;
+
+    if (Array.isArray(mobileColumns) && mobileColumns.length > 0) {
+      return mobileColumns.includes(col.key);
+    }
+
+    return idx < mobileColumnsCount;
   };
 
   // ─── Filter & Sort Data (Client-Side) ─────────────────────────────────────
@@ -304,13 +320,15 @@ const DataTable = ({
                     : col.align === 'center'
                     ? 'text-center'
                     : 'text-left';
+                const isMobileVis = isColVisibleOnMobile(col, idx);
+                const mobileCellClass = isMobileVis ? '' : 'hidden md:table-cell';
 
                 return (
                   <th
                     key={col.key || idx}
                     style={{ width: col.width }}
                     onClick={() => canSort && handleSort(col.key)}
-                    className={`py-3.5 px-4 ${alignClass} ${col.className || ''} ${
+                    className={`py-2.5 px-3 sm:py-3.5 sm:px-4 ${alignClass} ${col.className || ''} ${mobileCellClass} ${
                       canSort ? 'cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400' : ''
                     } transition-colors`}
                   >
@@ -354,14 +372,18 @@ const DataTable = ({
                       <div className="w-4 h-4 mx-auto rounded bg-slate-200 dark:bg-slate-800" />
                     </td>
                   )}
-                  {columns.map((col, cIdx) => (
-                    <td key={col.key || cIdx} className="py-4 px-4">
-                      <div
-                        className="h-3 rounded bg-slate-200 dark:bg-slate-800"
-                        style={{ width: `${Math.max(35, (cIdx * 25 + 40) % 90)}%` }}
-                      />
-                    </td>
-                  ))}
+                  {columns.map((col, cIdx) => {
+                    const isMobileVis = isColVisibleOnMobile(col, cIdx);
+                    const mobileCellClass = isMobileVis ? '' : 'hidden md:table-cell';
+                    return (
+                      <td key={col.key || cIdx} className={`py-3 px-3 sm:py-4 sm:px-4 ${mobileCellClass}`}>
+                        <div
+                          className="h-3 rounded bg-slate-200 dark:bg-slate-800"
+                          style={{ width: `${Math.max(35, (cIdx * 25 + 40) % 90)}%` }}
+                        />
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -435,13 +457,15 @@ const DataTable = ({
                           : col.align === 'center'
                           ? 'text-center'
                           : 'text-left';
+                      const isMobileVis = isColVisibleOnMobile(col, cIdx);
+                      const mobileCellClass = isMobileVis ? '' : 'hidden md:table-cell';
 
                       return (
                         <td
                           key={col.key || cIdx}
-                          className={`py-3.5 px-4 ${compact ? 'py-2.5' : ''} ${alignClass} ${
+                          className={`py-2.5 px-3 sm:py-3.5 sm:px-4 ${compact ? 'py-2' : ''} ${alignClass} ${
                             col.className || ''
-                          } text-slate-700 dark:text-slate-300`}
+                          } ${mobileCellClass} text-slate-700 dark:text-slate-300`}
                         >
                           {col.render ? col.render(row, rIdx) : (row[col.key] ?? '—')}
                         </td>
@@ -580,6 +604,8 @@ DataTable.propTypes = {
   pageSize: PropTypes.number,
   pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
   onPageChange: PropTypes.func,
+  mobileColumns: PropTypes.arrayOf(PropTypes.string),
+  mobileColumnsCount: PropTypes.number,
 };
 
 export default DataTable;
