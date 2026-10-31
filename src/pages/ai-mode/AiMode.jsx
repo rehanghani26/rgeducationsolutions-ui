@@ -205,6 +205,7 @@ export default function AiMode() {
                 speakingMessageId={speakingMessageId}
                 onSpeakMessage={(msgContent, id) => speak(msgContent, id)}
                 onStopSpeaking={stopSpeaking}
+                onAskAiPrompt={handleSendMessage}
               />
             )}
           </div>
