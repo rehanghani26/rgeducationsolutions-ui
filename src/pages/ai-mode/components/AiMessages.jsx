@@ -9,6 +9,11 @@ import {
 } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer.jsx";
 import { bg, border, text } from "@/theme/color";
+import AiStudentListCard from "./AiStudentListCard.jsx";
+import AiStudentIdCard from "./AiStudentIdCard.jsx";
+import AiStudentLeaveCard from "./AiStudentLeaveCard.jsx";
+import AiStudentProfileCard from "./AiStudentProfileCard.jsx";
+import AiStudentEditModal from "./AiStudentEditModal.jsx";
 
 function TypingDots() {
   return (
@@ -34,8 +39,13 @@ export default function AiMessages({
   speakingMessageId = null,
   onSpeakMessage,
   onStopSpeaking,
+  onAskAiPrompt,
 }) {
   const [copiedIndex, setCopiedIndex] = useState(null);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [inlineCardTarget, setInlineCardTarget] = useState(null);
+  const [inlineLeaveTarget, setInlineLeaveTarget] = useState(null);
 
   const handleCopy = (textContent, idx) => {
     navigator.clipboard.writeText(textContent);
@@ -43,12 +53,19 @@ export default function AiMessages({
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const handleOpenEdit = (student) => {
+    setEditingStudent(student);
+    setIsEditModalOpen(true);
+  };
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 space-y-6 sm:px-6">
+    <div className="mx-auto max-w-4xl px-3 py-6 space-y-6 sm:px-6">
       {messages.map((msg, idx) => {
         const isUser = msg.role === "user";
         const isCurrentSpeaking =
           isSpeaking && (speakingMessageId === msg.id || speakingMessageId === `msg-${idx}`);
+
+        const actions = msg.actionsExecuted || [];
 
         return (
           <div
@@ -72,15 +89,15 @@ export default function AiMessages({
 
             {/* Bubble */}
             <div
-              className={`group relative max-w-[85%] sm:max-w-[78%] ${
-                isUser ? "items-end" : "items-start"
+              className={`group relative w-full max-w-[94%] sm:max-w-[88%] ${
+                isUser ? "items-end ml-auto" : "items-start"
               } flex flex-col gap-1`}
             >
               {/* Message Content */}
               <div
-                className={`rounded-2xl px-4 py-3 shadow-sm ${
+                className={`w-full rounded-2xl px-4 py-3 shadow-sm ${
                   isUser
-                    ? `${bg.brandGradient} text-white rounded-tr-sm shadow-orange-500/10`
+                    ? `${bg.brandGradient} text-white rounded-tr-sm shadow-orange-500/10 max-w-[85%] ml-auto`
                     : `border ${border.default} ${bg.card} rounded-tl-sm ${text.primary} ${
                         msg.isError ? "border-rose-500/40 bg-rose-50/80 dark:bg-rose-950/20" : ""
                       } ${isCurrentSpeaking ? "ring-2 ring-orange-500/30 border-orange-500/40" : ""}`
@@ -91,7 +108,146 @@ export default function AiMessages({
                     {msg.content}
                   </p>
                 ) : (
-                  <MarkdownRenderer text={msg.content} />
+                  <div className="space-y-4">
+                    <MarkdownRenderer text={msg.content} />
+
+                    {/* ── Dynamic Tool-Driven Visual Components ── */}
+                    {actions.map((act, actIdx) => {
+                      const toolName = act.tool;
+                      const data = act.data || act.result || {};
+
+                      // 1. Student List Component
+                      if (
+                        toolName === "getStudents" &&
+                        data.students &&
+                        Array.isArray(data.students) &&
+                        data.students.length > 0
+                      ) {
+                        return (
+                          <AiStudentListCard
+                            key={`tool-students-${actIdx}`}
+                            students={data.students}
+                            total={data.total || data.count || data.students.length}
+                            initialFilters={act.args || {}}
+                            onSelectStudentForIdCard={(stu) => {
+                              if (onAskAiPrompt) {
+                                onAskAiPrompt(`Show student ID card for ${stu.name} (${stu.admissionNumber})`);
+                              } else {
+                                setInlineCardTarget(stu);
+                              }
+                            }}
+                            onSelectStudentForLeaves={(stu) => {
+                              if (onAskAiPrompt) {
+                                onAskAiPrompt(`Show leaves and leave status for student ${stu.name} (${stu.admissionNumber})`);
+                              } else {
+                                setInlineLeaveTarget(stu);
+                              }
+                            }}
+                            onSelectStudentForEdit={handleOpenEdit}
+                            onSelectStudentForReport={(stu) => {
+                              if (onAskAiPrompt) {
+                                onAskAiPrompt(`Get comprehensive academic dossier for student ${stu.name} (${stu.admissionNumber})`);
+                              }
+                            }}
+                            onAskAiPrompt={onAskAiPrompt}
+                          />
+                        );
+                      }
+
+                      // 2. Student ID Card Component
+                      if (
+                        (toolName === "getStudentIdCard" || toolName === "updateStudentIdCardData") &&
+                        data.cardData
+                      ) {
+                        return (
+                          <AiStudentIdCard
+                            key={`tool-idcard-${actIdx}`}
+                            student={data.student || {}}
+                            cardData={data.cardData || {}}
+                            schoolInfo={data.schoolInfo || {}}
+                            availableTemplates={data.availableTemplates}
+                            selectedTemplateId={data.selectedTemplateId || "student-id-classic"}
+                            onAskAiPrompt={onAskAiPrompt}
+                          />
+                        );
+                      }
+
+                      // 3. Student Leaves Component
+                      if (
+                        (toolName === "getStudentLeaves" ||
+                          toolName === "applyStudentLeave" ||
+                          toolName === "reviewStudentLeave") &&
+                        data.leaves &&
+                        Array.isArray(data.leaves)
+                      ) {
+                        return (
+                          <AiStudentLeaveCard
+                            key={`tool-leaves-${actIdx}`}
+                            leaves={data.leaves}
+                            summary={data.summary || {}}
+                            student={data.student}
+                            onAskAiPrompt={onAskAiPrompt}
+                          />
+                        );
+                      }
+
+                      // 4. Comprehensive Student Profile Component
+                      if (
+                        toolName === "getStudentComprehensiveReport" &&
+                        data.student
+                      ) {
+                        return (
+                          <AiStudentProfileCard
+                            key={`tool-report-${actIdx}`}
+                            student={data.student}
+                            attendance={data.attendance}
+                            leavesSummary={data.leavesSummary}
+                            fee={data.fee}
+                            onSelectStudentForIdCard={(stu) => {
+                              if (onAskAiPrompt) {
+                                onAskAiPrompt(`Show student ID card for ${stu.name} (${stu.admissionNumber})`);
+                              } else {
+                                setInlineCardTarget(stu);
+                              }
+                            }}
+                            onSelectStudentForLeaves={(stu) => {
+                              if (onAskAiPrompt) {
+                                onAskAiPrompt(`Show leaves for student ${stu.name} (${stu.admissionNumber})`);
+                              } else {
+                                setInlineLeaveTarget(stu);
+                              }
+                            }}
+                            onSelectStudentForEdit={handleOpenEdit}
+                            onAskAiPrompt={onAskAiPrompt}
+                          />
+                        );
+                      }
+
+                      return null;
+                    })}
+
+                    {/* Inline requested ID Card */}
+                    {inlineCardTarget && (
+                      <AiStudentIdCard
+                        student={inlineCardTarget}
+                        cardData={{
+                          ...inlineCardTarget,
+                          admissionNumber: inlineCardTarget.admissionNumber,
+                        }}
+                        selectedTemplateId="student-id-classic"
+                        onAskAiPrompt={onAskAiPrompt}
+                      />
+                    )}
+
+                    {/* Inline requested Leaves */}
+                    {inlineLeaveTarget && (
+                      <AiStudentLeaveCard
+                        student={inlineLeaveTarget}
+                        leaves={[]}
+                        onAskAiPrompt={onAskAiPrompt}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -167,12 +323,27 @@ export default function AiMessages({
             <div className="flex items-center gap-2">
               <TypingDots />
               <span className={`text-[11px] ${text.secondary}`}>
-                RGES ERP AI is thinking...
+                RGES ERP AI is processing student records...
               </span>
             </div>
           </div>
         </div>
       )}
+
+      {/* Global Edit Modal in AI Mode */}
+      <AiStudentEditModal
+        isOpen={isEditModalOpen}
+        student={editingStudent}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingStudent(null);
+        }}
+        onStudentUpdated={(updated) => {
+          if (onAskAiPrompt) {
+            onAskAiPrompt(`Updated record for student ${updated.name}. Please confirm and display updated details.`);
+          }
+        }}
+      />
 
       <div ref={messagesEndRef} />
     </div>

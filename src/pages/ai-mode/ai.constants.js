@@ -11,11 +11,40 @@ import {
   Sliders,
   FileSpreadsheet,
   Calendar,
+  CreditCard,
+  Palmtree,
 } from "lucide-react";
 
 export const STORAGE_KEY_SESSIONS = "GEMINI_ERP_CHAT_SESSIONS_V2";
 
 export const SUGGESTED_PROMPTS = [
+  {
+    icon: Users,
+    title: "Student Directory & Filters",
+    prompt:
+      "Show all students with interactive filters for class, section, status, and gender.",
+    gradient: "from-orange-500 to-amber-600",
+    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-orange-500/5 dark:hover:bg-orange-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-orange-500/40",
+    textColor: "text-orange-700 dark:text-orange-300",
+  },
+  {
+    icon: CreditCard,
+    title: "Student ID Card Studio",
+    prompt:
+      "Generate student ID card and allow me to preview styles, switch templates, and update student card information.",
+    gradient: "from-amber-500 to-yellow-600",
+    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-amber-500/5 dark:hover:bg-amber-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-amber-500/40",
+    textColor: "text-amber-700 dark:text-amber-300",
+  },
+  {
+    icon: Palmtree,
+    title: "Student Leaves Console",
+    prompt:
+      "Show all student leave requests, pending applications, and let me review or apply for a student leave.",
+    gradient: "from-emerald-500 to-teal-600",
+    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-emerald-500/5 dark:hover:bg-emerald-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-emerald-500/40",
+    textColor: "text-emerald-700 dark:text-emerald-300",
+  },
   {
     icon: Calendar,
     title: "Academic Session & Setup",
