@@ -29,3 +29,4 @@ export { default as ErrorBoundary }     from './ui/ErrorBoundary.jsx';
 export { default as ServerMaintenance } from './ui/ServerMaintenance.jsx';
 export { default as Breadcrumb }        from './ui/Breadcrumb.jsx';
 export { default as AccessDeniedPage }    from './ui/AccessDeniedPage.jsx';
+export { CurrencyInput, RupeesInput }   from './ui/CurrencyInput.jsx';

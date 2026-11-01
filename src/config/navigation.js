@@ -43,7 +43,7 @@ import { ROLES, ADMIN_ROLES, FINANCE_ROLES, INVENTORY_ROLES } from '../constants
 const ALL_STAFF = [
   ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.PRINCIPAL,
   ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD,
-  ROLES.COORDINATOR, ROLES.ACCOUNTANT, ROLES.LIBRARIAN,
+  ROLES.COORDINATOR, ROLES.ACCOUNTANT, ROLES.LIBRARIAN, ROLES.PEON,
 ];
 
 // ─── Navigation Sections ──────────────────────────────────────────────────────
@@ -60,6 +60,13 @@ export const NAV_SECTIONS = [
         icon:       LayoutDashboard,
         roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
         permission: 'dashboard',
+      },
+      {
+        name:       'My Profile',
+        path:       ROUTES.PROFILE,
+        icon:       User,
+        roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
+        permission: null,
       },
       {
         name:       'Students',
@@ -94,7 +101,7 @@ export const NAV_SECTIONS = [
         name:       'Attendance',
         path:       ROUTES.ATTENDANCE,
         icon:       CalendarCheck,
-        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT],
+        roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
         permission: 'attendance',
       },
       // Timetable — moved to Settings > Class Timetable Builder
@@ -145,15 +152,15 @@ export const NAV_SECTIONS = [
         name:       'Leave',
         path:       ROUTES.LEAVE,
         icon:       Palmtree,
-        roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.STUDENT],
+        roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
         permission: 'leave',
       },
       {
         name:       'Payroll',
         path:       ROUTES.PAYROLL,
         icon:       Briefcase,
-        roles:      FINANCE_ROLES,
-        permission: 'fee',
+        roles:      ALL_STAFF,
+        permission: 'payroll',
       },
     ],
   },
@@ -252,7 +259,7 @@ export const NAV_SECTIONS = [
         name:       'Settings',
         path:       ROUTES.SETTINGS,
         icon:       SettingsIcon,
-        roles:      [...ADMIN_ROLES, 'admin', 'superadmin', 'super_admin', 'school_admin', ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT],
+        roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
         permission: null,
       },
     ],

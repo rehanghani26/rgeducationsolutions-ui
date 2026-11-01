@@ -9,6 +9,7 @@ import SearchFilters from "../../components/ui/SearchFilters.jsx";
 import StatusBadge from "../../components/ui/StatusBadge.jsx";
 import StatsCard from "../../components/ui/StatsCard.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import { CurrencyInput } from "../../components/ui/CurrencyInput.jsx";
 import { getFees, collectFee, createExpense } from "../../services";
 import { mockFees } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
@@ -161,7 +162,7 @@ const FeeList = () => {
             <CanButton id="ADD_EXPENSE">
               <button
                 onClick={() => setShowExpense(true)}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg border border-slate-700 transition-all"
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg border border-slate-700 transition-all cursor-pointer"
               >
                 <Banknote size={14} /> Add Expense
               </button>
@@ -169,7 +170,7 @@ const FeeList = () => {
             <CanButton id="COLLECT_FEE">
               <button
                 onClick={() => setShowCollect(true)}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all"
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all cursor-pointer"
               >
                 <Plus size={14} /> Collect Fee
               </button>
@@ -249,19 +250,16 @@ const FeeList = () => {
               onChange={(e) => setCollectForm({ ...collectForm, feeId: e.target.value })}
             />
           </div>
-          <div>
-            <label className="block font-bold text-slate-500 uppercase mb-1">
-              Payment Amount (₹)
-            </label>
-            <input
-              required
-              type="number"
-              placeholder="e.g. 15500"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white"
-              value={collectForm.amount}
-              onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })}
-            />
-          </div>
+
+          <CurrencyInput
+            label="Payment Amount"
+            required
+            placeholder="e.g. 15,500"
+            value={collectForm.amount}
+            onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })}
+            quickPresets={[1000, 5000, 10000, 25000]}
+          />
+
           <div>
             <label className="block font-bold text-slate-500 uppercase mb-1">
               Payment Method
@@ -281,14 +279,14 @@ const FeeList = () => {
             <button
               type="button"
               onClick={() => setShowCollect(false)}
-              className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold"
+              className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold"
+              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold cursor-pointer"
             >
               Record Payment
             </button>
@@ -316,31 +314,28 @@ const FeeList = () => {
               onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })}
             />
           </div>
-          <div>
-            <label className="block font-bold text-slate-500 uppercase mb-1">
-              Amount (₹)
-            </label>
-            <input
-              required
-              type="number"
-              placeholder="e.g. 45000"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white"
-              value={expenseForm.amount}
-              onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
-            />
-          </div>
+
+          <CurrencyInput
+            label="Expense Amount"
+            required
+            placeholder="e.g. 45,000"
+            value={expenseForm.amount}
+            onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+            quickPresets={[5000, 10000, 25000, 50000]}
+          />
+
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => setShowExpense(false)}
-              className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold"
+              className="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 rounded-lg bg-slate-800 text-white font-bold"
+              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer"
             >
               Save Expense
             </button>

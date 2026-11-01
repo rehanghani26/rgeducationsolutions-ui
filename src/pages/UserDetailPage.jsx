@@ -43,6 +43,7 @@ import { userService } from '../services/userService.js';
 import Loader from '../components/ui/Loader.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Modal from '../components/ui/Modal.jsx';
+import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
 import { ROUTES } from '../routes/routes.js';
 
 const ROLE_CONFIG = {
@@ -1287,7 +1288,7 @@ const UserDetailPage = () => {
                 type="number"
                 value={editForm.salary}
                 onChange={(e) => setEditForm({ ...editForm, salary: e.target.value })}
-                placeholder="e.g. 75000"
+                placeholder="e.g. 75,000"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 focus:border-indigo-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               />
             </div>

@@ -7,10 +7,10 @@ import StudentsTab from "../tabs/StudentsTab.jsx";
 import StaffTab from "../tabs/StaffTab.jsx";
 import FinanceTab from "../tabs/FinanceTab.jsx";
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ activeTab: propActiveTab }) => {
   const outletContext = useOutletContext();
   const [localTab, setLocalTab] = useState("home");
-  const activeTab = outletContext?.activeDashboardTab || localTab;
+  const activeTab = propActiveTab || outletContext?.activeDashboardTab || localTab;
 
   return (
     <div className="space-y-6 font-sans text-slate-900 dark:text-slate-100">

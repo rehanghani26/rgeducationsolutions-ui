@@ -23,11 +23,7 @@ import {
   ChevronDown,
   Menu,
   X,
-  LayoutDashboard,
-  Megaphone,
   GraduationCap,
-  Users,
-  Wallet,
   Sparkles,
   Bell,
   Maximize2,
@@ -36,8 +32,6 @@ import {
   ChevronRight as ChevronRightIcon,
   Settings,
   User,
-  MoreHorizontal,
-  Check,
 } from "lucide-react";
 import { ROUTES } from "../routes/routes.js";
 import { ROLES, ADMIN_ROLES } from "../constants/roles.js";
@@ -49,24 +43,6 @@ import MandatorySchoolProfileModal, {
 } from "../components/modals/MandatorySchoolProfileModal.jsx";
 import SetupWizardModal from "../pages/setup/SetupWizardModal.jsx";
 import useSetupWizard from "../hooks/useSetupWizard.js";
-
-const HEADER_TABS = [
-  { id: "home", label: "Home", shortLabel: "Home", icon: LayoutDashboard },
-  {
-    id: "notices",
-    label: "Notice Board",
-    shortLabel: "Notices",
-    icon: Megaphone,
-  },
-  {
-    id: "students",
-    label: "Students",
-    shortLabel: "Students",
-    icon: GraduationCap,
-  },
-  { id: "staff", label: "Teachers & Staff", shortLabel: "Staff", icon: Users },
-  { id: "finance", label: "Finance", shortLabel: "Finance", icon: Wallet },
-];
 
 const resolveUserImageUrl = (userObj) => {
   const raw =
@@ -98,11 +74,9 @@ const DashboardLayout = () => {
   const [wizardModalOpen, setWizardModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [moreTabsOpen, setMoreTabsOpen] = useState(false);
   const [avatarImgError, setAvatarImgError] = useState(false);
 
   const dropdownRef = useRef(null);
-  const moreTabsRef = useRef(null);
 
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -121,7 +95,6 @@ const DashboardLayout = () => {
   useEffect(() => {
     setMobileDrawerOpen(false);
     setUserDropdownOpen(false);
-    setMoreTabsOpen(false);
   }, [location.pathname]);
 
   // Close dropdowns on outside click
@@ -129,9 +102,6 @@ const DashboardLayout = () => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setUserDropdownOpen(false);
-      }
-      if (moreTabsRef.current && !moreTabsRef.current.contains(e.target)) {
-        setMoreTabsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -197,13 +167,6 @@ const DashboardLayout = () => {
     }));
   };
 
-  const handleHeaderTabClick = (tabId) => {
-    setActiveDashboardTab(tabId);
-    if (location.pathname !== ROUTES.DASHBOARD) {
-      navigate(ROUTES.DASHBOARD);
-    }
-  };
-
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -236,12 +199,6 @@ const DashboardLayout = () => {
   const formattedRole = (user?.role || "Super Admin")
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
-
-  const canSeeHeaderTabs =
-    user?.role &&
-    user.role !== ROLES.STUDENT &&
-    user.role !== ROLES.PARENT &&
-    (ADMIN_ROLES.includes(user.role) || user.role === "superadmin");
 
   return (
     <div
@@ -632,32 +589,17 @@ const DashboardLayout = () => {
               </div>
             </div>
 
-            {/* CENTER: Header tabs — desktop only, hidden on mobile */}
-            {canSeeHeaderTabs && (
-              <div className="hidden md:flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none flex-1 px-2">
-                {HEADER_TABS.map((tab) => {
-                  const isActive =
-                    location.pathname === ROUTES.DASHBOARD &&
-                    activeDashboardTab === tab.id;
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => handleHeaderTabClick(tab.id)}
-                      className={`flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-150 ${
-                        isActive
-                          ? `${bg.brandGradient} text-white shadow-xs`
-                          : `border ${border.default} ${bg.input} ${text.secondary} hover:border-orange-300 hover:${bg.card} hover:${text.primary}`
-                      }`}
-                    >
-                      <Icon size={14} />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            {/* Desktop Left: Campus status & identity */}
+            <div className="hidden md:flex items-center gap-2.5 min-w-0">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-extrabold tracking-tight text-stone-800 dark:text-stone-200 truncate">
+                {schoolName || "Becon International School"}
+              </span>
+              <span className="text-stone-300 dark:text-stone-700">•</span>
+              <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                Active Campus
+              </span>
+            </div>
 
             {/* RIGHT: Actions */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -836,161 +778,6 @@ const DashboardLayout = () => {
               </div>
             </div>
           </div>
-
-          {/* ── Mobile tab row — visible only on mobile (CSS, not JS conditional) */}
-          {canSeeHeaderTabs &&
-            (() => {
-              const PRIMARY_MOBILE_COUNT = 3;
-              const primaryTabs = HEADER_TABS.slice(0, PRIMARY_MOBILE_COUNT);
-              const overflowTabs = HEADER_TABS.slice(PRIMARY_MOBILE_COUNT);
-              const isOverflowActive =
-                location.pathname === ROUTES.DASHBOARD &&
-                overflowTabs.some((t) => t.id === activeDashboardTab);
-              const activeOverflowTab = overflowTabs.find(
-                (t) => t.id === activeDashboardTab
-              );
-
-              return (
-                <div
-                  className={`md:hidden relative border-t ${border.default} bg-stone-50/70 dark:bg-stone-900/60 backdrop-blur-md px-2.5 sm:px-3 py-1.5`}
-                >
-                  <div className="flex items-center justify-between gap-1.5">
-                    {/* Primary 3 tabs */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
-                      {primaryTabs.map((tab) => {
-                        const isActive =
-                          location.pathname === ROUTES.DASHBOARD &&
-                          activeDashboardTab === tab.id;
-                        const Icon = tab.icon;
-                        return (
-                          <button
-                            key={tab.id}
-                            type="button"
-                            onClick={() => handleHeaderTabClick(tab.id)}
-                            className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-1.5 rounded-xl py-1.5 px-2 text-[11px] font-bold transition-all duration-150 ${
-                              isActive
-                                ? `${bg.brandGradient} text-white shadow-xs`
-                                : `border ${border.default} ${bg.input} ${text.secondary} hover:border-orange-300 hover:${text.primary}`
-                            }`}
-                          >
-                            <Icon size={13} className="shrink-0" />
-                            <span className="truncate">
-                              {tab.shortLabel || tab.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Three-dot menu button for overflow tabs */}
-                    {overflowTabs.length > 0 && (
-                      <div className="relative shrink-0" ref={moreTabsRef}>
-                        <button
-                          type="button"
-                          onClick={() => setMoreTabsOpen((prev) => !prev)}
-                          className={`flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[11px] font-bold transition-all duration-150 ${
-                            isOverflowActive
-                              ? `${bg.brandGradient} text-white shadow-xs ring-1 ring-orange-500/30`
-                              : moreTabsOpen
-                                ? `border border-orange-400 bg-orange-500/10 text-orange-600 dark:text-orange-400`
-                                : `border ${border.default} ${bg.input} ${text.secondary} hover:border-orange-300 hover:${text.primary}`
-                          }`}
-                          title={
-                            isOverflowActive
-                              ? `Active: ${activeOverflowTab?.label}`
-                              : "More tabs"
-                          }
-                          aria-expanded={moreTabsOpen}
-                          aria-label="More navigation tabs"
-                        >
-                          {isOverflowActive && activeOverflowTab ? (
-                            <>
-                              <activeOverflowTab.icon
-                                size={13}
-                                className="shrink-0"
-                              />
-                              <span className="max-w-[65px] truncate">
-                                {activeOverflowTab.shortLabel ||
-                                  activeOverflowTab.label}
-                              </span>
-                              <MoreHorizontal
-                                size={13}
-                                className="shrink-0 opacity-80"
-                              />
-                            </>
-                          ) : (
-                            <>
-                              <MoreHorizontal size={15} className="shrink-0" />
-                              <span className="text-[10px] uppercase tracking-wider font-extrabold hidden min-[360px]:inline">
-                                More
-                              </span>
-                            </>
-                          )}
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {moreTabsOpen && (
-                          <div
-                            className={`absolute right-0 top-full mt-2 w-52 rounded-2xl ${bg.card} shadow-2xl border ${border.default} z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 backdrop-blur-md`}
-                          >
-                            <div className="flex items-center justify-between px-2.5 py-1 border-b border-stone-200/50 dark:border-stone-800 mb-1">
-                              <span className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                                More Modules
-                              </span>
-                              <span className="text-[9px] font-bold text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
-                                {overflowTabs.length} tabs
-                              </span>
-                            </div>
-                            {overflowTabs.map((tab) => {
-                              const isActive =
-                                location.pathname === ROUTES.DASHBOARD &&
-                                activeDashboardTab === tab.id;
-                              const Icon = tab.icon;
-                              return (
-                                <button
-                                  key={tab.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setMoreTabsOpen(false);
-                                    handleHeaderTabClick(tab.id);
-                                  }}
-                                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
-                                    isActive
-                                      ? `${bg.brandGradient} text-white shadow-xs font-bold`
-                                      : `${text.secondary} ${bg.hover} hover:${text.primary}`
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <div
-                                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${
-                                        isActive
-                                          ? "bg-white/20 text-white"
-                                          : "bg-orange-500/10 text-orange-600 dark:text-orange-400"
-                                      }`}
-                                    >
-                                      <Icon size={13} />
-                                    </div>
-                                    <span className="truncate">
-                                      {tab.label}
-                                    </span>
-                                  </div>
-                                  {isActive && (
-                                    <Check
-                                      size={14}
-                                      className="text-white shrink-0"
-                                    />
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
         </header>
 
         {/* Main Content Viewport */}

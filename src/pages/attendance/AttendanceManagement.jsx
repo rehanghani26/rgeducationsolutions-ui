@@ -59,6 +59,13 @@ const AttendanceManagement = () => {
     ROLES.HOD,
     ROLES.COORDINATOR,
     "tg",
+    ROLES.ACCOUNTANT,
+    ROLES.LIBRARIAN,
+    ROLES.PEON,
+    "counselor",
+    "councellor",
+    "staff",
+    "support",
   ].includes(userRole);
   const isAdminRole = [
     ROLES.SUPER_ADMIN,
@@ -67,7 +74,9 @@ const AttendanceManagement = () => {
   ].includes(userRole);
 
   // Active Main Navigation Tab: "student" | "teacher"
-  const [activeMainTab, setActiveMainTab] = useState("student");
+  const [activeMainTab, setActiveMainTab] = useState(
+    [ROLES.PEON, ROLES.LIBRARIAN, ROLES.ACCOUNTANT, "staff", "support"].includes(userRole) ? "teacher" : "student"
+  );
   const [viewMode, setViewMode] = useState("list"); // "list" | "take_attendance" | "view_record"
 
   const [page, setPage] = useState(1);
@@ -927,11 +936,11 @@ const AttendanceManagement = () => {
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm">
             <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-              <Users className="text-purple-600 dark:text-purple-400" size={24} /> Faculty Personal
+              <Users className="text-purple-600 dark:text-purple-400" size={24} /> Faculty & Staff Personal
               Attendance & Check-In Log
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-              Logged in as Faculty Member{" "}
+              Logged in as Faculty / Staff Member{" "}
               <span className="text-purple-600 dark:text-purple-400 font-bold">{user?.name}</span>
             </p>
 

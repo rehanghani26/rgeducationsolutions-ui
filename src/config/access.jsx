@@ -18,7 +18,7 @@ export const ROLE_PERMISSIONS = {
   // School Admin / Admin has full administrative access
   [ROLES.SCHOOL_ADMIN]: {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'payroll', 'fees',
       'inventory', 'library', 'transport', 'hostel', 'certificates',
       'notifications', 'reports', 'settings', 'online-classes', 'homework',
@@ -29,7 +29,7 @@ export const ROLE_PERMISSIONS = {
 
   'admin': {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'payroll', 'fees',
       'inventory', 'library', 'transport', 'hostel', 'certificates',
       'notifications', 'reports', 'settings', 'online-classes', 'homework',
@@ -41,7 +41,7 @@ export const ROLE_PERMISSIONS = {
   // Director has executive leadership and comprehensive management access
   [ROLES.DIRECTOR]: {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
       'timetable', 'exams', 'results', 'leave', 'payroll', 'fees',
       'inventory', 'library', 'transport', 'hostel', 'certificates',
       'notifications', 'reports', 'settings', 'online-classes', 'homework'
@@ -52,84 +52,90 @@ export const ROLE_PERMISSIONS = {
   // Principal has high-level overview and administrative management
   [ROLES.PRINCIPAL]: {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
-      'timetable', 'exams', 'results', 'leave', 'fees',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
+      'timetable', 'exams', 'results', 'leave', 'payroll', 'fees',
       'inventory', 'library', 'transport', 'hostel', 'certificates',
       'notifications', 'reports', 'settings', 'online-classes', 'homework'
     ],
     actions: ['create', 'read', 'update', 'manage'],
   },
 
-  // Support Staff / Peon: Attendance, Leave, Notices
+  // Support Staff / Peon: Attendance, Leave, Payroll, Profile, Notices, Settings
   [ROLES.PEON]: {
-    modules: ['dashboard', 'attendance', 'leave', 'notifications'],
+    modules: ['dashboard', 'profile', 'attendance', 'leave', 'payroll', 'notifications', 'settings'],
     actions: ['read', 'create'],
+  },
+
+  // Librarian: Library, Attendance, Leave, Payroll, Profile, Notices, Settings
+  [ROLES.LIBRARIAN]: {
+    modules: ['dashboard', 'profile', 'attendance', 'leave', 'payroll', 'library', 'notifications', 'settings'],
+    actions: ['create', 'read', 'update'],
   },
 
   // Limited Role: Read-only access to basic modules
   'limited': {
-    modules: ['dashboard', 'students', 'academics', 'attendance', 'notifications'],
+    modules: ['dashboard', 'profile', 'students', 'academics', 'attendance', 'leave', 'notifications'],
     actions: ['read'],
     readOnly: true,
   },
 
-  // Accountant: Finance, Fees, Payroll, Expenses, Inventory
+  // Accountant: Finance, Fees, Payroll, Attendance, Leave, Profile, Expenses, Inventory
   [ROLES.ACCOUNTANT]: {
     modules: [
-      'dashboard', 'fees', 'payroll', 'inventory', 'expenses',
-      'transport', 'hostel', 'reports', 'students', 'certificates'
+      'dashboard', 'profile', 'attendance', 'leave', 'fees', 'payroll', 'inventory', 'expenses',
+      'transport', 'hostel', 'reports', 'students', 'certificates', 'settings'
     ],
     actions: ['create', 'read', 'update', 'manage'],
   },
 
-  // TG (Teacher Guardian): Student care, attendance, academics, guidance
+  // TG (Teacher Guardian): Student care, attendance, academics, guidance, profile
   'tg': {
     modules: [
-      'dashboard', 'students', 'attendance', 'academics',
-      'timetable', 'results', 'leave', 'notifications', 'certificates'
+      'dashboard', 'profile', 'students', 'attendance', 'academics',
+      'timetable', 'results', 'leave', 'payroll', 'notifications', 'certificates', 'settings'
     ],
     actions: ['create', 'read', 'update'],
   },
 
-  // Counselor / Councellor: Student well-being, attendance, reports
+  // Counselor / Councellor: Student well-being, attendance, reports, profile
   'councellor': {
-    modules: ['dashboard', 'students', 'attendance', 'leave', 'reports', 'notifications'],
+    modules: ['dashboard', 'profile', 'students', 'attendance', 'leave', 'payroll', 'reports', 'notifications', 'settings'],
     actions: ['read', 'update'],
   },
   'counselor': {
-    modules: ['dashboard', 'students', 'attendance', 'leave', 'reports', 'notifications'],
+    modules: ['dashboard', 'profile', 'students', 'attendance', 'leave', 'payroll', 'reports', 'notifications', 'settings'],
     actions: ['read', 'update'],
   },
 
   // Teacher / Head Teacher / HOD / Coordinator
   [ROLES.TEACHER]: {
     modules: [
-      'dashboard', 'students', 'academics', 'attendance',
-      'timetable', 'exams', 'results', 'leave', 'library', 'notifications',
+      'dashboard', 'profile', 'students', 'academics', 'attendance',
+      'timetable', 'exams', 'results', 'leave', 'payroll', 'library', 'notifications',
       'settings', 'online-classes', 'homework', 'certificates'
     ],
     actions: ['create', 'read', 'update'],
   },
   [ROLES.HEAD_TEACHER]: {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
-      'timetable', 'exams', 'results', 'leave', 'library', 'notifications',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
+      'timetable', 'exams', 'results', 'leave', 'payroll', 'library', 'notifications',
       'settings', 'online-classes', 'homework', 'certificates'
     ],
     actions: ['create', 'read', 'update'],
   },
   [ROLES.HOD]: {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
-      'timetable', 'exams', 'results', 'leave', 'library', 'notifications',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
+      'timetable', 'exams', 'results', 'leave', 'payroll', 'library', 'notifications',
       'settings', 'online-classes', 'homework', 'certificates'
     ],
     actions: ['create', 'read', 'update'],
   },
   [ROLES.COORDINATOR]: {
     modules: [
-      'dashboard', 'students', 'teachers', 'academics', 'attendance',
-      'timetable', 'exams', 'results', 'leave', 'notifications',
+      'dashboard', 'profile', 'students', 'teachers', 'academics', 'attendance',
+      'timetable', 'exams', 'results', 'leave', 'payroll', 'notifications',
       'settings', 'online-classes', 'homework', 'certificates'
     ],
     actions: ['create', 'read', 'update'],
@@ -137,16 +143,24 @@ export const ROLE_PERMISSIONS = {
 
   // Student: Student portal view (strictly read-only)
   [ROLES.STUDENT]: {
-    modules: ['dashboard', 'students', 'student-management', 'profile', 'settings', 'academics', 'attendance', 'leave', 'timetable', 'exams', 'results', 'library', 'notifications', 'certificates', 'online-classes', 'homework'],
-    actions: ['read'],
-    readOnly: true,
+    modules: [
+      'dashboard', 'profile', 'students', 'student-management', 'settings',
+      'academics', 'attendance', 'leave', 'timetable', 'exams', 'results',
+      'library', 'notifications', 'certificates', 'online-classes', 'homework'
+    ],
+    actions: ['read', 'create'], // allow applying for leave
+    readOnly: false,
   },
 
-  // Parent: Parent portal view (strictly read-only)
+  // Parent: Parent portal view
   [ROLES.PARENT]: {
-    modules: ['dashboard', 'students', 'academics', 'attendance', 'fees', 'exams', 'results', 'notifications', 'online-classes', 'homework', 'certificates'],
-    actions: ['read'],
-    readOnly: true,
+    modules: [
+      'dashboard', 'profile', 'students', 'academics', 'attendance',
+      'leave', 'fees', 'exams', 'results', 'notifications', 'online-classes',
+      'homework', 'certificates'
+    ],
+    actions: ['read', 'create'], // allow applying for leave
+    readOnly: false,
   },
 };
 
@@ -166,7 +180,7 @@ export const normalizeRole = (role) => {
 export const getDefaultRolePermissions = (role) => {
   const normRole = normalizeRole(role);
   const config = ROLE_PERMISSIONS[normRole] || ROLE_PERMISSIONS['teacher'] || ROLE_PERMISSIONS['student'];
-  return config?.modules || ['dashboard', 'academics', 'attendance'];
+  return config?.modules || ['dashboard', 'academics', 'attendance', 'profile'];
 };
 
 /**
@@ -201,6 +215,10 @@ export const PERMISSION_ALIASES = {
   exams: ['exam', 'exams'],
   fee: ['fees', 'fee'],
   fees: ['fee', 'fees'],
+  payroll: ['payroll', 'salary', 'compensation'],
+  attendance: ['attendance', 'leaves', 'leave'],
+  leave: ['leave', 'leaves', 'attendance'],
+  profile: ['profile', 'settings', 'account', 'my-profile'],
   'student-management': ['students', 'student-management'],
   students: ['student-management', 'students'],
   'teacher-management': ['teachers', 'teacher-management'],
@@ -256,8 +274,8 @@ export const hasActionAccess = (userOrRole, moduleName, action = 'read') => {
   const role = getUserRole(userOrRole);
   if (role === ROLES.SUPER_ADMIN || role === 'superadmin') return true;
 
-  // Strict guard: Students, Parents, and Peons can NEVER perform create, update, or delete on academic/class/homework modules
-  if ((role === ROLES.STUDENT || role === ROLES.PARENT) && action !== 'read') {
+  // Strict guard: Students and Parents can NEVER perform update, or delete on academic/class/homework modules
+  if ((role === ROLES.STUDENT || role === ROLES.PARENT) && action !== 'read' && moduleName !== 'leave') {
     return false;
   }
 
@@ -320,13 +338,6 @@ export const AccessGuard = ({ children, module, allowedRoles, fallback = <Naviga
 /**
  * React Component: Can / HasAccess
  * Conditional rendering component for UI elements (e.g. Buttons, Actions).
- * Usage:
- *   <Can module="fees" action="create">
- *     <button>Add Fee</button>
- *   </Can>
- *   <Can role={['super-admin', 'school-admin']}>
- *     <AdminSection />
- *   </Can>
  */
 export const Can = ({ children, module, action = 'read', role, fallback = null }) => {
   const authUser = useSelector((state) => state.auth?.user);

@@ -31,6 +31,7 @@ import {
   ResultsManagement,
   LeaveManagement,
   PayrollManagement,
+  StaffPayrollDetail,
   LibraryManagement,
   TransportManagement,
   HostelManagement,
@@ -40,6 +41,7 @@ import {
   AuditLogList,
   Settings,
   settingPageRoutes,
+  ProfileSettings,
   OnlineClassesManagement,
   HomeworkManagement,
   UserManagement,
@@ -105,6 +107,7 @@ const appRoutes = [
   { path: ROUTES.RESULTS, element: ResultsManagement, name: 'results', module: 'results' },
   { path: ROUTES.LEAVE, element: LeaveManagement, name: 'leave', module: 'leave' },
   { path: ROUTES.PAYROLL, element: PayrollManagement, name: 'payroll', module: 'payroll' },
+  { path: ROUTES.PAYROLL_DETAIL, element: StaffPayrollDetail, name: 'payroll-detail', module: 'payroll' },
   { path: ROUTES.LIBRARY, element: LibraryManagement, name: 'library', module: 'library' },
   { path: ROUTES.TRANSPORT, element: TransportManagement, name: 'transport', module: 'transport' },
   { path: ROUTES.HOSTEL, element: HostelManagement, name: 'hostel', module: 'hostel' },
@@ -116,7 +119,8 @@ const appRoutes = [
   { path: ROUTES.USER_MANAGEMENT, element: UserManagement, name: 'user-management', module: 'user-management', allowedRoles: [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin'] },
   { path: ROUTES.USER_DETAIL, element: UserDetailPage, name: 'user-detail', module: 'user-management', allowedRoles: [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, 'admin'] },
   { path: ROUTES.AUDIT_LOGS, element: AuditLogList, name: 'audit-logs', allowedRoles: ADMIN_ROLES },
-  { path: ROUTES.SETTINGS, element: Settings, name: 'settings', children: settingPageRoutes, allowedRoles: [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT] },
+  { path: ROUTES.PROFILE, element: ProfileSettings, name: 'profile' },
+  { path: ROUTES.SETTINGS, element: Settings, name: 'settings', children: settingPageRoutes, allowedRoles: [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.ACCOUNTANT, ROLES.LIBRARIAN, ROLES.PEON, ROLES.STUDENT, ROLES.PARENT] },
 
   // Learning Modules
   { path: ROUTES.ONLINE_CLASSES, element: OnlineClassesManagement, name: 'online-classes', module: 'online-classes' },

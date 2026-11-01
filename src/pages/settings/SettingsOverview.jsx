@@ -128,6 +128,16 @@ export const SETTINGS_ITEMS = [
       "Active currency symbol, tuition installment options, late payment fines, and automated invoice reminders.",
   },
   {
+    path: "budget-allocation",
+    priority: 6.5,
+    category: "operations",
+    label: "Session Budget Allocation",
+    icon: () => financeSVG,
+    badge: "Budget Control",
+    description:
+      "Session-wise operational caps for staff salary, school equipment, and buffer with revised budget logs.",
+  },
+  {
     path: "teacher",
     priority: 7,
     category: "operations",

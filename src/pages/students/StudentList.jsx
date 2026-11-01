@@ -23,6 +23,7 @@ import {
   School,
   Phone,
   Lock,
+  KeyRound,
   FileText,
   Bookmark,
   MoreVertical,
@@ -42,6 +43,7 @@ import StudentForm, {
   clearStudentDraft,
   isStudentFormDirty,
 } from "./StudentForm.jsx";
+import ResetStudentPasswordModal from "./ResetStudentPasswordModal.jsx";
 import {
   getStudents,
   getStudentCredentials,
@@ -132,6 +134,7 @@ const StudentRowActions = ({
   setActivePdfDoc,
   handleFetchCredentials,
   canSeeCredentials,
+  onResetPassword,
 }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
@@ -208,6 +211,15 @@ const StudentRowActions = ({
             title="Reveal DB Password"
           >
             <Lock size={14} />
+          </button>
+        )}
+        {canSeeCredentials && (
+          <button
+            onClick={() => onResetPassword && onResetPassword(row)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition"
+            title="Reset Student Password"
+          >
+            <KeyRound size={14} />
           </button>
         )}
       </div>
@@ -306,6 +318,19 @@ const StudentRowActions = ({
                     <span>Reveal Password</span>
                   </button>
                 )}
+                {canSeeCredentials && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      if (onResetPassword) onResetPassword(row);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition"
+                  >
+                    <KeyRound size={14} className="text-orange-500" />
+                    <span>Reset Password</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -333,6 +358,7 @@ const StudentList = () => {
   const [showPasswordText, setShowPasswordText] = useState(false);
   const [copiedField, setCopiedField] = useState("");
   const [activePdfDoc, setActivePdfDoc] = useState(null);
+  const [resetPasswordStudent, setResetPasswordStudent] = useState(null);
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -729,6 +755,7 @@ const StudentList = () => {
           setActivePdfDoc={setActivePdfDoc}
           handleFetchCredentials={handleFetchCredentials}
           canSeeCredentials={canSeeCredentials}
+          onResetPassword={(student) => setResetPasswordStudent(student)}
         />
       ),
     },
@@ -1503,6 +1530,17 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
               </button>
 
               <button
+                onClick={() => {
+                  const sMatch = students.find((s) => s.admissionNumber === activeCredentialsModal.username || s.email === activeCredentialsModal.email || s._id === activeCredentialsModal._id) || activeCredentialsModal;
+                  setResetPasswordStudent(sMatch);
+                  setActiveCredentialsModal(null);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 font-bold text-xs transition cursor-pointer"
+              >
+                <KeyRound size={14} />
+                <span>Reset Password</span>
+              </button>
+              <button
                 onClick={() => setActiveCredentialsModal(null)}
                 className="px-4 py-2 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-700"
               >
@@ -2030,6 +2068,13 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
           </div>
         </form>
       </Modal>
+
+      <ResetStudentPasswordModal
+        open={Boolean(resetPasswordStudent)}
+        student={resetPasswordStudent}
+        onClose={() => setResetPasswordStudent(null)}
+        onSuccess={() => {}}
+      />
 
       {/* Aadhaar PDF Viewer Modal */}
       <PdfViewerModal

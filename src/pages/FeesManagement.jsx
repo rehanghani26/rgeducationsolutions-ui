@@ -10,6 +10,7 @@ import Loader from '../components/ui/Loader.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
+import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
 
 const inputCls = 'w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1';
@@ -230,8 +231,17 @@ const FeesManagement = () => {
             </select>
           </div>
           <div>
-            <label className={labelCls}>Receipt Collected Amount ($)</label>
-            <input type="number" placeholder="e.g. 5000" className={inputCls} value={collectForm.amount} onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })} />
+            <CurrencyInput
+              label="Receipt Collected Amount"
+              placeholder="e.g. 5,000"
+              value={collectForm.amount}
+              onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })}
+              quickPresets={[500, 1000, 2000, 5000]}
+            />
+          </div>
+
+            <div>
+            <input type="number" type="hidden" style={{ display: 'none' }} className={inputCls} value={collectForm.amount} onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })} />
           </div>
           <div>
             <label className={labelCls}>Payment Method Mode</label>
@@ -267,8 +277,17 @@ const FeesManagement = () => {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className={labelCls}>Amount ($)</label>
-              <input type="number" placeholder="12500" className={inputCls} value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} />
+              <CurrencyInput
+                label="Expenditure Amount"
+                value={expenseForm.amount}
+                onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+                size="sm"
+                placeholder="e.g. 12,500"
+              />
+            </div>
+            <div style={{ display: 'none' }}>
+              <label className={labelCls}>Old</label>
+              <input type="number" type="hidden" style={{ display: 'none' }} className={inputCls} value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} />
             </div>
             <div>
               <label className={labelCls}>Invoice Reference ID</label>

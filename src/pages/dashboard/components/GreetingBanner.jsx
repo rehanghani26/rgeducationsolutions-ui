@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  SunMedium,
+  Sunset,
+  MoonStar,
+  GraduationCap,
+  Building2,
+  CheckCircle2,
+} from "lucide-react";
 import { getGreeting } from "../data/dashboardData.js";
 import { useSchoolBranding } from "../../../context/SchoolBrandingContext.jsx";
 import { THEME_MODES, useTheme } from "../../../theme/ThemeContext.jsx";
@@ -10,6 +22,7 @@ const GreetingBanner = ({ user }) => {
   const { theme } = useTheme();
   const { schoolLogo, schoolName } = useSchoolBranding();
   const [liveTime, setLiveTime] = useState("");
+  const [liveSeconds, setLiveSeconds] = useState("");
 
   useEffect(() => {
     const update = () => {
@@ -19,6 +32,11 @@ const GreetingBanner = ({ user }) => {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
+        })
+      );
+      setLiveSeconds(
+        now.toLocaleTimeString("en-US", {
+          second: "2-digit",
         })
       );
     };
@@ -34,88 +52,130 @@ const GreetingBanner = ({ user }) => {
     year: "numeric",
   });
 
+  const hour = new Date().getHours();
+  const GreetingIcon = (() => {
+    if (hour >= 5 && hour < 12) return Sun;
+    if (hour >= 12 && hour < 17) return SunMedium;
+    if (hour >= 17 && hour < 21) return Sunset;
+    return MoonStar;
+  })();
+
   const displayName = user?.name || user?.username || "Rehan Ghani";
-  const roleName = (user?.role || "super-admin").replace(/[-_]/g, " ").toUpperCase();
+  const roleName = (user?.role || "super-admin")
+    .replace(/[-_]/g, " ")
+    .toUpperCase();
 
   return (
-    <div className="relative mb-6 overflow-hidden rounded-3xl border border-[#FDBA74]/50 bg-gradient-to-r from-[#FFF5EB] via-[#FFECD6] to-[#FFE2C2] p-5 shadow-sm dark:border-[#EA580C]/25 dark:from-[#26170D] dark:via-[#201814] dark:to-[#181615] dark:shadow-md transition-all">
-      {/* Decorative campus ambient background waves and foliage */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-orange-400/15 blur-3xl" />
-      <div className="pointer-events-none absolute -left-10 -bottom-10 h-48 w-48 rounded-full bg-amber-400/20 blur-2xl" />
+    <div className="relative mb-6 overflow-hidden rounded-3xl border border-orange-300/70 bg-gradient-to-br from-[#FFFDF9] via-[#FFF6EB] to-[#FFEDE0] p-5 sm:p-6 shadow-md shadow-orange-500/5 dark:border-orange-500/25 dark:from-[#1F1C18] dark:via-[#171513] dark:to-[#100F0E] dark:shadow-xl dark:shadow-black/50 transition-all duration-300">
+      {/* ── Top Highlight Glow Line ── */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500/70 to-transparent opacity-90" />
 
-      {/* Subtle autumn leaves illustration decorative overlay */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 opacity-30 dark:opacity-15 hidden sm:block">
-        <svg viewBox="0 0 100 200" fill="none" className="h-full w-full">
-          <path
-            d="M10 20 C 40 40, 20 80, 50 100 C 80 120, 30 160, 60 190"
-            stroke="#F97316"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-          <circle cx="25" cy="50" r="14" fill="#FDBA74" fillOpacity="0.4" />
-          <circle cx="45" cy="130" r="18" fill="#F97316" fillOpacity="0.3" />
-        </svg>
-      </div>
+      {/* ── Ambient Radial Atmosphere Orbs ── */}
+      <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gradient-to-br from-orange-500/15 to-amber-500/5 blur-3xl dark:from-orange-500/20 dark:to-transparent" />
+      <div className="pointer-events-none absolute -left-12 -bottom-12 h-60 w-60 rounded-full bg-gradient-to-tr from-amber-400/15 to-rose-500/5 blur-2xl dark:from-amber-600/15 dark:to-transparent" />
+      <div className="pointer-events-none absolute left-1/3 top-1/2 -translate-y-1/2 h-44 w-96 rounded-full bg-orange-400/5 blur-3xl dark:bg-orange-500/5" />
 
-      <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        {/* Left Side: Branding & Greeting */}
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-orange-200/80 bg-white/95 p-1.5 shadow-xs dark:border-stone-700/80 dark:bg-stone-800/90">
-            <img
-              src={schoolLogo || rgLogo}
-              alt={schoolName || "Iqra Public School"}
-              style={
-                !schoolLogo && theme === THEME_MODES.DARK
-                  ? { mixBlendMode: "screen" }
-                  : undefined
-              }
-              className="h-full w-full object-contain"
-              onError={(e) => {
-                if (e.currentTarget.src !== rgLogo) {
-                  e.currentTarget.src = rgLogo;
+      <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        {/* ── Left Side: School Crest + Greeting + User Bio ── */}
+        <div className="flex items-start sm:items-center gap-4 min-w-0">
+          {/* Logo container with verified pulse dot */}
+          <div className="relative flex-shrink-0 group">
+            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl border-2 border-orange-500/30 bg-white/95 p-2 shadow-lg shadow-orange-500/10 dark:border-stone-700/80 dark:bg-[#1C1A18]/95 dark:shadow-black/40 transition-transform duration-300 group-hover:scale-105">
+              <img
+                src={schoolLogo || rgLogo}
+                alt={schoolName || "School Crest"}
+                style={
+                  !schoolLogo && theme === THEME_MODES.DARK
+                    ? { mixBlendMode: "screen" }
+                    : undefined
                 }
-              }}
-            />
+                className="h-full w-full object-contain"
+                onError={(e) => {
+                  if (e.currentTarget.src !== rgLogo) {
+                    e.currentTarget.src = rgLogo;
+                  }
+                }}
+              />
+            </div>
+            {/* Live active beacon */}
+            <span
+              className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center"
+              title="Campus Server Online"
+            >
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1E1D1C]" />
+            </span>
           </div>
 
-          <div className="flex min-w-0 flex-col">
-            <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
-              {greeting.text},
-            </span>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="truncate text-xl sm:text-2xl font-black tracking-tight text-[#EA580C] dark:text-[#FB923C]">
-                {displayName}!
+          {/* Greeting Typography & Context Tags */}
+          <div className="flex min-w-0 flex-col space-y-1">
+            {/* Salutation row */}
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                <GreetingIcon size={14} className="text-orange-500 animate-pulse" />
+                {greeting.text},
+              </span>
+            </div>
+
+            {/* User Name & Role Badge */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-stone-900 dark:text-white leading-tight">
+                <span className="bg-gradient-to-r from-orange-600 via-amber-500 to-orange-500 bg-clip-text text-transparent dark:from-orange-400 dark:via-amber-300 dark:to-orange-400">
+                  {displayName}!
+                </span>
               </h1>
-              <span className="rounded-lg border border-orange-300/80 bg-white/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-orange-700 shadow-2xs dark:border-orange-500/30 dark:bg-orange-500/15 dark:text-orange-300">
+
+              <span className="inline-flex items-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-orange-700 dark:bg-orange-500/15 dark:text-orange-300 shadow-2xs">
+                <ShieldCheck size={13} className="text-orange-500" />
                 {roleName}
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 mt-0.5 truncate">
-              <span className="font-bold text-stone-800 dark:text-stone-200 truncate">
-                {schoolName || "Iqra Public School"}
+            {/* School Campus & Academic Year Chips */}
+            <div className="flex flex-wrap items-center gap-2 text-xs text-stone-600 dark:text-stone-300 pt-0.5">
+              <span className="font-bold text-stone-800 dark:text-stone-200 truncate max-w-[240px] sm:max-w-none">
+                {schoolName || "Becon International School"}
               </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+
+              <span className="text-stone-300 dark:text-stone-700">•</span>
+
+              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 Active Campus
+              </span>
+
+              <span className="text-stone-300 dark:text-stone-700 hidden sm:inline">
+                •
+              </span>
+
+              <span className="hidden sm:inline-flex items-center gap-1 font-medium text-stone-500 dark:text-stone-400">
+                <GraduationCap size={13} className="text-orange-500/80" />
+                Session 2026-27
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Date & Time Card */}
-        <div className="flex items-center gap-3 self-start md:self-auto flex-shrink-0">
-          <div className="flex items-center gap-3 rounded-2xl border border-[#EFE8DD] bg-white/95 px-4 py-2.5 shadow-sm dark:border-[#2E2C2A] dark:bg-[#1E1D1C]/95">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+        {/* ── Right Side: Live Date & Clock Widget Hub ── */}
+        <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-auto flex-shrink-0">
+          <div className="flex items-center gap-3.5 rounded-2xl border border-orange-200/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-[#181615]/90 transition-all hover:border-orange-400/50">
+            {/* Clock & Calendar icon */}
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/20 shadow-xs">
               <Calendar size={18} />
             </div>
+
             <div className="flex flex-col">
-              <span className="text-xs font-extrabold text-stone-900 dark:text-stone-100">
+              {/* Live Digital Clock */}
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-base sm:text-lg font-mono font-black text-stone-900 dark:text-stone-100 tracking-tight">
+                  {liveTime || "06:46 PM"}
+                </span>
+                <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+              </div>
+
+              {/* Formatted Date */}
+              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
                 {todayDate}
-              </span>
-              <span className="text-[11px] font-semibold text-stone-400 dark:text-stone-500">
-                {liveTime || "04:24 PM"}
               </span>
             </div>
           </div>

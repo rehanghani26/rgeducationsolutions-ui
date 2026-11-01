@@ -13,6 +13,7 @@ export { default as AcademicSettings }          from "./AcademicSettings";
 export { default as StudentSettings }           from "./StudentSettings";
 export { default as TeacherSettings }           from "./TeacherSettings";
 export { default as FinanceSettings }           from "./FinanceSettings";
+export { default as BudgetAllocationSettings }  from "./BudgetAllocationSettings";
 export { default as PortalManagementSettings }   from "./PortalManagementSettings";
 export { default as NoticeSettings }            from "./NoticeSettings";
 export { default as PolicySettings }            from "./PolicySettings";

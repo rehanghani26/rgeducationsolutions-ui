@@ -5,6 +5,7 @@ import { Save } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import Button from '../../components/ui/Button.jsx';
+import { CurrencyInput } from '../../components/ui/CurrencyInput.jsx';
 import feeService from '../../services/feeService.js';
 import { mockFees } from '../../data/mockData.js';
 
@@ -81,10 +82,13 @@ const FeeEdit = () => {
       />
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm max-w-lg">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className={labelCls}>Pending Amount</label>
-            <input required type="number" className={inputCls} value={form.amountPending} onChange={(e) => setForm({ ...form, amountPending: e.target.value })} />
-          </div>
+          <CurrencyInput
+            label="Pending Amount"
+            value={form.amountPending}
+            onChange={(e) => setForm({ ...form, amountPending: e.target.value })}
+            required
+            placeholder="0"
+          />
           <div>
             <label className={labelCls}>Due Date</label>
             <input required type="date" className={inputCls} value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />

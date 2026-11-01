@@ -23,6 +23,7 @@ import {
   ClassSyllabusSettings,
   AcademicSettings,
   FinanceSettings,
+  BudgetAllocationSettings,
   PortalManagementSettings,
   NoticeSettings,
   PolicySettings,
@@ -44,7 +45,7 @@ import SetupWizardPage from "./setup/SetupWizardPage.jsx";
 // Re-export all SVG icons following requested pattern
 export * from "./settings/settingIcons";
 
-const MyProfileSettingRoute = (props) => {
+export const MyProfileSettingRoute = (props) => {
   const authUser = useSelector((state) => state.auth?.user);
   const userRole = (authUser?.role || getUserFromStorage()?.role || "").toLowerCase().replace(/_/g, '-');
   if (userRole === 'student') {
@@ -230,7 +231,6 @@ export const settingPageRoutes = [
     }),
     title: "Academic & Grading Rules",
   },
-
   {
     path: "finance",
     Component: withSettingsWrapper(FinanceSettings, {
@@ -238,6 +238,22 @@ export const settingPageRoutes = [
       title: "Finance & Fee Policies",
     }),
     title: "Finance & Fee Policies",
+  },
+  {
+    path: "budget-allocation",
+    Component: withSettingsWrapper(BudgetAllocationSettings, {
+      selfManaged: true,
+      title: "Session Budget Allocation & Revisions",
+    }),
+    title: "Budget Allocation",
+  },
+  {
+    path: "budget",
+    Component: withSettingsWrapper(BudgetAllocationSettings, {
+      selfManaged: true,
+      title: "Session Budget Allocation & Revisions",
+    }),
+    title: "Budget Allocation",
   },
   {
     path: "portal",

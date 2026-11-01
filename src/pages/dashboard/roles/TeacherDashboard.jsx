@@ -143,6 +143,22 @@ const TeacherDashboard = () => {
             <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
               <button
                 type="button"
+                onClick={() => navigate('/payroll')}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 transition text-xs font-bold cursor-pointer"
+              >
+                <span>My Salary & Compensation</span>
+                <span>→</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/leave')}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 transition text-xs font-bold cursor-pointer"
+              >
+                <span>Leave Applications & Status</span>
+                <span>→</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => navigate('/certificates?tab=id-cards')}
                 className="w-full flex items-center justify-between p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/25 transition text-xs font-bold cursor-pointer"
               >

@@ -48,6 +48,7 @@ import {
   Star,
   Plus,
   MoreHorizontal,
+  KeyRound,
 } from "lucide-react";
 import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
 import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
@@ -58,6 +59,7 @@ import Loader from "../../components/ui/Loader.jsx";
 import EmbeddedPdfViewer from "../../components/ui/EmbeddedPdfViewer.jsx";
 import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
 import { permissionOptions } from "./StudentForm.jsx";
+import ResetStudentPasswordModal from "./ResetStudentPasswordModal.jsx";
 import {
   getStudentById,
   getStudentActivity,
@@ -149,6 +151,7 @@ const StudentDetail = () => {
   // Credentials Modal State
   const [activeCredentialsModal, setActiveCredentialsModal] = useState(null);
   const [showPasswordText, setShowPasswordText] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
 
   // Mobile navigation menus state
   const [mobileTabsMenuOpen, setMobileTabsMenuOpen] = useState(false);
@@ -584,6 +587,16 @@ const StudentDetail = () => {
               <span>DB Credentials</span>
             </button>
           )}
+          {canSeeCredentials && (
+            <button
+              onClick={() => setShowResetPasswordModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-orange-700 bg-orange-50 dark:bg-orange-950/50 dark:text-orange-300 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 transition shadow-sm cursor-pointer"
+              title="Reset Student Password"
+            >
+              <KeyRound size={13} />
+              <span>Reset Password</span>
+            </button>
+          )}
           <Link
             to={`/id-cards?studentId=${studentId}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition shadow-sm"
@@ -639,6 +652,24 @@ const StudentDetail = () => {
                     <span>DB Credentials</span>
                   </button>
                 )}
+                {canSeeCredentials && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileActionsOpen(false);
+                      setShowResetPasswordModal(true);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-left transition cursor-pointer"
+                  >
+                    <KeyRound size={14} />
+                    <span>Reset Password</span>
+                  </button>
+                )}
+                {/*
+                  </button>
+                )}
+                <Link
+                */}
                 <Link
                   to={`/id-cards?studentId=${studentId}`}
                   onClick={() => setMobileActionsOpen(false)}
@@ -2708,6 +2739,14 @@ const StudentDetail = () => {
           </div>
         </Modal>
       )}
+
+      {/* Super Admin Reset Password Modal */}
+      <ResetStudentPasswordModal
+        open={showResetPasswordModal}
+        student={student}
+        onClose={() => setShowResetPasswordModal(false)}
+        onSuccess={() => {}}
+      />
 
       {/* PDF Viewer Full Screen Modal */}
       <PdfViewerModal

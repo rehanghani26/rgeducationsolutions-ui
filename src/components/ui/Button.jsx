@@ -1,3 +1,4 @@
+import React from 'react';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -6,8 +7,8 @@ import { Loader2 } from 'lucide-react';
  * Props:
  *   variant   : 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline'  (default: 'primary')
  *   size      : 'sm' | 'md' | 'lg'                                          (default: 'md')
- *   icon      : ReactNode — rendered to the left of children
- *   iconRight : ReactNode — rendered to the right of children
+ *   icon      : ReactNode | Component — rendered to the left of children
+ *   iconRight : ReactNode | Component — rendered to the right of children
  *   loading   : boolean — shows spinner + disables the button
  *   disabled  : boolean
  *   type      : 'button' | 'submit' | 'reset'                               (default: 'button')
@@ -61,6 +62,16 @@ const Button = ({
 }) => {
   const isDisabled = disabled || loading;
 
+  const renderIcon = (i) => {
+    if (!i) return null;
+    if (React.isValidElement(i)) return i;
+    if (typeof i === 'function' || (typeof i === 'object' && i.$$typeof)) {
+      const IconComponent = i;
+      return <IconComponent size={iconSizeMap[size] || 14} />;
+    }
+    return i;
+  };
+
   return (
     <button
       type={type}
@@ -81,10 +92,10 @@ const Button = ({
       {loading ? (
         <Loader2 size={iconSizeMap[size] || 14} className="animate-spin shrink-0" />
       ) : (
-        icon && <span className="shrink-0">{icon}</span>
+        icon && <span className="shrink-0">{renderIcon(icon)}</span>
       )}
       {children && <span>{children}</span>}
-      {iconRight && !loading && <span className="shrink-0">{iconRight}</span>}
+      {iconRight && !loading && <span className="shrink-0">{renderIcon(iconRight)}</span>}
     </button>
   );
 };

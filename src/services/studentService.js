@@ -258,11 +258,24 @@ export async function verifyStudentEmailOtp(params) {
   }
 }
 
+export async function resetStudentPassword(id, payload = {}) {
+  try {
+    const response = await api.patch(`${STUDENT_URLS.BASE}/${id}/reset-password`, payload);
+    toast.success('Student password reset successfully');
+    return response.data;
+  } catch (error) {
+    const msg = error.response?.data?.message || error.message || 'Failed to reset password';
+    toast.error(msg);
+    throw { status: error.response?.status, message: msg };
+  }
+}
+
 const studentService = {
   getAll: getStudents,
   getById: getStudentById,
   getActivity: getStudentActivity,
   getCredentials: getStudentCredentials,
+  resetPassword: resetStudentPassword,
   create: createStudent,
   update: updateStudent,
   delete: deleteStudent,
