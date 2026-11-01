@@ -241,7 +241,7 @@ const FeesManagement = () => {
           </div>
 
             <div>
-            <input type="number" type="hidden" style={{ display: 'none' }} className={inputCls} value={collectForm.amount} onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })} />
+            <input type="hidden" style={{ display: 'none' }} className={inputCls} value={collectForm.amount} onChange={(e) => setCollectForm({ ...collectForm, amount: e.target.value })} />
           </div>
           <div>
             <label className={labelCls}>Payment Method Mode</label>
@@ -287,7 +287,7 @@ const FeesManagement = () => {
             </div>
             <div style={{ display: 'none' }}>
               <label className={labelCls}>Old</label>
-              <input type="number" type="hidden" style={{ display: 'none' }} className={inputCls} value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} />
+              <input type="hidden" style={{ display: 'none' }} className={inputCls} value={expenseForm.amount} onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })} />
             </div>
             <div>
               <label className={labelCls}>Invoice Reference ID</label>

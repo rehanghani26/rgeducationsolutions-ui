@@ -3,13 +3,9 @@ import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { useAiChat } from "./useAiChat.js";
 import { useVoiceAssistant } from "./useVoiceAssistant.js";
-import AiSidebar from "./components/AiSidebar.jsx";
-import AiHeader from "./components/AiHeader.jsx";
-import AiWelcome from "./components/AiWelcome.jsx";
-import AiMessages from "./components/AiMessages.jsx";
-import AiInput from "./components/AiInput.jsx";
-import VoiceAssistantBanner from "./components/VoiceAssistantBanner.jsx";
-import { bg, text } from "@/theme/color";
+import AIChatLayout from "./components/AIChatLayout.jsx";
+import AIWelcomeScreen from "./components/AIWelcomeScreen.jsx";
+import AIChatMessages from "./components/AIChatMessages.jsx";
 
 export default function AiMode() {
   const { user } = useSelector((state) => state.auth);
@@ -39,7 +35,9 @@ export default function AiMode() {
     messagesEndRef,
     handleNewChat,
     handleDeleteSession,
+    handleRenameSession,
     handleSendMessage,
+    handleRegenerate,
   } = useAiChat({
     onAiResponse: (aiMsg) => {
       // If voice assistant mode is active, automatically read AI response aloud
@@ -65,11 +63,9 @@ export default function AiMode() {
   } = useVoiceAssistant({
     isLoading: loading,
     onSpeechInput: (text) => {
-      // Update the textarea live as user speaks
       setInputPrompt(text);
     },
     onSpeechFinal: (finalText) => {
-      // Auto-send query when speech pause is detected
       if (finalText && finalText.trim()) {
         handleSendMessage(finalText.trim());
       }
@@ -87,7 +83,6 @@ export default function AiMode() {
     if (promptParam && !processedPromptRef.current) {
       processedPromptRef.current = true;
       handleSendMessage(promptParam);
-      // Clean query string
       setSearchParams({}, { replace: true });
     }
   }, [promptParam, handleSendMessage, setSearchParams]);
@@ -112,118 +107,78 @@ export default function AiMode() {
     if (window.innerWidth < 1100) setSidebarOpen(false);
   };
 
-  const userName = user?.name?.split(" ")[0] || "Admin";
+  // Heading user name (defaults to Rehan if not available)
+  const userName = user?.name?.split(" ")[0] || "Rehan";
 
   return (
     <>
       <style>{`
         @keyframes bounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
-          40% { transform: translateY(-6px); opacity: 1; }
+          40% { transform: translateY(-5px); opacity: 1; }
         }
         @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(12px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes gradientShift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
         }
-        @keyframes soundwave {
-          0%, 100% { height: 3px; }
-          50% { height: 14px; }
-        }
-        .ai-msg-enter { animation: fadeSlideUp 0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
-        .gradient-animated {
-          background: linear-gradient(135deg, #f97316, #ea580c, #f59e0b, #f97316);
-          background-size: 300% 300%;
-          animation: gradientShift 4s ease infinite;
-        }
-        .animate-soundwave-1 { animation: soundwave 0.7s ease-in-out infinite; }
-        .animate-soundwave-2 { animation: soundwave 0.7s ease-in-out infinite 0.18s; }
-        .animate-soundwave-3 { animation: soundwave 0.7s ease-in-out infinite 0.36s; }
-        .animate-soundwave-4 { animation: soundwave 0.7s ease-in-out infinite 0.12s; }
-        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .animate-fadeSlideUp { animation: fadeSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(249,115,22,0.3); border-radius: 99px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(249,115,22,0.5); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #303030; border-radius: 99px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #FF7900; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
-      <div
-        className={`flex h-screen w-screen overflow-hidden ${bg.page} ${text.primary}`}
-        style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+      <AIChatLayout
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        onCloseSidebar={() => setSidebarOpen(false)}
+        sessions={filteredSessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onNewChat={handleCreateNewChat}
+        onDeleteSession={handleDeleteSession}
+        onRenameSession={handleRenameSession}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        providerName={providerName}
+        isVoiceMode={isVoiceMode}
+        onToggleVoiceMode={toggleVoiceMode}
+        isListening={isListening}
+        onToggleListening={toggleListening}
+        isSpeaking={isSpeaking}
+        onStopSpeaking={stopSpeaking}
+        interimTranscript={interimTranscript}
+        voiceError={voiceError}
+        loading={loading}
+        inputPrompt={inputPrompt}
+        setInputPrompt={setInputPrompt}
+        onSendMessage={handleSendMessage}
       >
-        {/* Left Sidebar */}
-        <AiSidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          sessions={filteredSessions}
-          activeSessionId={activeSessionId}
-          onSelectSession={handleSelectSession}
-          onNewChat={handleCreateNewChat}
-          onDeleteSession={handleDeleteSession}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          providerName={providerName}
-        />
-
-        {/* Main Chat Area */}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <AiHeader
-            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-            isVoiceMode={isVoiceMode}
-            onToggleVoiceMode={toggleVoiceMode}
-            isListening={isListening}
-            isSpeaking={isSpeaking}
+        {messages.length === 0 ? (
+          <AIWelcomeScreen
+            userName={userName}
+            onSelectPrompt={handleSendMessage}
           />
-
-          {/* Voice Assistant Status Banner */}
-          <VoiceAssistantBanner
-            isVoiceMode={isVoiceMode}
-            isListening={isListening}
-            isSpeaking={isSpeaking}
-            isLoading={loading}
-            interimTranscript={interimTranscript}
-            voiceError={voiceError}
-            onStopSpeaking={stopSpeaking}
-            onTurnOffVoice={() => toggleVoiceMode(false)}
-          />
-
-          <div className="flex-1 overflow-y-auto scrollbar-thin">
-            {messages.length === 0 ? (
-              <AiWelcome
-                userName={userName}
-                onSelectPrompt={handleSendMessage}
-              />
-            ) : (
-              <AiMessages
-                messages={messages}
-                loading={loading}
-                messagesEndRef={messagesEndRef}
-                isSpeaking={isSpeaking}
-                speakingMessageId={speakingMessageId}
-                onSpeakMessage={(msgContent, id) => speak(msgContent, id)}
-                onStopSpeaking={stopSpeaking}
-                onAskAiPrompt={handleSendMessage}
-              />
-            )}
-          </div>
-
-          <AiInput
-            inputPrompt={inputPrompt}
-            setInputPrompt={setInputPrompt}
-            onSendMessage={handleSendMessage}
+        ) : (
+          <AIChatMessages
+            messages={messages}
             loading={loading}
-            isListening={isListening}
-            onToggleListening={toggleListening}
-            isVoiceMode={isVoiceMode}
-            interimTranscript={interimTranscript}
+            messagesEndRef={messagesEndRef}
             isSpeaking={isSpeaking}
+            speakingMessageId={speakingMessageId}
+            onSpeakMessage={(msgContent, id) => speak(msgContent, id)}
             onStopSpeaking={stopSpeaking}
+            onAskAiPrompt={handleSendMessage}
+            onRegenerate={handleRegenerate}
+            onRetry={handleRegenerate}
           />
-        </div>
-      </div>
+        )}
+      </AIChatLayout>
     </>
   );
 }

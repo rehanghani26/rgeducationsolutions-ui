@@ -28,7 +28,7 @@ export function useAiChat({ onAiResponse } = {}) {
   const [inputPrompt, setInputPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [providerName, setProviderName] = useState("System AI");
+  const [providerName, setProviderName] = useState("NVIDIA AI");
 
   /* ── Refs ── */
   const messagesEndRef = useRef(null);
@@ -54,7 +54,7 @@ export function useAiChat({ onAiResponse } = {}) {
         }
       })
       .catch(() => {
-        // Keep fallback "System AI"
+        // Keep fallback "NVIDIA AI"
       });
     return () => {
       isMounted = false;
@@ -107,6 +107,13 @@ export function useAiChat({ onAiResponse } = {}) {
     },
     [sessions, activeSessionId]
   );
+
+  const handleRenameSession = useCallback((id, newTitle) => {
+    if (!newTitle?.trim()) return;
+    setSessions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, title: newTitle.trim() } : s))
+    );
+  }, []);
 
   const handleSendMessage = async (promptToSend) => {
     const prompt = (promptToSend || inputPrompt).trim();
@@ -178,7 +185,7 @@ export function useAiChat({ onAiResponse } = {}) {
       const errorMessage = {
         id: errorMessageId,
         role: "model",
-        content: `⚠️ **Unable to reach System AI**\n\n${err.message}\n\nPlease verify your connection and configuration and try again.`,
+        content: `⚠️ **Unable to reach AI Provider**\n\n${err.message}\n\nPlease verify your connection and configuration and try again.`,
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -203,6 +210,14 @@ export function useAiChat({ onAiResponse } = {}) {
     }
   };
 
+  const handleRegenerate = useCallback(
+    (promptToResend) => {
+      if (!promptToResend || loading) return;
+      handleSendMessage(promptToResend);
+    },
+    [loading, handleSendMessage]
+  );
+
   return {
     sessions,
     filteredSessions,
@@ -219,6 +234,8 @@ export function useAiChat({ onAiResponse } = {}) {
     messagesEndRef,
     handleNewChat,
     handleDeleteSession,
+    handleRenameSession,
     handleSendMessage,
+    handleRegenerate,
   };
 }

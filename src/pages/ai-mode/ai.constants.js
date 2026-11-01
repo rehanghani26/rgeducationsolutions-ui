@@ -1,18 +1,22 @@
 import {
-  GraduationCap,
-  Plus,
   Users,
-  ClipboardList,
-  DollarSign,
-  Boxes,
-  BarChart2,
-  BookOpen,
-  Award,
-  Sliders,
-  FileSpreadsheet,
-  Calendar,
   CreditCard,
   Palmtree,
+  Calendar,
+  BookOpen,
+  Award,
+  FileSpreadsheet,
+  Sliders,
+  GraduationCap,
+  ClipboardList,
+  DollarSign,
+  BarChart2,
+  UserPlus,
+  Banknote,
+  Wallet,
+  BookUser,
+  Grid3x3,
+  LayoutDashboard,
 } from "lucide-react";
 
 export const STORAGE_KEY_SESSIONS = "GEMINI_ERP_CHAT_SESSIONS_V2";
@@ -20,151 +24,152 @@ export const STORAGE_KEY_SESSIONS = "GEMINI_ERP_CHAT_SESSIONS_V2";
 export const SUGGESTED_PROMPTS = [
   {
     icon: Users,
-    title: "Student Directory & Filters",
+    title: "Student Directory",
+    description: "Browse students with smart filters by class, section & status",
     prompt:
       "Show all students with interactive filters for class, section, status, and gender.",
-    gradient: "from-orange-500 to-amber-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-orange-500/5 dark:hover:bg-orange-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-orange-500/40",
-    textColor: "text-orange-700 dark:text-orange-300",
   },
   {
     icon: CreditCard,
     title: "Student ID Card Studio",
+    description: "Generate, preview and customize student ID cards",
     prompt:
       "Generate student ID card and allow me to preview styles, switch templates, and update student card information.",
-    gradient: "from-amber-500 to-yellow-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-amber-500/5 dark:hover:bg-amber-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-amber-500/40",
-    textColor: "text-amber-700 dark:text-amber-300",
+  },
+  {
+    icon: UserPlus,
+    title: "Student Admissions",
+    description: "New student admission and enrollment management",
+    prompt:
+      "Show all student admission applications and pending enrollments.",
   },
   {
     icon: Palmtree,
-    title: "Student Leaves Console",
+    title: "Student Leaves",
+    description: "Review, approve or apply for student leave requests",
     prompt:
       "Show all student leave requests, pending applications, and let me review or apply for a student leave.",
-    gradient: "from-emerald-500 to-teal-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-emerald-500/5 dark:hover:bg-emerald-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-emerald-500/40",
-    textColor: "text-emerald-700 dark:text-emerald-300",
   },
   {
     icon: Calendar,
-    title: "Academic Session & Setup",
+    title: "Academic Session Setup",
+    description: "Track active session and academic setup progress",
     prompt:
-      "What is the active academic session and what is the progress of our 3-step academic setup (Session -> Master Period -> Timetables)?",
-    gradient: "from-indigo-600 to-violet-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-indigo-500/5 dark:hover:bg-indigo-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-indigo-500/40",
-    textColor: "text-indigo-700 dark:text-indigo-300",
+      "What is the active academic session and what is the progress of our academic setup (Session -> Master Period -> Timetables)?",
   },
   {
     icon: BookOpen,
-    title: "Exam Schedule & Papers",
+    title: "Exam Schedule",
+    description: "Upcoming exams, subjects, timings and prescribed books",
     prompt:
       "Show all upcoming exams and their subject schedule with prescribed books and timings.",
-    gradient: "from-fuchsia-600 to-pink-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-fuchsia-500/5 dark:hover:bg-fuchsia-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-fuchsia-500/40",
-    textColor: "text-fuchsia-700 dark:text-fuchsia-300",
   },
   {
     icon: Award,
     title: "Exam Results & Toppers",
+    description: "Analytics, grade performance and top rankers",
     prompt:
       "Show me exam analytics, top rankers, and grade performance for recent exams.",
-    gradient: "from-amber-500 to-yellow-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-amber-500/5 dark:hover:bg-amber-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-amber-500/40",
-    textColor: "text-amber-700 dark:text-amber-300",
   },
   {
     icon: FileSpreadsheet,
     title: "Class Syllabus & Books",
+    description: "Prescribed textbooks, authors and full marks per class",
     prompt:
       "What are the prescribed textbooks, authors, and full marks for Class 1 and Class 10?",
-    gradient: "from-teal-600 to-emerald-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-teal-500/5 dark:hover:bg-teal-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-teal-500/40",
-    textColor: "text-teal-700 dark:text-teal-300",
   },
   {
     icon: Sliders,
     title: "School Settings",
+    description: "School profile, contact details and session configuration",
     prompt:
       "View the current school profile, contact details, and academic session settings.",
-    gradient: "from-orange-500 to-amber-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-orange-500/5 dark:hover:bg-orange-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-orange-500/40",
-    textColor: "text-orange-700 dark:text-orange-400",
   },
   {
     icon: GraduationCap,
     title: "Student List",
+    description: "All enrolled students with class, section and roll numbers",
     prompt:
       "Show me all enrolled students with their class, section, and roll numbers.",
-    gradient: "from-amber-500 to-orange-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-amber-500/5 dark:hover:bg-amber-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-amber-500/40",
-    textColor: "text-amber-700 dark:text-amber-400",
   },
   {
     icon: ClipboardList,
     title: "Attendance Overview",
+    description: "Today's attendance rate and list of absent students",
     prompt: "What is the school's attendance rate today? Show absent students.",
-    gradient: "from-orange-600 to-amber-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-orange-500/5 dark:hover:bg-orange-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-orange-500/40",
-    textColor: "text-orange-700 dark:text-orange-300",
   },
   {
-    icon: DollarSign,
-    title: "Fee Status",
-    prompt: "Give an overview of school fee collections and show pending dues.",
-    gradient: "from-rose-600 to-red-600",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-rose-500/5 dark:hover:bg-rose-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-rose-500/40",
-    textColor: "text-rose-700 dark:text-rose-300",
-  },
-  {
-    icon: BarChart2,
-    title: "Dashboard Stats",
+    icon: Banknote,
+    title: "Fee Collection",
+    description: "Track and manage school fee collections and dues",
     prompt:
-      "Give me an executive summary of the school's key performance metrics.",
-    gradient: "from-orange-600 to-amber-500",
-    bg: "bg-white/90 dark:bg-[#1c1b1a] hover:bg-orange-500/5 dark:hover:bg-orange-950/20 border-stone-200/90 dark:border-stone-800 shadow-xs hover:border-orange-500/40",
-    textColor: "text-orange-700 dark:text-orange-400",
+      "Show fee collection summary, pending payments, and defaulters list.",
+  },
+  {
+    icon: Wallet,
+    title: "Payroll Management",
+    description: "Staff salary and payroll processing overview",
+    prompt:
+      "Show staff payroll summary and pending salary disbursements.",
+  },
+  {
+    icon: BookUser,
+    title: "Teacher Management",
+    description: "View and manage all teachers and staff assignments",
+    prompt:
+      "Show all teachers with their class assignments and contact details.",
+  },
+  {
+    icon: Grid3x3,
+    title: "Timetable Management",
+    description: "School timetable and period schedule for classes",
+    prompt:
+      "Show the current school timetable and period schedule for all classes.",
+  },
+  {
+    icon: LayoutDashboard,
+    title: "Dashboard Analytics",
+    description: "Executive summary and school performance snapshot",
+    prompt:
+      "Give me an executive summary of the school's key performance metrics and analytics.",
   },
 ];
 
 export const QUICK_CHIPS = [
   {
-    emoji: "🗓️",
     label: "Academic Session",
-    prompt: "Show the active academic session and 3-step setup progress",
+    prompt: "Show the active academic session and setup progress",
   },
   {
-    emoji: "📝",
     label: "Exams",
     prompt: "Show all exams and subject schedule",
   },
   {
-    emoji: "🏆",
     label: "Results & Toppers",
     prompt: "Show exam results and top rankers",
   },
   {
-    emoji: "📚",
     label: "Class Syllabus",
-    prompt: "Show prescribed books for Class 1",
+    prompt: "Show prescribed books for Class 1 and Class 10",
   },
   {
-    emoji: "⚙️",
     label: "Settings",
     prompt: "Show school settings and profile info",
   },
   {
-    emoji: "📋",
     label: "Students",
     prompt: "Show me all enrolled students",
   },
   {
-    emoji: "📊",
     label: "Attendance",
     prompt: "Give me today's attendance overview",
   },
   {
-    emoji: "💰",
     label: "Fees",
-    prompt: "Show pending fee collections",
+    prompt: "Show pending fee collections and defaulters",
+  },
+  {
+    label: "Payroll",
+    prompt: "Show payroll summary and pending salaries",
   },
 ];
