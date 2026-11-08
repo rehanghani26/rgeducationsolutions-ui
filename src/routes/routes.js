@@ -53,6 +53,14 @@ export const ROUTES = {
     edit:   (id = ':id') => `/inventory/${id}/edit`,
   },
 
+  // ── Vendors ──────────────────────────────────────────────────────────────
+  VENDORS: {
+    LIST:         '/vendors',
+    CREATE:       '/vendors/new',
+    DETAIL_PARAM: '/vendors/:id',
+    detail: (id = ':id') => `/vendors/${id}`,
+  },
+
   // ── Academics ────────────────────────────────────────────────────────────
   ACADEMICS: {
     BASE:         '/academics',

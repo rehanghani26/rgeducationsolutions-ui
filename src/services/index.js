@@ -21,6 +21,9 @@ export { default as feeService } from './feeService.js';
 export * from './inventoryService.js';
 export { default as inventoryService } from './inventoryService.js';
 
+export * from './vendorService.js';
+export { default as vendorService } from './vendorService.js';
+
 export * from './examService.js';
 export { default as examService } from './examService.js';
 

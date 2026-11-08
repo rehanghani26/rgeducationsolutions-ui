@@ -20,6 +20,8 @@ import {
   InventoryList,
   InventoryDetail,
   InventoryEdit,
+  VendorManagement,
+  VendorDetail,
   ClassList,
   ClassDetail,
   ClassSyllabusPage,
@@ -86,6 +88,10 @@ const appRoutes = [
   { path: ROUTES.INVENTORY.CREATE, element: InventoryEdit, name: 'inventory-create', module: 'inventory', allowedRoles: INVENTORY_ROLES },
   { path: ROUTES.INVENTORY.DETAIL_PARAM, element: InventoryDetail, name: 'inventory-detail', module: 'inventory', allowedRoles: INVENTORY_ROLES },
   { path: ROUTES.INVENTORY.EDIT_PARAM, element: InventoryEdit, name: 'inventory-edit', module: 'inventory', allowedRoles: INVENTORY_ROLES },
+
+  // Vendors
+  { path: ROUTES.VENDORS.LIST, element: VendorManagement, name: 'vendor-list', module: 'inventory', allowedRoles: INVENTORY_ROLES },
+  { path: ROUTES.VENDORS.DETAIL_PARAM, element: VendorDetail, name: 'vendor-detail', module: 'inventory', allowedRoles: INVENTORY_ROLES },
 
   // Academics
   { path: ROUTES.ACADEMICS.BASE, element: AcademicManagement, name: 'academic-overview', module: 'academics' },

@@ -1,9 +1,6 @@
 /**
  * @file inventoryService.js
- * @description Inventory module API service following the EODSrc/services pattern.
- *
- * Provides named async functions with try/catch error handling & toast notifications,
- * plus default inventoryService export for backward compatibility.
+ * @description Dynamic Inventory, Purchases, Issuance & Budget Integration API Service.
  */
 
 import { toast } from 'react-toastify';
@@ -41,14 +38,13 @@ export async function getInventoryById(id) {
   }
 }
 
-export async function getInventoryActivity(id) {
+export async function getInventorySummary() {
   try {
-    const url = INVENTORY_URLS.ACTIVITY(id);
-    const response = await api.get(url);
+    const response = await api.get(INVENTORY_URLS.SUMMARY);
     return response.data;
   } catch (error) {
-    console.error('Error fetching inventory activity:', error);
-    return { data: { logs: [] } };
+    console.error('Error fetching inventory summary:', error);
+    return null;
   }
 }
 
@@ -62,21 +58,11 @@ export async function getInventoryAlerts() {
   }
 }
 
-export async function getVendors() {
-  try {
-    const response = await api.get(INVENTORY_URLS.VENDORS);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching vendors:', error);
-    return { data: [] };
-  }
-}
-
 export async function createInventoryItem(data) {
   try {
     const response = await api.post(INVENTORY_URLS.BASE, data);
     toast.success('Inventory item created successfully');
-    return { status: response.status, data: response.data };
+    return response.data;
   } catch (error) {
     toast.error(error.response?.data?.message || error.message);
     throw { status: error.response?.status, message: error.message };
@@ -87,7 +73,18 @@ export async function updateInventoryItem(id, data) {
   try {
     const response = await api.put(INVENTORY_URLS.BY_ID(id), data);
     toast.success('Inventory item updated successfully');
-    return { status: response.status, data: response.data };
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data?.message || error.message);
+    throw { status: error.response?.status, message: error.message };
+  }
+}
+
+export async function deleteInventoryItem(id) {
+  try {
+    const response = await api.delete(INVENTORY_URLS.BY_ID(id));
+    toast.success('Inventory item deleted');
+    return response.data;
   } catch (error) {
     toast.error(error.response?.data?.message || error.message);
     throw { status: error.response?.status, message: error.message };
@@ -98,22 +95,117 @@ export async function adjustStock(data) {
   try {
     const response = await api.post(INVENTORY_URLS.STOCK_ADJUST, data);
     toast.success('Stock adjusted successfully');
-    return { status: response.status, data: response.data };
+    return response.data;
   } catch (error) {
     toast.error(error.response?.data?.message || error.message);
     throw { status: error.response?.status, message: error.message };
   }
 }
 
+// ─── Purchases (Inward Stock & Vendor Bills) ──────────────────────────────────
+export async function createPurchaseBill(data) {
+  try {
+    const response = await api.post(INVENTORY_URLS.PURCHASES, data);
+    toast.success('Purchase bill recorded & stock updated!');
+    return response.data;
+  } catch (error) {
+    const errData = error.response?.data;
+    if (errData?.overrun) {
+      toast.error(errData.message, { autoClose: 7000 });
+      return { overrun: true, data: errData };
+    }
+    toast.error(errData?.message || error.message);
+    throw error;
+  }
+}
+
+export async function getPurchases(params = {}) {
+  try {
+    const queryStr = buildQuery(params);
+    const url = `${INVENTORY_URLS.PURCHASES}${queryStr ? `?${queryStr}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    return { data: { purchases: [] } };
+  }
+}
+
+// ─── Issuances (Outward Stock & Class-Wise Requisition) ────────────────────────
+export async function createMaterialIssuance(data) {
+  try {
+    const response = await api.post(INVENTORY_URLS.ISSUANCES, data);
+    toast.success('Material issued successfully!');
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data?.message || error.message);
+    throw error;
+  }
+}
+
+export async function getIssuances(params = {}) {
+  try {
+    const queryStr = buildQuery(params);
+    const url = `${INVENTORY_URLS.ISSUANCES}${queryStr ? `?${queryStr}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching issuances:', error);
+    return { data: { issuances: [] } };
+  }
+}
+
+// ─── Unified Transactions Ledger ──────────────────────────────────────────────
+export async function getInventoryTransactions(params = {}) {
+  try {
+    const queryStr = buildQuery(params);
+    const url = `${INVENTORY_URLS.TRANSACTIONS}${queryStr ? `?${queryStr}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    return { data: { transactions: [] } };
+  }
+}
+
+// ─── Backward compatibility ───────────────────────────────────────────────────
+export async function getVendors() {
+  try {
+    const response = await api.get(INVENTORY_URLS.VENDORS);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching vendors:', error);
+    return { data: [] };
+  }
+}
+
+export async function getInventoryActivity(id) {
+  try {
+    const url = INVENTORY_URLS.ACTIVITY(id);
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching inventory activity:', error);
+    return { data: { logs: [] } };
+  }
+}
+
 const inventoryService = {
   getAll: getInventoryItems,
   getById: getInventoryById,
-  getActivity: getInventoryActivity,
+  getSummary: getInventorySummary,
   getAlerts: getInventoryAlerts,
-  getVendors,
+  getActivity: getInventoryActivity,
   create: createInventoryItem,
   update: updateInventoryItem,
+  delete: deleteInventoryItem,
   adjustStock,
+  createPurchase: createPurchaseBill,
+  getPurchases,
+  createIssuance: createMaterialIssuance,
+  getIssuances,
+  getTransactions: getInventoryTransactions,
+  getVendors,
 };
 
 export default inventoryService;

@@ -58,12 +58,26 @@ export const EXPENSE_URLS = {
 
 // ─── Inventory ────────────────────────────────────────────────────────────────
 export const INVENTORY_URLS = {
-  BASE:         '/inventory',
-  BY_ID:        (id)  => `/inventory/${id}`,
-  ACTIVITY:     (id)  => `/inventory/${id}/activity`,
-  ALERTS:       '/inventory/alerts',
-  VENDORS:      '/inventory/vendors',
-  STOCK_ADJUST: '/inventory/stock-adjust',
+  BASE:           '/inventory',
+  BY_ID:          (id)  => `/inventory/${id}`,
+  ACTIVITY:       (id)  => `/inventory/${id}/activity`,
+  SUMMARY:        '/inventory/summary',
+  ALERTS:         '/inventory/alerts',
+  STOCK_ADJUST:   '/inventory/stock-adjust',
+  PURCHASES:      '/inventory/purchases',
+  PURCHASE_BY_ID: (id)  => `/inventory/purchases/${id}`,
+  ISSUANCES:      '/inventory/issuances',
+  ISSUANCE_BY_ID: (id)  => `/inventory/issuances/${id}`,
+  TRANSACTIONS:   '/inventory/transactions',
+  VENDORS:        '/vendors',
+};
+
+// ─── Vendors ──────────────────────────────────────────────────────────────────
+export const VENDOR_URLS = {
+  BASE:   '/vendors',
+  BY_ID:  (id) => `/vendors/${id}`,
+  BILLS:  (id) => `/vendors/${id}/bills`,
+  PAY:    (id) => `/vendors/${id}/pay`,
 };
 
 // ─── Exams ────────────────────────────────────────────────────────────────────
@@ -182,6 +196,7 @@ export const API_URLS = {
   FEES:           FEE_URLS,
   EXPENSES:       EXPENSE_URLS,
   INVENTORY:      INVENTORY_URLS,
+  VENDORS:        VENDOR_URLS,
   EXAMS:          EXAM_URLS,
   RESULTS:        RESULT_URLS,
   SYLLABUS:       SYLLABUS_URLS,
