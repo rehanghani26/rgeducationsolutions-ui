@@ -1,6 +1,6 @@
 // ui/src/pages/vendors/VendorManagement.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   Truck,
