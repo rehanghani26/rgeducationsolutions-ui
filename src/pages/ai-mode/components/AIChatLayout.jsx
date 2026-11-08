@@ -1,6 +1,6 @@
 import React from "react";
-import AISidebar from "./AISidebar.jsx";
-import AIHeader from "./AIHeader.jsx";
+import AISidebar from "./AiSidebar.jsx";
+import AIHeader from "./AiHeader.jsx";
 import VoiceAssistantBanner from "./VoiceAssistantBanner.jsx";
 import AIMessageComposer from "./AIMessageComposer.jsx";
 
