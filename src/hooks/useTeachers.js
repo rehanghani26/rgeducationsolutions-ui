@@ -2,31 +2,37 @@
  * @file useTeachers.js
  * @description Plain React hooks for the Teacher module.
  *
- * API response calls commented out to directly serve hardcoded demo data response.
- * All HTTP calls delegated to teacherService.
+ * Real API integration with teacherService.
+ * All state managed with useState + useEffect.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import teacherService from '../services/teacherService.js';
-import { mockTeachers } from '../data/mockData.js';
 
 // ─── useTeachers ─────────────────────────────────────────────────────────────
 export const useTeachers = (params = {}) => {
-  const [data, setData]       = useState({ teachers: mockTeachers, pagination: { total: mockTeachers.length, page: 1, pages: 1 } });
+  const [data, setData]       = useState({ teachers: [], pagination: { total: 0, page: 1, pages: 1 } });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
   const fetch = useCallback(async () => {
     setLoading(true);
     try {
-      // API call commented out to use hardcoded actual response:
-      // const res = await teacherService.getAll(params);
-      // if (res.data?.teachers?.length > 0) setData(res.data);
-      
-      // Directly return hardcoded actual response:
-      setData({ teachers: mockTeachers, pagination: { total: mockTeachers.length, page: 1, pages: 1 } });
+      const res = await teacherService.getAll(params);
+      if (res?.teachers) {
+        setData({ teachers: res.teachers, pagination: res.pagination || { total: res.teachers.length, page: 1, pages: 1 } });
+      } else if (res?.data?.teachers) {
+        setData({ teachers: res.data.teachers, pagination: res.data.pagination || { total: res.data.teachers.length, page: 1, pages: 1 } });
+      } else if (Array.isArray(res?.data)) {
+        setData({ teachers: res.data, pagination: { total: res.data.length, page: 1, pages: 1 } });
+      } else if (Array.isArray(res)) {
+        setData({ teachers: res, pagination: { total: res.length, page: 1, pages: 1 } });
+      } else {
+        setData({ teachers: [], pagination: { total: 0, page: 1, pages: 1 } });
+      }
     } catch (err) {
       setError(err);
+      setData({ teachers: [], pagination: { total: 0, page: 1, pages: 1 } });
     } finally {
       setLoading(false);
     }
@@ -46,15 +52,13 @@ export const useTeacher = (id) => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    // API call commented out to use hardcoded actual response:
-    // teacherService.getById(id)
-    //   .then(res => setData(res.data?.teacher))
-    //   .catch(err => setError(err));
-
-    // Directly return hardcoded actual response:
-    const found = mockTeachers.find(t => t.id === id || t._id === id) || mockTeachers[0];
-    setData(found);
-    setLoading(false);
+    teacherService.getById(id)
+      .then(res => setData(res?.teacher || res?.data?.teacher || res?.data || res || null))
+      .catch(err => {
+        setError(err);
+        setData(null);
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
   return { data, loading, error };
@@ -63,14 +67,8 @@ export const useTeacher = (id) => {
 // ─── useTeacherActivity ───────────────────────────────────────────────────────
 export const useTeacherActivity = (id) => {
   const [data, setData]       = useState({
-    logs: [
-      { id: "log-1", action: "Profile Record Updated", date: "2026-08-01 10:15 AM", user: "Admin" },
-      { id: "log-2", action: "Class 10 Attendance Submitted", date: "2026-08-05 08:00 AM", user: "Self" },
-    ],
-    loginHistory: [
-      { id: "lh-1", date: "2026-08-05 07:30 AM", ip: "192.168.1.45", device: "Chrome (Windows)" },
-      { id: "lh-2", date: "2026-08-04 07:35 AM", ip: "192.168.1.45", device: "Chrome (Windows)" },
-    ]
+    logs: [],
+    loginHistory: []
   });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
@@ -78,11 +76,13 @@ export const useTeacherActivity = (id) => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    // API call commented out to use hardcoded actual response:
-    // teacherService.getActivity(id)
-    //   .then(res => setData(res.data))
-    //   .catch(err => setError(err));
-    setLoading(false);
+    teacherService.getActivity(id)
+      .then(res => setData(res?.data || res || { logs: [], loginHistory: [] }))
+      .catch(err => {
+        setError(err);
+        setData({ logs: [], loginHistory: [] });
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
   return { data, loading, error };
@@ -96,11 +96,9 @@ export const useCreateTeacher = () => {
   const mutate = async (data, { onSuccess } = {}) => {
     setLoading(true);
     try {
-      // API call commented out to return mock created data response:
-      // const res = await teacherService.create(data);
-      const res = { data: { message: "Teacher created successfully", teacher: { ...data, id: `tch-${Date.now()}` } } };
-      if (onSuccess) onSuccess(res.data);
-      return res.data;
+      const res = await teacherService.create(data);
+      if (onSuccess) onSuccess(res?.data || res);
+      return res?.data || res;
     } catch (err) {
       setError(err);
       throw err;
@@ -118,11 +116,9 @@ export const useUpdateTeacher = () => {
   const mutate = async ({ id, data }, { onSuccess } = {}) => {
     setLoading(true);
     try {
-      // API call commented out to return mock updated data response:
-      // const res = await teacherService.update(id, data);
-      const res = { data: { message: "Teacher updated successfully", teacher: { ...data, id } } };
-      if (onSuccess) onSuccess(res.data);
-      return res.data;
+      const res = await teacherService.update(id, data);
+      if (onSuccess) onSuccess(res?.data || res);
+      return res?.data || res;
     } catch (err) {
       setError(err);
       throw err;
@@ -140,9 +136,8 @@ export const useDeleteTeacher = () => {
   const mutate = async (id, { onSuccess } = {}) => {
     setLoading(true);
     try {
-      // API call commented out to return mock response:
-      // const res = await teacherService.delete(id);
-      if (onSuccess) onSuccess();
+      const res = await teacherService.delete(id);
+      if (onSuccess) onSuccess(res);
       return { success: true };
     } catch (err) {
       setError(err);
@@ -161,9 +156,8 @@ export const useBulkDeleteTeachers = () => {
   const mutate = async (ids, { onSuccess } = {}) => {
     setLoading(true);
     try {
-      // API call commented out to return mock response:
-      // const res = await teacherService.bulkDelete(ids);
-      if (onSuccess) onSuccess();
+      const res = await teacherService.bulkDelete(ids);
+      if (onSuccess) onSuccess(res);
       return { success: true };
     } catch (err) {
       setError(err);
@@ -182,11 +176,9 @@ export const useResetTeacherPassword = () => {
   const mutate = async ({ id, data }, { onSuccess } = {}) => {
     setLoading(true);
     try {
-      // API call commented out to return mock response:
-      // const res = await teacherService.resetPassword(id, data);
-      const res = { data: { message: "Password reset successfully" } };
-      if (onSuccess) onSuccess(res.data);
-      return res.data;
+      const res = await teacherService.resetPassword(id, data);
+      if (onSuccess) onSuccess(res?.data || res);
+      return res?.data || res;
     } catch (err) {
       setError(err);
       throw err;

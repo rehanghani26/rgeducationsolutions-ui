@@ -25,7 +25,7 @@ const ReportsManagement = () => {
             </div>
           </div>
           <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-800 dark:text-emerald-300 text-sm font-semibold">
-            ✨ Student attendance consistent at 96.4% across all departments this month.
+            ✨ Monthly Student Attendance Metric: N/A
           </div>
         </div>
 
@@ -38,7 +38,7 @@ const ReportsManagement = () => {
             </div>
           </div>
           <div className="p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-800 dark:text-indigo-300 text-sm font-semibold">
-            💳 ₹18,45,000 collected in Q3 session with 89.5% completion rate.
+            💳 Total Fee Collection Metric: N/A
           </div>
         </div>
       </div>
@@ -48,18 +48,24 @@ const ReportsManagement = () => {
         <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
           <Award className="text-amber-500" size={20} /> Academic Honor Roll & Top Performers
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {mockReports.topPerformers.map((st, i) => (
-            <div key={st.name} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold text-amber-600">Rank #{i + 1}</span>
-                <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">{st.name}</h4>
-                <p className="text-xs text-slate-400">{st.grade}</p>
+        {mockReports.topPerformers?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {mockReports.topPerformers.map((st, i) => (
+              <div key={st.name} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-amber-600">Rank #{i + 1}</span>
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">{st.name}</h4>
+                  <p className="text-xs text-slate-400">{st.grade}</p>
+                </div>
+                <span className="text-lg font-extrabold text-emerald-600">{st.score}</span>
               </div>
-              <span className="text-lg font-extrabold text-emerald-600">{st.score}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-8 text-center text-xs text-slate-400">
+            No academic honor roll records available (N/A)
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -8,16 +8,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import attendanceService from '../services/attendanceService.js';
-import { mockAttendance, mockAttendanceRecords } from '../data/mockData.js';
 
 // ─── useAttendanceRecords ─────────────────────────────────────────────────────
 export const useAttendanceRecords = (params = {}) => {
-  const fallback = {
-    records: mockAttendanceRecords,
-    pagination: { total: mockAttendanceRecords.length, page: 1, pages: 1 },
+  const emptyState = {
+    records: [],
+    pagination: { total: 0, page: 1, pages: 1 },
   };
 
-  const [data, setData]       = useState(fallback);
+  const [data, setData]       = useState(emptyState);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
@@ -25,14 +24,14 @@ export const useAttendanceRecords = (params = {}) => {
     setLoading(true);
     try {
       const res = await attendanceService.getRecords(params);
-      if (res.data?.records?.length > 0) {
+      if (res.data?.records) {
         setData(res.data);
       } else {
-        setData(fallback);
+        setData(emptyState);
       }
     } catch (err) {
       setError(err);
-      setData(fallback);
+      setData(emptyState);
     } finally {
       setLoading(false);
     }
@@ -45,14 +44,13 @@ export const useAttendanceRecords = (params = {}) => {
 
 // ─── useAttendanceStats ───────────────────────────────────────────────────────
 export const useAttendanceStats = (params = {}) => {
-  const { summary } = mockAttendance;
   const [data, setData]       = useState({
-    percentage: summary.presentPercentage,
-    presentPercentage: summary.presentPercentage,
-    total:   summary.total,
-    present: summary.present,
-    absent:  summary.absent,
-    late:    summary.late || 12,
+    percentage: "N/A",
+    presentPercentage: "N/A",
+    total:   0,
+    present: 0,
+    absent:  0,
+    late:    0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);

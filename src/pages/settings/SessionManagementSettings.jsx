@@ -22,10 +22,12 @@ import {
   ArrowRight,
   Bell,
   LayoutGrid,
+  Wallet,
 } from 'lucide-react';
 import api from '../../services/api.js';
 import { CLASS_OPTIONS } from '../../constants/academicOptions.js';
 import Modal from '../../components/ui/Modal.jsx';
+import Loader from '../../components/ui/Loader.jsx';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Academic Progress Stepper — shared 3-step indicator rendered at the top of
@@ -126,6 +128,7 @@ const SessionManagementSettings = () => {
   const [sessions, setSessions] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [budgets, setBudgets] = useState([]);
 
   // New session form state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -134,6 +137,19 @@ const SessionManagementSettings = () => {
   const [endDate, setEndDate] = useState('');
   const [isCurrent, setIsCurrent] = useState(false);
   const [notes, setNotes] = useState('');
+
+  // Edit session form state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSession, setEditingSession] = useState(null);
+  const [editForm, setEditForm] = useState({
+    sessionName: '',
+    startDate: '',
+    endDate: '',
+    isCurrent: false,
+    status: 'active',
+    notes: '',
+  });
+  const [submittingEdit, setSubmittingEdit] = useState(false);
 
   // Promotion state
   const [selectedClass, setSelectedClass] = useState('All Classes');
@@ -191,21 +207,31 @@ const SessionManagementSettings = () => {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [sessRes, studRes, promoRes] = await Promise.all([
+      const [sessRes, studRes, promoRes, budgetRes] = await Promise.all([
         api.get('/sessions').catch(() => null),
         api.get('/students').catch(() => null),
         api.get('/students/promotion-status').catch(() => null),
+        api.get('/budget').catch(() => null),
       ]);
 
-      if (sessRes?.data?.sessions) {
-        setSessions(sessRes.data.sessions);
-        const activeSess = sessRes.data.sessions.find((s) => s.isCurrent);
-        if (activeSess) setTargetSession(activeSess.sessionName);
-      }
+      const sessList =
+        sessRes?.data?.data?.sessions ||
+        sessRes?.data?.sessions ||
+        (Array.isArray(sessRes?.data?.data) ? sessRes.data.data : (Array.isArray(sessRes?.data) ? sessRes.data : []));
+      setSessions(sessList);
 
-      if (studRes?.data?.students || Array.isArray(studRes?.data)) {
-        const list = studRes.data.students || studRes.data;
-        setStudents(list);
+      const activeSess = sessList.find((s) => s.isCurrent) || sessList[0];
+      if (activeSess) setTargetSession(activeSess.sessionName);
+
+      const budgetList =
+        budgetRes?.data?.data?.budgets ||
+        budgetRes?.data?.budgets ||
+        (Array.isArray(budgetRes?.data?.data) ? budgetRes.data.data : []);
+      setBudgets(budgetList);
+
+      if (studRes?.data?.students || Array.isArray(studRes?.data?.data) || Array.isArray(studRes?.data)) {
+        const list = studRes.data?.data?.students || studRes.data?.students || studRes.data?.data || studRes.data;
+        setStudents(Array.isArray(list) ? list : []);
       }
 
       const hasLocalTimestamp = (() => {
@@ -230,6 +256,65 @@ const SessionManagementSettings = () => {
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  const handleOpenEditModal = (sess) => {
+    if (!sess) return;
+    setEditingSession(sess);
+    setEditForm({
+      sessionName: sess.sessionName || '',
+      startDate: sess.startDate ? String(sess.startDate).slice(0, 10) : '',
+      endDate: sess.endDate ? String(sess.endDate).slice(0, 10) : '',
+      isCurrent: !!sess.isCurrent,
+      status: sess.status || (sess.isCurrent ? 'active' : 'upcoming'),
+      notes: sess.notes || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateSession = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!editingSession) return;
+    if (!editForm.sessionName || !editForm.startDate || !editForm.endDate) {
+      safeToast('error', 'Please enter session name, start date, and end date.');
+      return;
+    }
+
+    setSubmittingEdit(true);
+    try {
+      const res = await api.put(`/sessions/${editingSession._id || editingSession.id}`, editForm);
+      if (res.data?.success) {
+        safeToast('success', `Academic Session "${editForm.sessionName}" updated successfully!`);
+        setShowEditModal(false);
+        setEditingSession(null);
+        fetchInitialData();
+      }
+    } catch (err) {
+      safeToast('error', err.response?.data?.message || 'Failed to update academic session');
+    } finally {
+      setSubmittingEdit(false);
+    }
+  };
+
+  const handleDeleteSession = async (sess) => {
+    if (!sess) return;
+    if (sess.isCurrent) {
+      safeToast('error', 'Cannot delete the active current session. Please set another session active first.');
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to delete session "${sess.sessionName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await api.delete(`/sessions/${sess._id || sess.id}`);
+      if (res.data?.success) {
+        safeToast('success', `Session "${sess.sessionName}" deleted successfully!`);
+        fetchInitialData();
+      }
+    } catch (err) {
+      safeToast('error', err.response?.data?.message || 'Failed to delete session');
+    }
+  };
 
   const activeSession = useMemo(
     () => sessions.find((s) => s.isCurrent) || sessions[0],
@@ -492,7 +577,7 @@ const SessionManagementSettings = () => {
 
         {/* Current Active Session Badge Bar */}
         {activeSession && (
-          <div className="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div className="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div className="flex items-center gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
               <Clock className="text-indigo-400" size={18} />
               <div>
@@ -506,7 +591,7 @@ const SessionManagementSettings = () => {
               <div>
                 <p className="text-[10px] text-slate-400 uppercase font-bold">Session Start & End Date</p>
                 <p className="font-extrabold text-slate-200">
-                  {new Date(activeSession.startDate).toLocaleDateString()} — {new Date(activeSession.endDate).toLocaleDateString()}
+                  {activeSession.startDate ? new Date(activeSession.startDate).toLocaleDateString() : '—'} — {activeSession.endDate ? new Date(activeSession.endDate).toLocaleDateString() : '—'}
                 </p>
               </div>
             </div>
@@ -517,6 +602,28 @@ const SessionManagementSettings = () => {
                 <p className="text-[10px] text-slate-400 uppercase font-bold">Total Enrolled Students</p>
                 <p className="font-black text-white text-sm">{students.length} Active Records</p>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+              <div className="flex items-center gap-2.5">
+                <Wallet className="text-orange-400 shrink-0" size={18} />
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold">Salary Master Budget</p>
+                  <p className="font-black text-white text-sm">
+                    {(() => {
+                      const b = budgets.find((bg) => String(bg.sessionId) === String(activeSession._id || activeSession.id));
+                      return b ? `₹${(b.salaryBudget || 0).toLocaleString('en-IN')}` : 'Not Allocated';
+                    })()}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => handleOpenEditModal(activeSession)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-[11px] shadow-sm transition-all shrink-0 cursor-pointer"
+                title="Edit Current Active Session"
+              >
+                <Edit size={12} /> Edit Current Session
+              </button>
             </div>
           </div>
         )}
@@ -536,58 +643,145 @@ const SessionManagementSettings = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                <th className="py-3 px-4">Session Name</th>
-                <th className="py-3 px-4">Start Date</th>
-                <th className="py-3 px-4">End Date</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {sessions.map((sess) => (
-                <tr key={sess._id || sess.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                  <td className="py-3 px-4 font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    {sess.sessionName}
-                    {sess.isCurrent && (
-                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
-                        ACTIVE CURRENT
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
-                    {new Date(sess.startDate).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
-                    {new Date(sess.endDate).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-md font-bold text-[10px] uppercase ${
-                        sess.isCurrent
-                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                          : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400'
-                      }`}
-                    >
-                      {sess.status || (sess.isCurrent ? 'active' : 'upcoming')}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    {!sess.isCurrent && (
-                      <button
-                        onClick={() => handleActivateSession(sess._id || sess.id, sess.sessionName)}
-                        className="px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[11px] border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800 transition-all"
-                      >
-                        Set Active
-                      </button>
-                    )}
-                  </td>
+          {loading ? (
+            <Loader text="Loading Academic Sessions & Master Budget Allocation..." />
+          ) : sessions.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 space-y-3">
+              <Calendar className="mx-auto text-slate-500" size={32} />
+              <p className="font-bold text-sm text-slate-300">No Academic Sessions Configured</p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Get started by creating your school's current academic year (e.g. 2026-2027).
+              </p>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer"
+              >
+                <Plus size={14} /> Create Academic Session
+              </button>
+            </div>
+          ) : (
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
+                  <th className="py-3 px-4">Session Name</th>
+                  <th className="py-3 px-4">Start Date</th>
+                  <th className="py-3 px-4">End Date</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Salary Budget & Payroll Integration</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {sessions.map((sess) => {
+                  const sessBudget = budgets.find(
+                    (b) => String(b.sessionId) === String(sess._id || sess.id)
+                  );
+                  return (
+                    <tr key={sess._id || sess.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                      <td className="py-3 px-4 font-black text-slate-900 dark:text-white">
+                        <div className="flex items-center gap-2">
+                          <span>{sess.sessionName}</span>
+                          {sess.isCurrent && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                              ACTIVE CURRENT
+                            </span>
+                          )}
+                        </div>
+                        {sess.notes && (
+                          <p className="text-[10px] text-slate-400 font-normal mt-0.5">{sess.notes}</p>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
+                        {sess.startDate ? new Date(sess.startDate).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
+                        {sess.endDate ? new Date(sess.endDate).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-md font-bold text-[10px] uppercase ${
+                            sess.isCurrent
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                              : sess.status === 'completed'
+                              ? 'bg-slate-100 text-slate-500 border border-slate-200'
+                              : 'bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-slate-800 dark:text-slate-400'
+                          }`}
+                        >
+                          {sess.status || (sess.isCurrent ? 'active' : 'upcoming')}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        {sessBudget ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
+                              <span>₹{(sessBudget.salaryBudget || 0).toLocaleString('en-IN')}</span>
+                              <span className="text-[10px] text-slate-400 font-normal">
+                                (₹{(sessBudget.salarySpent || 0).toLocaleString('en-IN')} spent)
+                              </span>
+                            </div>
+                            <div className="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-1 overflow-hidden">
+                              <div
+                                className="bg-emerald-500 h-1 rounded-full"
+                                style={{
+                                  width: `${
+                                    sessBudget.salaryBudget
+                                      ? Math.min(
+                                          100,
+                                          Math.round(
+                                            ((sessBudget.salarySpent || 0) / sessBudget.salaryBudget) * 100
+                                          )
+                                        )
+                                      : 0
+                                  }%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => navigate('/settings/budget-allocation')}
+                            className="text-[11px] font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1 cursor-pointer"
+                          >
+                            <Wallet size={12} /> Allocate Master Budget
+                          </button>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="inline-flex items-center gap-2 justify-end">
+                          <button
+                            onClick={() => handleOpenEditModal(sess)}
+                            className="p-1.5 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all font-bold text-[11px] flex items-center gap-1 cursor-pointer"
+                            title="Edit Academic Session"
+                          >
+                            <Edit size={13} />
+                            <span>Edit</span>
+                          </button>
+
+                          {!sess.isCurrent && (
+                            <>
+                              <button
+                                onClick={() => handleActivateSession(sess._id || sess.id, sess.sessionName)}
+                                className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[11px] border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800 transition-all cursor-pointer"
+                              >
+                                Set Active
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSession(sess)}
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800 transition-all cursor-pointer"
+                                title="Delete Inactive Session"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -849,18 +1043,132 @@ const SessionManagementSettings = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg cursor-pointer"
                 >
                   Save Academic Session
                 </button>
               </div>
             </form>
+        </div>
+      </Modal>
+
+      {/* ── MODAL: EDIT ACADEMIC SESSION ── */}
+      <Modal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingSession(null);
+        }}
+        size="sm"
+        title={
+          <div className="flex items-center gap-2">
+            <Edit className="text-indigo-600" size={18} />
+            <span>Edit Academic Session: {editingSession?.sessionName}</span>
+          </div>
+        }
+      >
+        <div className="space-y-5">
+          <form onSubmit={handleUpdateSession} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">
+                Session Name (e.g. 2026-2027):
+              </label>
+              <input
+                type="text"
+                placeholder="2026-2027"
+                value={editForm.sessionName}
+                onChange={(e) => setEditForm({ ...editForm, sessionName: e.target.value })}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Start Date:</label>
+                <input
+                  type="date"
+                  value={editForm.startDate}
+                  onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">End Date:</label>
+                <input
+                  type="date"
+                  value={editForm.endDate}
+                  onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Session Status:</label>
+              <select
+                value={editForm.status}
+                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
+              >
+                <option value="active">Active</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="editIsCurrentCheck"
+                checked={editForm.isCurrent}
+                onChange={(e) => setEditForm({ ...editForm, isCurrent: e.target.checked })}
+                className="rounded text-indigo-600"
+              />
+              <label htmlFor="editIsCurrentCheck" className="font-extrabold text-slate-800 dark:text-slate-200 cursor-pointer">
+                Mark as Active Current Session
+              </label>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Notes / Description:</label>
+              <textarea
+                rows={2}
+                placeholder="Optional session details..."
+                value={editForm.notes}
+                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingSession(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submittingEdit}
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg disabled:opacity-50 cursor-pointer"
+              >
+                {submittingEdit ? 'Saving...' : 'Update Academic Session'}
+              </button>
+            </div>
+          </form>
         </div>
       </Modal>
 

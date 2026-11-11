@@ -7,19 +7,13 @@ import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
 import auditLogService from "../../services/auditLogService.js";
 import Loader from "../../components/ui/Loader.jsx";
 
-const mockAuditLogs = [
-  { id: "al-1", timestamp: "2026-08-05T08:00:00Z", userId: { name: "Sheikh Abdullah Al-Hafiz" }, action: "ATTENDANCE_MARKED", module: "attendance", details: "Marked attendance for Grade 10 - Section A", ipAddress: "192.168.1.45" },
-  { id: "al-2", timestamp: "2026-08-04T14:30:00Z", userId: { name: "Principal Office" }, action: "STUDENT_REGISTERED", module: "students", details: "Registered student Zayd Ibn Tariq", ipAddress: "192.168.1.10" },
-  { id: "al-3", timestamp: "2026-08-02T11:20:00Z", userId: { name: "Finance Admin" }, action: "FEE_COLLECTED", module: "finance", details: "Collected Q3 Tuition Fee ₹15,500 (INV-2026-8801)", ipAddress: "192.168.1.12" },
-];
-
 const AuditLogList = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [module, setModule] = useState("");
   const [action, setAction] = useState("");
-  const [logs, setLogs] = useState(mockAuditLogs);
-  const [pagination, setPagination] = useState({ total: mockAuditLogs.length, page: 1, pages: 1 });
+  const [logs, setLogs] = useState([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
 
   // Direct useEffect API Fetch
@@ -27,14 +21,14 @@ const AuditLogList = () => {
     setLoading(true);
     auditLogService.getAll({ page, limit: 30, search, module, action })
       .then((res) => {
-        if (res.data?.data?.length > 0) {
+        if (res.data?.data) {
           setLogs(res.data.data);
           if (res.data.pagination) setPagination(res.data.pagination);
         } else {
-          setLogs(mockAuditLogs);
+          setLogs([]);
         }
       })
-      .catch(() => setLogs(mockAuditLogs))
+      .catch(() => setLogs([]))
       .finally(() => setLoading(false));
   }, [page, search, module, action]);
 

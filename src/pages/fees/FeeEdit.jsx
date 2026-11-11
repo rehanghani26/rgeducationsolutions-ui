@@ -7,7 +7,6 @@ import Loader from '../../components/ui/Loader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { CurrencyInput } from '../../components/ui/CurrencyInput.jsx';
 import feeService from '../../services/feeService.js';
-import { mockFees } from '../../data/mockData.js';
 
 const inputCls = 'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase';
@@ -25,12 +24,17 @@ const FeeEdit = () => {
     setLoading(true);
     feeService.getById(id)
       .then(res => {
-        const found = res.data?.fee || mockFees.find(f => f.id === id || f._id === id) || mockFees[0];
-        setFee(found);
+        const found = res?.fee || res?.data?.fee || (res?._id || res?.id ? res : null);
+        if (found) {
+          setFee(found);
+        } else {
+          toast.error("Fee record not found");
+        }
       })
-      .catch(() => {
-        const found = mockFees.find(f => f.id === id || f._id === id) || mockFees[0];
-        setFee(found);
+      .catch((err) => {
+        console.error("Failed to load fee record:", err);
+        toast.error("Failed to load fee record from server");
+        setFee(null);
       })
       .finally(() => setLoading(false));
   }, [id]);

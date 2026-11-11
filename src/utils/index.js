@@ -43,6 +43,17 @@ export const checkVisibility = (section, permissionAction, pageConfig) => {
   return hasModuleAccess(user, "settings");
 };
 
+/**
+ * Formats a number into Indian Rupee Currency string.
+ * @param {number|string} val
+ * @returns {string}
+ */
+export const formatCurrency = (val) => {
+  const n = Number(val) || 0;
+  return `₹${n.toLocaleString("en-IN")}`;
+};
+
 export default {
   checkVisibility,
+  formatCurrency,
 };

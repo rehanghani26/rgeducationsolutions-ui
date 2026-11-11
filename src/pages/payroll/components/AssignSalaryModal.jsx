@@ -4,11 +4,7 @@ import { toast } from 'react-toastify';
 import api from '../../../services/api.js';
 import Modal from '../../../components/ui/Modal.jsx';
 import { CurrencyInput } from '../../../components/ui/CurrencyInput.jsx';
-
-const formatCurrency = (val) => {
-  const n = Number(val) || 0;
-  return `₹${n.toLocaleString('en-IN')}`;
-};
+import { formatCurrency } from '../payrollUtils.js';
 
 const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
   const [formData, setFormData] = useState({
@@ -215,7 +211,7 @@ const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2.5">
             Disbursement & Bank Information
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Payment Mode
@@ -277,27 +273,27 @@ const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
         </div>
 
         {/* Footer actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
-          <div className="text-xs text-slate-500">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="text-xs text-slate-500 text-center sm:text-left">
             Gross: <strong className="text-slate-800 dark:text-slate-200">{formatCurrency(calculatedGross)}</strong> •
             Deductions: <strong className="text-rose-500">-{formatCurrency(calculatedDeductions)}</strong>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-center"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-60"
+              className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-md transition cursor-pointer disabled:opacity-60 text-center"
             >
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-              Save Structure
+              <span>Save Structure</span>
             </button>
           </div>
         </div>

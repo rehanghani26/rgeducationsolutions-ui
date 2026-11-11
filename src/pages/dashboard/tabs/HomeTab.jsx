@@ -90,120 +90,40 @@ const HomeTab = () => {
     };
   }, []);
 
-  // Attendance Stacked Bar Data (From Mockup)
+  // Attendance Stacked Bar Data (From API or empty)
   const attendanceData = useMemo(() => {
-    return [
-      { day: "Mon", present: 45, absent: 15, leave: 10 },
-      { day: "Tue", present: 58, absent: 20, leave: 8 },
-      { day: "Wed", present: 72, absent: 18, leave: 6 },
-      { day: "Thu", present: 88, absent: 22, leave: 10 },
-      { day: "Fri", present: 68, absent: 18, leave: 8 },
-      { day: "Sat", present: 42, absent: 12, leave: 6 },
-      { day: "Sun", present: 56, absent: 14, leave: 8 },
-    ];
-  }, []);
+    return charts?.attendanceWeekly || charts?.attendanceTrend || [];
+  }, [charts]);
 
-  // Class distribution donut data (From Mockup)
+  // Class distribution donut data (From API or empty)
   const classData = useMemo(() => {
-    return [
-      { name: "Class 1-5", count: 420, color: "#EA580C" },
-      { name: "Class 6-8", count: 380, color: "#F97316" },
-      { name: "Class 9-10", count: 300, color: "#FB923C" },
-      { name: "Class 11-12", count: 148, color: "#FBBF24" },
-    ];
-  }, []);
+    return charts?.classDistribution || [];
+  }, [charts]);
 
-  // Fee collection trend data (From Mockup)
+  // Fee collection trend data (From API or empty)
   const feeTrendData = useMemo(() => {
-    return [
-      { date: "1 Oct", amount: 75 },
-      { date: "5 Oct", amount: 180 },
-      { date: "10 Oct", amount: 150 },
-      { date: "15 Oct", amount: 220 },
-      { date: "20 Oct", amount: 250 },
-      { date: "25 Oct", amount: 330 },
-      { date: "30 Oct", amount: 360 },
-    ];
-  }, []);
+    return charts?.feeCollection || charts?.monthlyRevenue || [];
+  }, [charts]);
 
-  // Recent activities list (From Mockup)
+  // Recent activities list (From API or empty)
   const recentActivities = useMemo(() => {
-    return [
-      {
-        id: 1,
-        title: "New student admitted",
-        time: "2 hours ago",
-        icon: UserPlus,
-        color: "bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400",
-      },
-      {
-        id: 2,
-        title: "Fee payment received",
-        time: "4 hours ago",
-        icon: Wallet,
-        color: "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
-      },
-      {
-        id: 3,
-        title: "Teacher attendance marked",
-        time: "5 hours ago",
-        icon: Users,
-        color: "bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
-      },
-      {
-        id: 4,
-        title: "Exam result published",
-        time: "1 day ago",
-        icon: FileText,
-        color: "bg-rose-500/15 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400",
-      },
-      {
-        id: 5,
-        title: "Notice added in notice board",
-        time: "1 day ago",
-        icon: Bell,
-        color: "bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400",
-      },
-    ];
-  }, []);
+    return stats?.recentActivities || [];
+  }, [stats]);
 
-  // Upcoming events list (From Mockup)
+  // Upcoming events list (From API or empty)
   const upcomingEvents = useMemo(() => {
-    return [
-      {
-        id: 1,
-        month: "OCT",
-        date: "5",
-        title: "Unit Test - Class 6",
-        time: "09:00 AM - 12:00 PM",
-        tagColor: "bg-amber-500",
-      },
-      {
-        id: 2,
-        month: "OCT",
-        date: "10",
-        title: "PTM (Parents Meeting)",
-        time: "10:00 AM - 01:00 PM",
-        tagColor: "bg-rose-500",
-      },
-      {
-        id: 3,
-        month: "OCT",
-        date: "15",
-        title: "Science Exhibition",
-        time: "All Day",
-        tagColor: "bg-orange-500",
-      },
-      {
-        id: 4,
-        month: "OCT",
-        date: "20",
-        title: "Holiday (Eid Milad-un-Nabi)",
-        time: "All Day",
-        tagColor: "bg-amber-600",
-      },
-    ];
-  }, []);
+    if (charts?.upcomingExams?.length) {
+      return charts.upcomingExams.map((ex, idx) => ({
+        id: ex.id || ex._id || idx,
+        month: ex.date ? new Date(ex.date).toLocaleString('en', { month: 'short' }).toUpperCase() : 'N/A',
+        date: ex.date ? new Date(ex.date).getDate() : '—',
+        title: ex.title || ex.name || 'Examination',
+        time: ex.time || 'Scheduled',
+        tagColor: 'bg-amber-500',
+      }));
+    }
+    return [];
+  }, [charts]);
 
   if (loading) {
     return (
@@ -303,31 +223,37 @@ const HomeTab = () => {
 
           {/* Chart */}
           <div className="h-52 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={attendanceData} barSize={16}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EFE8DD" opacity={0.6} />
-                <XAxis dataKey="day" stroke="#A8A29E" fontSize={11} tickLine={false} />
-                <YAxis
-                  stroke="#A8A29E"
-                  fontSize={10}
-                  domain={[0, 100]}
-                  ticks={[0, 25, 50, 75, 100]}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#1C1B1A",
-                    border: "1px solid #3F3C39",
-                    borderRadius: "12px",
-                    fontSize: "11px",
-                    color: "#FAF7F2",
-                  }}
-                />
-                <Bar dataKey="leave" stackId="a" fill="#F59E0B" />
-                <Bar dataKey="absent" stackId="a" fill="#EF4444" />
-                <Bar dataKey="present" stackId="a" fill="#EA580C" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {attendanceData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={attendanceData} barSize={16}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#EFE8DD" opacity={0.6} />
+                  <XAxis dataKey="day" stroke="#A8A29E" fontSize={11} tickLine={false} />
+                  <YAxis
+                    stroke="#A8A29E"
+                    fontSize={10}
+                    domain={[0, 100]}
+                    ticks={[0, 25, 50, 75, 100]}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#1C1B1A",
+                      border: "1px solid #3F3C39",
+                      borderRadius: "12px",
+                      fontSize: "11px",
+                      color: "#FAF7F2",
+                    }}
+                  />
+                  <Bar dataKey="leave" stackId="a" fill="#F59E0B" />
+                  <Bar dataKey="absent" stackId="a" fill="#EF4444" />
+                  <Bar dataKey="present" stackId="a" fill="#EA580C" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-stone-400 font-semibold">
+                No attendance records for this period (N/A)
+              </div>
+            )}
           </div>
         </div>
 
@@ -349,26 +275,32 @@ const HomeTab = () => {
           </div>
 
           <div className="space-y-3.5 mt-2">
-            {recentActivities.map((act) => {
-              const Icon = act.icon;
-              return (
-                <div key={act.id} className="flex items-center gap-3">
-                  <div
-                    className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${act.color}`}
-                  >
-                    <Icon size={16} />
+            {recentActivities.length > 0 ? (
+              recentActivities.map((act) => {
+                const Icon = act.icon || Clock;
+                return (
+                  <div key={act.id} className="flex items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${act.color || 'bg-orange-500/15 text-orange-600'}`}
+                    >
+                      <Icon size={16} />
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">
+                        {act.title}
+                      </span>
+                      <span className="text-[10px] font-medium text-stone-400">
+                        {act.time}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">
-                      {act.title}
-                    </span>
-                    <span className="text-[10px] font-medium text-stone-400">
-                      {act.time}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <div className="py-8 text-center text-xs text-stone-400 font-semibold">
+                No recent activity logs (N/A)
+              </div>
+            )}
           </div>
         </div>
 
@@ -390,31 +322,36 @@ const HomeTab = () => {
           </div>
 
           <div className="space-y-3.5 mt-2">
-            {upcomingEvents.map((ev) => (
-              <div key={ev.id} className="flex items-center gap-3">
-                {/* Date Badge */}
-                <div className="flex flex-col items-center justify-center rounded-xl bg-orange-500/10 px-2.5 py-1 text-center flex-shrink-0 min-w-[42px] dark:bg-orange-500/20">
-                  <span className="text-[9px] font-extrabold text-orange-700 dark:text-orange-300 uppercase">
-                    {ev.month}
-                  </span>
-                  <span className="text-sm font-black text-orange-600 dark:text-orange-400 leading-none">
-                    {ev.date}
-                  </span>
-                </div>
-
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`h-1.5 w-1.5 rounded-full ${ev.tagColor} flex-shrink-0`} />
-                    <span className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">
-                      {ev.title}
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map((ev) => (
+                <div key={ev.id} className="flex items-center gap-3">
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-orange-500/10 px-2.5 py-1 text-center flex-shrink-0 min-w-[42px] dark:bg-orange-500/20">
+                    <span className="text-[9px] font-extrabold text-orange-700 dark:text-orange-300 uppercase">
+                      {ev.month}
+                    </span>
+                    <span className="text-sm font-black text-orange-600 dark:text-orange-400 leading-none">
+                      {ev.date}
                     </span>
                   </div>
-                  <span className="text-[10px] font-medium text-stone-400 pl-3">
-                    {ev.time}
-                  </span>
+
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${ev.tagColor} flex-shrink-0`} />
+                      <span className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">
+                        {ev.title}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-medium text-stone-400 pl-3">
+                      {ev.time}
+                    </span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-xs text-stone-400 font-semibold">
+                No upcoming events or examinations (N/A)
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -433,63 +370,69 @@ const HomeTab = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center mt-2">
-            {/* Donut Chart with Center Text */}
-            <div className="relative h-44 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={classData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={68}
-                    paddingAngle={3}
-                    dataKey="count"
-                  >
-                    {classData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "#1C1B1A",
-                      border: "1px solid #3F3C39",
-                      borderRadius: "10px",
-                      fontSize: "11px",
-                      color: "#FAF7F2",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
-                <span className="text-base font-black text-stone-900 dark:text-stone-100">
-                  {totalStudentsCount.toLocaleString()}
-                </span>
-                <span className="text-[10px] font-semibold text-stone-400">
-                  Students
-                </span>
-              </div>
-            </div>
-
-            {/* Legend & Counts */}
-            <div className="space-y-2 text-xs">
-              {classData.map((cls) => (
-                <div key={cls.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2 w-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: cls.color }}
-                    />
-                    <span className="font-semibold text-stone-700 dark:text-stone-300">
-                      {cls.name}
+            {classData.length > 0 ? (
+              <>
+                <div className="relative h-44 flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={classData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={68}
+                        paddingAngle={3}
+                        dataKey="count"
+                      >
+                        {classData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          background: "#1C1B1A",
+                          border: "1px solid #3F3C39",
+                          borderRadius: "10px",
+                          fontSize: "11px",
+                          color: "#FAF7F2",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+                    <span className="text-base font-black text-stone-900 dark:text-stone-100">
+                      {totalStudentsCount.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-semibold text-stone-400">
+                      Students
                     </span>
                   </div>
-                  <span className="font-bold text-stone-900 dark:text-stone-100">
-                    {cls.count}
-                  </span>
                 </div>
-              ))}
-            </div>
+
+                <div className="space-y-2 text-xs">
+                  {classData.map((cls) => (
+                    <div key={cls.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="h-2 w-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: cls.color }}
+                        />
+                        <span className="font-semibold text-stone-700 dark:text-stone-300">
+                          {cls.name}
+                        </span>
+                      </div>
+                      <span className="font-bold text-stone-900 dark:text-stone-100">
+                        {cls.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="col-span-2 h-44 flex items-center justify-center text-xs text-stone-400 font-semibold">
+                No student class distribution data (N/A)
+              </div>
+            )}
           </div>
         </div>
 
@@ -509,37 +452,43 @@ const HomeTab = () => {
           </div>
 
           <div className="h-44 w-full mt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={feeTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EFE8DD" opacity={0.6} />
-                <XAxis dataKey="date" stroke="#A8A29E" fontSize={10} tickLine={false} />
-                <YAxis
-                  stroke="#A8A29E"
-                  fontSize={10}
-                  tickFormatter={(val) => `${val}K`}
-                  ticks={[0, 100, 200, 300, 400]}
-                  tickLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#1C1B1A",
-                    border: "1px solid #3F3C39",
-                    borderRadius: "12px",
-                    fontSize: "11px",
-                    color: "#FAF7F2",
-                  }}
-                  formatter={(val) => [`₹${val}k`, "Collected"]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#EA580C"
-                  strokeWidth={2.5}
-                  dot={{ r: 4, fill: "#EA580C" }}
-                  activeDot={{ r: 6, fill: "#F97316" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {feeTrendData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={feeTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#EFE8DD" opacity={0.6} />
+                  <XAxis dataKey="date" stroke="#A8A29E" fontSize={10} tickLine={false} />
+                  <YAxis
+                    stroke="#A8A29E"
+                    fontSize={10}
+                    tickFormatter={(val) => `${val}K`}
+                    ticks={[0, 100, 200, 300, 400]}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#1C1B1A",
+                      border: "1px solid #3F3C39",
+                      borderRadius: "12px",
+                      fontSize: "11px",
+                      color: "#FAF7F2",
+                    }}
+                    formatter={(val) => [`₹${val}k`, "Collected"]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#EA580C"
+                    strokeWidth={2.5}
+                    dot={{ r: 4, fill: "#EA580C" }}
+                    activeDot={{ r: 6, fill: "#F97316" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-stone-400 font-semibold">
+                No fee collection trends recorded (N/A)
+              </div>
+            )}
           </div>
         </div>
 

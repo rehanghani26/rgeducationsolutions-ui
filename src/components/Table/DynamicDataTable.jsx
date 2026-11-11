@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { FiPlus, FiTrash2, FiRotateCcw } from "react-icons/fi";
+import { Plus as FiPlus, Trash2 as FiTrash2, RotateCcw as FiRotateCcw } from "lucide-react";
 
 const DynamicDataTable = ({
   className = "",

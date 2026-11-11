@@ -32,7 +32,6 @@ import { permissionOptions } from "./TeacherForm.jsx";
 import { getTeacherById, getTeacherActivity, getTeacherClassHistory } from "../../services";
 import { getApplicantLeaveProfile, reviewLeave, requestLeave } from "../../services/leaveService.js";
 import api from "../../services/api.js";
-import { mockTeachers } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
 
 const InfoGrid = ({ items }) => (
@@ -140,8 +139,7 @@ const TeacherDetail = () => {
         const foundTeacher =
           res?.teacher ||
           res?.data?.teacher ||
-          mockTeachers.find((t) => t.id === teacherId || t._id === teacherId) ||
-          mockTeachers[0];
+          (res?._id || res?.id ? res : null);
         setTeacher(foundTeacher);
         setActivity(actRes?.data || actRes || { logs: [], loginHistory: [] });
         if (ttRes?.data?.timetables) {

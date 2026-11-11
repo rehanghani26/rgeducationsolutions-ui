@@ -16,7 +16,7 @@ const Dashboard = () => {
   const authUser = useSelector((state) => state.auth?.user);
   const user =
     authUser ||
-    getUserFromStorage() || { name: "Albus Dumbledore", role: "super-admin" };
+    getUserFromStorage() || { name: "Administrator", role: "super-admin" };
   const role = (getUserRole(user) || "").toLowerCase();
 
   const outletContext = useOutletContext();

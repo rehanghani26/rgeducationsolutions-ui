@@ -21,7 +21,7 @@ const FeesManagement = () => {
 
   const [showCollectModal, setShowCollectModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
-  const [collectForm, setCollectForm] = useState({ studentId: 's1', amount: '', method: 'Online', reference: '' });
+  const [collectForm, setCollectForm] = useState({ studentId: '', amount: '', method: 'Online', reference: '' });
   const [expenseForm, setExpenseForm] = useState({ title: '', amount: '', category: 'Utilities', date: '', refInvoice: '' });
 
   // Confirmation state for submit actions
@@ -50,7 +50,7 @@ const FeesManagement = () => {
       toast.success('Fee receipt issued.');
       setShowCollectModal(false);
       setConfirmCollect(false);
-      setCollectForm({ studentId: 's1', amount: '', method: 'Online', reference: '' });
+      setCollectForm({ studentId: '', amount: '', method: 'Online', reference: '' });
       dispatch(fetchFees());
     } else {
       toast.error(res.payload || 'Failed to collect fee.');
@@ -105,13 +105,13 @@ const FeesManagement = () => {
           <div className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-[10px]">
             {row.student?.name ? row.student.name.charAt(0) : 'S'}
           </div>
-          <span>{row.student?.name || 'Harry Potter'}</span>
+          <span>{row.student?.name || 'N/A'}</span>
         </div>
       ),
     },
     { key: 'amountPaid', label: 'Total Paid', render: (row) => <span className="font-semibold text-emerald-500">${row.amountPaid.toLocaleString()}</span> },
     { key: 'amountPending', label: 'Outstanding', render: (row) => <span className="font-semibold text-rose-500">${row.amountPending.toLocaleString()}</span> },
-    { key: 'dueDate', label: 'Due Date', render: (row) => <span className="text-slate-500">{row.dueDate ? row.dueDate.split('T')[0] : '2026-06-15'}</span> },
+    { key: 'dueDate', label: 'Due Date', render: (row) => <span className="text-slate-500">{row.dueDate ? row.dueDate.split('T')[0] : 'N/A'}</span> },
     {
       key: 'status',
       label: 'Invoice Status',
@@ -225,9 +225,21 @@ const FeesManagement = () => {
           <div>
             <label className={labelCls}>Select Student billing record</label>
             <select className={inputCls} value={collectForm.studentId} onChange={(e) => setCollectForm({ ...collectForm, studentId: e.target.value })}>
-              <option value="s1">Harry Potter (Roll: 101)</option>
-              <option value="s2">Hermione Granger (Roll: 102)</option>
-              <option value="s3">Ron Weasley (Roll: 103)</option>
+              <option value="">-- Select Student --</option>
+              {fees && fees.length > 0 ? (
+                fees.map((f) => {
+                  const sId = f.student?._id || f.student?.id || f.studentId || f.id || f._id;
+                  const sName = f.student?.name || f.studentName || 'Student';
+                  const sRoll = f.student?.rollNumber ? ` (Roll: ${f.student.rollNumber})` : '';
+                  return (
+                    <option key={f.id || f._id} value={sId}>
+                      {sName}{sRoll}
+                    </option>
+                  );
+                })
+              ) : (
+                <option value="" disabled>No student billing records available</option>
+              )}
             </select>
           </div>
           <div>

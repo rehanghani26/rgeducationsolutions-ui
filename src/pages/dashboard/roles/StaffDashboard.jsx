@@ -32,7 +32,7 @@ const StaffDashboard = () => {
 
   const [payrollData, setPayrollData] = useState(null);
   const [leaveStats, setLeaveStats] = useState({ approved: 0, pending: 0, total: 0 });
-  const [attStats, setAttStats] = useState({ present: 0, total: 26, percentage: 100 });
+  const [attStats, setAttStats] = useState({ present: 0, total: 0, percentage: "N/A" });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,9 +70,9 @@ const StaffDashboard = () => {
           if (attRes?.data?.summary) {
             const s = attRes.data.summary;
             setAttStats({
-              present: s.presentDays || s.present || 26,
-              total: s.totalDays || s.standardWorkingDays || 26,
-              percentage: s.attendanceRate || s.percentage || 100,
+              present: s.presentDays ?? s.present ?? 0,
+              total: s.totalDays ?? s.standardWorkingDays ?? 0,
+              percentage: s.attendanceRate ?? s.percentage ?? "N/A",
             });
           }
         }
@@ -111,10 +111,10 @@ const StaffDashboard = () => {
             </div>
           </div>
           <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-            {attStats.present} / {attStats.total}
+            {attStats.total > 0 ? `${attStats.present} / ${attStats.total}` : "N/A"}
           </h3>
           <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1 flex items-center gap-1">
-            <CheckCircle2 size={12} /> {attStats.percentage}% Attendance Rate
+            <CheckCircle2 size={12} /> {attStats.percentage !== "N/A" ? `${attStats.percentage}% Attendance Rate` : "N/A"}
           </p>
         </div>
 

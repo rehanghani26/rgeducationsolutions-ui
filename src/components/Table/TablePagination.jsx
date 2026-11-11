@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { memo } from "react";
-import { chevronLeft, chevronRight } from "../../assets/figmaIcons";
-import { Icon } from "..";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const TablePagination = ({
   currentPage = 1,
@@ -45,7 +44,7 @@ const TablePagination = ({
           className={buttonClassname}
           onClick={handleDecreaseClick}
         >
-          <Icon svg={chevronLeft} className="size-4 p-0 text-[#6B6B6A]" />
+          <ChevronLeft className="size-4 p-0 text-[#6B6B6A]" />
         </button>
 
         {/* Page Numbers */}
@@ -76,7 +75,7 @@ const TablePagination = ({
           className={buttonClassname}
           onClick={handleIncreaseClick}
         >
-          <Icon svg={chevronRight} className="size-4 p-0 text-[#6B6B6A]" />
+          <ChevronRight className="size-4 p-0 text-[#6B6B6A]" />
         </button>
       </div>
     </div>

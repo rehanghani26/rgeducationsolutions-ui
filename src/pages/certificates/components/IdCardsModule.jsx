@@ -531,7 +531,7 @@ export default function IdCardsModule({ schoolSettings = {}, userRole = '', auth
                 </p>
               </div>
 
-              {/* Dummy Data Preview Toggle (Admins only) */}
+              {/* Sample Data Preview Toggle (Admins only) */}
               {isAdmin && (
                 <button
                   type="button"
@@ -541,10 +541,10 @@ export default function IdCardsModule({ schoolSettings = {}, userRole = '', auth
                       ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
                       : 'bg-slate-950/70 border-slate-800 text-slate-400 hover:text-white'
                   }`}
-                  title="Toggle between PDF-style sample dummy preview and real data"
+                  title="Toggle between sample placeholder preview and real data"
                 >
                   <FileText size={13} />
-                  <span>{previewWithDummy ? 'PDF Dummy Preview ON' : 'Real Recipient Data'}</span>
+                  <span>{previewWithDummy ? 'Sample Preview ON' : 'Real Recipient Data'}</span>
                 </button>
               )}
             </div>
@@ -842,7 +842,7 @@ export default function IdCardsModule({ schoolSettings = {}, userRole = '', auth
             customConfig={activeTemplate?.configuration || null}
             title={
               previewWithDummy
-                ? `${effectiveRecipientType.toUpperCase()} ID CARD (PDF DUMMY PREVIEW)`
+                ? `${effectiveRecipientType.toUpperCase()} ID CARD (SAMPLE PREVIEW)`
                 : isStudent
                 ? 'MY STUDENT IDENTITY CARD'
                 : isParent

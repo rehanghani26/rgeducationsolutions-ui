@@ -2,11 +2,7 @@ import React, { useRef } from 'react';
 import { Printer, Download, CheckCircle, ShieldCheck, Calendar } from 'lucide-react';
 import Modal from '../../../components/ui/Modal.jsx';
 import { useSchoolBranding } from '../../../context/SchoolBrandingContext.jsx';
-
-const formatCurrency = (val) => {
-  const n = Number(val) || 0;
-  return `₹${n.toLocaleString('en-IN')}`;
-};
+import { formatCurrency } from '../payrollUtils.js';
 
 const PayslipModal = ({ isOpen, onClose, staff, month, year }) => {
   const { schoolName, schoolLogo } = useSchoolBranding();
@@ -205,18 +201,18 @@ const PayslipModal = ({ isOpen, onClose, staff, month, year }) => {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-2.5 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-center"
           >
             Close
           </button>
           <button
             type="button"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-extrabold text-xs shadow-sm transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-extrabold text-xs shadow-sm transition cursor-pointer text-center"
           >
             <Printer size={14} /> Print Payslip
           </button>

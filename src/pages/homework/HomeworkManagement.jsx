@@ -49,31 +49,6 @@ const priorityBadge = (priority) => {
   );
 };
 
-// ─── Seed fallback (client-side) ──────────────────────────────────────────────
-const SEED = [
-  {
-    _id: 'hw-1', id: 'hw-1', title: 'Linear Equations Practice Set', subject: 'Mathematics',
-    instructions: 'Complete problems 1–25 from Chapter 4. Show all working steps.',
-    className: 'Class 10', sectionName: 'Section A', teacherName: 'Severus Snape',
-    issueDate: '2026-09-03', dueDate: '2026-09-07', totalMarks: 25, priority: 'high',
-    status: 'published', attachments: [], submissions: [],
-  },
-  {
-    _id: 'hw-2', id: 'hw-2', title: 'Photosynthesis Lab Report', subject: 'Science',
-    instructions: 'Write a full lab report (min. 600 words) on the photosynthesis experiment.',
-    className: 'Class 10', sectionName: 'Section A', teacherName: 'Filius Flitwick',
-    issueDate: '2026-09-02', dueDate: '2026-09-10', totalMarks: 20, priority: 'normal',
-    status: 'published', attachments: [], submissions: [],
-  },
-  {
-    _id: 'hw-3', id: 'hw-3', title: 'History Essay: Industrial Revolution', subject: 'History',
-    instructions: 'Write a 500-word analytical essay on the social impact of the Industrial Revolution.',
-    className: 'Class 11', sectionName: 'All Sections', teacherName: 'Filius Flitwick',
-    issueDate: '2026-09-01', dueDate: '2026-09-06', totalMarks: 30, priority: 'high',
-    status: 'published', attachments: [], submissions: [],
-  },
-];
-
 // ─── Sub-component: Submissions List ─────────────────────────────────────────
 const SubmissionsList = ({ submissions = [], homeworkId, totalMarks, canGrade, onGraded }) => {
   const [expanded, setExpanded] = useState(null);
@@ -206,7 +181,7 @@ const HomeworkManagement = () => {
   const canGrade = (isAdmin || isTeacher) && !isStudent && !isParent;
   const canRead = true;
 
-  const [homework, setHomework] = useState(SEED);
+  const [homework, setHomework] = useState([]);
   const [stats, setStats] = useState({ total: 0, assigned: 0, dueSoon: 0, submitted: 0, graded: 0, pendingReview: 0 });
   const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
@@ -232,12 +207,12 @@ const HomeworkManagement = () => {
     homeworkService.getAll({ page, limit: 20, search, status: statusFilter, priority: priorityFilter })
       .then((res) => {
         if (res?.homework !== undefined) {
-          setHomework(res.homework.length ? res.homework : SEED);
+          setHomework(Array.isArray(res.homework) ? res.homework : []);
           if (res.stats) setStats(res.stats);
           if (res.pagination) setPagination(res.pagination);
         }
       })
-      .catch(() => setHomework(SEED))
+      .catch(() => setHomework([]))
       .finally(() => setLoading(false));
   }, [page, search, statusFilter, priorityFilter]);
 

@@ -8,11 +8,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import examService from '../services/examService.js';
-import { mockExams } from '../data/mockData.js';
 
 // ─── useExams ─────────────────────────────────────────────────────────────────
 export const useExams = (params = {}) => {
-  const [data, setData]       = useState({ exams: mockExams, pagination: { total: mockExams.length, page: 1, pages: 1 } });
+  const [data, setData]       = useState({ exams: [], pagination: { total: 0, page: 1, pages: 1 } });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
@@ -29,12 +28,11 @@ export const useExams = (params = {}) => {
         : Array.isArray(res?.data?.exams)
         ? res.data.exams
         : [];
-      if (list.length > 0) {
-        const pag = res.pagination || res.data?.pagination || { total: list.length, page: 1, pages: 1 };
-        setData({ exams: list, pagination: pag });
-      }
+      const pag = res.pagination || res.data?.pagination || { total: list.length, page: 1, pages: 1 };
+      setData({ exams: list, pagination: pag });
     } catch (err) {
       setError(err);
+      setData({ exams: [], pagination: { total: 0, page: 1, pages: 1 } });
     } finally {
       setLoading(false);
     }
@@ -56,12 +54,12 @@ export const useExam = (id) => {
     setLoading(true);
     examService.getById(id)
       .then(res => {
-        const found = res?.exam || res?.data?.exam || res?.data || mockExams.find(e => e.id === id || e._id === id);
-        setData(found ?? mockExams[0]);
+        const found = res?.exam || res?.data?.exam || res?.data || null;
+        setData(found);
       })
       .catch(err => {
         setError(err);
-        setData(mockExams.find(e => e.id === id || e._id === id) ?? mockExams[0]);
+        setData(null);
       })
       .finally(() => setLoading(false));
   }, [id]);

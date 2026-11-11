@@ -20,25 +20,31 @@ const NotificationsManagement = () => {
           <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Sent Announcements & Delivery History</h3>
         </div>
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {mockNotifications.map((notif) => (
-            <div key={notif.id} className="p-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-all space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-                  <Bell size={18} className="text-indigo-500" /> {notif.title}
-                </h4>
-                <span className="text-xs text-slate-400 font-medium">{notif.sentAt}</span>
-              </div>
-              <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-4 pt-1">
-                <div className="flex items-center gap-3">
-                  <span>Target Audience: <strong className="text-slate-700 dark:text-slate-300">{notif.recipientGroup}</strong></span>
-                  <span>Channel: <strong className="text-slate-700 dark:text-slate-300">{notif.channel}</strong></span>
+          {mockNotifications && mockNotifications.length > 0 ? (
+            mockNotifications.map((notif) => (
+              <div key={notif.id} className="p-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-all space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <Bell size={18} className="text-indigo-500" /> {notif.title}
+                  </h4>
+                  <span className="text-xs text-slate-400 font-medium">{notif.sentAt}</span>
                 </div>
-                <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2.5 py-1 rounded-md">
-                  <CheckCircle2 size={13} /> {notif.status}
-                </span>
+                <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-4 pt-1">
+                  <div className="flex items-center gap-3">
+                    <span>Target Audience: <strong className="text-slate-700 dark:text-slate-300">{notif.recipientGroup}</strong></span>
+                    <span>Channel: <strong className="text-slate-700 dark:text-slate-300">{notif.channel}</strong></span>
+                  </div>
+                  <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2.5 py-1 rounded-md">
+                    <CheckCircle2 size={13} /> {notif.status}
+                  </span>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="p-8 text-center text-xs text-slate-400">
+              No broadcast notifications found (N/A)
             </div>
-          ))}
+          )}
         </div>
       </div>
     </motion.div>

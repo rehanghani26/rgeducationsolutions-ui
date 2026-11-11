@@ -38,7 +38,6 @@ import MarksheetPDF, { downloadMarksheetPDF, getPdfLibs, printElement } from '..
 import examService from '../../services/examService.js';
 import resultService from '../../services/resultService.js';
 import { getStudents } from '../../services/studentService.js';
-import { mockResults, mockExams } from '../../data/mockData.js';
 import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -912,9 +911,9 @@ const ResultsManagement = () => {
     examService.getAll({ limit: 100 })
       .then((d) => {
         const list = Array.isArray(d?.exams) ? d.exams : Array.isArray(d?.data) ? d.data : Array.isArray(d) ? d : [];
-        setExams(list.length ? list : mockExams);
+        setExams(list);
       })
-      .catch(() => setExams(mockExams))
+      .catch(() => setExams([]))
       .finally(() => setExamsLoading(false));
   }, []);
 

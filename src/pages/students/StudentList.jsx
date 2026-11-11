@@ -55,7 +55,6 @@ import {
   CLASS_OPTIONS,
   SECTION_OPTIONS,
 } from "../../constants/academicOptions.js";
-import { mockStudents } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 
@@ -365,9 +364,9 @@ const StudentList = () => {
   const [status, setStatus] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedSection, setSelectedSection] = useState("");
-  const [students, setStudents] = useState(mockStudents);
+  const [students, setStudents] = useState([]);
   const [pagination, setPagination] = useState({
-    total: mockStudents.length,
+    total: 0,
     page: 1,
     pages: 1,
   });

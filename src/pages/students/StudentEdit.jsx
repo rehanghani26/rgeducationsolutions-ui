@@ -5,7 +5,6 @@ import PageHeader from '../../components/ui/PageHeader.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import StudentForm, { blankStudentForm } from './StudentForm.jsx';
 import studentService from '../../services/studentService.js';
-import { mockStudents } from '../../data/mockData.js';
 
 const StudentEdit = () => {
   const { studentId } = useParams();
@@ -29,14 +28,7 @@ const StudentEdit = () => {
       })
       .catch((err) => {
         console.error("Failed to load student record:", err);
-        const found = mockStudents?.find(
-          (s) => String(s.id) === String(studentId) || String(s._id) === String(studentId)
-        );
-        if (found) {
-          setStudent(found);
-        } else {
-          toast.error("Failed to load student record from server");
-        }
+        toast.error("Failed to load student record from server");
       })
       .finally(() => setLoading(false));
   }, [studentId]);

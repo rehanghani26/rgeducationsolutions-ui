@@ -6,7 +6,6 @@ import DetailPageLayout, { EditButton } from '../../components/ui/DetailPageLayo
 import ActivityTimeline from '../../components/ui/ActivityTimeline.jsx';
 import examService from '../../services/examService.js';
 import resultService from '../../services/resultService.js';
-import { mockExams } from '../../data/mockData.js';
 import Loader from '../../components/ui/Loader.jsx';
 
 const InfoGrid = ({ items }) => (
@@ -38,9 +37,8 @@ const ExamDetail = () => {
       examService.getById(id).catch(() => null),
       examService.getActivity(id).catch(() => null),
     ]).then(([res, actRes]) => {
-      const fallbackExam = mockExams.find((e) => e.id === id || e._id === id) || mockExams[0];
-      const realExam = res?.exam || res?.data?.exam || res?.data;
-      setExam(realExam ? { ...fallbackExam, ...realExam } : fallbackExam);
+      const realExam = res?.exam || res?.data?.exam || (res?._id || res?.id ? res : null);
+      setExam(realExam || null);
       setActivity(actRes?.logs || actRes?.data || { logs: [] });
     }).finally(() => setLoading(false));
   }, [id]);

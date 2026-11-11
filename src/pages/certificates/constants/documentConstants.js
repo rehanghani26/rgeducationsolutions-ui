@@ -85,62 +85,62 @@ export const DOCUMENT_TABS = [
 
 /** Used for template previews when real student data is not available */
 export const STUDENT_PLACEHOLDER = {
-  name: 'Rahul Kumar',
-  admissionNumber: 'STU-2026-0001',
-  rollNumber: '12',
-  class: 'Class 10',
-  section: 'Section A',
-  dob: '2010-05-15',
-  bloodGroup: 'B+',
-  gender: 'Male',
-  parentName: 'Suresh Kumar',
-  academicYear: '2026-27',
+  name: 'N/A',
+  admissionNumber: 'N/A',
+  rollNumber: 'N/A',
+  class: 'N/A',
+  section: 'N/A',
+  dob: 'N/A',
+  bloodGroup: 'N/A',
+  gender: 'N/A',
+  parentName: 'N/A',
+  academicYear: 'N/A',
   photo: null,
 };
 
 /** Used for template previews when real teacher data is not available */
 export const TEACHER_PLACEHOLDER = {
-  name: 'Dr. Priya Sharma',
-  employeeId: 'TCH-2026-0001',
-  designation: 'Senior Teacher',
-  department: 'Mathematics',
-  subjectsAssigned: ['Mathematics', 'Physics'],
-  joiningDate: '2020-06-01',
+  name: 'N/A',
+  employeeId: 'N/A',
+  designation: 'N/A',
+  department: 'N/A',
+  subjectsAssigned: [],
+  joiningDate: 'N/A',
   photo: null,
 };
 
 /** Used for template previews when real staff data is not available */
 export const STAFF_PLACEHOLDER = {
-  name: 'Rajesh Verma',
-  employeeId: 'STF-2026-0001',
-  designation: 'Accountant',
-  department: 'Administration',
+  name: 'N/A',
+  employeeId: 'N/A',
+  designation: 'N/A',
+  department: 'N/A',
   photo: null,
 };
 
 /** Used for certificate template previews */
 export const CERTIFICATE_PLACEHOLDER = {
-  certificateNumber: 'CERT-2026-000001',
+  certificateNumber: 'N/A',
   certificateType: 'BONAFIDE',
-  recipientName: 'Rahul Kumar',
-  admissionNumber: 'STU-2026-0001',
-  class: 'Class 10',
-  section: 'Section A',
-  academicSession: '2026-27',
+  recipientName: 'N/A',
+  admissionNumber: 'N/A',
+  class: 'N/A',
+  section: 'N/A',
+  academicSession: 'N/A',
   issueDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
-  purposeNote: 'This certificate is issued for the purpose of bank account opening.',
+  purposeNote: 'N/A',
 };
 
 /** School placeholder used when settings are not yet loaded */
 export const SCHOOL_PLACEHOLDER = {
-  schoolName: 'ABC Public School',
+  schoolName: 'N/A',
   schoolLogo: '',
-  schoolAddress: '123 Education Street, Knowledge City - 400001',
-  schoolPhone: '+91 98765 43210',
-  schoolEmail: 'admin@abcschool.edu',
-  schoolWebsite: 'www.abcschool.edu',
-  schoolMotto: 'Excellence in Education',
-  principalName: 'Dr. Anita Gupta',
+  schoolAddress: 'N/A',
+  schoolPhone: 'N/A',
+  schoolEmail: 'N/A',
+  schoolWebsite: 'N/A',
+  schoolMotto: 'N/A',
+  principalName: 'N/A',
 };
 
 // Aliases

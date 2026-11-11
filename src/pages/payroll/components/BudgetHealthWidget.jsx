@@ -9,13 +9,9 @@ import {
   ArrowUpRight,
   ExternalLink,
 } from 'lucide-react';
+import { formatCurrency } from '../payrollUtils.js';
 
-const formatCurrency = (val) => {
-  const n = Number(val) || 0;
-  return `₹${n.toLocaleString('en-IN')}`;
-};
-
-const BudgetHealthWidget = ({ summary, onRefresh }) => {
+const BudgetHealthWidget = ({ summary, canReviseBudget = true, onRefresh }) => {
   const navigate = useNavigate();
 
   if (!summary) return null;
@@ -68,30 +64,30 @@ const BudgetHealthWidget = ({ summary, onRefresh }) => {
         </div>
 
         {/* Center: Financial Counters */}
-        <div className="flex flex-wrap items-center gap-5 shrink-0">
-          <div>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3 sm:gap-5 w-full lg:w-auto">
+          <div className="bg-slate-50 dark:bg-slate-800/50 sm:bg-transparent sm:dark:bg-transparent p-2.5 sm:p-0 rounded-xl sm:rounded-none">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
               Approved Salary Budget
             </span>
-            <span className="text-lg font-black text-slate-900 dark:text-white">
+            <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
               {formatCurrency(salaryBudget)}
             </span>
           </div>
 
-          <div className="border-l border-slate-200 dark:border-slate-700 pl-4">
+          <div className="bg-slate-50 dark:bg-slate-800/50 sm:bg-transparent sm:dark:bg-transparent p-2.5 sm:p-0 rounded-xl sm:rounded-none sm:border-l sm:border-slate-200 sm:dark:border-slate-700 sm:pl-4">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
               Total Disbursed
             </span>
-            <span className="text-lg font-black text-slate-700 dark:text-slate-200">
+            <span className="text-base sm:text-lg font-black text-slate-700 dark:text-slate-200">
               {formatCurrency(salarySpent)}
             </span>
           </div>
 
-          <div className="border-l border-slate-200 dark:border-slate-700 pl-4">
+          <div className="col-span-2 sm:col-span-1 bg-slate-50 dark:bg-slate-800/50 sm:bg-transparent sm:dark:bg-transparent p-2.5 sm:p-0 rounded-xl sm:rounded-none sm:border-l sm:border-slate-200 sm:dark:border-slate-700 sm:pl-4">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
               Available Remaining
             </span>
-            <span className={`text-lg font-black ${
+            <span className={`text-base sm:text-lg font-black ${
               isBudgetExceeded ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
             }`}>
               {isBudgetExceeded ? `- ${formatCurrency(deficit)}` : formatCurrency(salaryRemaining)}
@@ -99,21 +95,23 @@ const BudgetHealthWidget = ({ summary, onRefresh }) => {
           </div>
 
           {/* Action to Settings Budget Allocation */}
-          <button
-            onClick={() => navigate('/settings/budget-allocation')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xs transition cursor-pointer shrink-0"
-          >
-            <span>{isBudgetExceeded ? 'Revise Budget Now' : 'Manage Budget'}</span>
-            <ExternalLink size={13} />
-          </button>
+          {canReviseBudget && (
+            <button
+              onClick={() => navigate('/settings/budget-allocation')}
+              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-xs transition cursor-pointer w-full sm:w-auto"
+            >
+              <span>{isBudgetExceeded ? 'Revise Budget Now' : 'Manage Budget'}</span>
+              <ExternalLink size={13} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="mt-3 space-y-1">
-        <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col sm:flex-row justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 gap-0.5">
           <span>{percent}% of salary pool utilized</span>
-          <span>{formatCurrency(salaryRemaining)} remaining for future monthly disbursements</span>
+          <span>{formatCurrency(salaryRemaining)} remaining for future disbursements</span>
         </div>
         <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
           <div

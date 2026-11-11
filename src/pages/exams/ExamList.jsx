@@ -11,7 +11,6 @@ import Modal from "../../components/ui/Modal.jsx";
 import examService from "../../services/examService.js";
 import teacherService from "../../services/teacherService.js";
 import syllabusService from "../../services/syllabusService.js";
-import { mockExams } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 import { CLASS_OPTIONS, SECTION_OPTIONS, CLASS_SECTION_COMBINED_OPTIONS } from "../../constants/academicOptions.js";
@@ -33,8 +32,8 @@ const ExamList = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [exams, setExams] = useState(mockExams);
-  const [pagination, setPagination] = useState({ total: mockExams.length, page: 1, pages: 1 });
+  const [exams, setExams] = useState([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -125,15 +124,13 @@ const ExamList = () => {
           const pag = res.pagination || res.data?.pagination;
           if (pag) setPagination(pag);
           else setPagination({ total: list.length, page: 1, pages: Math.ceil(list.length / 20) || 1 });
-        } else if (!search && !status) {
-          setExams(mockExams);
         } else {
           setExams([]);
         }
       })
       .catch((err) => {
         console.error("fetchExamsData error:", err);
-        setExams((prev) => (prev?.length > 0 ? prev : mockExams));
+        setExams((prev) => (prev?.length > 0 ? prev : []));
       })
       .finally(() => setLoading(false));
   };

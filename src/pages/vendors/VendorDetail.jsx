@@ -1,7 +1,7 @@
 // ui/src/pages/vendors/VendorDetail.jsx
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   ArrowLeft,
   Truck,
@@ -30,26 +30,26 @@ import {
   FileText,
   BarChart3,
   TrendingUp,
-} from 'lucide-react';
+} from "lucide-react";
 
 import {
   getVendorById,
   updateVendor,
   recordVendorPayment,
-} from '../../services/vendorService.js';
+} from "../../services/vendorService.js";
 import {
   createPurchaseBill,
   getInventoryItems,
-} from '../../services/inventoryService.js';
-import Modal from '../../components/ui/Modal.jsx';
-import Loader from '../../components/ui/Loader.jsx';
-import { ROUTES } from '../../routes/routes.js';
+} from "../../services/inventoryService.js";
+import Modal from "../../components/ui/Modal.jsx";
+import Loader from "../../components/ui/Loader.jsx";
+import { ROUTES } from "../../routes/routes.js";
 
 export default function VendorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'bills', 'products', 'ledger'
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'bills', 'products', 'ledger'
   const [vendor, setVendor] = useState(null);
   const [bills, setBills] = useState([]);
   const [suppliedProducts, setSuppliedProducts] = useState([]);
@@ -62,10 +62,10 @@ export default function VendorDetail() {
   const [showPayModal, setShowPayModal] = useState(false);
   const [payTargetBill, setPayTargetBill] = useState(null);
   const [payForm, setPayForm] = useState({
-    amount: '',
-    paymentType: 'Bank Transfer',
-    transactionReference: '',
-    notes: '',
+    amount: "",
+    paymentType: "Bank Transfer",
+    transactionReference: "",
+    notes: "",
   });
 
   const [showEditModal, setShowEditModal] = useState(false);
@@ -74,20 +74,28 @@ export default function VendorDetail() {
   const [showBillModal, setShowBillModal] = useState(false);
   const [inventoryCatalog, setInventoryCatalog] = useState([]);
   const [billLines, setBillLines] = useState([
-    { itemId: '', name: '', sku: '', category: '', quantity: 1, unitCost: 0, totalCost: 0 },
+    {
+      itemId: "",
+      name: "",
+      sku: "",
+      category: "",
+      quantity: 1,
+      unitCost: 0,
+      totalCost: 0,
+    },
   ]);
   const [billMeta, setBillMeta] = useState({
-    billNumber: '',
-    billDate: new Date().toISOString().split('T')[0],
-    paymentType: 'Bank Transfer',
-    amountPaid: '',
-    transactionReference: '',
-    notes: '',
+    billNumber: "",
+    billDate: new Date().toISOString().split("T")[0],
+    paymentType: "Bank Transfer",
+    amountPaid: "",
+    transactionReference: "",
+    notes: "",
   });
 
   const [printBill, setPrintBill] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [copiedField, setCopiedField] = useState('');
+  const [copiedField, setCopiedField] = useState("");
 
   // Fetch Vendor Details & Ledger
   const fetchVendorDetails = async () => {
@@ -104,7 +112,7 @@ export default function VendorDetail() {
       setCategoryBreakdown(data.categoryBreakdown || []);
       setEditForm(data.vendor || {});
     } catch (err) {
-      console.error('Failed to load vendor details:', err);
+      console.error("Failed to load vendor details:", err);
     } finally {
       setLoading(false);
     }
@@ -125,7 +133,7 @@ export default function VendorDetail() {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
-    setTimeout(() => setCopiedField(''), 2000);
+    setTimeout(() => setCopiedField(""), 2000);
     toast.info(`Copied ${fieldName} to clipboard`);
   };
 
@@ -133,10 +141,12 @@ export default function VendorDetail() {
   const handleOpenPay = (bill = null) => {
     setPayTargetBill(bill);
     setPayForm({
-      amount: bill ? bill.balanceDue : vendor?.outstandingBalance || '',
-      paymentType: 'Bank Transfer',
-      transactionReference: '',
-      notes: bill ? `Payment for Bill #${bill.billNumber}` : 'Account settlement',
+      amount: bill ? bill.balanceDue : vendor?.outstandingBalance || "",
+      paymentType: "Bank Transfer",
+      transactionReference: "",
+      notes: bill
+        ? `Payment for Bill #${bill.billNumber}`
+        : "Account settlement",
     });
     setShowPayModal(true);
   };
@@ -144,7 +154,8 @@ export default function VendorDetail() {
   const handleSavePayment = async (e) => {
     e.preventDefault();
     const amt = Number(payForm.amount);
-    if (!amt || amt <= 0) return toast.warn('Please enter a valid payment amount.');
+    if (!amt || amt <= 0)
+      return toast.warn("Please enter a valid payment amount.");
 
     setSubmitting(true);
     try {
@@ -182,14 +193,22 @@ export default function VendorDetail() {
   // ─── NEW PURCHASE BILL ────────────────────────────────────────────────────
   const handleOpenNewBill = () => {
     setBillLines([
-      { itemId: '', name: '', sku: '', category: '', quantity: 1, unitCost: 0, totalCost: 0 },
+      {
+        itemId: "",
+        name: "",
+        sku: "",
+        category: "",
+        quantity: 1,
+        unitCost: 0,
+        totalCost: 0,
+      },
     ]);
     setBillMeta({
       billNumber: `BILL-${Date.now().toString(36).toUpperCase()}`,
-      billDate: new Date().toISOString().split('T')[0],
-      paymentType: 'Bank Transfer',
-      amountPaid: '',
-      transactionReference: '',
+      billDate: new Date().toISOString().split("T")[0],
+      paymentType: "Bank Transfer",
+      amountPaid: "",
+      transactionReference: "",
       notes: `Purchase from ${vendor?.name}`,
     });
     setShowBillModal(true);
@@ -197,7 +216,7 @@ export default function VendorDetail() {
 
   const handleBillLineChange = (idx, field, value) => {
     const updated = [...billLines];
-    if (field === 'itemId') {
+    if (field === "itemId") {
       const prod = inventoryCatalog.find((p) => (p.id || p._id) === value);
       if (prod) {
         updated[idx] = {
@@ -207,14 +226,15 @@ export default function VendorDetail() {
           sku: prod.sku,
           category: prod.category,
           unitCost: prod.unitCost || prod.price || 0,
-          totalCost: (updated[idx].quantity || 1) * (prod.unitCost || prod.price || 0),
+          totalCost:
+            (updated[idx].quantity || 1) * (prod.unitCost || prod.price || 0),
         };
       }
-    } else if (field === 'quantity') {
+    } else if (field === "quantity") {
       const q = Math.max(1, Number(value) || 1);
       updated[idx].quantity = q;
       updated[idx].totalCost = q * (updated[idx].unitCost || 0);
-    } else if (field === 'unitCost') {
+    } else if (field === "unitCost") {
       const c = Math.max(0, Number(value) || 0);
       updated[idx].unitCost = c;
       updated[idx].totalCost = (updated[idx].quantity || 1) * c;
@@ -222,12 +242,16 @@ export default function VendorDetail() {
     setBillLines(updated);
   };
 
-  const calculatedBillTotal = billLines.reduce((s, it) => s + (Number(it.totalCost) || 0), 0);
+  const calculatedBillTotal = billLines.reduce(
+    (s, it) => s + (Number(it.totalCost) || 0),
+    0
+  );
 
   const handleSaveBill = async (e) => {
     e.preventDefault();
     const validLines = billLines.filter((l) => l.itemId && l.quantity > 0);
-    if (validLines.length === 0) return toast.warn('Please add at least one valid inventory item.');
+    if (validLines.length === 0)
+      return toast.warn("Please add at least one valid inventory item.");
 
     setSubmitting(true);
     try {
@@ -239,7 +263,10 @@ export default function VendorDetail() {
         subtotal: calculatedBillTotal,
         grandTotal: calculatedBillTotal,
         paymentType: billMeta.paymentType,
-        amountPaid: billMeta.amountPaid !== '' ? Number(billMeta.amountPaid) : calculatedBillTotal,
+        amountPaid:
+          billMeta.amountPaid !== ""
+            ? Number(billMeta.amountPaid)
+            : calculatedBillTotal,
         transactionReference: billMeta.transactionReference,
         notes: billMeta.notes,
       };
@@ -268,7 +295,9 @@ export default function VendorDetail() {
     return (
       <div className="text-center py-24 space-y-4">
         <Truck className="h-12 w-12 text-gray-400 mx-auto" />
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Vendor Not Found</h2>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+          Vendor Not Found
+        </h2>
         <Link
           to={ROUTES.VENDORS.LIST}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white font-semibold"
@@ -332,19 +361,19 @@ export default function VendorDetail() {
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="font-mono text-xs font-extrabold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-neutral-700 text-gray-700 dark:text-gray-300">
-                  {vendor.vendorCode || 'VND-000'}
+                  {vendor.vendorCode || "VND-000"}
                 </span>
                 <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-300">
-                  {vendor.category || 'General'}
+                  {vendor.category || "General"}
                 </span>
                 <span
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                    vendor.status === 'active'
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                      : 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                    vendor.status === "active"
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                      : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
                   }`}
                 >
-                  {vendor.status === 'active' ? 'Active Approved' : 'Inactive'}
+                  {vendor.status === "active" ? "Active Approved" : "Inactive"}
                 </span>
                 <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-lg text-xs font-bold">
                   <Star className="h-3.5 w-3.5 fill-amber-500" />
@@ -379,7 +408,7 @@ export default function VendorDetail() {
                 {(vendor.city || vendor.state) && (
                   <span className="flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 text-gray-400" />
-                    {[vendor.city, vendor.state].filter(Boolean).join(', ')}
+                    {[vendor.city, vendor.state].filter(Boolean).join(", ")}
                   </span>
                 )}
               </div>
@@ -388,16 +417,20 @@ export default function VendorDetail() {
 
           {/* Outstanding Balance Banner */}
           <div className="bg-gray-50 dark:bg-neutral-900/80 p-4 rounded-2xl border border-gray-200 dark:border-neutral-700 text-right min-w-[200px]">
-            <span className="text-xs text-gray-400 block font-semibold">Outstanding Due Balance</span>
+            <span className="text-xs text-gray-400 block font-semibold">
+              Outstanding Due Balance
+            </span>
             <span
               className={`text-2xl font-black block mt-0.5 ${
-                hasDue ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                hasDue
+                  ? "text-rose-600 dark:text-rose-400"
+                  : "text-emerald-600 dark:text-emerald-400"
               }`}
             >
-              ₹{(vendor.outstandingBalance || 0).toLocaleString('en-IN')}
+              ₹{(vendor.outstandingBalance || 0).toLocaleString("en-IN")}
             </span>
             <span className="text-[11px] text-gray-400 mt-1 block">
-              Terms: {vendor.paymentTerms || 'Net 30 Days'}
+              Terms: {vendor.paymentTerms || "Net 30 Days"}
             </span>
           </div>
         </div>
@@ -410,11 +443,18 @@ export default function VendorDetail() {
             <Receipt className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-gray-400 font-semibold block">Total Inward Billed</span>
+            <span className="text-xs text-gray-400 font-semibold block">
+              Total Inward Billed
+            </span>
             <h3 className="text-lg font-black text-gray-900 dark:text-white mt-0.5">
-              ₹{(kpis?.totalBilled || vendor.totalBilled || 0).toLocaleString('en-IN')}
+              ₹
+              {(kpis?.totalBilled || vendor.totalBilled || 0).toLocaleString(
+                "en-IN"
+              )}
             </h3>
-            <span className="text-[11px] text-gray-400 block">From {bills.length} Purchase Bills</span>
+            <span className="text-[11px] text-gray-400 block">
+              From {bills.length} Purchase Bills
+            </span>
           </div>
         </div>
 
@@ -423,11 +463,18 @@ export default function VendorDetail() {
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-gray-400 font-semibold block">Total Disbursed</span>
+            <span className="text-xs text-gray-400 font-semibold block">
+              Total Disbursed
+            </span>
             <h3 className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              ₹{(kpis?.totalPaid || vendor.totalPaid || 0).toLocaleString('en-IN')}
+              ₹
+              {(kpis?.totalPaid || vendor.totalPaid || 0).toLocaleString(
+                "en-IN"
+              )}
             </h3>
-            <span className="text-[11px] text-gray-400 block">Settled to Vendor</span>
+            <span className="text-[11px] text-gray-400 block">
+              Settled to Vendor
+            </span>
           </div>
         </div>
 
@@ -436,11 +483,15 @@ export default function VendorDetail() {
             <Boxes className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-gray-400 font-semibold block">Supplied Products</span>
+            <span className="text-xs text-gray-400 font-semibold block">
+              Supplied Products
+            </span>
             <h3 className="text-lg font-black text-gray-900 dark:text-white mt-0.5">
               {suppliedProducts.length} SKUs
             </h3>
-            <span className="text-[11px] text-gray-400 block">Active catalog lines</span>
+            <span className="text-[11px] text-gray-400 block">
+              Active catalog lines
+            </span>
           </div>
         </div>
 
@@ -449,11 +500,15 @@ export default function VendorDetail() {
             <TrendingUp className="h-6 w-6" />
           </div>
           <div>
-            <span className="text-xs text-gray-400 font-semibold block">Avg Purchase Order</span>
+            <span className="text-xs text-gray-400 font-semibold block">
+              Avg Purchase Order
+            </span>
             <h3 className="text-lg font-black text-gray-900 dark:text-white mt-0.5">
-              ₹{(kpis?.averageOrderValue || 0).toLocaleString('en-IN')}
+              ₹{(kpis?.averageOrderValue || 0).toLocaleString("en-IN")}
             </h3>
-            <span className="text-[11px] text-gray-400 block">Per procurement batch</span>
+            <span className="text-[11px] text-gray-400 block">
+              Per procurement batch
+            </span>
           </div>
         </div>
       </div>
@@ -461,11 +516,11 @@ export default function VendorDetail() {
       {/* ─── TAB NAVIGATION ─────────────────────────────────────────────────── */}
       <div className="flex border-b border-gray-200 dark:border-neutral-700 space-x-6 text-sm font-bold">
         <button
-          onClick={() => setActiveTab('overview')}
+          onClick={() => setActiveTab("overview")}
           className={`pb-3 flex items-center gap-2 border-b-2 transition-all ${
-            activeTab === 'overview'
-              ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            activeTab === "overview"
+              ? "border-primary-600 text-primary-600 dark:text-primary-400"
+              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           }`}
         >
           <Building className="h-4 w-4" />
@@ -473,11 +528,11 @@ export default function VendorDetail() {
         </button>
 
         <button
-          onClick={() => setActiveTab('bills')}
+          onClick={() => setActiveTab("bills")}
           className={`pb-3 flex items-center gap-2 border-b-2 transition-all ${
-            activeTab === 'bills'
-              ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            activeTab === "bills"
+              ? "border-primary-600 text-primary-600 dark:text-primary-400"
+              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           }`}
         >
           <Receipt className="h-4 w-4" />
@@ -485,11 +540,11 @@ export default function VendorDetail() {
         </button>
 
         <button
-          onClick={() => setActiveTab('products')}
+          onClick={() => setActiveTab("products")}
           className={`pb-3 flex items-center gap-2 border-b-2 transition-all ${
-            activeTab === 'products'
-              ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            activeTab === "products"
+              ? "border-primary-600 text-primary-600 dark:text-primary-400"
+              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           }`}
         >
           <Boxes className="h-4 w-4" />
@@ -498,7 +553,7 @@ export default function VendorDetail() {
       </div>
 
       {/* ─── TAB 1: OVERVIEW & SPEND ANALYTICS ────────────────────────────────── */}
-      {activeTab === 'overview' && (
+      {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Visual Analytics & Breakdown */}
           <div className="lg:col-span-2 space-y-6">
@@ -515,7 +570,7 @@ export default function VendorDetail() {
                   </p>
                 </div>
                 <span className="text-xs font-bold text-primary-600 dark:text-primary-400">
-                  Total ₹{(kpis?.totalBilled || 0).toLocaleString('en-IN')}
+                  Total ₹{(kpis?.totalBilled || 0).toLocaleString("en-IN")}
                 </span>
               </div>
 
@@ -526,14 +581,21 @@ export default function VendorDetail() {
               ) : (
                 <div className="space-y-3 pt-2">
                   {spendTrend.map((st, i) => {
-                    const maxVal = Math.max(...spendTrend.map((x) => x.amount || 1));
-                    const pct = Math.min(100, Math.round((st.amount / maxVal) * 100));
+                    const maxVal = Math.max(
+                      ...spendTrend.map((x) => x.amount || 1)
+                    );
+                    const pct = Math.min(
+                      100,
+                      Math.round((st.amount / maxVal) * 100)
+                    );
                     return (
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-gray-700 dark:text-gray-300">{st.month}</span>
+                          <span className="text-gray-700 dark:text-gray-300">
+                            {st.month}
+                          </span>
                           <span className="text-gray-900 dark:text-white">
-                            ₹{st.amount.toLocaleString('en-IN')}
+                            ₹{st.amount.toLocaleString("en-IN")}
                           </span>
                         </div>
                         <div className="w-full h-2.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
@@ -561,9 +623,11 @@ export default function VendorDetail() {
                       key={i}
                       className="p-3 rounded-xl bg-gray-50 dark:bg-neutral-900/60 border border-gray-200 dark:border-neutral-700 text-xs"
                     >
-                      <span className="text-gray-500 dark:text-gray-400 block truncate">{cat.category}</span>
+                      <span className="text-gray-500 dark:text-gray-400 block truncate">
+                        {cat.category}
+                      </span>
                       <span className="font-extrabold text-sm text-gray-900 dark:text-white block mt-0.5">
-                        ₹{cat.amount.toLocaleString('en-IN')}
+                        ₹{cat.amount.toLocaleString("en-IN")}
                       </span>
                     </div>
                   ))}
@@ -590,21 +654,26 @@ export default function VendorDetail() {
                 <div className="flex justify-between">
                   <span className="text-gray-400">Bank Name:</span>
                   <span className="font-bold text-gray-900 dark:text-white">
-                    {vendor.bankDetails?.bankName || 'Not Provided'}
+                    {vendor.bankDetails?.bankName || "Not Provided"}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Account #:</span>
                   <div className="flex items-center gap-1.5 font-mono font-bold text-gray-900 dark:text-white">
-                    <span>{vendor.bankDetails?.accountNumber || '—'}</span>
+                    <span>{vendor.bankDetails?.accountNumber || "—"}</span>
                     {vendor.bankDetails?.accountNumber && (
                       <button
-                        onClick={() => handleCopy(vendor.bankDetails.accountNumber, 'Account #')}
+                        onClick={() =>
+                          handleCopy(
+                            vendor.bankDetails.accountNumber,
+                            "Account #"
+                          )
+                        }
                         className="text-gray-400 hover:text-primary-600"
                         title="Copy Account Number"
                       >
-                        {copiedField === 'Account #' ? (
+                        {copiedField === "Account #" ? (
                           <Check className="h-3 w-3 text-emerald-600" />
                         ) : (
                           <Copy className="h-3 w-3" />
@@ -617,13 +686,15 @@ export default function VendorDetail() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">IFSC Code:</span>
                   <div className="flex items-center gap-1.5 font-mono font-bold text-gray-900 dark:text-white">
-                    <span>{vendor.bankDetails?.ifscCode || '—'}</span>
+                    <span>{vendor.bankDetails?.ifscCode || "—"}</span>
                     {vendor.bankDetails?.ifscCode && (
                       <button
-                        onClick={() => handleCopy(vendor.bankDetails.ifscCode, 'IFSC Code')}
+                        onClick={() =>
+                          handleCopy(vendor.bankDetails.ifscCode, "IFSC Code")
+                        }
                         className="text-gray-400 hover:text-primary-600"
                       >
-                        {copiedField === 'IFSC Code' ? (
+                        {copiedField === "IFSC Code" ? (
                           <Check className="h-3 w-3 text-emerald-600" />
                         ) : (
                           <Copy className="h-3 w-3" />
@@ -636,7 +707,9 @@ export default function VendorDetail() {
                 {vendor.bankDetails?.upiId && (
                   <div className="flex justify-between items-center pt-1 border-t border-gray-200 dark:border-neutral-700">
                     <span className="text-gray-400">UPI ID:</span>
-                    <span className="font-mono font-bold text-primary-600">{vendor.bankDetails.upiId}</span>
+                    <span className="font-mono font-bold text-primary-600">
+                      {vendor.bankDetails.upiId}
+                    </span>
                   </div>
                 )}
               </div>
@@ -653,26 +726,28 @@ export default function VendorDetail() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">GSTIN:</span>
                   <span className="font-mono font-bold text-gray-900 dark:text-white">
-                    {vendor.gstin || 'Unregistered / Exempt'}
+                    {vendor.gstin || "Unregistered / Exempt"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">PAN Number:</span>
                   <span className="font-mono font-bold text-gray-900 dark:text-white">
-                    {vendor.pan || '—'}
+                    {vendor.pan || "—"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Payment Terms:</span>
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {vendor.paymentTerms || 'Net 30'}
+                    {vendor.paymentTerms || "Net 30"}
                   </span>
                 </div>
               </div>
 
               {vendor.notes && (
                 <div className="p-3 rounded-xl bg-gray-50 dark:bg-neutral-900 text-xs text-gray-600 dark:text-gray-300">
-                  <span className="font-bold block text-gray-700 dark:text-gray-200 mb-0.5">Notes:</span>
+                  <span className="font-bold block text-gray-700 dark:text-gray-200 mb-0.5">
+                    Notes:
+                  </span>
                   {vendor.notes}
                 </div>
               )}
@@ -682,7 +757,7 @@ export default function VendorDetail() {
       )}
 
       {/* ─── TAB 2: INVOICES & BILLS ─────────────────────────────────────────── */}
-      {activeTab === 'bills' && (
+      {activeTab === "bills" && (
         <div className="space-y-4">
           <div className="flex justify-between items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-gray-200 dark:border-neutral-700">
             <div>
@@ -690,7 +765,8 @@ export default function VendorDetail() {
                 Inward Purchase Invoices & Payment Ledger
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                Every procurement invoice, item count, disbursed payment, and pending balance.
+                Every procurement invoice, item count, disbursed payment, and
+                pending balance.
               </p>
             </div>
             <button
@@ -723,33 +799,36 @@ export default function VendorDetail() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-neutral-700">
                   {bills.map((bill) => (
-                    <tr key={bill.id || bill._id} className="hover:bg-gray-50 dark:hover:bg-neutral-750">
+                    <tr
+                      key={bill.id || bill._id}
+                      className="hover:bg-gray-50 dark:hover:bg-neutral-750"
+                    >
                       <td className="p-3.5 font-mono font-bold text-gray-900 dark:text-white">
                         {bill.billNumber}
                       </td>
                       <td className="p-3.5 text-gray-500">
-                        {new Date(bill.billDate).toLocaleDateString('en-IN')}
+                        {new Date(bill.billDate).toLocaleDateString("en-IN")}
                       </td>
                       <td className="p-3.5 text-gray-700 dark:text-gray-300">
                         {bill.items?.length || 0} product lines
                       </td>
                       <td className="p-3.5 font-black text-gray-900 dark:text-white">
-                        ₹{(bill.grandTotal || 0).toLocaleString('en-IN')}
+                        ₹{(bill.grandTotal || 0).toLocaleString("en-IN")}
                       </td>
                       <td className="p-3.5 text-emerald-600 font-bold">
-                        ₹{(bill.amountPaid || 0).toLocaleString('en-IN')}
+                        ₹{(bill.amountPaid || 0).toLocaleString("en-IN")}
                       </td>
                       <td className="p-3.5 font-black text-rose-600">
-                        ₹{(bill.balanceDue || 0).toLocaleString('en-IN')}
+                        ₹{(bill.balanceDue || 0).toLocaleString("en-IN")}
                       </td>
                       <td className="p-3.5">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            bill.paymentStatus === 'Paid'
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                              : bill.paymentStatus === 'Partial'
-                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                              : 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                            bill.paymentStatus === "Paid"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                              : bill.paymentStatus === "Partial"
+                                ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                                : "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
                           }`}
                         >
                           {bill.paymentStatus}
@@ -784,7 +863,7 @@ export default function VendorDetail() {
       )}
 
       {/* ─── TAB 3: SUPPLIED PRODUCTS CATALOG ───────────────────────────────── */}
-      {activeTab === 'products' && (
+      {activeTab === "products" && (
         <div className="space-y-4">
           <div className="flex justify-between items-center bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-gray-200 dark:border-neutral-700">
             <div>
@@ -792,7 +871,8 @@ export default function VendorDetail() {
                 Supplied Inventory Products Catalog ({suppliedProducts.length})
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                School inventory items sourced directly from this registered vendor.
+                School inventory items sourced directly from this registered
+                vendor.
               </p>
             </div>
             <button
@@ -823,7 +903,10 @@ export default function VendorDetail() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-neutral-700">
                   {suppliedProducts.map((prod) => (
-                    <tr key={prod.id || prod._id} className="hover:bg-gray-50 dark:hover:bg-neutral-750">
+                    <tr
+                      key={prod.id || prod._id}
+                      className="hover:bg-gray-50 dark:hover:bg-neutral-750"
+                    >
                       <td className="p-3.5">
                         <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-gray-300">
                           {prod.sku}
@@ -841,9 +924,14 @@ export default function VendorDetail() {
                         {prod.quantity} {prod.unit}
                       </td>
                       <td className="p-3.5 font-bold text-gray-900 dark:text-white">
-                        ₹{(prod.unitCost || prod.price || 0).toLocaleString('en-IN')}
+                        ₹
+                        {(prod.unitCost || prod.price || 0).toLocaleString(
+                          "en-IN"
+                        )}
                       </td>
-                      <td className="p-3.5 text-gray-500">{prod.location || 'Main Store'}</td>
+                      <td className="p-3.5 text-gray-500">
+                        {prod.location || "Main Store"}
+                      </td>
                       <td className="p-3.5 text-right">
                         <Link
                           to={`/inventory/${prod.id || prod._id}`}
@@ -868,14 +956,22 @@ export default function VendorDetail() {
       <Modal
         isOpen={showPayModal}
         onClose={() => setShowPayModal(false)}
-        title={payTargetBill ? `Settle Bill #${payTargetBill.billNumber}` : `Record Payment to ${vendor?.name}`}
+        title={
+          payTargetBill
+            ? `Settle Bill #${payTargetBill.billNumber}`
+            : `Record Payment to ${vendor?.name}`
+        }
         maxWidth="max-w-md"
       >
         <form onSubmit={handleSavePayment} className="space-y-4">
           <div className="bg-gray-50 dark:bg-neutral-900 p-3.5 rounded-xl border border-gray-200 dark:border-neutral-700 text-xs">
             <span className="text-gray-400">Total Outstanding Balance:</span>
             <p className="text-base font-black text-rose-600 dark:text-rose-400">
-              ₹{(payTargetBill ? payTargetBill.balanceDue : vendor?.outstandingBalance || 0).toLocaleString('en-IN')}
+              ₹
+              {(payTargetBill
+                ? payTargetBill.balanceDue
+                : vendor?.outstandingBalance || 0
+              ).toLocaleString("en-IN")}
             </p>
           </div>
 
@@ -888,7 +984,9 @@ export default function VendorDetail() {
               required
               min="1"
               value={payForm.amount}
-              onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
+              onChange={(e) =>
+                setPayForm({ ...payForm, amount: e.target.value })
+              }
               className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white font-bold"
             />
           </div>
@@ -899,7 +997,9 @@ export default function VendorDetail() {
             </label>
             <select
               value={payForm.paymentType}
-              onChange={(e) => setPayForm({ ...payForm, paymentType: e.target.value })}
+              onChange={(e) =>
+                setPayForm({ ...payForm, paymentType: e.target.value })
+              }
               className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
             >
               <option value="Bank Transfer">Bank Transfer (NEFT / RTGS)</option>
@@ -916,7 +1016,9 @@ export default function VendorDetail() {
             <input
               type="text"
               value={payForm.transactionReference}
-              onChange={(e) => setPayForm({ ...payForm, transactionReference: e.target.value })}
+              onChange={(e) =>
+                setPayForm({ ...payForm, transactionReference: e.target.value })
+              }
               placeholder="e.g. UTR123456789 or Cheque #49201"
               className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white font-mono"
             />
@@ -929,7 +1031,9 @@ export default function VendorDetail() {
             <input
               type="text"
               value={payForm.notes}
-              onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })}
+              onChange={(e) =>
+                setPayForm({ ...payForm, notes: e.target.value })
+              }
               className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
             />
           </div>
@@ -947,7 +1051,7 @@ export default function VendorDetail() {
               disabled={submitting}
               className="px-5 py-2 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all"
             >
-              {submitting ? 'Recording...' : 'Confirm Disbursement'}
+              {submitting ? "Recording..." : "Confirm Disbursement"}
             </button>
           </div>
         </form>
@@ -971,8 +1075,10 @@ export default function VendorDetail() {
               <input
                 type="text"
                 required
-                value={editForm.name || ''}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                value={editForm.name || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, name: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               />
             </div>
@@ -983,8 +1089,10 @@ export default function VendorDetail() {
               </label>
               <input
                 type="text"
-                value={editForm.category || ''}
-                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                value={editForm.category || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, category: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               />
             </div>
@@ -995,8 +1103,10 @@ export default function VendorDetail() {
               </label>
               <input
                 type="text"
-                value={editForm.contactPerson || ''}
-                onChange={(e) => setEditForm({ ...editForm, contactPerson: e.target.value })}
+                value={editForm.contactPerson || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, contactPerson: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               />
             </div>
@@ -1007,8 +1117,10 @@ export default function VendorDetail() {
               </label>
               <input
                 type="text"
-                value={editForm.phone || ''}
-                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                value={editForm.phone || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, phone: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               />
             </div>
@@ -1019,8 +1131,10 @@ export default function VendorDetail() {
               </label>
               <input
                 type="email"
-                value={editForm.email || ''}
-                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                value={editForm.email || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, email: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               />
             </div>
@@ -1031,25 +1145,37 @@ export default function VendorDetail() {
               </label>
               <input
                 type="text"
-                value={editForm.gstin || ''}
-                onChange={(e) => setEditForm({ ...editForm, gstin: e.target.value.toUpperCase() })}
+                value={editForm.gstin || ""}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    gstin: e.target.value.toUpperCase(),
+                  })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white font-mono uppercase"
               />
             </div>
           </div>
 
           <div className="pt-2 border-t border-gray-200 dark:border-neutral-700">
-            <h4 className="text-xs font-black uppercase text-gray-400 mb-2">Banking Coordinates</h4>
+            <h4 className="text-xs font-black uppercase text-gray-400 mb-2">
+              Banking Coordinates
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Bank Name</label>
+                <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  Bank Name
+                </label>
                 <input
                   type="text"
-                  value={editForm.bankDetails?.bankName || ''}
+                  value={editForm.bankDetails?.bankName || ""}
                   onChange={(e) =>
                     setEditForm({
                       ...editForm,
-                      bankDetails: { ...editForm.bankDetails, bankName: e.target.value },
+                      bankDetails: {
+                        ...editForm.bankDetails,
+                        bankName: e.target.value,
+                      },
                     })
                   }
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
@@ -1057,14 +1183,19 @@ export default function VendorDetail() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Account #</label>
+                <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  Account #
+                </label>
                 <input
                   type="text"
-                  value={editForm.bankDetails?.accountNumber || ''}
+                  value={editForm.bankDetails?.accountNumber || ""}
                   onChange={(e) =>
                     setEditForm({
                       ...editForm,
-                      bankDetails: { ...editForm.bankDetails, accountNumber: e.target.value },
+                      bankDetails: {
+                        ...editForm.bankDetails,
+                        accountNumber: e.target.value,
+                      },
                     })
                   }
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white font-mono"
@@ -1072,14 +1203,19 @@ export default function VendorDetail() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">IFSC Code</label>
+                <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  IFSC Code
+                </label>
                 <input
                   type="text"
-                  value={editForm.bankDetails?.ifscCode || ''}
+                  value={editForm.bankDetails?.ifscCode || ""}
                   onChange={(e) =>
                     setEditForm({
                       ...editForm,
-                      bankDetails: { ...editForm.bankDetails, ifscCode: e.target.value.toUpperCase() },
+                      bankDetails: {
+                        ...editForm.bankDetails,
+                        ifscCode: e.target.value.toUpperCase(),
+                      },
                     })
                   }
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white font-mono uppercase"
@@ -1101,7 +1237,7 @@ export default function VendorDetail() {
               disabled={submitting}
               className="px-5 py-2 rounded-xl text-sm font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-md transition-all"
             >
-              {submitting ? 'Saving...' : 'Update Vendor'}
+              {submitting ? "Saving..." : "Update Vendor"}
             </button>
           </div>
         </form>
@@ -1126,7 +1262,9 @@ export default function VendorDetail() {
                 type="text"
                 required
                 value={billMeta.billNumber}
-                onChange={(e) => setBillMeta({ ...billMeta, billNumber: e.target.value })}
+                onChange={(e) =>
+                  setBillMeta({ ...billMeta, billNumber: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white font-mono"
               />
             </div>
@@ -1139,7 +1277,9 @@ export default function VendorDetail() {
                 type="date"
                 required
                 value={billMeta.billDate}
-                onChange={(e) => setBillMeta({ ...billMeta, billDate: e.target.value })}
+                onChange={(e) =>
+                  setBillMeta({ ...billMeta, billDate: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               />
             </div>
@@ -1150,14 +1290,18 @@ export default function VendorDetail() {
               </label>
               <select
                 value={billMeta.paymentType}
-                onChange={(e) => setBillMeta({ ...billMeta, paymentType: e.target.value })}
+                onChange={(e) =>
+                  setBillMeta({ ...billMeta, paymentType: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white"
               >
                 <option value="Bank Transfer">Bank Transfer (NEFT/RTGS)</option>
                 <option value="Cheque">Cheque</option>
                 <option value="UPI">UPI</option>
                 <option value="Cash">Cash</option>
-                <option value="Credit / On Account">Deferred Credit / On Account</option>
+                <option value="Credit / On Account">
+                  Deferred Credit / On Account
+                </option>
               </select>
             </div>
           </div>
@@ -1173,7 +1317,15 @@ export default function VendorDetail() {
                 onClick={() =>
                   setBillLines([
                     ...billLines,
-                    { itemId: '', name: '', sku: '', category: '', quantity: 1, unitCost: 0, totalCost: 0 },
+                    {
+                      itemId: "",
+                      name: "",
+                      sku: "",
+                      category: "",
+                      quantity: 1,
+                      unitCost: 0,
+                      totalCost: 0,
+                    },
                   ])
                 }
                 className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1"
@@ -1193,7 +1345,9 @@ export default function VendorDetail() {
                     <select
                       required
                       value={line.itemId}
-                      onChange={(e) => handleBillLineChange(idx, 'itemId', e.target.value)}
+                      onChange={(e) =>
+                        handleBillLineChange(idx, "itemId", e.target.value)
+                      }
                       className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white"
                     >
                       <option value="">Select Inventory Product...</option>
@@ -1212,7 +1366,9 @@ export default function VendorDetail() {
                       min="1"
                       placeholder="Qty"
                       value={line.quantity}
-                      onChange={(e) => handleBillLineChange(idx, 'quantity', e.target.value)}
+                      onChange={(e) =>
+                        handleBillLineChange(idx, "quantity", e.target.value)
+                      }
                       className="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white font-bold text-center"
                     />
                   </div>
@@ -1224,19 +1380,23 @@ export default function VendorDetail() {
                       min="0"
                       placeholder="Unit Cost"
                       value={line.unitCost}
-                      onChange={(e) => handleBillLineChange(idx, 'unitCost', e.target.value)}
+                      onChange={(e) =>
+                        handleBillLineChange(idx, "unitCost", e.target.value)
+                      }
                       className="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white font-mono text-right"
                     />
                   </div>
 
                   <div className="w-28 text-right font-extrabold text-xs text-gray-900 dark:text-white">
-                    ₹{(line.totalCost || 0).toLocaleString('en-IN')}
+                    ₹{(line.totalCost || 0).toLocaleString("en-IN")}
                   </div>
 
                   {billLines.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => setBillLines(billLines.filter((_, i) => i !== idx))}
+                      onClick={() =>
+                        setBillLines(billLines.filter((_, i) => i !== idx))
+                      }
                       className="p-1 text-gray-400 hover:text-rose-600 rounded"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -1252,7 +1412,7 @@ export default function VendorDetail() {
               Total Bill Value:
             </span>
             <span className="text-lg font-black text-primary-600 dark:text-primary-400">
-              ₹{calculatedBillTotal.toLocaleString('en-IN')}
+              ₹{calculatedBillTotal.toLocaleString("en-IN")}
             </span>
           </div>
 
@@ -1269,7 +1429,7 @@ export default function VendorDetail() {
               disabled={submitting || calculatedBillTotal <= 0}
               className="px-5 py-2 rounded-xl text-sm font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-md transition-all"
             >
-              {submitting ? 'Recording...' : 'Authorize Purchase & Stock In'}
+              {submitting ? "Recording..." : "Authorize Purchase & Stock In"}
             </button>
           </div>
         </form>
@@ -1290,7 +1450,9 @@ export default function VendorDetail() {
               <h2 className="text-base font-black tracking-wide uppercase">
                 RAJ GLOBAL EDUCATIONAL SYSTEM (RGES)
               </h2>
-              <p className="text-[11px] text-gray-500">Inward Procurement Voucher</p>
+              <p className="text-[11px] text-gray-500">
+                Inward Procurement Voucher
+              </p>
               <div className="mt-2 inline-block px-3 py-1 bg-gray-100 rounded font-mono font-bold text-xs">
                 INVOICE #{printBill.billNumber}
               </div>
@@ -1298,13 +1460,21 @@ export default function VendorDetail() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-gray-400 text-[10px] block">Invoice Date:</span>
-                <span className="font-bold">{new Date(printBill.billDate).toLocaleDateString('en-IN')}</span>
+                <span className="text-gray-400 text-[10px] block">
+                  Invoice Date:
+                </span>
+                <span className="font-bold">
+                  {new Date(printBill.billDate).toLocaleDateString("en-IN")}
+                </span>
               </div>
               <div className="text-right">
-                <span className="text-gray-400 text-[10px] block">Vendor Supplier:</span>
+                <span className="text-gray-400 text-[10px] block">
+                  Vendor Supplier:
+                </span>
                 <span className="font-bold text-sm">{vendor?.name}</span>
-                <span className="text-[10px] text-gray-400 block font-mono">{vendor?.vendorCode}</span>
+                <span className="text-[10px] text-gray-400 block font-mono">
+                  {vendor?.vendorCode}
+                </span>
               </div>
             </div>
 
@@ -1322,14 +1492,18 @@ export default function VendorDetail() {
                   <tr key={idx}>
                     <td className="p-2">
                       <span className="font-bold block">{it.name}</span>
-                      <span className="text-[10px] font-mono text-gray-500">{it.sku}</span>
+                      <span className="text-[10px] font-mono text-gray-500">
+                        {it.sku}
+                      </span>
                     </td>
                     <td className="p-2 text-center font-bold">
-                      {it.quantity} {it.unit || 'pcs'}
+                      {it.quantity} {it.unit || "pcs"}
                     </td>
-                    <td className="p-2 text-right font-mono">₹{(it.unitCost || 0).toLocaleString('en-IN')}</td>
+                    <td className="p-2 text-right font-mono">
+                      ₹{(it.unitCost || 0).toLocaleString("en-IN")}
+                    </td>
                     <td className="p-2 text-right font-bold font-mono">
-                      ₹{(it.totalCost || 0).toLocaleString('en-IN')}
+                      ₹{(it.totalCost || 0).toLocaleString("en-IN")}
                     </td>
                   </tr>
                 ))}
@@ -1340,7 +1514,7 @@ export default function VendorDetail() {
                     Grand Total:
                   </td>
                   <td className="p-2 text-right font-mono text-sm">
-                    ₹{(printBill.grandTotal || 0).toLocaleString('en-IN')}
+                    ₹{(printBill.grandTotal || 0).toLocaleString("en-IN")}
                   </td>
                 </tr>
               </tfoot>

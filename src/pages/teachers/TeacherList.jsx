@@ -21,7 +21,6 @@ import {
   bulkImportTeachers,
   exportTeachersCsv,
 } from "../../services";
-import { mockTeachers } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 
@@ -49,7 +48,7 @@ const TeacherList = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [teachers, setTeachers] = useState();
+  const [teachers, setTeachers] = useState([]);
   const [pagination, setPagination] = useState();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -62,10 +61,10 @@ const TeacherList = () => {
       const res = await getTeacherCredentials(targetId).catch(() => null);
 
       const creds = res?.credentials || res?.data?.credentials || {
-        username: row.employeeId || row.teacherId || "tch-001",
-        email: row.email || `${(row.employeeId || 'tch').toLowerCase()}@school.local`,
-        password: row.password || row.tempPassword || "Tch@2026!pass",
-        name: row.name,
+        username: row.employeeId || row.teacherId || "N/A",
+        email: row.email || "N/A",
+        password: row.password || row.tempPassword || "N/A",
+        name: row.name || "N/A",
       };
 
       setActiveCredentialsModal(creds);
@@ -115,11 +114,11 @@ const TeacherList = () => {
       } else if (Array.isArray(res)) {
         setTeachers(res);
       } else {
-        setTeachers(mockTeachers);
+        setTeachers([]);
       }
     } catch (err) {
       console.error("fetchTeachers error:", err);
-      setTeachers(mockTeachers);
+      setTeachers([]);
     } finally {
       setLoading(false);
     }

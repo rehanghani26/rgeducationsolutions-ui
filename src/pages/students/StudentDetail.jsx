@@ -74,7 +74,6 @@ import CertificatePreview from "../certificates/components/CertificatePreview.js
 import IssueModal from "../certificates/components/IssueModal.jsx";
 import { getDefaultTemplate, getIssuedCertificates } from "../certificates/services/documentService.js";
 import { getTemplateById } from "../certificates/templates/registry.js";
-import { MOCK_STUDENT_DATA } from "../certificates/constants/documentConstants.js";
 import { getVerificationUrl } from "../certificates/utils/qrUtils.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -176,7 +175,6 @@ const StudentDetail = () => {
   // Student ID Card Tab State (Finalized School Format)
   const [defaultIdTemplate, setDefaultIdTemplate] = useState(null);
   const [idTemplateLoading, setIdTemplateLoading] = useState(false);
-  const [idCardDummyMode, setIdCardDummyMode] = useState(false);
 
   // Certificates Tab State (Student Issued Credentials)
   const [studentCertificates, setStudentCertificates] = useState([]);
@@ -421,16 +419,6 @@ const StudentDetail = () => {
         ]);
 
         let s = studentRes?.student || studentRes?.data?.student || null;
-        if (!s) {
-          const { mockStudents } = await import("../../data/mockData.js");
-          s =
-            mockStudents?.find(
-              (m) =>
-                String(m.id) === String(studentId) ||
-                String(m._id) === String(studentId)
-            ) || null;
-        }
-
         setStudent(s);
         setActivity(actRes?.data || actRes || { logs: [], loginHistory: [] });
       } catch (err) {
@@ -1510,21 +1498,6 @@ const StudentDetail = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {/* Toggle Dummy Data vs Real Student Data */}
-                  <button
-                    type="button"
-                    onClick={() => setIdCardDummyMode((prev) => !prev)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
-                      idCardDummyMode
-                        ? "bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400"
-                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                    }`}
-                    title="Toggle between PDF dummy layout preview and real student data"
-                  >
-                    <FileText size={14} />
-                    <span>{idCardDummyMode ? "Showing PDF Dummy Data" : "Showing Student Real Data"}</span>
-                  </button>
-
                   {/* Admin link to customize or change the finalized layout */}
                   {canManage && (
                     <Link
@@ -1544,9 +1517,7 @@ const StudentDetail = () => {
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
                     <CheckCircle2 size={16} className="text-emerald-500" />
                     <span>
-                      {idCardDummyMode
-                        ? "Previewing Finalized Format with Institutional Sample Data"
-                        : `Live ID Card for ${student.name} (${student.admissionNumber || "STD"})`}
+                      Live ID Card for {student.name || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "Student"} ({student.admissionNumber || "N/A"})
                     </span>
                   </div>
                   <span className="text-[11px] font-mono text-slate-400">
@@ -1557,28 +1528,24 @@ const StudentDetail = () => {
                 <div className="flex justify-center p-4 bg-slate-950/10 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-slate-800 min-h-[480px]">
                   <IdCardPreview
                     template={resolvedIdTemplate}
-                    recipient={
-                      idCardDummyMode
-                        ? MOCK_STUDENT_DATA
-                        : {
-                            ...student,
-                            id: student._id || student.id || student.admissionNumber,
-                            admissionNumber: student.admissionNumber || "STD-2026-001",
-                            name: student.name || `${student.firstName || ""} ${student.lastName || ""}`.trim(),
-                            class: className || "Class 10",
-                            section: sectionName || "A",
-                            bloodGroup: student.bloodGroup || "O+",
-                            dob: student.dob || "2010-01-01",
-                            rollNumber: student.rollNumber || "01",
-                            photo: photoUrl || "",
-                            parentName: student.parentName || "",
-                            contactNumber: student.contactNumber || student.phone || "",
-                          }
-                    }
+                    recipient={{
+                      ...student,
+                      id: student._id || student.id || student.admissionNumber || "N/A",
+                      admissionNumber: student.admissionNumber || "N/A",
+                      name: student.name || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "N/A",
+                      class: className || "N/A",
+                      section: sectionName || "N/A",
+                      bloodGroup: student.bloodGroup || "N/A",
+                      dob: student.dob || "N/A",
+                      rollNumber: student.rollNumber || "N/A",
+                      photo: photoUrl || "",
+                      parentName: student.parentName || "N/A",
+                      contactNumber: student.contactNumber || student.phone || "N/A",
+                    }}
                     recipientType="student"
                     schoolSettings={schoolBranding}
                     customConfig={defaultIdTemplate?.configuration || null}
-                    title={`${student.name} — ID Card`}
+                    title={`${student.name || "Student"} — ID Card`}
                   />
                 </div>
               </div>

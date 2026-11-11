@@ -8,11 +8,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import inventoryService from '../services/inventoryService.js';
-import { mockInventory } from '../data/mockData.js';
 
 // ─── useInventory ─────────────────────────────────────────────────────────────
 export const useInventory = (params = {}) => {
-  const [data, setData]       = useState({ items: mockInventory, pagination: { total: mockInventory.length, page: 1, pages: 1 } });
+  const [data, setData]       = useState({ items: [], pagination: { total: 0, page: 1, pages: 1 } });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
@@ -20,9 +19,11 @@ export const useInventory = (params = {}) => {
     setLoading(true);
     try {
       const res = await inventoryService.getAll(params);
-      if (res.data?.items?.length > 0) setData(res.data);
+      if (res.data?.items) setData(res.data);
+      else setData({ items: [], pagination: { total: 0, page: 1, pages: 1 } });
     } catch (err) {
       setError(err);
+      setData({ items: [], pagination: { total: 0, page: 1, pages: 1 } });
     } finally {
       setLoading(false);
     }
@@ -43,10 +44,10 @@ export const useInventoryItem = (id) => {
     if (!id) return;
     setLoading(true);
     inventoryService.getById(id)
-      .then(res => setData(res.data?.item ?? mockInventory.find(i => i.id === id || i._id === id) ?? mockInventory[0]))
+      .then(res => setData(res.data?.item || null))
       .catch(err => {
         setError(err);
-        setData(mockInventory.find(i => i.id === id || i._id === id) ?? mockInventory[0]);
+        setData(null);
       })
       .finally(() => setLoading(false));
   }, [id]);

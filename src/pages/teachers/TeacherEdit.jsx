@@ -5,7 +5,6 @@ import PageHeader from '../../components/ui/PageHeader.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import TeacherForm, { blankTeacherForm, payloadFromForm } from './TeacherForm.jsx';
 import { getTeacherById, updateTeacher } from '../../services';
-import { mockTeachers } from '../../data/mockData.js';
 
 const TeacherEdit = () => {
   const { teacherId } = useParams();
@@ -21,10 +20,15 @@ const TeacherEdit = () => {
       setLoading(true);
       try {
         const res = await getTeacherById(teacherId);
-        const found = res?.teacher || res?.data?.teacher || mockTeachers[0];
-        setTeacher(found);
+        const found = res?.teacher || res?.data?.teacher || (res?._id || res?.id ? res : null);
+        if (found) {
+          setTeacher(found);
+        } else {
+          toast.error("Teacher record not found");
+        }
       } catch (err) {
-        setTeacher(mockTeachers[0]);
+        toast.error("Failed to load teacher record from server");
+        setTeacher(null);
       } finally {
         setLoading(false);
       }

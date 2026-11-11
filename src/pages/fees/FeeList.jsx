@@ -11,7 +11,6 @@ import StatsCard from "../../components/ui/StatsCard.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { CurrencyInput } from "../../components/ui/CurrencyInput.jsx";
 import { getFees, collectFee, createExpense } from "../../services";
-import { mockFees } from "../../data/mockData.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 
@@ -20,8 +19,8 @@ const FeeList = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [fees, setFees] = useState(mockFees);
-  const [pagination, setPagination] = useState({ total: mockFees.length, page: 1, pages: 1 });
+  const [fees, setFees] = useState([]);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -54,11 +53,11 @@ const FeeList = () => {
         setFees(res.data.fees);
         if (res.data.pagination) setPagination(res.data.pagination);
       } else {
-        setFees(mockFees);
+        setFees([]);
       }
     } catch (err) {
       console.error("fetchFees error:", err);
-      setFees(mockFees);
+      setFees([]);
     } finally {
       setLoading(false);
     }

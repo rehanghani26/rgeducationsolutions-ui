@@ -9,7 +9,6 @@ import StatsCard from '../../components/ui/StatsCard.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { CurrencyInput } from '../../components/ui/CurrencyInput.jsx';
 import feeService from '../../services/feeService.js';
-import { mockFees } from '../../data/mockData.js';
 import Loader from '../../components/ui/Loader.jsx';
 
 const InfoGrid = ({ items }) => (
@@ -44,14 +43,14 @@ const FeeDetail = () => {
       feeService.getById(id).catch(() => null),
       feeService.getActivity(id).catch(() => null),
     ]).then(([res, actRes]) => {
-      const fallbackFee = mockFees.find((f) => f.id === id || f._id === id) || mockFees[0];
-      setFee({ ...fallbackFee, ...res?.data?.fee });
+      const realFee = res?.fee || res?.data?.fee || (res?._id || res?.id ? res : null);
+      setFee(realFee || null);
       setActivity(actRes?.data || { logs: [] });
     }).finally(() => setLoading(false));
   }, [id]);
 
   const student = fee?.studentId || fee?.student || fee?.studentDetails;
-  const totalFees = (fee?.amountPaid || fee?.amount || 15500);
+  const totalFees = fee?.amountPaid || fee?.amount || 0;
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: ClipboardList },

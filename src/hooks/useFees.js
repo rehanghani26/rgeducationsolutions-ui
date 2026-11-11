@@ -8,11 +8,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import feeService from '../services/feeService.js';
-import { mockFees } from '../data/mockData.js';
 
 // ─── useFees ──────────────────────────────────────────────────────────────────
 export const useFees = (params = {}) => {
-  const [data, setData]       = useState({ fees: mockFees, pagination: { total: mockFees.length, page: 1, pages: 1 } });
+  const [data, setData]       = useState({ fees: [], pagination: { total: 0, page: 1, pages: 1 } });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
@@ -20,9 +19,11 @@ export const useFees = (params = {}) => {
     setLoading(true);
     try {
       const res = await feeService.getAll(params);
-      if (res.data?.fees?.length > 0) setData(res.data);
+      if (res.data?.fees) setData(res.data);
+      else setData({ fees: [], pagination: { total: 0, page: 1, pages: 1 } });
     } catch (err) {
       setError(err);
+      setData({ fees: [], pagination: { total: 0, page: 1, pages: 1 } });
     } finally {
       setLoading(false);
     }
@@ -43,10 +44,10 @@ export const useFee = (id) => {
     if (!id) return;
     setLoading(true);
     feeService.getById(id)
-      .then(res => setData(res.data?.fee ?? mockFees.find(f => f.id === id || f._id === id) ?? mockFees[0]))
+      .then(res => setData(res.data?.fee || null))
       .catch(err => {
         setError(err);
-        setData(mockFees.find(f => f.id === id || f._id === id) ?? mockFees[0]);
+        setData(null);
       })
       .finally(() => setLoading(false));
   }, [id]);

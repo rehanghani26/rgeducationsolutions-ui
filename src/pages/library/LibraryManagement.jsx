@@ -60,29 +60,37 @@ const LibraryManagement = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-              {filteredBooks.map((bk) => (
-                <tr key={bk.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                  <td className="p-3 text-slate-400 text-xs font-mono">{bk.isbn}</td>
-                  <td className="p-3 font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                    <BookOpen size={16} className="text-indigo-500" />
-                    {bk.title}
-                  </td>
-                  <td className="p-3 text-slate-600 dark:text-slate-300">{bk.author}</td>
-                  <td className="p-3">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
-                      {bk.category}
-                    </span>
-                  </td>
-                  <td className="p-3 text-center text-xs font-bold text-slate-500">{bk.rack}</td>
-                  <td className="p-3 text-center font-bold text-slate-700 dark:text-slate-300">{bk.totalCopies}</td>
-                  <td className="p-3 text-center font-extrabold text-emerald-600">{bk.availableCopies}</td>
-                  <td className="p-3 text-center">
-                    <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
-                      In Stock
-                    </span>
+              {filteredBooks.length > 0 ? (
+                filteredBooks.map((bk) => (
+                  <tr key={bk.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    <td className="p-3 text-slate-400 text-xs font-mono">{bk.isbn}</td>
+                    <td className="p-3 font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                      <BookOpen size={16} className="text-indigo-500" />
+                      {bk.title}
+                    </td>
+                    <td className="p-3 text-slate-600 dark:text-slate-300">{bk.author}</td>
+                    <td className="p-3">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                        {bk.category}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center text-xs font-bold text-slate-500">{bk.rack}</td>
+                    <td className="p-3 text-center font-bold text-slate-700 dark:text-slate-300">{bk.totalCopies}</td>
+                    <td className="p-3 text-center font-extrabold text-emerald-600">{bk.availableCopies}</td>
+                    <td className="p-3 text-center">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
+                        In Stock
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-slate-400 text-xs">
+                    No books found in library catalog (N/A)
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

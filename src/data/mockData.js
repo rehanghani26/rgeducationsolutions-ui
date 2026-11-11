@@ -74,6 +74,7 @@ export const mockHostel = [];
 export const mockLibrary = [];
 export const mockNotifications = [];
 export const mockResults = [];
+export const mockAuditLogs = [];
 
 export default {
   mockDashboardStats,
@@ -95,4 +96,5 @@ export default {
   mockLibrary,
   mockNotifications,
   mockResults,
+  mockAuditLogs,
 };

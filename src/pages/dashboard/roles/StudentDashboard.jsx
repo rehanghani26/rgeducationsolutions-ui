@@ -94,65 +94,30 @@ const StudentDashboard = () => {
     };
   }, []);
 
-  // ─── 6 CHART DATASETS ──────────────────────────────────────────────────────
+  // ─── 6 CHART DATASETS (From API or Empty) ───────────────────────────────────
 
   // Chart 1: Academic Grades Performance (% Marks)
-  const defaultGrades = [
-    { name: "Mathematics", obtained: 92, total: 100 },
-    { name: "Science", obtained: 88, total: 100 },
-    { name: "English Lit", obtained: 95, total: 100 },
-    { name: "Physics", obtained: 84, total: 100 },
-    { name: "Islamic Studies", obtained: 98, total: 100 },
-    { name: "Computer Sci", obtained: 90, total: 100 },
-  ];
+  const recentGrades = charts?.recentGrades || [];
 
   // Chart 2: Fee Payment & Dues Distribution
-  const feePaid = stats?.paidFees ?? 15000;
-  const feePending = stats?.pendingFees ?? 0;
+  const feePaid = Number(stats?.paidFees) || 0;
+  const feePending = Number(stats?.pendingFees) || 0;
   const feePieSlices = [
-    { name: "Tuition Paid", value: feePaid || 12000, color: "#10b981" },
-    { name: "Transport Paid", value: 3000, color: "#f59e0b" },
-    { name: "Pending Dues", value: feePending || 1500, color: "#ef4444" },
-  ];
+    { name: "Tuition Paid", value: feePaid, color: "#10b981" },
+    { name: "Pending Dues", value: feePending, color: "#ef4444" },
+  ].filter((s) => s.value > 0);
 
   // Chart 3: Term-Wise Score Growth vs Class Benchmark
-  const defaultTermComparison = [
-    { term: "Term 1 (Fall)", score: 86, avg: 80 },
-    { term: "Term 2 (Mid)", score: 89, avg: 82 },
-    { term: "Term 3 (Final)", score: 94, avg: 84 },
-  ];
+  const termComparison = charts?.termComparison || [];
 
   // Chart 4: Monthly Attendance Trend (%)
-  const defaultMonthlyAttendance = [
-    { month: "Jan", rate: 96 },
-    { month: "Feb", rate: 94 },
-    { month: "Mar", rate: 98 },
-    { month: "Apr", rate: 95 },
-    { month: "May", rate: 97 },
-    { month: "Jun", rate: 96 },
-  ];
+  const monthlyAttendance = charts?.monthlyAttendance || [];
 
   // Chart 5: Library & Reading Book Distribution
-  const defaultLibraryReading = [
-    { category: "Science & Tech", books: 8 },
-    { category: "Literature", books: 5 },
-    { category: "History", books: 4 },
-    { category: "General", books: 3 },
-  ];
+  const libraryReading = charts?.libraryReading || [];
 
   // Chart 6: Student Skill & Behavior Competencies Assessment (%)
-  const skillCompetencies = [
-    { skill: "Punctuality", score: 98, color: "#10b981" },
-    { skill: "Homework", score: 94, color: "#f97316" },
-    { skill: "Lab Practical", score: 90, color: "#fb923c" },
-    { skill: "Class Conduct", score: 96, color: "#f59e0b" },
-    { skill: "Extra-Curricular", score: 88, color: "#ec4899" },
-  ];
-
-  const recentGrades = charts?.recentGrades?.length ? charts.recentGrades : defaultGrades;
-  const monthlyAttendance = charts?.monthlyAttendance?.length ? charts.monthlyAttendance : defaultMonthlyAttendance;
-  const termComparison = charts?.termComparison?.length ? charts.termComparison : defaultTermComparison;
-  const libraryReading = charts?.libraryReading?.length ? charts.libraryReading : defaultLibraryReading;
+  const skillCompetencies = charts?.skillCompetencies || [];
 
   // ─── 4 DATA MODULE DATASETS ────────────────────────────────────────────────
 
@@ -184,8 +149,8 @@ const StudentDashboard = () => {
         <StatCard
           icon={Activity}
           label="My Attendance Rate"
-          value={stats?.attendanceRate || "95.2%"}
-          sub={`Present ${stats?.daysPresent || 48} of ${(stats?.daysPresent || 48) + (stats?.daysAbsent || 2)} total days`}
+          value={stats?.attendanceRate || "N/A"}
+          sub={stats?.daysPresent !== undefined ? `Present ${stats.daysPresent} of ${(stats.daysPresent || 0) + (stats.daysAbsent || 0)} total days` : "N/A"}
           iconBg="bg-emerald-600/20"
           iconColor="text-emerald-400"
         />
@@ -200,16 +165,16 @@ const StudentDashboard = () => {
         <StatCard
           icon={CreditCard}
           label="Fee Account Status"
-          value={feePending > 0 ? "Pending Dues" : "Paid & Settled"}
-          sub={feePending > 0 ? `Pending: ₹${feePending.toLocaleString()}` : `Paid: ₹${(feePaid || 15000).toLocaleString()}`}
+          value={feePending > 0 ? "Pending Dues" : (feePaid > 0 ? "Paid & Settled" : "N/A")}
+          sub={feePending > 0 ? `Pending: ₹${feePending.toLocaleString()}` : (feePaid > 0 ? `Paid: ₹${feePaid.toLocaleString()}` : "N/A")}
           iconBg={feePending > 0 ? "bg-amber-600/20" : "bg-cyan-600/20"}
           iconColor={feePending > 0 ? "text-amber-400" : "text-cyan-400"}
         />
         <StatCard
           icon={BookOpen}
           label="Courses & Library"
-          value={`${stats?.activeCourses || 6} Enrolled Courses`}
-          sub={`${stats?.booksIssued || 4} Library Books Borrowed`}
+          value={stats?.activeCourses !== undefined ? `${stats.activeCourses} Enrolled Courses` : "N/A"}
+          sub={stats?.booksIssued !== undefined ? `${stats.booksIssued} Library Books Borrowed` : "N/A"}
           iconBg="bg-purple-600/20"
           iconColor="text-purple-400"
         />
@@ -305,22 +270,28 @@ const StudentDashboard = () => {
         <div className="lg:col-span-2">
           <SectionCard title="Chart 1: My Subject Academic Performance (% Marks)">
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={recentGrades}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} />
-                  <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} />
-                  <Tooltip
-                    contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "12px", color: "#fff" }}
-                    formatter={(value) => [`${value}% Obtained`, "Grade Score"]}
-                  />
-                  <Bar dataKey="obtained" fill="#f97316" radius={[6, 6, 0, 0]}>
-                    {recentGrades.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.obtained >= 90 ? "#10b981" : entry.obtained >= 75 ? "#f97316" : "#f59e0b"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {recentGrades.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={recentGrades}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} />
+                    <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} />
+                    <Tooltip
+                      contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "12px", color: "#fff" }}
+                      formatter={(value) => [`${value}% Obtained`, "Grade Score"]}
+                    />
+                    <Bar dataKey="obtained" fill="#f97316" radius={[6, 6, 0, 0]}>
+                      {recentGrades.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.obtained >= 90 ? "#10b981" : entry.obtained >= 75 ? "#f97316" : "#f59e0b"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
+                  No grade records available (N/A)
+                </div>
+              )}
             </div>
           </SectionCard>
         </div>
@@ -328,28 +299,36 @@ const StudentDashboard = () => {
         {/* CHART 2: Fee Account Overview Donut */}
         <SectionCard title="Chart 2: Fee Account Payment Distribution">
           <div className="h-48 flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={feePieSlices} cx="50%" cy="50%" innerRadius={48} outerRadius={70} paddingAngle={4} dataKey="value">
-                  {feePieSlices.map((e, i) => (
-                    <Cell key={i} fill={e.color} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="space-y-2 border-t border-slate-200 pt-3 text-xs dark:border-slate-800/80">
-            {feePieSlices.map((item) => (
-              <div key={item.name} className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  {item.name}
-                </span>
-                <span className="font-bold">₹{item.value.toLocaleString()}</span>
+            {feePieSlices.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={feePieSlices} cx="50%" cy="50%" innerRadius={48} outerRadius={70} paddingAngle={4} dataKey="value">
+                    {feePieSlices.map((e, i) => (
+                      <Cell key={i} fill={e.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
+                No fee dues or payments recorded (N/A)
               </div>
-            ))}
+            )}
           </div>
+          {feePieSlices.length > 0 && (
+            <div className="space-y-2 border-t border-slate-200 pt-3 text-xs dark:border-slate-800/80">
+              {feePieSlices.map((item) => (
+                <div key={item.name} className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                    {item.name}
+                  </span>
+                  <span className="font-bold">₹{item.value.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </SectionCard>
       </div>
 
@@ -358,37 +337,49 @@ const StudentDashboard = () => {
         {/* CHART 3: Term-Wise Growth vs Class Benchmark */}
         <SectionCard title="Chart 3: Term Score Growth vs Class Benchmark">
           <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={termComparison}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                <XAxis dataKey="term" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} domain={[60, 100]} />
-                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                <Line type="monotone" dataKey="score" stroke="#10b981" strokeWidth={3} name="My Score %" />
-                <Line type="monotone" dataKey="avg" stroke="#f97316" strokeWidth={2} strokeDasharray="5 5" name="Class Avg %" />
-              </LineChart>
-            </ResponsiveContainer>
+            {termComparison.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={termComparison}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
+                  <XAxis dataKey="term" stroke="#64748b" fontSize={11} />
+                  <YAxis stroke="#64748b" fontSize={11} domain={[60, 100]} />
+                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
+                  <Line type="monotone" dataKey="score" stroke="#10b981" strokeWidth={3} name="My Score %" />
+                  <Line type="monotone" dataKey="avg" stroke="#f97316" strokeWidth={2} strokeDasharray="5 5" name="Class Avg %" />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
+                No term benchmark records available (N/A)
+              </div>
+            )}
           </div>
         </SectionCard>
 
         {/* CHART 4: Monthly Attendance Area Chart */}
         <SectionCard title="Chart 4: Monthly Attendance Trend (%)">
           <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyAttendance}>
-                <defs>
-                  <linearGradient id="studentAttGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} domain={[70, 100]} />
-                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                <Area type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#studentAttGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {monthlyAttendance.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={monthlyAttendance}>
+                  <defs>
+                    <linearGradient id="studentAttGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
+                  <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
+                  <YAxis stroke="#64748b" fontSize={11} domain={[70, 100]} />
+                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
+                  <Area type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#studentAttGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
+                No monthly attendance trend records available (N/A)
+              </div>
+            )}
           </div>
         </SectionCard>
       </div>
@@ -398,34 +389,46 @@ const StudentDashboard = () => {
         {/* CHART 5: Library Reading Breakdown */}
         <SectionCard title="Chart 5: Library Books Read by Category">
           <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={libraryReading} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                <XAxis type="number" stroke="#64748b" fontSize={10} />
-                <YAxis dataKey="category" type="category" stroke="#94a3b8" fontSize={10} width={90} />
-                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                <Bar dataKey="books" fill="#ec4899" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {libraryReading.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={libraryReading} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
+                  <XAxis type="number" stroke="#64748b" fontSize={10} />
+                  <YAxis dataKey="category" type="category" stroke="#94a3b8" fontSize={10} width={90} />
+                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
+                  <Bar dataKey="books" fill="#ec4899" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
+                No library reading records available (N/A)
+              </div>
+            )}
           </div>
         </SectionCard>
 
         {/* CHART 6: Student Skill & Behavior Competencies */}
         <SectionCard title="Chart 6: Student Conduct & Skill Competencies (%)">
           <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={skillCompetencies}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                <XAxis dataKey="skill" stroke="#64748b" fontSize={10} />
-                <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} />
-                <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                <Bar dataKey="score" fill="#f97316" radius={[4, 4, 0, 0]}>
-                  {skillCompetencies.map((entry, index) => (
-                    <Cell key={`cell-skill-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {skillCompetencies.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={skillCompetencies}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
+                  <XAxis dataKey="skill" stroke="#64748b" fontSize={10} />
+                  <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} />
+                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
+                  <Bar dataKey="score" fill="#f97316" radius={[4, 4, 0, 0]}>
+                    {skillCompetencies.map((entry, index) => (
+                      <Cell key={`cell-skill-${index}`} fill={entry.color || '#f97316'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
+                No competency assessment records available (N/A)
+              </div>
+            )}
           </div>
         </SectionCard>
       </div>
