@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { verifyCertificate } from '../services/documentService.js';
 import { getVerificationUrl } from '../utils/qrUtils.js';
+import { formatDateLong, formatDateTime } from '../../../utils';
 
 export default function VerifyModule() {
   const [tokenInput, setTokenInput] = useState('');
@@ -142,7 +143,7 @@ export default function VerifyModule() {
               )}
               {result.certificate.revokedAt && (
                 <div className="text-slate-400 text-[11px]">
-                  Revoked on {new Date(result.certificate.revokedAt).toLocaleString()}
+                  Revoked on {formatDateTime(result.certificate.revokedAt)}
                 </div>
               )}
             </div>
@@ -182,11 +183,7 @@ export default function VerifyModule() {
                 Date Issued
               </div>
               <div className="text-white font-medium text-xs mt-1">
-                {new Date(result.certificate.issuedAt).toLocaleDateString('en-IN', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
+                {formatDateLong(result.certificate.issuedAt)}
               </div>
             </div>
           </div>

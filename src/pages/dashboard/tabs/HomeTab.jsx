@@ -38,6 +38,8 @@ import SectionCard from "../components/SectionCard.jsx";
 import Loader from "../../../components/ui/Loader.jsx";
 import api from "../../../services/api.js";
 import { ROUTES } from "../../../routes/routes.js";
+import { SHORT_MONTH_NAMES } from "../../../constants";
+import { formatCurrency } from "../../../utils";
 
 const HomeTab = () => {
   const navigate = useNavigate();
@@ -115,7 +117,7 @@ const HomeTab = () => {
     if (charts?.upcomingExams?.length) {
       return charts.upcomingExams.map((ex, idx) => ({
         id: ex.id || ex._id || idx,
-        month: ex.date ? new Date(ex.date).toLocaleString('en', { month: 'short' }).toUpperCase() : 'N/A',
+        month: ex.date ? (SHORT_MONTH_NAMES[new Date(ex.date).getMonth()] || 'N/A').toUpperCase() : 'N/A',
         date: ex.date ? new Date(ex.date).getDate() : '—',
         title: ex.title || ex.name || 'Examination',
         time: ex.time || 'Scheduled',
@@ -136,7 +138,7 @@ const HomeTab = () => {
   const totalStudentsCount = stats?.totalStudents || 1248;
   const totalTeachersCount = stats?.totalTeachers || 86;
   const totalStaffCount = stats?.totalStaff || 48;
-  const feeCollectionAmount = stats?.feeCollectionToday ? `₹${stats.feeCollectionToday.toLocaleString()}` : "₹4,52,300";
+  const feeCollectionAmount = stats?.feeCollectionToday ? formatCurrency(stats.feeCollectionToday) : "₹4,52,300";
 
   return (
     <div className="space-y-6">

@@ -3,6 +3,7 @@ import { Calendar, CheckCircle2, ArrowRight, Loader2, Sparkles, Clock, AlertCirc
 import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
+import { dateOnly } from '../../../utils';
 
 export default function Step2AcademicSession({ onComplete, onNext }) {
   const [loading, setLoading] = useState(false);
@@ -28,8 +29,8 @@ export default function Step2AcademicSession({ onComplete, onNext }) {
         setActiveSession(curr);
         setForm({
           sessionName: curr.sessionName || '2026-2027',
-          startDate: curr.startDate ? curr.startDate.slice(0, 10) : '2026-04-01',
-          endDate: curr.endDate ? curr.endDate.slice(0, 10) : '2027-03-31',
+          startDate: curr.startDate ? dateOnly(curr.startDate) : '2026-04-01',
+          endDate: curr.endDate ? dateOnly(curr.endDate) : '2027-03-31',
           notes: curr.notes || '',
         });
       }

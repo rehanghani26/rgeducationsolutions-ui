@@ -6,10 +6,10 @@ import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
 import api from "../../../services/api.js";
 import { getUserFromStorage } from "../../../config/access.jsx";
+import { DAY_NAMES_LOWER } from "../../../constants";
 
 const getCurrentDayId = () => {
-  const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-  const todayName = dayNames[new Date().getDay()];
+  const todayName = DAY_NAMES_LOWER[new Date().getDay()];
   return todayName === "sunday" ? "monday" : todayName;
 };
 

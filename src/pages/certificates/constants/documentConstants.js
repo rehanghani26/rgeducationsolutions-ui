@@ -4,6 +4,8 @@
  * Certificate types, statuses, recipient types, and display mappings.
  */
 
+import { formatDateLong } from '../../../utils';
+
 // ─── Certificate Types ────────────────────────────────────────────────────────
 
 export const CERTIFICATE_TYPES = {
@@ -127,7 +129,7 @@ export const CERTIFICATE_PLACEHOLDER = {
   class: 'N/A',
   section: 'N/A',
   academicSession: 'N/A',
-  issueDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
+  issueDate: formatDateLong(new Date()),
   purposeNote: 'N/A',
 };
 

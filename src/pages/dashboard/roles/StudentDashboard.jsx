@@ -38,6 +38,7 @@ import {
 import api from "../../../services/api.js";
 import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
+import { formatCurrency } from "../../../utils";
 
 const resolveImageUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
@@ -166,7 +167,7 @@ const StudentDashboard = () => {
           icon={CreditCard}
           label="Fee Account Status"
           value={feePending > 0 ? "Pending Dues" : (feePaid > 0 ? "Paid & Settled" : "N/A")}
-          sub={feePending > 0 ? `Pending: ₹${feePending.toLocaleString()}` : (feePaid > 0 ? `Paid: ₹${feePaid.toLocaleString()}` : "N/A")}
+          sub={feePending > 0 ? `Pending: ${formatCurrency(feePending)}` : (feePaid > 0 ? `Paid: ${formatCurrency(feePaid)}` : "N/A")}
           iconBg={feePending > 0 ? "bg-amber-600/20" : "bg-cyan-600/20"}
           iconColor={feePending > 0 ? "text-amber-400" : "text-cyan-400"}
         />
@@ -324,7 +325,7 @@ const StudentDashboard = () => {
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                     {item.name}
                   </span>
-                  <span className="font-bold">₹{item.value.toLocaleString()}</span>
+                  <span className="font-bold">{formatCurrency(item.value)}</span>
                 </div>
               ))}
             </div>

@@ -7,6 +7,7 @@ import {
   Clock,
   ArrowUpRight,
 } from "lucide-react";
+import { formatCurrency } from "../../../utils";
 
 export default function AIFeeSummary({
   summary = {},
@@ -22,9 +23,9 @@ export default function AIFeeSummary({
       ? `${Math.round((Number(totalPaid) / Number(totalAmount)) * 100)}%`
       : "0%");
 
-  const formatCurrency = (val) => {
+  const formatCurrencyLocal = (val) => {
     if (typeof val === "string" && val.startsWith("₹")) return val;
-    return `₹${Number(val || 0).toLocaleString("en-IN")}`;
+    return formatCurrency(val);
   };
 
   return (
@@ -51,7 +52,7 @@ export default function AIFeeSummary({
             <DollarSign className="h-3.5 w-3.5 text-[#FFA000]" />
           </div>
           <span className="text-lg font-bold text-[#FFFFFF] tracking-tight">
-            {formatCurrency(totalAmount)}
+            {formatCurrencyLocal(totalAmount)}
           </span>
         </div>
 
@@ -62,7 +63,7 @@ export default function AIFeeSummary({
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
           </div>
           <span className="text-lg font-bold text-emerald-400 tracking-tight">
-            {formatCurrency(totalPaid)}
+            {formatCurrencyLocal(totalPaid)}
           </span>
         </div>
 
@@ -73,7 +74,7 @@ export default function AIFeeSummary({
             <AlertCircle className="h-3.5 w-3.5 text-rose-400" />
           </div>
           <span className="text-lg font-bold text-rose-400 tracking-tight">
-            {formatCurrency(totalPending)}
+            {formatCurrencyLocal(totalPending)}
           </span>
         </div>
 
@@ -124,7 +125,7 @@ export default function AIFeeSummary({
                       {f.class || f.studentId?.class || "—"}
                     </td>
                     <td className="px-3 py-1.5 font-bold text-rose-400 font-mono">
-                      {f.amountPending || formatCurrency(f.pending || 0)}
+                      {f.amountPending || formatCurrencyLocal(f.pending || 0)}
                     </td>
                     <td className="px-3 py-1.5 text-[#A1A1AA] font-mono text-[10px]">
                       {f.dueDate || "—"}

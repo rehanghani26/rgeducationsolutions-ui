@@ -27,6 +27,7 @@ import { CanButton } from "../../config/buttonAccess.jsx";
 import { useSelector } from "react-redux";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
+import { formatCurrency } from "../../utils";
 
 const TeacherList = () => {
   const navigate = useNavigate();
@@ -196,7 +197,7 @@ const TeacherList = () => {
       key: "salary",
       label: "Salary",
       render: (row) =>
-        row.salary ? `₹${Number(row.salary).toLocaleString()}` : "—",
+        row.salary ? formatCurrency(row.salary) : "—",
     },
   ];
 

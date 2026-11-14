@@ -5,7 +5,8 @@ import { format, differenceInYears } from "date-fns";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import { getUserFromStorage } from "../../config/access.jsx";
-import { ROLES } from "../../constants/roles.js";
+import { ROLES, MONTH_OPTIONS as MONTH_NAMES, YEAR_OPTIONS } from "../../constants";
+import { formatCurrency, formatDate } from "../../utils";
 import {
   User,
   CalendarCheck,
@@ -88,30 +89,6 @@ const formatAadhaar = (val) => {
   }
   return val;
 };
-
-const MONTH_NAMES = [
-  { value: "1", label: "January" },
-  { value: "2", label: "February" },
-  { value: "3", label: "March" },
-  { value: "4", label: "April" },
-  { value: "5", label: "May" },
-  { value: "6", label: "June" },
-  { value: "7", label: "July" },
-  { value: "8", label: "August" },
-  { value: "9", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
-
-const currentYearNum = new Date().getFullYear();
-const YEAR_OPTIONS = [
-  currentYearNum + 1,
-  currentYearNum,
-  currentYearNum - 1,
-  currentYearNum - 2,
-  currentYearNum - 3,
-];
 
 // ─── StudentDetail Component ──────────────────────────────────────────────────
 
@@ -1670,11 +1647,7 @@ const StudentDetail = () => {
                             </p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
                               Session: {cert.academicSession || "2025-2026"} • Issued on{" "}
-                              {new Date(cert.issuedAt).toLocaleDateString("en-IN", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
+                              {formatDate(cert.issuedAt)}
                             </p>
                             {cert.purposeNote && (
                               <p className="text-[11px] text-slate-400 italic mt-1 line-clamp-1">

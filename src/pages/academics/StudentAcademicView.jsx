@@ -9,12 +9,13 @@ import {
 import Modal from '../../components/ui/Modal.jsx';
 import curriculumService from '../../services/curriculumService.js';
 import { COLOR, bg, border, shadow, text, button, card, badge } from '@/theme/color';
+import { WORKING_DAY_NAMES } from '../../constants';
 
 // ─── Enriched Student Subjects with Syllabus & Progress ──────────────────────
 export const ENRICHED_STUDENT_SUBJECTS = [];
 
 // ─── Weekly Timetable Schedule Data ──────────────────────────────────────────
-const TIMETABLE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const TIMETABLE_DAYS = WORKING_DAY_NAMES;
 
 const WEEKLY_TIMETABLE = {
   Monday: [],
@@ -80,7 +81,7 @@ const normalizeSubject = (sub, idx = 0) => {
 
 // ─── Dynamic Timetable Builder from Assigned Courses ─────────────────────────
 export const buildDynamicTimetable = (coursesList = []) => {
-  const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const DAYS = WORKING_DAY_NAMES;
   const dayPatterns = {
     Monday: /\b(mon|monday)\b/i,
     Tuesday: /\b(tue|tues|tuesday)\b/i,

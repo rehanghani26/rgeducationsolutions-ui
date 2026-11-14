@@ -1,10 +1,14 @@
 /**
  * @file index.js
- * @description General utilities barrel export including permission checkVisibility helper
+ * @description General utilities barrel export including permission checkVisibility helper and formatting utilities.
  */
 
 import { hasModuleAccess, getUserFromStorage, getUserRole } from "../config/access.jsx";
 import { ROLES } from "../constants/roles.js";
+
+// Re-export all formatters
+export * from "./formatters.js";
+import formatters from "./formatters.js";
 
 /**
  * Checks visibility/permission for a module or action.
@@ -43,17 +47,7 @@ export const checkVisibility = (section, permissionAction, pageConfig) => {
   return hasModuleAccess(user, "settings");
 };
 
-/**
- * Formats a number into Indian Rupee Currency string.
- * @param {number|string} val
- * @returns {string}
- */
-export const formatCurrency = (val) => {
-  const n = Number(val) || 0;
-  return `₹${n.toLocaleString("en-IN")}`;
-};
-
 export default {
   checkVisibility,
-  formatCurrency,
+  ...formatters,
 };

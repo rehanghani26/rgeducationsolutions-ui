@@ -25,11 +25,7 @@ import api from "../../services/api.js";
 import Modal from "../../components/ui/Modal.jsx";
 import { CurrencyInput } from "../../components/ui/CurrencyInput.jsx";
 import Loader from "../../components/ui/Loader.jsx";
-
-const formatCurrency = (val) => {
-  const n = Number(val) || 0;
-  return `₹${n.toLocaleString("en-IN")}`;
-};
+import { formatCurrency, formatDate } from "../../utils";
 
 const BudgetAllocationSettings = () => {
   const [sessions, setSessions] = useState([]);
@@ -756,7 +752,7 @@ const BudgetAllocationSettings = () => {
 
               <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Clock size={12} /> Last Modified: {budgetData.updatedAt ? new Date(budgetData.updatedAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent'}
+                  <Clock size={12} /> Last Modified: {budgetData.updatedAt ? formatDate(budgetData.updatedAt) : 'Recent'}
                 </span>
                 <span>•</span>
                 <span>Fiscal Model: 3-Head Institutional Guard</span>
@@ -983,7 +979,7 @@ const BudgetAllocationSettings = () => {
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
                   >
                     <td className="p-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {new Date(rev.revisedAt).toLocaleDateString("en-GB")}
+                      {formatDate(rev.revisedAt)}
                     </td>
                     <td className="p-3 font-extrabold text-slate-800 dark:text-slate-200 uppercase">
                       {rev.category}

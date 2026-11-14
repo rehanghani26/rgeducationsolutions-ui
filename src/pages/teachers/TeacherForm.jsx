@@ -4,6 +4,10 @@ import Button from '../../components/ui/Button.jsx';
 import { CLASS_OPTIONS, SECTION_OPTIONS } from '../../constants/academicOptions.js';
 import { getDefaultRolePermissions } from '../../config/access.jsx';
 import {
+  GENDER_OPTIONS,
+  COMMON_STATUS_OPTIONS,
+} from '../../constants';
+import {
   DESIGNATION_OPTIONS,
   DEPARTMENT_OPTIONS,
   QUALIFICATION_OPTIONS,
@@ -98,7 +102,14 @@ const TeacherForm = ({ form, onChange, editing = false, onSubmit, onCancel, subm
             <div><label className={labelCls}>Last Name</label><input required className={inputCls} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={labelCls}>Gender</label><select className={inputCls} value={form.gender} onChange={(e) => updateField('gender', e.target.value)}><option>Male</option><option>Female</option><option>Other</option></select></div>
+            <div>
+              <label className={labelCls}>Gender</label>
+              <select className={inputCls} value={form.gender} onChange={(e) => updateField('gender', e.target.value)}>
+                {GENDER_OPTIONS.map((g) => (
+                  <option key={g.value} value={g.value}>{g.label}</option>
+                ))}
+              </select>
+            </div>
             <div><label className={labelCls}>Date of Birth</label><input type="date" className={inputCls} value={form.dob} onChange={(e) => updateField('dob', e.target.value)} /></div>
           </div>
           <div><label className={labelCls}>Phone Number</label><input required className={inputCls} value={form.phone} onChange={(e) => updateField('phone', e.target.value)} /></div>
@@ -219,7 +230,14 @@ const TeacherForm = ({ form, onChange, editing = false, onSubmit, onCancel, subm
             <PermissionMatrix permissions={form.permissions} options={permissionOptions} onChange={togglePermission} />
           )}
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={labelCls}>Status</label><select className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+            <div>
+              <label className={labelCls}>Status</label>
+              <select className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}>
+                {COMMON_STATUS_OPTIONS.map((st) => (
+                  <option key={st.value} value={st.value}>{st.label}</option>
+                ))}
+              </select>
+            </div>
             <div><label className={labelCls}>Expiry Date</label><input type="date" className={inputCls} value={form.accountExpiryDate} onChange={(e) => updateField('accountExpiryDate', e.target.value)} /></div>
           </div>
           <div><label className={labelCls}>Login Restriction</label><select className={inputCls} value={form.loginRestriction} onChange={(e) => updateField('loginRestriction', e.target.value)}><option value="none">None</option><option value="school-network">School Network</option><option value="office-hours">Office Hours</option></select></div>

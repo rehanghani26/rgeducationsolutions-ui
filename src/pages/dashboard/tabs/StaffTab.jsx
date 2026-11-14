@@ -4,13 +4,14 @@ import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
 import Loader from "../../../components/ui/Loader.jsx";
 import api from "../../../services/api.js";
+import { SHORT_MONTH_NAMES } from "../../../constants";
 const StaffTab = () => {
   const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
 
   const currentMonth = useMemo(() => {
-    return new Date().toLocaleDateString("en-US", { month: "short" });
+    return SHORT_MONTH_NAMES[new Date().getMonth()];
   }, []);
 
   useEffect(() => {

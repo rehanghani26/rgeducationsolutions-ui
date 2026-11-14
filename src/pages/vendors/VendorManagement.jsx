@@ -42,6 +42,7 @@ import StatsCard from '../../components/ui/StatsCard.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import { ROUTES } from '../../routes/routes.js';
+import { formatCurrency, formatDate } from '../../utils';
 
 const CATEGORIES = [
   'All',
@@ -397,19 +398,19 @@ export default function VendorManagement() {
         />
         <StatsCard
           title="Total Billed"
-          value={`₹${totalBilled.toLocaleString('en-IN')}`}
+          value={formatCurrency(totalBilled)}
           icon={Receipt}
           description="Lifetime purchase billing"
         />
         <StatsCard
           title="Total Paid"
-          value={`₹${totalPaid.toLocaleString('en-IN')}`}
+          value={formatCurrency(totalPaid)}
           icon={CheckCircle}
           description="Disbursed accounts payable"
         />
         <StatsCard
           title="Outstanding Due"
-          value={`₹${outstandingBalance.toLocaleString('en-IN')}`}
+          value={formatCurrency(outstandingBalance)}
           icon={CreditCard}
           description="Pending vendor settlements"
         />
@@ -539,7 +540,7 @@ export default function VendorManagement() {
                     <div>
                       <span className="text-gray-400 text-[11px] block">Total Billed</span>
                       <span className="font-bold text-gray-800 dark:text-gray-100">
-                        ₹{(vendor.totalBilled || 0).toLocaleString('en-IN')}
+                        {formatCurrency(vendor.totalBilled || 0)}
                       </span>
                     </div>
                     <div>
@@ -549,7 +550,7 @@ export default function VendorManagement() {
                           hasDue ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
                         }`}
                       >
-                        ₹{(vendor.outstandingBalance || 0).toLocaleString('en-IN')}
+                        {formatCurrency(vendor.outstandingBalance || 0)}
                       </span>
                     </div>
                   </div>
@@ -860,19 +861,19 @@ export default function VendorManagement() {
               <div className="bg-blue-50 dark:bg-blue-950/30 p-3.5 rounded-xl border border-blue-100 dark:border-blue-900/40">
                 <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Total Inward Billed</span>
                 <p className="text-lg font-black text-blue-900 dark:text-blue-100 mt-0.5">
-                  ₹{(selectedVendorDetail.totalBilled || 0).toLocaleString('en-IN')}
+                  {formatCurrency(selectedVendorDetail.totalBilled || 0)}
                 </p>
               </div>
               <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Total Disbursed</span>
                 <p className="text-lg font-black text-emerald-900 dark:text-emerald-100 mt-0.5">
-                  ₹{(selectedVendorDetail.totalPaid || 0).toLocaleString('en-IN')}
+                  {formatCurrency(selectedVendorDetail.totalPaid || 0)}
                 </p>
               </div>
               <div className="bg-rose-50 dark:bg-rose-950/30 p-3.5 rounded-xl border border-rose-100 dark:border-rose-900/40">
                 <span className="text-xs text-rose-600 dark:text-rose-400 font-semibold">Outstanding Due</span>
                 <p className="text-lg font-black text-rose-900 dark:text-rose-100 mt-0.5">
-                  ₹{(selectedVendorDetail.outstandingBalance || 0).toLocaleString('en-IN')}
+                  {formatCurrency(selectedVendorDetail.outstandingBalance || 0)}
                 </p>
               </div>
             </div>
@@ -934,19 +935,19 @@ export default function VendorManagement() {
                           {bill.billNumber}
                         </td>
                         <td className="p-3 text-gray-500">
-                          {new Date(bill.billDate).toLocaleDateString('en-IN')}
+                          {formatDate(bill.billDate)}
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
                           {bill.items?.length || 0} line items
                         </td>
                         <td className="p-3 font-bold text-gray-900 dark:text-white">
-                          ₹{(bill.grandTotal || 0).toLocaleString('en-IN')}
+                          {formatCurrency(bill.grandTotal || 0)}
                         </td>
                         <td className="p-3">
                           <span className="text-emerald-600 font-semibold">
-                            ₹{(bill.amountPaid || 0).toLocaleString('en-IN')}
+                            {formatCurrency(bill.amountPaid || 0)}
                           </span>{' '}
-                          / <span className="text-rose-600 font-bold">₹{(bill.balanceDue || 0).toLocaleString('en-IN')}</span>
+                          / <span className="text-rose-600 font-bold">{formatCurrency(bill.balanceDue || 0)}</span>
                         </td>
                         <td className="p-3">
                           <span
@@ -994,7 +995,7 @@ export default function VendorManagement() {
           <div className="bg-gray-50 dark:bg-neutral-900 p-3.5 rounded-xl border border-gray-200 dark:border-neutral-700 text-xs">
             <span className="text-gray-400">Total Outstanding Balance:</span>
             <p className="text-base font-black text-rose-600 dark:text-rose-400">
-              ₹{(selectedVendorDetail?.outstandingBalance || 0).toLocaleString('en-IN')}
+              {formatCurrency(selectedVendorDetail?.outstandingBalance || 0)}
             </p>
           </div>
 
@@ -1090,9 +1091,9 @@ export default function VendorManagement() {
                   Active Session School Requirements Budget:
                 </span>{' '}
                 <span className="font-bold text-blue-700 dark:text-blue-300">
-                  ₹{budgetHealth.remainingBudget.toLocaleString('en-IN')} remaining
+                  {formatCurrency(budgetHealth.remainingBudget)} remaining
                 </span>{' '}
-                (out of ₹{budgetHealth.schoolRequirementsBudget.toLocaleString('en-IN')})
+                (out of {formatCurrency(budgetHealth.schoolRequirementsBudget)})
               </div>
               <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 font-bold text-[10px]">
                 {budgetHealth.percentUsed}% Utilized
@@ -1208,7 +1209,7 @@ export default function VendorManagement() {
                   </div>
 
                   <div className="w-28 text-right font-extrabold text-xs text-gray-900 dark:text-white">
-                    ₹{(line.totalCost || 0).toLocaleString('en-IN')}
+                    {formatCurrency(line.totalCost || 0)}
                   </div>
 
                   {billLines.length > 1 && (
@@ -1231,7 +1232,7 @@ export default function VendorManagement() {
               Total Purchase Value:
             </span>
             <span className="text-lg font-black text-primary-600 dark:text-primary-400">
-              ₹{calculatedBillTotal.toLocaleString('en-IN')}
+              {formatCurrency(calculatedBillTotal)}
             </span>
           </div>
 

@@ -25,7 +25,8 @@ import {
   Wallet,
 } from 'lucide-react';
 import api from '../../services/api.js';
-import { CLASS_OPTIONS } from '../../constants/academicOptions.js';
+import { CLASS_OPTIONS } from '../../constants';
+import { formatCurrency, formatDate } from '../../utils';
 import Modal from '../../components/ui/Modal.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 
@@ -591,7 +592,7 @@ const SessionManagementSettings = () => {
               <div>
                 <p className="text-[10px] text-slate-400 uppercase font-bold">Session Start & End Date</p>
                 <p className="font-extrabold text-slate-200">
-                  {activeSession.startDate ? new Date(activeSession.startDate).toLocaleDateString() : '—'} — {activeSession.endDate ? new Date(activeSession.endDate).toLocaleDateString() : '—'}
+                  {formatDate(activeSession.startDate, undefined, '—')} — {formatDate(activeSession.endDate, undefined, '—')}
                 </p>
               </div>
             </div>
@@ -612,7 +613,7 @@ const SessionManagementSettings = () => {
                   <p className="font-black text-white text-sm">
                     {(() => {
                       const b = budgets.find((bg) => String(bg.sessionId) === String(activeSession._id || activeSession.id));
-                      return b ? `₹${(b.salaryBudget || 0).toLocaleString('en-IN')}` : 'Not Allocated';
+                      return b ? formatCurrency(b.salaryBudget || 0) : 'Not Allocated';
                     })()}
                   </p>
                 </div>
@@ -692,10 +693,10 @@ const SessionManagementSettings = () => {
                         )}
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
-                        {sess.startDate ? new Date(sess.startDate).toLocaleDateString() : '—'}
+                        {formatDate(sess.startDate, undefined, '—')}
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
-                        {sess.endDate ? new Date(sess.endDate).toLocaleDateString() : '—'}
+                        {formatDate(sess.endDate, undefined, '—')}
                       </td>
                       <td className="py-3 px-4">
                         <span
@@ -714,9 +715,9 @@ const SessionManagementSettings = () => {
                         {sessBudget ? (
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
-                              <span>₹{(sessBudget.salaryBudget || 0).toLocaleString('en-IN')}</span>
+                              <span>{formatCurrency(sessBudget.salaryBudget || 0)}</span>
                               <span className="text-[10px] text-slate-400 font-normal">
-                                (₹{(sessBudget.salarySpent || 0).toLocaleString('en-IN')} spent)
+                                ({formatCurrency(sessBudget.salarySpent || 0)} spent)
                               </span>
                             </div>
                             <div className="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-1 overflow-hidden">

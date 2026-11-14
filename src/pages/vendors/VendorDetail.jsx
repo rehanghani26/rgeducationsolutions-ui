@@ -44,6 +44,7 @@ import {
 import Modal from "../../components/ui/Modal.jsx";
 import Loader from "../../components/ui/Loader.jsx";
 import { ROUTES } from "../../routes/routes.js";
+import { formatCurrency, formatDate } from "../../utils";
 
 export default function VendorDetail() {
   const { id } = useParams();
@@ -427,7 +428,7 @@ export default function VendorDetail() {
                   : "text-emerald-600 dark:text-emerald-400"
               }`}
             >
-              ₹{(vendor.outstandingBalance || 0).toLocaleString("en-IN")}
+              {formatCurrency(vendor.outstandingBalance || 0)}
             </span>
             <span className="text-[11px] text-gray-400 mt-1 block">
               Terms: {vendor.paymentTerms || "Net 30 Days"}
@@ -447,10 +448,7 @@ export default function VendorDetail() {
               Total Inward Billed
             </span>
             <h3 className="text-lg font-black text-gray-900 dark:text-white mt-0.5">
-              ₹
-              {(kpis?.totalBilled || vendor.totalBilled || 0).toLocaleString(
-                "en-IN"
-              )}
+              {formatCurrency(kpis?.totalBilled || vendor.totalBilled || 0)}
             </h3>
             <span className="text-[11px] text-gray-400 block">
               From {bills.length} Purchase Bills
@@ -467,10 +465,7 @@ export default function VendorDetail() {
               Total Disbursed
             </span>
             <h3 className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              ₹
-              {(kpis?.totalPaid || vendor.totalPaid || 0).toLocaleString(
-                "en-IN"
-              )}
+              {formatCurrency(kpis?.totalPaid || vendor.totalPaid || 0)}
             </h3>
             <span className="text-[11px] text-gray-400 block">
               Settled to Vendor
@@ -504,7 +499,7 @@ export default function VendorDetail() {
               Avg Purchase Order
             </span>
             <h3 className="text-lg font-black text-gray-900 dark:text-white mt-0.5">
-              ₹{(kpis?.averageOrderValue || 0).toLocaleString("en-IN")}
+              {formatCurrency(kpis?.averageOrderValue || 0)}
             </h3>
             <span className="text-[11px] text-gray-400 block">
               Per procurement batch
@@ -570,7 +565,7 @@ export default function VendorDetail() {
                   </p>
                 </div>
                 <span className="text-xs font-bold text-primary-600 dark:text-primary-400">
-                  Total ₹{(kpis?.totalBilled || 0).toLocaleString("en-IN")}
+                  Total {formatCurrency(kpis?.totalBilled || 0)}
                 </span>
               </div>
 
@@ -595,7 +590,7 @@ export default function VendorDetail() {
                             {st.month}
                           </span>
                           <span className="text-gray-900 dark:text-white">
-                            ₹{st.amount.toLocaleString("en-IN")}
+                            {formatCurrency(st.amount)}
                           </span>
                         </div>
                         <div className="w-full h-2.5 bg-gray-100 dark:bg-neutral-700 rounded-full overflow-hidden">
@@ -627,7 +622,7 @@ export default function VendorDetail() {
                         {cat.category}
                       </span>
                       <span className="font-extrabold text-sm text-gray-900 dark:text-white block mt-0.5">
-                        ₹{cat.amount.toLocaleString("en-IN")}
+                        {formatCurrency(cat.amount)}
                       </span>
                     </div>
                   ))}
@@ -807,19 +802,19 @@ export default function VendorDetail() {
                         {bill.billNumber}
                       </td>
                       <td className="p-3.5 text-gray-500">
-                        {new Date(bill.billDate).toLocaleDateString("en-IN")}
+                        {formatDate(bill.billDate)}
                       </td>
                       <td className="p-3.5 text-gray-700 dark:text-gray-300">
                         {bill.items?.length || 0} product lines
                       </td>
                       <td className="p-3.5 font-black text-gray-900 dark:text-white">
-                        ₹{(bill.grandTotal || 0).toLocaleString("en-IN")}
+                        {formatCurrency(bill.grandTotal || 0)}
                       </td>
                       <td className="p-3.5 text-emerald-600 font-bold">
-                        ₹{(bill.amountPaid || 0).toLocaleString("en-IN")}
+                        {formatCurrency(bill.amountPaid || 0)}
                       </td>
                       <td className="p-3.5 font-black text-rose-600">
-                        ₹{(bill.balanceDue || 0).toLocaleString("en-IN")}
+                        {formatCurrency(bill.balanceDue || 0)}
                       </td>
                       <td className="p-3.5">
                         <span
@@ -924,10 +919,7 @@ export default function VendorDetail() {
                         {prod.quantity} {prod.unit}
                       </td>
                       <td className="p-3.5 font-bold text-gray-900 dark:text-white">
-                        ₹
-                        {(prod.unitCost || prod.price || 0).toLocaleString(
-                          "en-IN"
-                        )}
+                        {formatCurrency(prod.unitCost || prod.price || 0)}
                       </td>
                       <td className="p-3.5 text-gray-500">
                         {prod.location || "Main Store"}
@@ -967,11 +959,11 @@ export default function VendorDetail() {
           <div className="bg-gray-50 dark:bg-neutral-900 p-3.5 rounded-xl border border-gray-200 dark:border-neutral-700 text-xs">
             <span className="text-gray-400">Total Outstanding Balance:</span>
             <p className="text-base font-black text-rose-600 dark:text-rose-400">
-              ₹
-              {(payTargetBill
-                ? payTargetBill.balanceDue
-                : vendor?.outstandingBalance || 0
-              ).toLocaleString("en-IN")}
+              {formatCurrency(
+                payTargetBill
+                  ? payTargetBill.balanceDue
+                  : vendor?.outstandingBalance || 0
+              )}
             </p>
           </div>
 
@@ -1388,7 +1380,7 @@ export default function VendorDetail() {
                   </div>
 
                   <div className="w-28 text-right font-extrabold text-xs text-gray-900 dark:text-white">
-                    ₹{(line.totalCost || 0).toLocaleString("en-IN")}
+                    {formatCurrency(line.totalCost || 0)}
                   </div>
 
                   {billLines.length > 1 && (
@@ -1412,7 +1404,7 @@ export default function VendorDetail() {
               Total Bill Value:
             </span>
             <span className="text-lg font-black text-primary-600 dark:text-primary-400">
-              ₹{calculatedBillTotal.toLocaleString("en-IN")}
+              {formatCurrency(calculatedBillTotal)}
             </span>
           </div>
 
@@ -1464,7 +1456,7 @@ export default function VendorDetail() {
                   Invoice Date:
                 </span>
                 <span className="font-bold">
-                  {new Date(printBill.billDate).toLocaleDateString("en-IN")}
+                  {formatDate(printBill.billDate)}
                 </span>
               </div>
               <div className="text-right">
@@ -1500,10 +1492,10 @@ export default function VendorDetail() {
                       {it.quantity} {it.unit || "pcs"}
                     </td>
                     <td className="p-2 text-right font-mono">
-                      ₹{(it.unitCost || 0).toLocaleString("en-IN")}
+                      {formatCurrency(it.unitCost || 0)}
                     </td>
                     <td className="p-2 text-right font-bold font-mono">
-                      ₹{(it.totalCost || 0).toLocaleString("en-IN")}
+                      {formatCurrency(it.totalCost || 0)}
                     </td>
                   </tr>
                 ))}
@@ -1514,7 +1506,7 @@ export default function VendorDetail() {
                     Grand Total:
                   </td>
                   <td className="p-2 text-right font-mono text-sm">
-                    ₹{(printBill.grandTotal || 0).toLocaleString("en-IN")}
+                    {formatCurrency(printBill.grandTotal || 0)}
                   </td>
                 </tr>
               </tfoot>

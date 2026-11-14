@@ -6,16 +6,14 @@
  */
 
 import { getVerificationUrl } from './qrUtils.js';
+import { formatDate } from '../../../utils';
 
 /**
  * Format a raw Date or string to display format (e.g. 15 Aug 2026)
  * @param {string|Date} dateStr
  */
 export function formatDisplayDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return String(dateStr);
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDate(dateStr, { day: 'numeric', month: 'short', year: 'numeric' }, '');
 }
 
 /**

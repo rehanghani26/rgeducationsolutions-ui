@@ -3,6 +3,7 @@
  * @description Traditional white horizontal teacher card with navy blue header,
  * subtle watermark, formal typography. Classic institution feel.
  */
+import { formatDate } from '../../../../../utils';
 export const classicFacultyCard = {
   id: 'teacher-id-classic',
   name: 'Classic Faculty',
@@ -54,7 +55,7 @@ export const classicFacultyCard = {
             ${cRow('Department', data.department || '—')}
             ${cRow('Employee ID', data.employeeId || '—')}
             ${subjects ? cRow('Subject(s)', subjects) : ''}
-            ${cRow('Joining Date', data.joiningDate ? new Date(data.joiningDate).toLocaleDateString('en-IN') : '—')}
+            ${cRow('Joining Date', formatDate(data.joiningDate, undefined, '—'))}
           </div>
         </div>
 

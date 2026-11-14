@@ -16,6 +16,7 @@ import { getGreeting } from "../data/dashboardData.js";
 import { useSchoolBranding } from "../../../context/SchoolBrandingContext.jsx";
 import { THEME_MODES, useTheme } from "../../../theme/ThemeContext.jsx";
 import rgLogo from "../../../assets/logo/RGLOGO.png";
+import { formatDate } from "../../../utils";
 
 const GreetingBanner = ({ user }) => {
   const greeting = getGreeting();
@@ -45,7 +46,7 @@ const GreetingBanner = ({ user }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const todayDate = new Date().toLocaleDateString("en-US", {
+  const todayDate = formatDate(new Date(), {
     weekday: "short",
     month: "short",
     day: "numeric",

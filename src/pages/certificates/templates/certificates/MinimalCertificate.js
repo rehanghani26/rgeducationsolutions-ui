@@ -3,6 +3,7 @@
  * @description Ultra-clean minimalist certificate design. Modern Swiss typography,
  * generous white space, elegant understated borders and lines.
  */
+import { formatDateLong } from '../../../../utils';
 export const minimalCertificate = {
   id: 'certificate-minimal',
   name: 'Minimal Modern',
@@ -76,7 +77,7 @@ export const minimalCertificate = {
               <div>
                 <div style="font-size:9px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Date Issued</div>
                 <div style="font-size:12px; font-weight:600; color:#0f172a;">
-                  ${data.issueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  ${data.issueDate || formatDateLong(new Date())}
                 </div>
               </div>
 

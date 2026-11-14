@@ -22,6 +22,8 @@ import {
 } from '../../services/classService.js';
 import { getTeachers } from '../../services/teacherService.js';
 import { getStudents } from '../../services/studentService.js';
+import { SCHOOL_DAY_NAMES } from '../../constants';
+import { formatDate } from '../../utils';
 
 const ClassDetail = () => {
   const { classId } = useParams();
@@ -541,7 +543,7 @@ const ClassDetail = () => {
                         </p>
                         {currentTeacher.assignedAt && (
                           <p className="text-[11px] text-slate-400">
-                            Assigned on: {new Date(currentTeacher.assignedAt).toLocaleDateString()}
+                            Assigned on: {formatDate(currentTeacher.assignedAt)}
                           </p>
                         )}
                       </div>
@@ -604,11 +606,11 @@ const ClassDetail = () => {
 
                           <div className="flex items-center gap-3 text-slate-500 text-[11px]">
                             <span>
-                              From: <strong>{new Date(h.startDate).toLocaleDateString()}</strong>
+                              From: <strong>{formatDate(h.startDate)}</strong>
                             </span>
                             {h.endDate && (
                               <span>
-                                To: <strong>{new Date(h.endDate).toLocaleDateString()}</strong>
+                                To: <strong>{formatDate(h.endDate)}</strong>
                               </span>
                             )}
                           </div>
@@ -771,7 +773,7 @@ const ClassDetail = () => {
                   {/* Day cards or periods list */}
                   {timetableData?.allocations?.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
+                      {SCHOOL_DAY_NAMES.map((day) => {
                         const daySlots = (timetableData.allocations || []).filter(
                           (a) => (a.day || '').toLowerCase() === day.toLowerCase()
                         );

@@ -19,11 +19,7 @@ import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
 import api from "../../../services/api.js";
 import { getUserFromStorage } from "../../../config/access.jsx";
-
-const formatCurrency = (val) => {
-  const n = Number(val) || 0;
-  return `₹${n.toLocaleString("en-IN")}`;
-};
+import { formatCurrency } from "../../../utils";
 
 const StaffDashboard = () => {
   const navigate = useNavigate();

@@ -58,18 +58,16 @@ export const EXPENSE_URLS = {
 
 // ─── Inventory ────────────────────────────────────────────────────────────────
 export const INVENTORY_URLS = {
-  BASE:           '/inventory',
-  BY_ID:          (id)  => `/inventory/${id}`,
-  ACTIVITY:       (id)  => `/inventory/${id}/activity`,
-  SUMMARY:        '/inventory/summary',
-  ALERTS:         '/inventory/alerts',
-  STOCK_ADJUST:   '/inventory/stock-adjust',
-  PURCHASES:      '/inventory/purchases',
-  PURCHASE_BY_ID: (id)  => `/inventory/purchases/${id}`,
-  ISSUANCES:      '/inventory/issuances',
-  ISSUANCE_BY_ID: (id)  => `/inventory/issuances/${id}`,
-  TRANSACTIONS:   '/inventory/transactions',
-  VENDORS:        '/vendors',
+  BASE:              '/inventory',
+  BULK:              '/inventory/bulk',
+  UPLOAD_ATTACHMENT: '/inventory/upload-attachment',
+  BY_ID:             (id)  => `/inventory/${id}`,
+  ACTIVITY:          (id)  => `/inventory/${id}/activity`,
+  SUMMARY:           '/inventory/summary',
+  ALERTS:            '/inventory/alerts',
+  STOCK_ADJUST:      '/inventory/stock-adjust',
+  TRANSACTIONS:      '/inventory/transactions',
+  VENDORS:           '/vendors',
 };
 
 // ─── Vendors ──────────────────────────────────────────────────────────────────

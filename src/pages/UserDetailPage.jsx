@@ -45,6 +45,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
 import { ROUTES } from '../routes/routes.js';
+import { formatCurrency, formatDate, formatDateTime } from '../utils';
 
 const ROLE_CONFIG = {
   'super-admin': {
@@ -606,7 +607,7 @@ const UserDetailPage = () => {
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Date of Birth</span>
                   <p className="mt-0.5 font-medium text-slate-800 dark:text-slate-200">
-                    {user.dob ? new Date(user.dob).toLocaleDateString() : 'Not provided'}
+                    {formatDate(user.dob, undefined, 'Not provided')}
                   </p>
                 </div>
                 <div>
@@ -645,13 +646,13 @@ const UserDetailPage = () => {
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Joining Date</span>
                   <p className="mt-0.5 font-medium text-slate-800 dark:text-slate-200">
-                    {user.joiningDate ? new Date(user.joiningDate).toLocaleDateString() : 'Not provided'}
+                    {formatDate(user.joiningDate, undefined, 'Not provided')}
                   </p>
                 </div>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Monthly Compensation</span>
                   <p className="mt-0.5 font-bold text-emerald-600 dark:text-emerald-400">
-                    {user.salary ? `$${Number(user.salary).toLocaleString()}/mo` : 'Confidential / Not set'}
+                    {user.salary ? `${formatCurrency(user.salary)}/mo` : 'Confidential / Not set'}
                   </p>
                 </div>
               </div>
@@ -684,7 +685,7 @@ const UserDetailPage = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Last Session Login</span>
                   <span className="font-bold text-slate-700 dark:text-slate-300">
-                    {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                    {formatDate(user.lastLogin, undefined, 'Never')}
                   </span>
                 </div>
               </div>
@@ -1126,7 +1127,7 @@ const UserDetailPage = () => {
                       </p>
                     </div>
                     <span className="text-[11px] text-slate-500">
-                      {new Date(entry.timestamp).toLocaleString()}
+                      {formatDateTime(entry.timestamp)}
                     </span>
                   </div>
                 ))

@@ -3,6 +3,7 @@
  * @description Luxury gold on dark theme certificate for high honors, excellence,
  * and prestigious achievements. Rich metallic accents and seal.
  */
+import { formatDateLong } from '../../../../utils';
 export const premiumCertificate = {
   id: 'certificate-premium',
   name: 'Premium Honor',
@@ -100,7 +101,7 @@ export const premiumCertificate = {
             <div style="text-align:center;width:140px;">
               <div style="border-bottom:1px solid rgba(245,158,11,0.5);padding-bottom:4px;margin-bottom:6px;">
                 <div style="font-size:11px;font-weight:700;color:#f8fafc;font-family:'Inter',sans-serif;">
-                  ${data.issueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  ${data.issueDate || formatDateLong(new Date())}
                 </div>
               </div>
               <div style="font-size:9px;color:#94a3b8;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:1px;">Date of Conformance</div>

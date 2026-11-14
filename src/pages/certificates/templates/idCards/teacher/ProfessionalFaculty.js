@@ -3,6 +3,7 @@
  * @description Professional dark-teal horizontal layout with designation badge,
  * subjects listed, and authoritative faculty aesthetic.
  */
+import { formatDate } from '../../../../../utils';
 export const professionalFacultyCard = {
   id: 'teacher-id-professional',
   name: 'Professional Faculty',
@@ -57,7 +58,7 @@ export const professionalFacultyCard = {
             </div>
             ${fRow('Employee ID', data.employeeId)}
             ${fRow('Subject(s)', subjects)}
-            ${fRow('Joined', data.joiningDate ? new Date(data.joiningDate).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : '—')}
+            ${fRow('Joined', formatDate(data.joiningDate, { month: 'short', year: 'numeric' }, '—'))}
           </div>
         </div>
 

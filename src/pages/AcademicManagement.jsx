@@ -27,7 +27,8 @@ import { getTeachers } from "../services/teacherService.js";
 import {
   CLASS_OPTIONS,
   SECTION_OPTIONS,
-} from "../constants/academicOptions.js";
+  WORKING_DAY_NAMES,
+} from "../constants";
 import Loader from "../components/ui/Loader.jsx";
 import Modal from "../components/ui/Modal.jsx";
 import { Can, CanButton, getUserFromStorage } from "../config/access.jsx";
@@ -1184,13 +1185,7 @@ const AcademicManagement = () => {
                       <div className="space-y-4">
                         {/* Day Selector Pills */}
                         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                          {[
-                            "Monday",
-                            "Tuesday",
-                            "Wednesday",
-                            "Thursday",
-                            "Friday",
-                          ].map((day) => (
+                          {WORKING_DAY_NAMES.map((day) => (
                             <button
                               key={day}
                               onClick={() => setSelectedRoutineDay(day)}
