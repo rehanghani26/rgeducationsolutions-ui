@@ -18,6 +18,7 @@ import api from "../../../services/api.js";
 import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
 import Loader from "../../../components/ui/Loader.jsx";
+import { formatDate } from "../../../utils";
 
 const StudentsTab = () => {
   const [data, setData] = useState(null);
@@ -294,12 +295,7 @@ const StudentsTab = () => {
                     </p>
                   </div>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {s.createdAt
-                      ? new Date(s.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : "Recent"}
+                    {formatDate(s.createdAt, { month: "short", day: "numeric" }, "Recent")}
                   </span>
                 </div>
               ))

@@ -4,13 +4,15 @@ import StatCard from "../components/StatCard.jsx";
 import SectionCard from "../components/SectionCard.jsx";
 import Loader from "../../../components/ui/Loader.jsx";
 import api from "../../../services/api.js";
+import { formatCurrency } from "../../../utils";
+import { SHORT_MONTH_NAMES } from "../../../constants";
 
 const FinanceTab = () => {
   const [loading, setLoading] = useState(true);
   const [financeData, setFinanceData] = useState(null);
 
   const currentMonth = useMemo(() => {
-    return new Date().toLocaleDateString("en-US", { month: "short" });
+    return SHORT_MONTH_NAMES[new Date().getMonth()];
   }, []);
 
   useEffect(() => {
@@ -55,7 +57,7 @@ const FinanceTab = () => {
         <StatCard
           icon={CreditCard}
           label={`Fee Collected (${currentMonth})`}
-          value={financeData?.fees?.collected ? `₹${financeData.fees.collected.toLocaleString()}` : "N/A"}
+          value={financeData?.fees?.collected ? formatCurrency(financeData.fees.collected) : "N/A"}
           badge={currentMonth}
           sub="N/A"
           iconBg="bg-emerald-600/20"
@@ -64,7 +66,7 @@ const FinanceTab = () => {
         <StatCard
           icon={AlertTriangle}
           label="Pending Dues"
-          value={financeData?.fees?.pending ? `₹${financeData.fees.pending.toLocaleString()}` : "N/A"}
+          value={financeData?.fees?.pending ? formatCurrency(financeData.fees.pending) : "N/A"}
           badge="Overdue"
           badgeColor="bg-rose-500/10 text-rose-500 border-rose-500/20"
           sub="N/A"
@@ -74,7 +76,7 @@ const FinanceTab = () => {
         <StatCard
           icon={Wallet}
           label={`Monthly Expenses (${currentMonth})`}
-          value={financeData?.expenses?.total ? `₹${financeData.expenses.total.toLocaleString()}` : "N/A"}
+          value={financeData?.expenses?.total ? formatCurrency(financeData.expenses.total) : "N/A"}
           badge="Disbursed"
           sub="N/A"
           iconBg="bg-indigo-600/20"

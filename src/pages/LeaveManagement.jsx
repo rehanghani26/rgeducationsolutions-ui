@@ -46,7 +46,8 @@ import {
 } from '../services/leaveService.js';
 import { getStudents } from '../services/studentService.js';
 import { userService } from '../services/userService.js';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../constants/academicOptions.js';
+import { CLASS_OPTIONS, SECTION_OPTIONS, LEAVE_STATUS_OPTIONS, LEAVE_TYPE_OPTIONS } from '../constants';
+import { formatDate } from '../utils';
 import { getUserFromStorage, getUserRole } from '../config/access.jsx';
 import { ROLES } from '../constants/roles.js';
 
@@ -628,16 +629,8 @@ const LeaveManagement = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
                 {leaves.map((leave, idx) => {
-                  const sDate = new Date(leave.startDate).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  });
-                  const eDate = new Date(leave.endDate).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  });
+                  const sDate = formatDate(leave.startDate);
+                  const eDate = formatDate(leave.endDate);
 
                   const isApproved = leave.status === 'approved';
                   const isPending = leave.status === 'pending';
@@ -1165,7 +1158,7 @@ const LeaveManagement = () => {
               {applicantProfileData.activeLeaveNow ? (
                 <div className="px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-right">
                   <span className="font-black text-xs block">Currently on Active Leave</span>
-                  <span className="text-[10px]">Until {new Date(applicantProfileData.activeLeaveNow.endDate).toLocaleDateString()}</span>
+                  <span className="text-[10px]">Until {formatDate(applicantProfileData.activeLeaveNow.endDate)}</span>
                 </div>
               ) : (
                 <div className="px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-right">
@@ -1236,7 +1229,7 @@ const LeaveManagement = () => {
                           </span>
                         </div>
                         <span className="text-[10px] text-slate-500">
-                          {new Date(h.startDate).toLocaleDateString()} – {new Date(h.endDate).toLocaleDateString()} ({h.totalDays} Days)
+                          {formatDate(h.startDate)} – {formatDate(h.endDate)} ({h.totalDays} Days)
                         </span>
                         <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">"{h.reason}"</p>
                       </div>

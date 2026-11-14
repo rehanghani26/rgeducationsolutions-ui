@@ -1,4 +1,5 @@
 // Timetable Utilities, Predefined Templates, and Timing Validation Helpers
+import { WEEKDAYS } from "../../constants";
 
 export const SLOT_TYPES = [
   {
@@ -107,14 +108,7 @@ export const getSlotTypeMeta = (type) => {
   return SLOT_TYPES.find((t) => t.value === type) || SLOT_TYPES[SLOT_TYPES.length - 1];
 };
 
-export const WEEK_DAYS = [
-  { id: "monday", label: "Monday", short: "Mon" },
-  { id: "tuesday", label: "Tuesday", short: "Tue" },
-  { id: "wednesday", label: "Wednesday", short: "Wed" },
-  { id: "thursday", label: "Thursday", short: "Thu" },
-  { id: "friday", label: "Friday", short: "Fri" },
-  { id: "saturday", label: "Saturday", short: "Sat" },
-];
+export const WEEK_DAYS = WEEKDAYS;
 
 export const timeToMinutes = (timeStr) => {
   if (!timeStr || typeof timeStr !== "string") return 0;

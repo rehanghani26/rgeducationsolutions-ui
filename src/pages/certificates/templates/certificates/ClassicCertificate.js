@@ -3,6 +3,7 @@
  * @description Classic A4-style certificate with navy blue border, gold accents,
  * formal serif typography, and space for principal signature.
  */
+import { formatDateLong } from '../../../../utils';
 export const classicCertificate = {
   id: 'certificate-classic',
   name: 'Classic',
@@ -78,7 +79,7 @@ export const classicCertificate = {
             </div>
             <div style="text-align:center;">
               <div style="font-size:9px;color:#94a3b8;font-family:'Inter',sans-serif;margin-bottom:4px;">Date of Issue</div>
-              <div style="font-size:11px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">${data.issueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+              <div style="font-size:11px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">${data.issueDate || formatDateLong(new Date())}</div>
             </div>
             <div style="text-align:center;">
               <div style="width:120px;border-top:1px solid #c2410c;padding-top:6px;">

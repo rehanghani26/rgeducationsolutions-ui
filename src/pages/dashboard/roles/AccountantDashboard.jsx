@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { CreditCard, AlertTriangle, Wallet, Receipt } from "lucide-react";
 import StatCard from "../components/StatCard.jsx";
 import api from "../../../services/api.js";
+import { formatCurrency } from "../../../utils";
 
 const AccountantDashboard = () => {
   const [finance, setFinance] = useState(null);
@@ -31,7 +32,7 @@ const AccountantDashboard = () => {
         <StatCard
           icon={CreditCard}
           label="Fee Collected (Month)"
-          value={finance?.fees?.collected ? `₹${finance.fees.collected.toLocaleString()}` : "N/A"}
+          value={finance?.fees?.collected ? formatCurrency(finance.fees.collected) : "N/A"}
           sub="N/A"
           iconBg="bg-emerald-600/20"
           iconColor="text-emerald-400"
@@ -39,7 +40,7 @@ const AccountantDashboard = () => {
         <StatCard
           icon={AlertTriangle}
           label="Pending Student Dues"
-          value={finance?.fees?.pending ? `₹${finance.fees.pending.toLocaleString()}` : "N/A"}
+          value={finance?.fees?.pending ? formatCurrency(finance.fees.pending) : "N/A"}
           sub="N/A"
           iconBg="bg-rose-600/20"
           iconColor="text-rose-400"
@@ -47,7 +48,7 @@ const AccountantDashboard = () => {
         <StatCard
           icon={Wallet}
           label="Monthly Expenses"
-          value={finance?.expenses?.total ? `₹${finance.expenses.total.toLocaleString()}` : "N/A"}
+          value={finance?.expenses?.total ? formatCurrency(finance.expenses.total) : "N/A"}
           sub="N/A"
           iconBg="bg-indigo-600/20"
           iconColor="text-indigo-400"

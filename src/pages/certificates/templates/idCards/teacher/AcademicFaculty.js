@@ -3,6 +3,7 @@
  * @description Emerald academic style matching the AcademicStudent template family.
  * Two-column layout, QR placeholder area, formal academic aesthetic.
  */
+import { formatDate } from '../../../../../utils';
 export const academicFacultyCard = {
   id: 'teacher-id-academic',
   name: 'Academic Faculty',
@@ -51,7 +52,7 @@ export const academicFacultyCard = {
             </div>
             ${aRow('Employee ID', data.employeeId)}
             ${subjects ? aRow('Subject(s)', subjects) : ''}
-            ${aRow('Joined', data.joiningDate ? new Date(data.joiningDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' }) : '—')}
+            ${aRow('Joined', formatDate(data.joiningDate, { year: 'numeric', month: 'short' }, '—'))}
           </div>
         </div>
 

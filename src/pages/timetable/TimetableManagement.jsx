@@ -33,7 +33,11 @@ import PageHeader from "../../components/ui/PageHeader.jsx";
 import Button from "../../components/ui/Button.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import api from "../../services/api.js";
-import { CLASS_OPTIONS } from "../../constants/academicOptions.js";
+import {
+  CLASS_OPTIONS,
+  WEEKDAYS as DEFAULT_DAYS,
+  DAY_NAMES_LOWER,
+} from "../../constants";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 
 // Category meta definitions matching Master Period settings
@@ -112,15 +116,6 @@ const PERIOD_META = {
 
 const getMeta = (type) => PERIOD_META[type] || PERIOD_META.custom;
 
-const DEFAULT_DAYS = [
-  { id: "monday", label: "Monday", short: "Mon" },
-  { id: "tuesday", label: "Tuesday", short: "Tue" },
-  { id: "wednesday", label: "Wednesday", short: "Wed" },
-  { id: "thursday", label: "Thursday", short: "Thu" },
-  { id: "friday", label: "Friday", short: "Fri" },
-  { id: "saturday", label: "Saturday", short: "Sat" },
-];
-
 const DEFAULT_SUBJECTS = [
   "Mathematics",
   "English Literature",
@@ -135,16 +130,7 @@ const DEFAULT_SUBJECTS = [
 ];
 
 const getCurrentDayId = () => {
-  const dayNames = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ];
-  const todayName = dayNames[new Date().getDay()];
+  const todayName = DAY_NAMES_LOWER[new Date().getDay()];
   return todayName === "sunday" ? "monday" : todayName;
 };
 

@@ -11,6 +11,7 @@ import DataTable from '../components/ui/DataTable.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
+import { formatCurrency, dateOnly } from '../utils';
 
 const inputCls = 'w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1';
@@ -109,9 +110,9 @@ const FeesManagement = () => {
         </div>
       ),
     },
-    { key: 'amountPaid', label: 'Total Paid', render: (row) => <span className="font-semibold text-emerald-500">${row.amountPaid.toLocaleString()}</span> },
-    { key: 'amountPending', label: 'Outstanding', render: (row) => <span className="font-semibold text-rose-500">${row.amountPending.toLocaleString()}</span> },
-    { key: 'dueDate', label: 'Due Date', render: (row) => <span className="text-slate-500">{row.dueDate ? row.dueDate.split('T')[0] : 'N/A'}</span> },
+    { key: 'amountPaid', label: 'Total Paid', render: (row) => <span className="font-semibold text-emerald-500">{formatCurrency(row.amountPaid)}</span> },
+    { key: 'amountPending', label: 'Outstanding', render: (row) => <span className="font-semibold text-rose-500">{formatCurrency(row.amountPending)}</span> },
+    { key: 'dueDate', label: 'Due Date', render: (row) => <span className="text-slate-500">{dateOnly(row.dueDate) || 'N/A'}</span> },
     {
       key: 'status',
       label: 'Invoice Status',
@@ -139,8 +140,8 @@ const FeesManagement = () => {
       ),
     },
     { key: 'category', label: 'Billing Category', render: (row) => <span className="font-semibold text-slate-500">{row.category}</span> },
-    { key: 'amount', label: 'Bill Amount', render: (row) => <span className="font-bold text-rose-500">${row.amount.toLocaleString()}</span> },
-    { key: 'date', label: 'Logging Date', render: (row) => <span className="text-slate-500">{row.date.split('T')[0]}</span> },
+    { key: 'amount', label: 'Bill Amount', render: (row) => <span className="font-bold text-rose-500">{formatCurrency(row.amount)}</span> },
+    { key: 'date', label: 'Logging Date', render: (row) => <span className="text-slate-500">{dateOnly(row.date)}</span> },
     { key: 'refInvoice', label: 'Invoice Ref', className: 'text-right', render: (row) => <span className="font-medium text-indigo-500">{row.refInvoice || 'N/A'}</span> },
   ];
 
@@ -165,10 +166,10 @@ const FeesManagement = () => {
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Fees Collected', value: `$${totalCollectedFees.toLocaleString()}`, icon: <Banknote size={18} />, color: 'emerald' },
-          { label: 'Pending Receivables', value: `$${totalPendingFees.toLocaleString()}`, icon: <Landmark size={18} />, color: 'rose' },
-          { label: 'Total Expenditures', value: `$${totalExpenditures.toLocaleString()}`, icon: <Receipt size={18} />, color: 'amber' },
-          { label: 'Operating Balance', value: `$${netOperatingIncome.toLocaleString()}`, icon: <Wallet size={18} />, color: netOperatingIncome >= 0 ? 'emerald' : 'rose' },
+          { label: 'Fees Collected', value: formatCurrency(totalCollectedFees), icon: <Banknote size={18} />, color: 'emerald' },
+          { label: 'Pending Receivables', value: formatCurrency(totalPendingFees), icon: <Landmark size={18} />, color: 'rose' },
+          { label: 'Total Expenditures', value: formatCurrency(totalExpenditures), icon: <Receipt size={18} />, color: 'amber' },
+          { label: 'Operating Balance', value: formatCurrency(netOperatingIncome), icon: <Wallet size={18} />, color: netOperatingIncome >= 0 ? 'emerald' : 'rose' },
         ].map(({ label, value, icon, color }) => (
           <div key={label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
             <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">{label}</span>

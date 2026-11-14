@@ -43,6 +43,7 @@ import { renderTemplate, prepareTemplateData } from './utils/templateRenderer.js
 import { openDocumentInNewTab } from './utils/printUtils.js';
 import { getStudents, getStudentById } from '../../services/studentService.js';
 import { getIssuedCertificates, getCustomTemplates, getDefaultTemplate } from './services/documentService.js';
+import { formatDate } from '../../utils';
 
 export default function StudentPageCertification({ authUser: propAuthUser = null, schoolSettings: propSchoolSettings = null }) {
   const [searchParams] = useSearchParams();
@@ -549,11 +550,7 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
                         <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
                           <span>Session: {cert.academicSession || '2025-2026'}</span>
                           <span>
-                            {new Date(cert.issuedAt).toLocaleDateString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
+                            {formatDate(cert.issuedAt)}
                           </span>
                         </div>
                       </div>

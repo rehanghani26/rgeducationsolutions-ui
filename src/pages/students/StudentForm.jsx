@@ -28,10 +28,14 @@ import FormTextarea from "../../components/ui/FormTextarea.jsx";
 import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
 import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
 import { getClasses, getSections } from "../../services";
+import { formatDate, formatTime } from "../../utils";
 import {
   CLASS_OPTIONS,
   SECTION_OPTIONS,
-} from "../../constants/academicOptions.js";
+  GENDER_STRINGS as GENDER_OPTIONS,
+  BLOOD_GROUP_STRINGS as BLOOD_GROUP_OPTIONS,
+  STUDENT_STATUS_OPTIONS as STATUS_OPTIONS,
+} from "../../constants";
 import { getDefaultRolePermissions } from "../../config/access.jsx";
 import {
   uploadStudentFile,
@@ -145,14 +149,6 @@ export const isStudentFormDirty = (form) => {
 
 export const randomPassword = () =>
   `Std@${Math.random().toString(36).slice(2, 8)}${Math.floor(100 + Math.random() * 900)}`;
-
-const GENDER_OPTIONS = ["Male", "Female", "Other"];
-const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-  { value: "Passout", label: "Passout / Graduated" },
-];
 
 const StudentForm = ({
   form,
@@ -569,7 +565,7 @@ const StudentForm = ({
                 {draftInfo.studentName ? `: "${draftInfo.studentName}"` : ""}
               </p>
               <p className="text-[11px] text-amber-700/80 dark:text-amber-300/80">
-                Saved on {new Date(draftInfo.savedAt).toLocaleDateString([], { month: "short", day: "numeric" })} at {new Date(draftInfo.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • You can save progress and complete registration later.
+                Saved on {formatDate(draftInfo.savedAt, { month: "short", day: "numeric" })} at {formatTime(draftInfo.savedAt)} • You can save progress and complete registration later.
               </p>
             </div>
           </div>

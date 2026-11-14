@@ -10,6 +10,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import { CurrencyInput } from '../../components/ui/CurrencyInput.jsx';
 import feeService from '../../services/feeService.js';
 import Loader from '../../components/ui/Loader.jsx';
+import { formatCurrency, formatDate } from '../../utils';
 
 const InfoGrid = ({ items }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -84,9 +85,9 @@ const FeeDetail = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatsCard title="Total Fee Assigned" value={`₹${Number(fee?.totalAmount || fee?.amount || 0).toLocaleString()}`} />
-              <StatsCard title="Total Paid" value={`₹${Number(fee?.paidAmount || 0).toLocaleString()}`} />
-              <StatsCard title="Outstanding Due" value={`₹${Number(fee?.dueAmount || 0).toLocaleString()}`} />
+              <StatsCard title="Total Fee Assigned" value={formatCurrency(fee?.totalAmount || fee?.amount || 0)} />
+              <StatsCard title="Total Paid" value={formatCurrency(fee?.paidAmount || 0)} />
+              <StatsCard title="Outstanding Due" value={formatCurrency(fee?.dueAmount || 0)} />
             </div>
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
@@ -117,7 +118,7 @@ const FeeDetail = () => {
                 <p className="text-slate-500">{fee?.feeType || 'Tuition & Academic Term'}</p>
               </div>
               <div className="text-right">
-                <p className="font-extrabold text-sm text-slate-900 dark:text-white">₹{Number(fee?.amount || 0).toLocaleString()}</p>
+                <p className="font-extrabold text-sm text-slate-900 dark:text-white">{formatCurrency(fee?.amount || 0)}</p>
                 <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full">{fee?.status || 'Active'}</span>
               </div>
             </div>
@@ -135,7 +136,7 @@ const FeeDetail = () => {
                 <p className="text-slate-500 font-mono text-[11px]">{fee?.paymentDate ? format(new Date(fee.paymentDate), 'dd MMM yyyy, hh:mm a') : 'Recent payment'}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">₹{Number(fee?.paidAmount || fee?.amount || 0).toLocaleString()}</p>
+                <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">{formatCurrency(fee?.paidAmount || fee?.amount || 0)}</p>
                 <span className="text-[10px] text-slate-400 font-mono">TXN: #8920194</span>
               </div>
             </div>
@@ -160,7 +161,7 @@ const FeeDetail = () => {
         loading={loading}
         backTo="/fees"
         title={fee?.studentName || student?.name || 'Fee Account'}
-        subtitle={`${fee?.admissionNumber || ''} · ${fee?.status || ''} · Due ₹${(fee?.dueAmount || 0).toLocaleString()}`}
+        subtitle={`${fee?.admissionNumber || ''} · ${fee?.status || ''} · Due ${formatCurrency(fee?.dueAmount || 0)}`}
         status={fee?.status}
         avatar={fee?.studentName?.charAt(0) || '₹'}
         actions={

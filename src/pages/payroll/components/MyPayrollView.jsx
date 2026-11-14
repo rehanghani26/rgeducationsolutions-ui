@@ -282,11 +282,7 @@ const MyPayrollView = ({ currentUser }) => {
                       <>
                         <span>•</span>
                         <span>
-                          Joined{" "}
-                          {new Date(staff.joiningDate).toLocaleDateString(
-                            "en-IN",
-                            { month: "short", year: "numeric" }
-                          )}
+                          Joined {formatDate(staff.joiningDate, { month: "short", year: "numeric" })}
                         </span>
                       </>
                     )}
@@ -312,8 +308,7 @@ const MyPayrollView = ({ currentUser }) => {
                     </span>
                   </div>
                   <div className="text-3xl font-black text-white mt-1 flex items-baseline gap-1">
-                    <span className="text-orange-400 text-xl font-bold">₹</span>
-                    <span>{netTakeHome.toLocaleString("en-IN")}</span>
+                    <span>{formatCurrency(netTakeHome)}</span>
                   </div>
                   <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
                     {isPaidThisMonth

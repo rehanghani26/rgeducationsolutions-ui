@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { updateUserProfile } from "../../store/slices/authSlice.js";
 import StudentProfileView from "../students/StudentProfileView.jsx";
 import { getUserFromStorage } from "../../config/access.jsx";
+import { formatDateLong, formatDateTime } from "../../utils";
 import {
   User,
   Mail,
@@ -1020,15 +1021,7 @@ const ProfileSettings = () => {
                   <InfoTile
                     icon={Calendar}
                     label="Date of Joining"
-                    value={
-                      p.joiningDate
-                        ? new Date(p.joiningDate).toLocaleDateString("en-IN", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
-                        : null
-                    }
+                    value={p.joiningDate ? formatDateLong(p.joiningDate) : null}
                   />
                 </div>
               </div>
@@ -1069,7 +1062,7 @@ const ProfileSettings = () => {
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last Session Login</p>
                 <p className="text-xs font-black text-slate-800 dark:text-slate-100 mt-0.5 truncate">
-                  {p.lastLogin ? new Date(p.lastLogin).toLocaleString("en-IN") : "Current Session"}
+                  {p.lastLogin ? formatDateTime(p.lastLogin) : "Current Session"}
                 </p>
               </div>
             </div>

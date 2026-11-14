@@ -147,7 +147,7 @@ const BatchDisburseModal = ({
     setItems((prev) =>
       prev.map((item) => (item.selected ? { ...item, bonus: num } : item))
     );
-    toast.info(`Applied +₹${num.toLocaleString('en-IN')} Extra to ${totalSelectedCount} staff members`);
+    toast.info(`Applied +${formatCurrency(num)} Extra to ${totalSelectedCount} staff members`);
     setGlobalExtra('');
   };
 
@@ -157,7 +157,7 @@ const BatchDisburseModal = ({
     setItems((prev) =>
       prev.map((item) => (item.selected ? { ...item, customDeduction: num } : item))
     );
-    toast.info(`Applied -₹${num.toLocaleString('en-IN')} Deduction to ${totalSelectedCount} staff members`);
+    toast.info(`Applied -${formatCurrency(num)} Deduction to ${totalSelectedCount} staff members`);
     setGlobalDeduction('');
   };
 

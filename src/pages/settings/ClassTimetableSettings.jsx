@@ -9,11 +9,17 @@ import {
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import { getSyllabusByClass } from "../../services/syllabusService.js";
-import { CLASS_OPTIONS, SECTION_OPTIONS } from "../../constants/academicOptions.js";
+import {
+  CLASS_OPTIONS,
+  SECTION_OPTIONS,
+  WEEKDAYS as DEFAULT_DAYS,
+  DAY_NAMES_LOWER,
+} from "../../constants";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { useSelector } from "react-redux";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import { formatDate, formatTime } from "../../utils";
 
 // ─── Period type display metadata ────────────────────────────────────────────
 const PERIOD_META = {
@@ -30,15 +36,6 @@ const PERIOD_META = {
 };
 const getMeta = (type) => PERIOD_META[type] || PERIOD_META.custom;
 
-const DEFAULT_DAYS = [
-  { id: "monday",    label: "Monday",    short: "Mon" },
-  { id: "tuesday",   label: "Tuesday",   short: "Tue" },
-  { id: "wednesday", label: "Wednesday", short: "Wed" },
-  { id: "thursday",  label: "Thursday",  short: "Thu" },
-  { id: "friday",    label: "Friday",    short: "Fri" },
-  { id: "saturday",  label: "Saturday",  short: "Sat" },
-];
-
 const DEFAULT_SUBJECTS = [
   "Mathematics", "English Literature", "Science / Physics", "Chemistry",
   "Biology", "Social Studies / History", "Computer Science",
@@ -46,8 +43,7 @@ const DEFAULT_SUBJECTS = [
 ];
 
 const getCurrentDayId = () => {
-  const names = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
-  const name = names[new Date().getDay()];
+  const name = DAY_NAMES_LOWER[new Date().getDay()];
   return name === "sunday" ? "monday" : name;
 };
 
@@ -732,10 +728,10 @@ const ClassTimetableSettings = () => {
         return (
           <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
             <span className="font-semibold block text-slate-700 dark:text-slate-300">
-              {d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              {formatDate(d)}
             </span>
             <span className="text-[10px] text-slate-400">
-              {d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+              {formatTime(d)}
             </span>
           </div>
         );

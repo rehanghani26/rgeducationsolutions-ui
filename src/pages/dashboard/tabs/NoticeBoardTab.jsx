@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Megaphone } from "lucide-react";
 import erpService from "../../../services/erpService.js";
 import Loader from "../../../components/ui/Loader.jsx";
+import { formatDate } from "../../../utils";
 
 const NoticeBoardTab = () => {
   const [notices, setNotices] = useState([]);
@@ -71,7 +72,7 @@ const NoticeBoardTab = () => {
 
                 <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-[10px] font-semibold text-slate-500 dark:border-slate-800/80">
                   <span>Published by {n.author || "Administration"}</span>
-                  <span>{new Date(n.createdAt || Date.now()).toLocaleDateString()}</span>
+                  <span>{formatDate(n.createdAt || Date.now())}</span>
                 </div>
               </div>
             ))}

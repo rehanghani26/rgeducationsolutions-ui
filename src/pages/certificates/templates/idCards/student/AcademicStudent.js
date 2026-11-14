@@ -3,6 +3,7 @@
  * @description Academic style with emerald/teal color scheme, structured info table,
  * school emblem prominence, and formal document aesthetic.
  */
+import { formatDate } from '../../../../../utils';
 export const academicStudentCard = {
   id: 'student-id-academic',
   name: 'Academic',
@@ -48,7 +49,7 @@ export const academicStudentCard = {
             ${tRow('ID No.', data.admissionNumber)}
             ${tRow('Class', `${data.class || ''} ${data.section ? '| ' + data.section : ''}`)}
             ${tRow('Roll No.', data.rollNumber || '—')}
-            ${tRow('Date of Birth', data.dob ? new Date(data.dob).toLocaleDateString('en-IN') : '—')}
+            ${tRow('Date of Birth', formatDate(data.dob, undefined, '—'))}
             ${data.bloodGroup ? tRow('Blood Group', data.bloodGroup) : ''}
           </div>
         </div>

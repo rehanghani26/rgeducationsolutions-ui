@@ -28,6 +28,7 @@ import CertificatePreview from './CertificatePreview.jsx';
 import Modal from '../../../components/ui/Modal.jsx';
 import { getIssuedCertificates, revokeCertificate } from '../services/documentService.js';
 import { getTemplateById } from '../templates/registry.js';
+import { formatDate } from '../../../utils';
 import { CERTIFICATE_TYPES } from '../constants/documentConstants.js';
 import { getVerificationUrl } from '../utils/qrUtils.js';
 import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
@@ -305,11 +306,7 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '',
                         {cert.academicSession || '—'}
                       </td>
                       <td className="px-4 py-3 text-slate-400">
-                        {new Date(cert.issuedAt).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {formatDate(cert.issuedAt)}
                       </td>
                       <td className="px-4 py-3">
                         {isValid ? (

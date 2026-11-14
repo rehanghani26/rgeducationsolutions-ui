@@ -19,10 +19,12 @@ import {
 import {
   CLASS_OPTIONS,
   SECTION_OPTIONS,
-} from "../../constants/academicOptions.js";
+  MONTH_OPTIONS_WITH_ALL as MONTH_OPTIONS,
+  YEAR_OPTIONS_WITH_ALL as YEAR_OPTIONS,
+  ROLES,
+} from "../../constants";
 import { getActiveLeavesOnDate } from "../../services/leaveService.js";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
-import { ROLES } from "../../constants/roles.js";
 import {
   Eye,
   Calendar,
@@ -226,32 +228,7 @@ const AttendanceManagement = () => {
     return matchesStatus && matchesDate;
   });
 
-  // Filter option constants & derived lists
-  const MONTH_OPTIONS = [
-    { value: "all", label: "All Months" },
-    { value: "1", label: "January" },
-    { value: "2", label: "February" },
-    { value: "3", label: "March" },
-    { value: "4", label: "April" },
-    { value: "5", label: "May" },
-    { value: "6", label: "June" },
-    { value: "7", label: "July" },
-    { value: "8", label: "August" },
-    { value: "9", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
-    { value: "12", label: "December" },
-  ];
-
-  const currentYearNum = new Date().getFullYear();
-  const YEAR_OPTIONS = [
-    { value: "all", label: "All Years" },
-    { value: String(currentYearNum), label: String(currentYearNum) },
-    { value: String(currentYearNum - 1), label: String(currentYearNum - 1) },
-    { value: String(currentYearNum - 2), label: String(currentYearNum - 2) },
-    { value: String(currentYearNum - 3), label: String(currentYearNum - 3) },
-  ];
-
+  // Filter options and derived lists (imported from central constants)
   const availableClasses = useMemo(() => {
     const fromApi = availableFilterOptions.classes || [];
     const fromConstants = CLASS_OPTIONS.map((c) => c.name);

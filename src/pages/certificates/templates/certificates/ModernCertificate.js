@@ -3,6 +3,7 @@
  * @description Modern A4 certificate with dark navy background, vibrant gradient accents,
  * premium typography, and geometric decorative elements.
  */
+import { formatDateLong } from '../../../../utils';
 export const modernCertificate = {
   id: 'certificate-modern',
   name: 'Modern',
@@ -92,7 +93,7 @@ export const modernCertificate = {
             </div>
             <div style="text-align:center;">
               <div style="font-size:8px;color:#64748b;margin-bottom:3px;">Date of Issue</div>
-              <div style="font-size:11px;font-weight:700;color:#e2e8f0;">${data.issueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+              <div style="font-size:11px;font-weight:700;color:#e2e8f0;">${data.issueDate || formatDateLong(new Date())}</div>
             </div>
             <div style="text-align:center;">
               <div style="width:130px;border-top:1px solid rgba(99,102,241,0.4);padding-top:6px;">

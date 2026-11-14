@@ -12,6 +12,7 @@ import {
   Zap,
 } from 'lucide-react';
 import api from '../../services/api.js';
+import { formatTime } from '../../utils';
 
 const QUICK_PROMPTS = [
   '🧙 Check setup status and tell me what to do next',
@@ -27,7 +28,7 @@ export default function SetupWizardAI({ onStepCompleted, onStatusRefresh, status
       role: 'assistant',
       content:
         "👋 Hello Administrator! I am your **AI Setup Assistant**.\n\nI can configure your entire school ERP foundation for you — just tell me your school details, or click any prompt below to get started!",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: formatTime(new Date()),
     },
   ]);
   const [input, setInput] = useState('');
@@ -48,7 +49,7 @@ export default function SetupWizardAI({ onStepCompleted, onStatusRefresh, status
     const userMsg = {
       role: 'user',
       content: textToSend,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: formatTime(new Date()),
     };
     setMessages((prev) => [...prev, userMsg]);
     setSending(true);
@@ -64,7 +65,7 @@ export default function SetupWizardAI({ onStepCompleted, onStatusRefresh, status
       const botMsg = {
         role: 'assistant',
         content: reply,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: formatTime(new Date()),
       };
       setMessages((prev) => [...prev, botMsg]);
 
@@ -84,7 +85,7 @@ export default function SetupWizardAI({ onStepCompleted, onStatusRefresh, status
         {
           role: 'assistant',
           content: `⚠️ ${errorReply}`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          timestamp: formatTime(new Date()),
         },
       ]);
     } finally {
@@ -123,7 +124,7 @@ export default function SetupWizardAI({ onStepCompleted, onStatusRefresh, status
               {
                 role: 'assistant',
                 content: 'Chat reset. What would you like to set up next?',
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                timestamp: formatTime(new Date()),
               },
             ]);
           }}

@@ -299,9 +299,7 @@ const StaffPayrollDetail = () => {
                 <span>•</span>
                 <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-bold">
                   <Calendar size={13} className="text-emerald-500" /> Joined:{" "}
-                  {staff.joiningDate
-                    ? new Date(staff.joiningDate).toLocaleDateString("en-GB")
-                    : "—"}
+                  {formatDate(staff.joiningDate, undefined, "—")}
                 </span>
               </div>
             </div>
@@ -844,10 +842,7 @@ const StaffPayrollDetail = () => {
                               {disb.transactionReference || "Disbursed"}
                             </span>
                             <span className="text-[10px] block">
-                              {new Date(disb.disbursedAt).toLocaleDateString(
-                                "en-GB"
-                              )}{" "}
-                              via {disb.paymentMethod}
+                              {formatDate(disb.disbursedAt)} via {disb.paymentMethod}
                             </span>
                           </div>
                         ) : (

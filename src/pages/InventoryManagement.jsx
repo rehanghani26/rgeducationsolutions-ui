@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api.js';
 import Modal from '../components/ui/Modal.jsx';
+import { formatCurrency } from '../utils';
 
 const InventoryManagement = () => {
   const [search, setSearch] = useState('');
@@ -190,7 +191,7 @@ const InventoryManagement = () => {
                               {item.quantity} {item.unit} {isLowStock && '(Low Stock)'}
                             </span>
                           </td>
-                          <td className="py-4 font-semibold">${item.price.toLocaleString()}</td>
+                          <td className="py-4 font-semibold">{formatCurrency(item.price)}</td>
                           <td className="py-4 text-slate-500">{item.vendor?.name || 'Spud & Sons Supplies'}</td>
                           <td className="py-4 text-right">
                             <button

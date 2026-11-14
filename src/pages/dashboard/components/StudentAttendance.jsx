@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import api from "../../../services/api.js";
 import { getUserFromStorage } from "../../../config/access.jsx";
+import { dateOnly, formatDate, getDayName } from "../../../utils";
 
 const StudentAttendance = ({ studentId: propStudentId }) => {
   const authUser = useSelector((state) => state.auth?.user);
@@ -65,8 +66,8 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
   }, [currentStudentId]);
 
   // Today's Date String in YYYY-MM-DD
-  const todayStr = new Date().toISOString().split("T")[0];
-  const todayDateFormatted = new Date().toLocaleDateString("en-US", {
+  const todayStr = dateOnly(new Date());
+  const todayDateFormatted = formatDate(new Date(), {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -332,7 +333,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
 
                       {/* Day Name */}
                       <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300">
-                        {log.dayName || new Date(log.date).toLocaleDateString("en-US", { weekday: "long" })}
+                        {log.dayName || getDayName(log.date)}
                       </td>
 
                       {/* Status */}

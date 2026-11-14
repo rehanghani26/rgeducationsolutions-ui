@@ -3,6 +3,7 @@
  * @description Emerald academic certificate — matches the Academic ID card family.
  * Formal, institution-grade layout with gold-green accents, watermark-style background.
  */
+import { formatDateLong } from '../../../../utils';
 export const academicCertificate = {
   id: 'certificate-academic',
   name: 'Academic',
@@ -96,7 +97,7 @@ export const academicCertificate = {
             </div>
             <div style="text-align:center;">
               <div style="font-size:9px;color:#9ca3af;font-family:'Inter',sans-serif;margin-bottom:4px;">Date of Issue</div>
-              <div style="font-size:12px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">${data.issueDate || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+              <div style="font-size:12px;font-weight:700;color:#374151;font-family:'Inter',sans-serif;">${data.issueDate || formatDateLong(new Date())}</div>
             </div>
             <div style="text-align:center;">
               <div style="width:130px;border-top:1px dashed #059669;padding-top:6px;">

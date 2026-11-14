@@ -13,6 +13,8 @@ import { CurrencyInput } from "../../components/ui/CurrencyInput.jsx";
 import { getFees, collectFee, createExpense } from "../../services";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
+import { formatCurrency, dateOnly } from "../../utils";
+import { PAYMENT_METHOD_OPTIONS, FEE_STATUS_OPTIONS } from "../../constants";
 
 const FeeList = () => {
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ const FeeList = () => {
     title: "",
     amount: "",
     category: "Operations",
-    date: new Date().toISOString().slice(0, 10),
+    date: dateOnly(new Date()),
     refInvoice: "",
   });
 
@@ -87,7 +89,7 @@ const FeeList = () => {
     try {
       await createExpense(expenseForm);
       setShowExpense(false);
-      setExpenseForm({ title: "", amount: "", category: "Operations", date: new Date().toISOString().slice(0, 10), refInvoice: "" });
+      setExpenseForm({ title: "", amount: "", category: "Operations", date: dateOnly(new Date()), refInvoice: "" });
     } catch (err) {
       console.error("Create expense error:", err);
     } finally {
@@ -123,14 +125,14 @@ const FeeList = () => {
     {
       key: "amount",
       label: "Total Amount",
-      render: (row) => `₹${Number(row.amount || 0).toLocaleString()}`,
+      render: (row) => formatCurrency(row.amount || 0),
     },
     {
       key: "paidAmount",
       label: "Paid",
       render: (row) => (
         <span className="font-bold text-emerald-600 dark:text-emerald-400">
-          ₹${Number(row.paidAmount || 0).toLocaleString()}
+          {formatCurrency(row.paidAmount || 0)}
         </span>
       ),
     },
@@ -139,7 +141,7 @@ const FeeList = () => {
       label: "Due Balance",
       render: (row) => (
         <span className="font-bold text-rose-600 dark:text-rose-400">
-          ₹${Number(row.dueAmount || 0).toLocaleString()}
+          {formatCurrency(row.dueAmount || 0)}
         </span>
       ),
     },

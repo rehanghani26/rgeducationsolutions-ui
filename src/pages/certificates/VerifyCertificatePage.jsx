@@ -19,6 +19,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { verifyCertificate } from './services/documentService.js';
+import { formatDateLong } from '../../utils';
 
 export default function VerifyCertificatePage() {
   const { token } = useParams();
@@ -127,11 +128,7 @@ export default function VerifyCertificatePage() {
                   {data.certificate.revokedAt && (
                     <p className="text-[10px] text-slate-400 mt-1">
                       Revoked date:{' '}
-                      {new Date(data.certificate.revokedAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
+                      {formatDateLong(data.certificate.revokedAt)}
                     </p>
                   )}
                 </div>
@@ -170,11 +167,7 @@ export default function VerifyCertificatePage() {
                 <div className="py-3 flex justify-between items-center">
                   <span className="text-slate-400">Date of Issue</span>
                   <span className="text-slate-200 font-medium">
-                    {new Date(data.certificate.issuedAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                    {formatDateLong(data.certificate.issuedAt)}
                   </span>
                 </div>
               </div>

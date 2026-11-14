@@ -33,6 +33,7 @@ import { getTeacherById, getTeacherActivity, getTeacherClassHistory } from "../.
 import { getApplicantLeaveProfile, reviewLeave, requestLeave } from "../../services/leaveService.js";
 import api from "../../services/api.js";
 import Loader from "../../components/ui/Loader.jsx";
+import { formatCurrency, formatDate } from "../../utils";
 
 const InfoGrid = ({ items }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -469,7 +470,7 @@ const TeacherDetail = () => {
                             {h.className} · {h.sectionName} ({h.sessionName})
                           </p>
                           <p className="text-[10px] text-slate-400">
-                            Tenure: {new Date(h.startDate).toLocaleDateString()} — {h.endDate ? new Date(h.endDate).toLocaleDateString() : 'Present'}
+                            Tenure: {formatDate(h.startDate)} — {h.endDate ? formatDate(h.endDate) : 'Present'}
                           </p>
                         </div>
                         {h.reasonForRemoval && (
@@ -563,9 +564,9 @@ const TeacherDetail = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatsCard title="Monthly Basic Salary" value={`₹${Number(teacher?.salary || 68000).toLocaleString()}`} />
-              <StatsCard title="Allowances" value="₹8,500" />
-              <StatsCard title="Net Take-Home" value={`₹${Number((teacher?.salary || 68000) + 8500).toLocaleString()}`} />
+              <StatsCard title="Monthly Basic Salary" value={formatCurrency(teacher?.salary || 68000)} />
+              <StatsCard title="Allowances" value={formatCurrency(8500)} />
+              <StatsCard title="Net Take-Home" value={formatCurrency((teacher?.salary || 68000) + 8500)} />
             </div>
 
             <InfoGrid
@@ -573,8 +574,8 @@ const TeacherDetail = () => {
                 [
                   "Monthly Base Salary",
                   teacher?.salary
-                    ? `₹${Number(teacher.salary).toLocaleString()}`
-                    : "₹68,000",
+                    ? formatCurrency(teacher.salary)
+                    : formatCurrency(68000),
                 ],
                 ["Employment Status", teacher?.status || "Active"],
                 ["Bank Account Linked", "HDFC Bank (A/C: ****5592)"],

@@ -5,6 +5,7 @@ import PageHeader from '../../components/ui/PageHeader.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import StudentForm, { blankStudentForm } from './StudentForm.jsx';
 import studentService from '../../services/studentService.js';
+import { dateOnly } from '../../utils';
 
 const StudentEdit = () => {
   const { studentId } = useParams();
@@ -55,30 +56,7 @@ const StudentEdit = () => {
       const parentEmail = student.parentEmail || student.parentId?.email || student.parentDetails?.email || student.guardianEmail || '';
 
       // Date formatter for HTML5 date inputs (strictly YYYY-MM-DD)
-      const formatDateStr = (val) => {
-        if (!val) return '';
-        try {
-          if (typeof val === 'string') {
-            const trimmed = val.trim();
-            // Already YYYY-MM-DD
-            if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-              return trimmed.slice(0, 10);
-            }
-            // Parse DD/MM/YYYY or DD-MM-YYYY
-            const dmyMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-            if (dmyMatch) {
-              const day = dmyMatch[1].padStart(2, '0');
-              const month = dmyMatch[2].padStart(2, '0');
-              const year = dmyMatch[3];
-              return `${year}-${month}-${day}`;
-            }
-          }
-          const d = new Date(val);
-          return !isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : '';
-        } catch {
-          return '';
-        }
-      };
+      const formatDateStr = (val) => dateOnly(val);
 
       // Name resolution
       const fullName = student.name || '';

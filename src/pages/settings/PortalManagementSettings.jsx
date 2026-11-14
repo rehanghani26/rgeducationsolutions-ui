@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../services/api.js';
+import { formatDate, formatDateTime } from '../../utils';
 
 const PORTAL_URL = 'http://localhost:5174';
 
@@ -385,7 +386,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
       notices: [
         {
           title: 'New Announcement / Important Circular',
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+          date: formatDate(new Date()),
           tag: 'General',
           urgent: false,
         },
@@ -1444,7 +1445,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
-                        Received: {new Date(inq.createdAt).toLocaleString()}
+                        Received: {formatDateTime(inq.createdAt)}
                       </div>
                     </div>
 
