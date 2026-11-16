@@ -132,8 +132,8 @@ const LeaveManagement = () => {
       if (!isElevated) {
         // Individual Student / Staff: fetch their own applications
         const res = await getMyLeaves();
-        if (res?.success) {
-          let list = res.leaves || [];
+        if (res?.success || res?.leaves || res?.data?.leaves) {
+          let list = res?.leaves || res?.data?.leaves || [];
           if (statusFilter !== 'all') {
             list = list.filter((l) => l.status === statusFilter);
           }
@@ -143,11 +143,17 @@ const LeaveManagement = () => {
               (l) =>
                 (l.reason && l.reason.toLowerCase().includes(s)) ||
                 (l.category && l.category.toLowerCase().includes(s)) ||
-                (l.leaveCode && l.leaveCode.toLowerCase().includes(s))
+                (l.leaveCode && l.leaveCode.toLowerCase().includes(s)) ||
+                (l.applicantName && l.applicantName.toLowerCase().includes(s)) ||
+                (l.admissionNumber && l.admissionNumber.toLowerCase().includes(s))
             );
           }
           setLeaves(list);
-          setPagination({ total: list.length, page: 1, pages: 1 });
+          setPagination({
+            total: res?.total ?? res?.data?.total ?? list.length,
+            page: res?.page ?? res?.data?.page ?? 1,
+            pages: res?.pages ?? res?.data?.pages ?? 1,
+          });
         }
       } else {
         // Elevated Admin / Teacher: query comprehensive leaves
@@ -164,8 +170,8 @@ const LeaveManagement = () => {
         if (selectedClass) params.className = selectedClass;
 
         const res = await getAllLeaves(params);
-        if (res?.success) {
-          let list = res.leaves || [];
+        if (res?.success || res?.leaves || res?.data?.leaves) {
+          let list = res?.leaves || res?.data?.leaves || [];
 
           // Local date filtering
           if (dateFilter === 'today') {
@@ -179,9 +185,9 @@ const LeaveManagement = () => {
 
           setLeaves(list);
           setPagination({
-            total: res.total || list.length,
-            page: res.page || 1,
-            pages: res.pages || 1,
+            total: res?.total ?? res?.data?.total ?? list.length,
+            page: res?.page ?? res?.data?.page ?? 1,
+            pages: res?.pages ?? res?.data?.pages ?? 1,
           });
         }
       }
@@ -310,8 +316,9 @@ const LeaveManagement = () => {
     setProfileDrawerOpen(true);
     setProfileLoading(true);
     try {
-      const data = await getApplicantLeaveProfile(applicantId);
-      if (data?.success) {
+      const res = await getApplicantLeaveProfile(applicantId);
+      const data = res?.data || res;
+      if (res?.success || data?.applicant || data?.summary) {
         setApplicantProfileData(data);
       } else {
         toast.error('Unable to fetch detailed applicant leave history');
@@ -350,6 +357,27 @@ const LeaveManagement = () => {
       setReviewSubmitting(false);
     }
   };
+
+  // Determine if current user can review/approve a specific leave request
+  const canReviewLeave = useCallback(
+    (leave) => {
+      if (!leave || leave.status !== 'pending') return false;
+      if (isAdmin) return true;
+      if (isTeacher) {
+        if ((leave.applicantRole || '').toLowerCase() === 'student') {
+          if (!user.isClassTeacher) return false;
+          if (user.classTeacherOf) {
+            const lClass = (leave.classSection || leave.className || '').toLowerCase();
+            return lClass.includes(user.classTeacherOf.toLowerCase());
+          }
+          return true;
+        }
+        return false;
+      }
+      return false;
+    },
+    [isAdmin, isTeacher, user]
+  );
 
   // Cancel Leave
   const handleCancelApplication = async (leaveId) => {
@@ -615,16 +643,16 @@ const LeaveManagement = () => {
             <p className="text-xs text-slate-400">No applications match your selected criteria or filters.</p>
           </div>
         ) : (
-          <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden text-xs">
+          <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto text-sm">
             <table className="w-full text-left">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 whitespace-nowrap">
                 <tr>
-                  <th className="py-3.5 px-4">Applicant & Role</th>
-                  <th className="py-3.5 px-4">Leave Category</th>
-                  <th className="py-3.5 px-4">Duration & Calendar</th>
-                  <th className="py-3.5 px-4">Reason / Notes</th>
-                  <th className="py-3.5 px-4 text-center">Attendance Sync Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                  <th className="py-4 px-4">Applicant & Role</th>
+                  <th className="py-4 px-4">Leave Category</th>
+                  <th className="py-4 px-4">Duration & Calendar</th>
+                  <th className="py-4 px-4">Reason / Notes</th>
+                  <th className="py-4 px-4 text-center">Attendance Sync Status</th>
+                  <th className="py-4 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
@@ -642,119 +670,129 @@ const LeaveManagement = () => {
                       className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                     >
                       {/* Applicant & Role (Clickable to inspect drawer) */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div
                           onClick={() => handleInspectApplicant(leave.applicantId || leave.user)}
-                          className="flex items-center gap-2.5 cursor-pointer group w-max"
+                          className="flex items-center gap-3 cursor-pointer group"
                           title="Click to view full leave history & profile"
                         >
-                          <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition shadow-2xs">
+                          <div className="w-10 h-10 rounded-2xl bg-orange-100 dark:bg-slate-700 text-orange-600 dark:text-slate-200 font-extrabold text-sm flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white transition shadow-2xs border border-orange-200 dark:border-slate-600">
                             {leave.applicantName ? leave.applicantName.charAt(0) : 'A'}
                           </div>
                           <div>
-                            <span className="font-extrabold text-slate-900 dark:text-white block group-hover:text-orange-500 transition">
-                              {leave.applicantName || 'Applicant'}
-                            </span>
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono mt-0.5">
-                              <span className="uppercase font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-1.5 py-0.2 rounded border border-orange-200 dark:border-orange-900">
+                            <div className="flex items-center gap-2">
+                              <span className="font-extrabold text-sm text-slate-900 dark:text-white block group-hover:text-orange-500 transition">
+                                {leave.applicantName || 'Applicant'}
+                              </span>
+                              {leave.leaveCode && (
+                                <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
+                                  {leave.leaveCode}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-mono mt-1 whitespace-nowrap">
+                              <span className="uppercase font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-2 py-0.5 rounded border border-orange-200 dark:border-orange-800">
                                 {leave.applicantRole || 'Student'}
                               </span>
-                              {leave.admissionNumber && <span>Adm: {leave.admissionNumber}</span>}
-                              {leave.employeeId && <span>Emp: {leave.employeeId}</span>}
-                              {leave.classSection && <span>• {leave.classSection}</span>}
+                              {leave.admissionNumber && <span>Adm: <strong className="text-slate-700 dark:text-slate-300">{leave.admissionNumber}</strong></span>}
+                              {leave.rollNumber != null && <span>Roll: <strong className="text-slate-700 dark:text-slate-300">#{leave.rollNumber}</strong></span>}
+                              {leave.employeeId && <span>Emp: <strong className="text-slate-700 dark:text-slate-300">{leave.employeeId}</strong></span>}
+                              {(leave.classSection || leave.className) && (
+                                <span>• <strong className="text-slate-700 dark:text-slate-300">{leave.classSection || `${leave.className}${leave.sectionName ? ` - ${leave.sectionName}` : ''}`}</strong></span>
+                              )}
                             </div>
                           </div>
                         </div>
                       </td>
 
                       {/* Leave Category */}
-                      <td className="py-3.5 px-4">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <span className="font-bold text-sm text-slate-900 dark:text-slate-100 block">
                           {leave.category}
                         </span>
                         {leave.isHalfDay ? (
-                          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 block mt-0.5">
-                            ⚡ Half Day ({leave.halfDaySession?.replace('_', ' ')})
+                          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 block mt-0.5">
+                            ⚡ Half Day ({leave.halfDaySession ? leave.halfDaySession.replace('_', ' ') : 'first half'})
                           </span>
                         ) : (
-                          <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono block mt-0.5">
                             Full Day Application
                           </span>
                         )}
                       </td>
 
                       {/* Duration & Calendar */}
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                          <Calendar size={13} className="text-orange-500 flex-shrink-0" />
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <Calendar size={14} className="text-orange-500 flex-shrink-0" />
                           <span>{sDate === eDate ? sDate : `${sDate} – ${eDate}`}</span>
                         </div>
-                        <span className="text-[10px] text-slate-400 font-bold mt-0.5 block">
-                          {leave.totalDays} Working Day{leave.totalDays > 1 ? 's' : ''}
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5 block">
+                          {leave.totalDays} Day{leave.totalDays === 1 ? '' : 's'}
                         </span>
                       </td>
 
                       {/* Reason */}
-                      <td className="py-3.5 px-4 max-w-xs">
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed truncate" title={leave.reason}>
+                      <td className="py-4 px-4 max-w-xs whitespace-nowrap">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed truncate" title={leave.reason}>
                           {leave.reason}
                         </p>
                         {leave.reviewRemarks && (
-                          <div className="text-[11px] text-indigo-600 dark:text-indigo-400 italic mt-0.5">
+                          <div className="text-xs text-indigo-600 dark:text-indigo-400 italic mt-0.5 truncate">
                             Note: "{leave.reviewRemarks}"
                           </div>
                         )}
                       </td>
 
                       {/* Attendance Sync Status */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
                         {isApproved ? (
                           <div className="inline-flex flex-col items-center gap-0.5">
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40 inline-flex items-center gap-1">
-                              <CheckCircle size={11} /> Synced with Attendance
+                            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 inline-flex items-center gap-1.5">
+                              <CheckCircle size={13} /> Synced with Attendance
                             </span>
-                            <span className="text-[9px] text-slate-400">Rosters marked "L"</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Rosters marked "L"</span>
                           </div>
                         ) : isPending ? (
                           <div className="inline-flex flex-col items-center gap-0.5">
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300/40 inline-flex items-center gap-1">
-                              <Clock size={11} /> Awaiting Approval
+                            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/60 inline-flex items-center gap-1.5">
+                              <Clock size={13} /> Awaiting Approval
                             </span>
-                            <span className="text-[9px] text-amber-600 dark:text-amber-400">Not synced yet</span>
+                            <span className="text-xs text-amber-600 dark:text-amber-400">Not synced yet</span>
                           </div>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-300/40 inline-flex items-center gap-1">
-                            <XCircle size={11} /> Disallowed
+                          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-300/60 inline-flex items-center gap-1.5">
+                            <XCircle size={13} /> Disallowed
                           </span>
                         )}
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-4 px-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
                           {/* Inspect Profile Button */}
                           <button
                             onClick={() => handleInspectApplicant(leave.applicantId || leave.user)}
                             title="Inspect Applicant Leave Profile"
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+                            className="p-2 rounded-xl text-slate-500 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                           >
-                            <Eye size={13} />
+                            <Eye size={15} />
                           </button>
 
-                          {/* Elevated Review Actions */}
-                          {isElevated && isPending && (
+                          {/* Elevated Review Actions (Admin or Class Teacher for assigned student) */}
+                          {canReviewLeave(leave) && (
                             <>
                               <button
                                 onClick={() => handleOpenReview(leave, 'approved')}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] flex items-center gap-1 transition shadow-xs cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer"
                               >
-                                <Check size={12} /> Approve
+                                <Check size={14} /> Approve
                               </button>
                               <button
                                 onClick={() => handleOpenReview(leave, 'rejected')}
-                                className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex items-center gap-1 transition shadow-xs cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer"
                               >
-                                <X size={12} /> Reject
+                                <X size={14} /> Reject
                               </button>
                             </>
                           )}
@@ -763,7 +801,7 @@ const LeaveManagement = () => {
                           {isPending && !isElevated && (
                             <button
                               onClick={() => handleCancelApplication(leave._id || leave.id)}
-                              className="px-2.5 py-1 rounded-lg border border-rose-300 text-rose-600 hover:bg-rose-50 text-[11px] font-bold cursor-pointer"
+                              className="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 text-xs font-bold cursor-pointer"
                             >
                               Cancel
                             </button>

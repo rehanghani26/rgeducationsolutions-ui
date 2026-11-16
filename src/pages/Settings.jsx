@@ -32,6 +32,7 @@ import {
   NotificationSettings,
   BackupSettings,
   AccessSettings,
+  RoleAndAccessSettings,
   TimesheetSettings,
   SettingsOverview,
   ProfileSettings,
@@ -320,12 +321,20 @@ export const settingPageRoutes = [
     title: "System Backup & Data",
   },
   {
-    path: "access",
-    Component: withSettingsWrapper(AccessSettings, {
-      selfManaged: false,
-      title: "Access Control",
+    path: "role-access",
+    Component: withSettingsWrapper(RoleAndAccessSettings, {
+      selfManaged: true,
+      title: "Role & Permission Governance",
     }),
-    title: "Access Control",
+    title: "Role & Permission Governance",
+  },
+  {
+    path: "access",
+    Component: withSettingsWrapper(RoleAndAccessSettings, {
+      selfManaged: true,
+      title: "Role & Permission Governance",
+    }),
+    title: "Role & Permission Governance",
   },
   {
     path: "timesheet",

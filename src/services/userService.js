@@ -10,7 +10,17 @@ export const userService = {
    */
   getUsers: async (params = {}) => {
     const response = await api.get('/users', { params });
-    return response.data;
+    const body = response.data || {};
+    const inner = body.data || {};
+    return {
+      ...body,
+      users: inner.users || body.users || [],
+      total: inner.total ?? body.total ?? 0,
+      page: inner.page ?? body.page ?? 1,
+      limit: inner.limit ?? body.limit ?? 100,
+      roleStats: inner.roleStats || body.roleStats || {},
+      data: inner,
+    };
   },
 
   /**
@@ -18,7 +28,13 @@ export const userService = {
    */
   getRoles: async () => {
     const response = await api.get('/users/roles');
-    return response.data;
+    const body = response.data || {};
+    const inner = body.data || {};
+    return {
+      ...body,
+      roles: inner.roles || body.roles || [],
+      data: inner,
+    };
   },
 
   /**
@@ -27,7 +43,13 @@ export const userService = {
    */
   getUserById: async (id) => {
     const response = await api.get(`/users/${id}`);
-    return response.data;
+    const body = response.data || {};
+    const inner = body.data || {};
+    return {
+      ...body,
+      user: inner.user || body.user || null,
+      data: inner,
+    };
   },
 
   /**
@@ -36,7 +58,13 @@ export const userService = {
    */
   createUser: async (userData) => {
     const response = await api.post('/users', userData);
-    return response.data;
+    const body = response.data || {};
+    const inner = body.data || {};
+    return {
+      ...body,
+      user: inner.user || body.user || null,
+      data: inner,
+    };
   },
 
   /**
@@ -46,7 +74,13 @@ export const userService = {
    */
   updateUser: async (id, userData) => {
     const response = await api.put(`/users/${id}`, userData);
-    return response.data;
+    const body = response.data || {};
+    const inner = body.data || {};
+    return {
+      ...body,
+      user: inner.user || body.user || null,
+      data: inner,
+    };
   },
 
   /**

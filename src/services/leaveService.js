@@ -23,7 +23,14 @@ export async function getApplicantLeaveProfile(applicantId) {
   try {
     const url = LEAVE_URLS.APPLICANT(encodeURIComponent(applicantId));
     const response = await api.get(url);
-    return response.data;
+    const raw = response.data;
+    const payload = raw?.data || raw;
+    return {
+      success: raw?.success ?? true,
+      ...raw,
+      ...(payload && typeof payload === 'object' ? payload : {}),
+      data: payload,
+    };
   } catch (error) {
     console.error('Error fetching applicant leave profile:', error);
     return {
@@ -43,10 +50,19 @@ export async function getApplicantLeaveProfile(applicantId) {
 export async function getMyLeaves() {
   try {
     const response = await api.get(LEAVE_URLS.MY);
-    return response.data;
+    const raw = response.data;
+    const payload = raw?.data || raw;
+    const leaves = payload?.leaves || raw?.leaves || (Array.isArray(payload) ? payload : []);
+    return {
+      success: raw?.success ?? true,
+      leaves,
+      ...raw,
+      ...(payload && typeof payload === 'object' ? payload : {}),
+      data: { leaves, ...(typeof payload === 'object' ? payload : {}) },
+    };
   } catch (error) {
     console.error('Error fetching my leaves:', error);
-    return { success: false, leaves: [] };
+    return { success: false, leaves: [], data: { leaves: [] } };
   }
 }
 
@@ -58,10 +74,25 @@ export async function getAllLeaves(params = {}) {
     const queryStr = buildQuery(params);
     const url = `${LEAVE_URLS.ALL}${queryStr ? `?${queryStr}` : ''}`;
     const response = await api.get(url);
-    return response.data;
+    const raw = response.data;
+    const payload = raw?.data || raw;
+    const leaves = payload?.leaves || raw?.leaves || (Array.isArray(payload) ? payload : []);
+    const total = payload?.total ?? raw?.total ?? leaves.length;
+    const page = payload?.page ?? raw?.page ?? 1;
+    const pages = payload?.pages ?? raw?.pages ?? 1;
+    return {
+      success: raw?.success ?? true,
+      leaves,
+      total,
+      page,
+      pages,
+      ...raw,
+      ...(payload && typeof payload === 'object' ? payload : {}),
+      data: { leaves, total, page, pages, ...(typeof payload === 'object' ? payload : {}) },
+    };
   } catch (error) {
     console.error('Error fetching all leaves:', error);
-    return { success: false, leaves: [], total: 0, page: 1, pages: 1 };
+    return { success: false, leaves: [], total: 0, page: 1, pages: 1, data: { leaves: [], total: 0, page: 1, pages: 1 } };
   }
 }
 
@@ -120,10 +151,21 @@ export async function getActiveLeavesOnDate(params = {}) {
     const queryStr = buildQuery(params);
     const url = `${LEAVE_URLS.ACTIVE_ON_DATE}${queryStr ? `?${queryStr}` : ''}`;
     const response = await api.get(url);
-    return response.data;
+    const raw = response.data;
+    const payload = raw?.data || raw;
+    const leaves = payload?.leaves || raw?.leaves || (Array.isArray(payload) ? payload : []);
+    const count = payload?.count ?? raw?.count ?? leaves.length;
+    return {
+      success: raw?.success ?? true,
+      leaves,
+      count,
+      ...raw,
+      ...(payload && typeof payload === 'object' ? payload : {}),
+      data: { leaves, count, ...(typeof payload === 'object' ? payload : {}) },
+    };
   } catch (error) {
     console.error('Error fetching active leaves on date:', error);
-    return { success: false, leaves: [], count: 0 };
+    return { success: false, leaves: [], count: 0, data: { leaves: [], count: 0 } };
   }
 }
 

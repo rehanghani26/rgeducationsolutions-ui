@@ -7,8 +7,9 @@
 
 export const ROUTES = {
   // ── Auth ────────────────────────────────────────────────────────────────
-  LOGIN:  '/login',
-  SIGNUP: '/signup',
+  LOGIN:     '/login',
+  SIGNUP:    '/signup',
+  SUSPENDED: '/suspended',
 
   // ── Dashboard ────────────────────────────────────────────────────────────
   DASHBOARD: '/',
@@ -108,6 +109,8 @@ export const ROUTES = {
   AUDIT_LOGS: '/audit-logs',
   SETTINGS:   '/settings',
   SETUP_WIZARD: '/settings/wizard',
+  ROLE_ACCESS: '/settings/role-access',
+  BUDGET: '/settings/budget-allocation',
   PASSWORD_REQUESTS: '/settings/password-security',
   USER_MANAGEMENT: '/user-management',
   USERS:           '/user-management',

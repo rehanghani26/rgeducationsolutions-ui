@@ -144,7 +144,7 @@ export const ROLE_PERMISSIONS = {
   // Student: Student portal view (strictly read-only)
   [ROLES.STUDENT]: {
     modules: [
-      'dashboard', 'profile', 'students', 'student-management', 'settings',
+      'dashboard', 'profile',
       'academics', 'attendance', 'leave', 'timetable', 'exams', 'results',
       'library', 'notifications', 'certificates', 'online-classes', 'homework'
     ],
@@ -155,7 +155,7 @@ export const ROLE_PERMISSIONS = {
   // Parent: Parent portal view
   [ROLES.PARENT]: {
     modules: [
-      'dashboard', 'profile', 'students', 'academics', 'attendance',
+      'dashboard', 'profile', 'academics', 'attendance',
       'leave', 'fees', 'exams', 'results', 'notifications', 'online-classes',
       'homework', 'certificates'
     ],
@@ -230,6 +230,38 @@ export const PERMISSION_ALIASES = {
   documents: ['certificates', 'id-cards', 'documents'],
 };
 
+export const ROLE_PERMISSIONS_CACHE_KEY = 'rges_role_permissions_cache_v2';
+
+/**
+ * Retrieve cached custom role permissions from localStorage if available
+ */
+export const getCustomRolePermissions = (role) => {
+  try {
+    const raw = localStorage.getItem(ROLE_PERMISSIONS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const norm = normalizeRole(role);
+    if (Array.isArray(parsed)) {
+      return parsed.find((r) => normalizeRole(r.role) === norm) || null;
+    }
+    return parsed[norm] || null;
+  } catch (_e) {
+    return null;
+  }
+};
+
+/**
+ * Persist updated role permissions matrix in client storage
+ */
+export const setCustomRolePermissions = (permissionsData) => {
+  try {
+    localStorage.setItem(ROLE_PERMISSIONS_CACHE_KEY, JSON.stringify(permissionsData));
+    window.dispatchEvent(new CustomEvent('role_permissions_updated', { detail: permissionsData }));
+  } catch (_e) {
+    // ignore
+  }
+};
+
 /**
  * Helper to check if user has access to a specific module
  * @param {object|string} userOrRole - User object or role string
@@ -243,14 +275,12 @@ export const hasModuleAccess = (userOrRole, moduleName) => {
   // Super-admin always has full access
   if (role === ROLES.SUPER_ADMIN || role === 'superadmin') return true;
 
-  // Check explicit permissions array attached to user object if available
-  if (typeof userOrRole === 'object' && Array.isArray(userOrRole?.permissions)) {
-    const userPerms = userOrRole.permissions;
-    if (userPerms.includes(moduleName)) return true;
-    
-    // Check aliases
+  // Check dynamic custom role permissions first
+  const dynamicConfig = getCustomRolePermissions(role);
+  if (dynamicConfig && Array.isArray(dynamicConfig.modules)) {
+    if (dynamicConfig.modules.includes('*')) return true;
     const aliases = PERMISSION_ALIASES[moduleName] || [moduleName];
-    if (aliases.some(alias => userPerms.includes(alias))) return true;
+    return dynamicConfig.modules.some((mod) => mod === '*' || mod === moduleName || aliases.includes(mod));
   }
 
   const roleConfig = ROLE_PERMISSIONS[role];

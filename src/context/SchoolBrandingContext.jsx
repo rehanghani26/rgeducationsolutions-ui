@@ -12,6 +12,18 @@ const defaultBranding = {
 const getStoredBranding = () => {
   if (typeof window === "undefined") return defaultBranding;
   try {
+    const rawSchool = window.localStorage.getItem("rges_school_info");
+    if (rawSchool) {
+      const parsedSchool = JSON.parse(rawSchool);
+      if (parsedSchool?.schoolName) {
+        return {
+          schoolLogo: parsedSchool.schoolLogo || "",
+          schoolName: parsedSchool.schoolName,
+          schoolMotto: parsedSchool.schoolMotto || defaultBranding.schoolMotto,
+        };
+      }
+    }
+
     const raw = window.localStorage.getItem(BRANDING_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
@@ -76,11 +88,12 @@ export const SchoolBrandingProvider = ({ children }) => {
 
     try {
       const res = await api.get("/erp/settings").catch(() => null);
-      if (res?.data?.settings) {
-        const s = res.data.settings;
-        const logo = s.companyLogo || s.schoolLogo || "";
-        const name = s.schoolName || defaultBranding.schoolName;
-        const motto = s.schoolMotto || defaultBranding.schoolMotto;
+      if (res?.data) {
+        const s = res.data.settings || {};
+        const sch = res.data.school || {};
+        const logo = sch.schoolLogo || s.schoolLogo || s.companyLogo || "";
+        const name = sch.schoolName || s.schoolName || defaultBranding.schoolName;
+        const motto = sch.schoolMotto || s.schoolMotto || defaultBranding.schoolMotto;
         updateBranding({ schoolLogo: logo, schoolName: name, schoolMotto: motto });
       }
     } catch {

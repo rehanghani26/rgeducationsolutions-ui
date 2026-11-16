@@ -1,2 +1,2 @@
-// Re-export SecuritySettings for backward compatibility
-export { default } from "./SecuritySettings";
+// Export RoleAndAccessSettings as primary access control component
+export { default } from "./RoleAndAccessSettings";

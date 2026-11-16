@@ -43,6 +43,7 @@ import MandatorySchoolProfileModal, {
 } from "../components/modals/MandatorySchoolProfileModal.jsx";
 import SetupWizardModal from "../pages/setup/SetupWizardModal.jsx";
 import useSetupWizard from "../hooks/useSetupWizard.js";
+import { roleAccessService } from "../services/roleAccessService.js";
 
 const resolveUserImageUrl = (userObj) => {
   const raw =
@@ -154,7 +155,12 @@ const DashboardLayout = () => {
     refreshBranding();
   };
 
-  const navSections = filterNavForUser(user);
+  // Reactive dynamic role permissions from Redux Toolkit store (zero duplicate API calls)
+  const roleAccessState = useSelector((state) => state.roleAccess || {});
+  const navSections = React.useMemo(
+    () => filterNavForUser(user),
+    [user, roleAccessState.roles]
+  );
 
   const handleLogout = () => {
     dispatch(logoutUser()).then(() => navigate("/login"));
@@ -593,7 +599,7 @@ const DashboardLayout = () => {
             <div className="hidden md:flex items-center gap-2.5 min-w-0">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-extrabold tracking-tight text-stone-800 dark:text-stone-200 truncate">
-                {schoolName || "Becon International School"}
+                {schoolName || "RG EduCore"}
               </span>
               <span className="text-stone-300 dark:text-stone-700">•</span>
               <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">

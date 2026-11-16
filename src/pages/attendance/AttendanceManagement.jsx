@@ -363,7 +363,11 @@ const AttendanceManagement = () => {
       ]);
 
       const students = studentsRes?.students || studentsRes?.data?.students || [];
-      const activeLeaves = leavesRes?.data || leavesRes?.leaves || [];
+      const activeLeaves =
+        leavesRes?.leaves ||
+        leavesRes?.data?.leaves ||
+        (Array.isArray(leavesRes?.data) ? leavesRes.data : []) ||
+        [];
 
       if (students.length === 0) {
         toast.info(`No students found for ${className} - ${sectionName}`);

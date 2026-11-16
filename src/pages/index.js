@@ -51,3 +51,4 @@ export { default as VendorManagement }        from './vendors/VendorManagement.j
 export { default as VendorDetail }            from './vendors/VendorDetail.jsx';
 export { default as AiMode }                  from './ai-mode/AiMode.jsx';
 export { default as VerifyCertificatePage }   from './certificates/VerifyCertificatePage.jsx';
+export { default as SuspendedPage }           from './SuspendedPage.jsx';
