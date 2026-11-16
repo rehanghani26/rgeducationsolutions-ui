@@ -135,7 +135,7 @@ const GreetingBanner = ({ user }) => {
             {/* School Campus & Academic Year Chips */}
             <div className="flex flex-wrap items-center gap-2 text-xs text-stone-600 dark:text-stone-300 pt-0.5">
               <span className="font-bold text-stone-800 dark:text-stone-200 truncate max-w-[240px] sm:max-w-none">
-                {schoolName || "Becon International School"}
+                {schoolName || "RG EduCore"}
               </span>
 
               <span className="text-stone-300 dark:text-stone-700">•</span>

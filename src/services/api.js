@@ -14,6 +14,18 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    // 1. Attach Multi-Tenant Identifiers Header (both x-school-id and x-collection-name)
+    const schoolIdentifier =
+      localStorage.getItem("rges_school_id") ||
+      localStorage.getItem("rges_school_collection") ||
+      sessionStorage.getItem("rges_school_id") ||
+      sessionStorage.getItem("rges_school_collection");
+
+    if (schoolIdentifier) {
+      config.headers["x-school-id"] = schoolIdentifier;
+      config.headers["x-collection-name"] = schoolIdentifier;
+    }
+
     const rawToken = localStorage.getItem("token");
     const token =
       rawToken && rawToken !== "undefined" && rawToken !== "null"
@@ -28,6 +40,7 @@ api.interceptors.request.use(
       const isPublicRoute =
         url.includes("/auth/login") ||
         url.includes("/auth/signup") ||
+        url.includes("/auth/school-check") ||
         url.includes("/auth/setup-status") ||
         url.includes("/auth/has-users") ||
         url.includes("/auth/send-otp") ||
@@ -92,6 +105,40 @@ api.interceptors.response.use(
           },
         })
       );
+    }
+
+    // Check if institution access has been suspended (403 with status: "suspended")
+    const isSuspendedResponse =
+      error.response?.data?.status === "suspended" ||
+      error.response?.data?.schoolStatus === "suspended" ||
+      (error.response?.data?.message &&
+        typeof error.response.data.message === "string" &&
+        error.response.data.message.toLowerCase().includes("suspended"));
+
+    if (isSuspendedResponse) {
+      const suspensionInfo = {
+        schoolId:
+          error.response?.data?.schoolId ||
+          localStorage.getItem("rges_school_id") ||
+          "",
+        schoolName:
+          error.response?.data?.schoolName ||
+          "Your School",
+        message:
+          error.response?.data?.message ||
+          "Access to your school has been suspended. Please contact RGES Support.",
+      };
+      sessionStorage.setItem(
+        "rges_suspended_info",
+        JSON.stringify(suspensionInfo)
+      );
+      if (
+        typeof window !== "undefined" &&
+        !window.location.pathname.includes("/suspended")
+      ) {
+        window.location.href = "/suspended";
+      }
+      return Promise.reject(error);
     }
 
     if (error.response?.status !== 401 || originalRequest?._retry) {

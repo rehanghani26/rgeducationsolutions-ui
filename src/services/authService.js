@@ -13,6 +13,18 @@ import { AUTH_URLS } from '../constants/urls.js';
 export async function loginUser(credentials) {
   try {
     const response = await api.post(AUTH_URLS.LOGIN, credentials);
+    const school = response.data?.school || response.data?.data?.school;
+    if (school) {
+      const sId = school.schoolId || school.collectionName || school._id;
+      if (sId) {
+        localStorage.setItem('rges_school_id', sId);
+        localStorage.setItem('rges_school_collection', sId);
+      }
+      localStorage.setItem('rges_school_info', JSON.stringify(school));
+    } else if (credentials?.collectionName) {
+      localStorage.setItem('rges_school_id', credentials.collectionName.toLowerCase().trim());
+      localStorage.setItem('rges_school_collection', credentials.collectionName.toLowerCase().trim());
+    }
     toast.success('Login successful!');
     return response.data;
   } catch (error) {
@@ -37,6 +49,9 @@ export async function logoutUser() {
     const response = await api.post(AUTH_URLS.LOGOUT);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('rges_school_id');
+    localStorage.removeItem('rges_school_collection');
+    localStorage.removeItem('rges_school_info');
     return response.data;
   } catch (error) {
     console.error('Logout error:', error);

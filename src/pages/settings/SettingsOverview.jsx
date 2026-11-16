@@ -203,6 +203,16 @@ export const SETTINGS_ITEMS = [
       "Data encryption at rest, audit trails, two-factor authentication (2FA), session timeout, and password expiry.",
   },
   {
+    path: "role-access",
+    priority: 13.5,
+    category: "system",
+    label: "Role & Permission Governance",
+    icon: () => securitySVG,
+    badge: "RBAC Hub",
+    description:
+      "Granular role-wise access control: customize sidebar modules, action buttons, view scopes, and leave approval workflows.",
+  },
+  {
     path: "notifications",
     priority: 14,
     category: "system",

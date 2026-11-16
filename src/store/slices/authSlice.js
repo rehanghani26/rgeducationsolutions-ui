@@ -23,6 +23,14 @@ export const loginUser = createAsyncThunk(
       if (data?.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
+      if (data?.school) {
+        const sId = data.school.schoolId || data.school.collectionName || data.school._id;
+        if (sId) {
+          localStorage.setItem('rges_school_id', sId);
+          localStorage.setItem('rges_school_collection', sId);
+        }
+        localStorage.setItem('rges_school_info', JSON.stringify(data.school));
+      }
       return data;
     } catch (error) {
       const msg = error?.response?.data?.message || error?.message || 'Login failed';
@@ -43,6 +51,14 @@ export const signupUser = createAsyncThunk(
       if (data?.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
+      if (data?.school) {
+        const sId = data.school.schoolId || data.school.collectionName || data.school._id;
+        if (sId) {
+          localStorage.setItem('rges_school_id', sId);
+          localStorage.setItem('rges_school_collection', sId);
+        }
+        localStorage.setItem('rges_school_info', JSON.stringify(data.school));
+      }
       return data;
     } catch (error) {
       const msg = error?.response?.data?.message || error?.message || 'Registration failed';
@@ -61,6 +77,9 @@ export const logoutUser = createAsyncThunk(
     }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('rges_school_id');
+    localStorage.removeItem('rges_school_collection');
+    localStorage.removeItem('rges_school_info');
     return true;
   }
 );
@@ -72,13 +91,24 @@ export const fetchMe = createAsyncThunk(
       const data = await authService.me();
       // authService.me() returns response.data directly after refactor
       const user = data?.user || data?.data?.user || data;
+      const school = data?.school || data?.data?.school;
+
+      if (school) {
+        localStorage.setItem('rges_school_info', JSON.stringify(school));
+        const sId = school.schoolId || school.collectionName || school._id;
+        if (sId) {
+          localStorage.setItem('rges_school_id', sId);
+          localStorage.setItem('rges_school_collection', sId);
+        }
+      }
+
       if (user && user.id) {
         localStorage.setItem('user', JSON.stringify(user));
-        return user;
+        return { user, school };
       }
       // If no valid user object, return existing user from state without kicking out
       const existingUser = getState().auth.user;
-      return existingUser;
+      return { user: existingUser, school };
     } catch (error) {
       // Do NOT clear token/user on network errors – keep user logged in
       // Only clear if it's a 401 (token truly invalid)
@@ -181,7 +211,10 @@ const authSlice = createSlice({
       })
       .addCase(fetchMe.fulfilled, (state, { payload }) => {
         state.loading         = false;
-        state.user            = payload;
+        state.user            = payload?.user || payload;
+        if (payload?.school) {
+          state.school        = payload.school;
+        }
         state.isAuthenticated = true;
       })
       .addCase(fetchMe.rejected, (state, { payload }) => {

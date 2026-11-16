@@ -277,13 +277,13 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
       />
 
       {/* ─── PROFILE HERO BANNER ──────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] p-6 md:p-8 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl border border-orange-200 dark:border-orange-500/20 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] p-6 md:p-8 shadow-sm dark:shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           
           {/* Avatar & Core Identity */}
           <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-orange-500/20 flex-shrink-0 border-2 border-orange-400/30">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-orange-500/20 flex-shrink-0 border-2 border-orange-400/40">
               {studentPhoto ? (
                 <img
                   src={resolveImageUrl(studentPhoto)}
@@ -298,51 +298,51 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-black text-white">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                   {student?.name || 'Student Name'}
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                  <CheckCircle2 size={12} /> Active Enrolled
+                <span className="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} /> Active Enrolled
                 </span>
                 {student?.isEmailVerified ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/15 text-orange-400 border border-orange-500/25 flex items-center gap-1">
-                    <ShieldCheck size={12} /> Verified Email
+                  <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-orange-500/15 text-orange-700 dark:text-orange-400 border border-orange-500/30 flex items-center gap-1.5">
+                    <ShieldCheck size={13} /> Verified Email
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25 flex items-center gap-1">
-                    <AlertCircle size={12} /> Pending Verification
+                  <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
+                    <AlertCircle size={13} /> Pending Verification
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-slate-300 font-medium flex-wrap">
-                <span className="bg-stone-800/80 px-2.5 py-1 rounded-xl border border-stone-700 font-bold text-orange-400">
+              {/* All details in one clean line, medium size */}
+              <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
+                <span className="bg-white dark:bg-stone-800/80 px-3 py-1 rounded-xl border border-orange-200 dark:border-stone-700 font-bold text-orange-600 dark:text-orange-400 shadow-2xs">
                   {student?.class} · {student?.section}
                 </span>
                 <span>
-                  Roll No: <strong className="text-white">{student?.rollNumber}</strong>
+                  Roll No: <strong className="text-slate-900 dark:text-white font-extrabold">{student?.rollNumber}</strong>
                 </span>
-                <span className="text-slate-500">•</span>
-                <div className="flex items-center gap-1 font-mono text-slate-300">
-                  <span>Adm No:</span>
-                  <span className="font-bold text-orange-400">{student?.admissionNumber}</span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <div className="flex items-center gap-1.5 font-mono">
+                  <span className="text-slate-500 dark:text-slate-400">Adm No:</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400">{student?.admissionNumber}</span>
                   <button
                     type="button"
                     onClick={() => handleCopy(student?.admissionNumber, 'Admission Number')}
-                    className="p-1 text-slate-400 hover:text-white transition cursor-pointer"
+                    className="p-1 text-slate-400 hover:text-orange-500 dark:hover:text-white transition cursor-pointer"
                     title="Copy Admission Number"
                   >
-                    {copiedField === 'Admission Number' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                    {copiedField === 'Admission Number' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                   </button>
                 </div>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span>Session: <strong className="text-slate-900 dark:text-slate-100">{student?.academicYear}</strong></span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span>Admitted: <strong className="text-slate-900 dark:text-slate-100">{formattedJoiningDate}</strong></span>
               </div>
-
-              <p className="text-xs text-slate-400 flex items-center gap-4 pt-1 flex-wrap">
-                <span>Session: <strong className="text-slate-200">{student?.academicYear}</strong></span>
-                <span>Admitted: <strong className="text-slate-200">{formattedJoiningDate}</strong></span>
-              </p>
             </div>
           </div>
 
@@ -351,18 +351,18 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
             <button
               type="button"
               onClick={() => navigate('/certificates?tab=id-cards')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-none transition shadow-lg shadow-orange-500/20 cursor-pointer"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-none transition shadow-lg shadow-orange-500/20 cursor-pointer"
             >
-              <CreditCard size={15} />
+              <CreditCard size={16} />
               <span>View My ID Card</span>
             </button>
 
             <button
               type="button"
               onClick={() => navigate('/certificates?tab=certificates')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 transition shadow-lg shadow-amber-500/10 cursor-pointer"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-amber-500/15 hover:bg-amber-50 dark:hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 transition shadow-xs cursor-pointer"
             >
-              <Award size={15} />
+              <Award size={16} />
               <span>My Certificates</span>
             </button>
 
@@ -373,10 +373,10 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                 fetchStudentProfile();
               }}
               disabled={refreshing}
-              className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer flex items-center justify-center"
+              className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center justify-center shadow-xs"
               title="Refresh Profile Details"
             >
-              <RefreshCw size={15} className={refreshing ? 'animate-spin text-orange-500' : ''} />
+              <RefreshCw size={16} className={refreshing ? 'animate-spin text-orange-500' : ''} />
             </button>
           </div>
         </div>
@@ -389,87 +389,87 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
         <div className="lg:col-span-7 space-y-6">
 
           {/* SECTION 1: Personal & Demographic Details */}
-          <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-5 shadow-xl">
-            <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/25 flex items-center justify-center">
-                <User size={16} />
+          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-sm dark:shadow-xl">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/25 flex items-center justify-center">
+                <User size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Personal & Demographic Information</h3>
-                <p className="text-[11px] text-slate-400">Student individual bio-data and contact details</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Personal & Demographic Information</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Student individual bio-data and contact details</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">First Name</span>
-                <span className="font-bold text-white">{student?.firstName || '—'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">First Name</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.firstName || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Last Name</span>
-                <span className="font-bold text-white">{student?.lastName || '—'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Last Name</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.lastName || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Gender</span>
-                <span className="font-bold text-white capitalize">{student?.gender || '—'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Gender</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white capitalize">{student?.gender || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Date of Birth & Age</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Date of Birth & Age</span>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white">{formattedDob}</span>
+                  <span className="font-bold text-sm text-slate-900 dark:text-white">{formattedDob}</span>
                   {studentAge !== null && (
-                    <span className="text-[10px] bg-orange-500/10 text-orange-400 font-semibold px-2 py-0.5 rounded-full border border-orange-500/20">
+                    <span className="text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-2.5 py-0.5 rounded-full border border-orange-500/20">
                       {studentAge} Years Old
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Blood Group</span>
-                <span className="font-bold text-rose-400 flex items-center gap-1">
-                  <Droplet size={13} className="fill-rose-400/40" />
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Blood Group</span>
+                <span className="font-bold text-sm text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                  <Droplet size={14} className="fill-rose-500/30" />
                   {student?.bloodGroup || '—'}
                 </span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Primary Mobile Phone</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Primary Mobile Phone</span>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white font-mono">{student?.contactNumber}</span>
+                  <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">{student?.contactNumber || '—'}</span>
                   {student?.contactNumber && student?.contactNumber !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.contactNumber, 'Phone Number')}
-                      className="text-slate-400 hover:text-white"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
                       title="Copy Mobile"
                     >
-                      {copiedField === 'Phone Number' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      {copiedField === 'Phone Number' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Alternate Phone</span>
-                <span className="font-bold text-slate-300 font-mono">{student?.alternatePhone || '—'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Alternate Phone</span>
+                <span className="font-bold text-sm text-slate-700 dark:text-slate-300 font-mono">{student?.alternatePhone || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Registered Student Email</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Registered Student Email</span>
                 <div className="flex items-center justify-between gap-1">
-                  <span className="font-bold text-orange-400 truncate font-mono">{student?.email}</span>
+                  <span className="font-bold text-sm text-orange-600 dark:text-orange-400 truncate font-mono">{student?.email}</span>
                   {student?.email && student?.email !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.email, 'Email')}
-                      className="text-slate-400 hover:text-white flex-shrink-0"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white flex-shrink-0 p-1"
                       title="Copy Email"
                     >
-                      {copiedField === 'Email' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      {copiedField === 'Email' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                     </button>
                   )}
                 </div>
@@ -477,57 +477,57 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
             </div>
 
             {/* Address Row */}
-            <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1 text-xs">
-              <span className="text-[10px] text-slate-500 uppercase font-bold block flex items-center gap-1">
-                <MapPin size={12} className="text-orange-400" /> Residential & Permanent Address
+            <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1.5 text-xs">
+              <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block flex items-center gap-1.5">
+                <MapPin size={14} className="text-orange-500" /> Residential & Permanent Address
               </span>
-              <p className="font-medium text-slate-300 leading-relaxed">
+              <p className="font-medium text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                 {student?.address && student.address !== '—' ? student.address : 'Address records not specified.'}
               </p>
             </div>
           </div>
 
           {/* SECTION 2: Academic & Institutional Enrollment */}
-          <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-5 shadow-xl">
-            <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center">
-                <GraduationCap size={16} />
+          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-sm dark:shadow-xl">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center">
+                <GraduationCap size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Academic & Institutional Enrollment</h3>
-                <p className="text-[11px] text-slate-400">Class, roll number, and official school session records</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Academic & Institutional Enrollment</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Class, roll number, and official school session records</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs">
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Assigned Class</span>
-                <span className="font-bold text-white">{student?.class || 'Class 10'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Assigned Class</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.class || 'Class 10'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Section</span>
-                <span className="font-bold text-white">{student?.section || 'Section A'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Section</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.section || 'Section A'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Roll Number</span>
-                <span className="font-bold text-amber-400 font-mono text-sm">{student?.rollNumber || '01'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Roll Number</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-base">{student?.rollNumber || '01'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Admission Number</span>
-                <span className="font-bold text-orange-400 font-mono">{student?.admissionNumber}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Admission Number</span>
+                <span className="font-bold text-orange-600 dark:text-orange-400 font-mono text-sm">{student?.admissionNumber}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Academic Year</span>
-                <span className="font-bold text-white font-mono">{student?.academicYear || '2025-2026'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Academic Year</span>
+                <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">{student?.academicYear || '2025-2026'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Admission Date</span>
-                <span className="font-bold text-slate-300">{formattedJoiningDate}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Admission Date</span>
+                <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{formattedJoiningDate}</span>
               </div>
             </div>
           </div>
@@ -537,43 +537,43 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
         <div className="lg:col-span-5 space-y-6">
 
           {/* SECTION 3: Parent & Guardian Information */}
-          <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center justify-center">
-                <Users size={16} />
+          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm dark:shadow-xl">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center">
+                <Users size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Parent & Guardian Contacts</h3>
-                <p className="text-[11px] text-slate-400">Emergency & registered guardian details</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Parent & Guardian Contacts</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Emergency & registered guardian details</p>
               </div>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Guardian Full Name</span>
-                <span className="font-bold text-white text-sm">{student?.parentName || 'Authorized Parent'}</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Guardian Full Name</span>
+                <span className="font-bold text-slate-900 dark:text-white text-sm">{student?.parentName || 'Authorized Parent'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Guardian Phone / Mobile</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Guardian Phone / Mobile</span>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white font-mono">{student?.parentContact || '—'}</span>
+                  <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">{student?.parentContact || '—'}</span>
                   {student?.parentContact && student?.parentContact !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.parentContact, 'Guardian Phone')}
-                      className="text-slate-400 hover:text-white"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
                       title="Copy Phone"
                     >
-                      {copiedField === 'Guardian Phone' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      {copiedField === 'Guardian Phone' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block">Guardian Email Address</span>
-                <span className="font-bold text-slate-300 truncate block font-mono">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Guardian Email Address</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 truncate block font-mono text-sm">
                   {student?.parentEmail || '—'}
                 </span>
               </div>
@@ -581,27 +581,27 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           </div>
 
           {/* SECTION 4: Identity & KYC Documents */}
-          <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center justify-center">
-                <ShieldCheck size={16} />
+          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm dark:shadow-xl">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center">
+                <ShieldCheck size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Identity & KYC Verification</h3>
-                <p className="text-[11px] text-slate-400">Institutional records and verified identity tokens</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Identity & KYC Verification</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Institutional records and verified identity tokens</p>
               </div>
             </div>
 
             <div className="space-y-3 text-xs">
               {/* Aadhaar Number with Toggle */}
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 space-y-1.5">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-500 uppercase font-bold">Government Aadhaar Number</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Government Aadhaar Number</span>
                   {student?.aadhaarNumber && student?.aadhaarNumber !== '—' && (
                     <button
                       type="button"
                       onClick={() => setShowAadhaarNumber(!showAadhaarNumber)}
-                      className="text-slate-400 hover:text-white flex items-center gap-1 text-[11px] transition cursor-pointer"
+                      className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 text-xs font-semibold transition cursor-pointer"
                     >
                       {showAadhaarNumber ? <EyeOff size={13} /> : <Eye size={13} />}
                       <span>{showAadhaarNumber ? 'Mask' : 'Reveal'}</span>
@@ -610,29 +610,29 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm font-bold text-white tracking-wider">
+                  <span className="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-wider">
                     {formattedAadhaar}
                   </span>
                   {student?.aadhaarNumber && student?.aadhaarNumber !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.aadhaarNumber, 'Aadhaar Number')}
-                      className="text-slate-400 hover:text-white"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
                       title="Copy Aadhaar"
                     >
-                      {copiedField === 'Aadhaar Number' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      {copiedField === 'Aadhaar Number' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Uploaded Aadhaar Document */}
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <FileText size={18} className="text-emerald-400" />
+                  <FileText size={18} className="text-emerald-600 dark:text-emerald-400" />
                   <div>
-                    <span className="font-bold text-white block text-xs">Aadhaar Card Document</span>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="font-bold text-slate-900 dark:text-white block text-sm">Aadhaar Card Document</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                       {student?.aadhaarDocument ? 'Verified Document Uploaded' : 'No document on file'}
                     </span>
                   </div>
@@ -647,37 +647,37 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                         title: `${student.name} - Aadhaar Document`,
                       })
                     }
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold transition cursor-pointer"
                   >
                     <Eye size={13} />
                     <span>View PDF</span>
                   </button>
                 ) : (
-                  <span className="text-[10px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
                     Not Uploaded
                   </span>
                 )}
               </div>
 
               {/* Student Photo ID Document */}
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                     {studentPhoto ? (
                       <img src={studentPhoto} alt="Photo" className="w-full h-full object-cover" />
                     ) : (
-                      <User size={14} className="text-slate-500" />
+                      <User size={15} className="text-slate-500 dark:text-slate-400" />
                     )}
                   </div>
                   <div>
-                    <span className="font-bold text-white block text-xs">Student Profile Photograph</span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="font-bold text-slate-900 dark:text-white block text-sm">Student Profile Photograph</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       {studentPhoto ? 'High-Resolution S3 Synced' : 'Default Avatar In Use'}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
                   Verified
                 </span>
               </div>
@@ -685,33 +685,33 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           </div>
 
           {/* SECTION 5: Security & Portal Account */}
-          <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center">
-                <Lock size={16} />
+          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm dark:shadow-xl">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                <Lock size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Security & Portal Access</h3>
-                <p className="text-[11px] text-slate-400">Account status and authentication records</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Security & Portal Access</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Account status and authentication records</p>
               </div>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-2xl border border-slate-800/80">
-                <span className="text-slate-400">Portal Login ID</span>
-                <span className="font-bold text-white font-mono">{student?.admissionNumber}</span>
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Portal Login ID</span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">{student?.admissionNumber}</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-2xl border border-slate-800/80">
-                <span className="text-slate-400">Account Access State</span>
-                <span className="font-bold text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 size={13} /> Active & Enabled
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Account Access State</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xs">
+                  <CheckCircle2 size={14} /> Active & Enabled
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-2xl border border-slate-800/80">
-                <span className="text-slate-400">Two-Factor Authentication (2FA)</span>
-                <span className="font-bold text-slate-300">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Two-Factor Authentication (2FA)</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
                   {student?.twoFactorEnabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
@@ -719,7 +719,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               <button
                 type="button"
                 onClick={() => navigate('/settings/password-security')}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold transition cursor-pointer text-xs mt-2"
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 font-bold transition cursor-pointer text-xs mt-2"
               >
                 <KeyRound size={13} />
                 <span>Request Password Change</span>

@@ -22,6 +22,7 @@ export { default as SecuritySettings }          from "./SecuritySettings";
 export { default as NotificationSettings }      from "./NotificationSettings";
 export { default as BackupSettings }            from "./BackupSettings";
 export { default as AccessSettings }            from "./AccessSettings";
+export { default as RoleAndAccessSettings }     from "./RoleAndAccessSettings";
 export { default as TimesheetSettings }         from "./TimesheetSettings";
 export { default as SettingsOverview }          from "./SettingsOverview";
 export { default as ProfileSettings }           from "./ProfileSettings";

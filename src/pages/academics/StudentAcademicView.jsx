@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import Modal from '../../components/ui/Modal.jsx';
 import curriculumService from '../../services/curriculumService.js';
+import { getStudentById, getStudents } from '../../services/studentService.js';
+import { getUserFromStorage } from '../../config/access.jsx';
 import { COLOR, bg, border, shadow, text, button, card, badge } from '@/theme/color';
 import { WORKING_DAY_NAMES } from '../../constants';
 
@@ -239,19 +241,53 @@ export const buildDynamicPerformance = (coursesList = []) => {
   };
 };
 
-export const StudentAcademicView = ({ currentUser }) => {
+export const StudentAcademicView = ({ currentUser: propUser }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('subjects'); // 'subjects', 'timetable', 'syllabus', 'resources', 'performance'
   const [selectedDay, setSelectedDay] = useState('Monday');
   const [selectedSubjectModal, setSelectedSubjectModal] = useState(null);
   const [searchFilter, setSearchFilter] = useState('');
   const [loading, setLoading] = useState(false);
+  const [studentData, setStudentData] = useState(null);
 
-  const studentName = currentUser?.name || currentUser?.username || 'N/A';
-  const className = currentUser?.className || 'N/A';
-  const sectionName = currentUser?.sectionName || 'N/A';
-  const admissionNumber = currentUser?.admissionNumber || 'N/A';
-  const rollNumber = currentUser?.rollNumber || 'N/A';
+  const user = propUser || getUserFromStorage() || {};
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStudentProfile = async () => {
+      try {
+        if (user?.profileId) {
+          const res = await getStudentById(user.profileId);
+          const s = res?.student || res?.data || res;
+          if (isMounted && s) {
+            setStudentData(s);
+            return;
+          }
+        }
+        const res = await getStudents({ limit: 10 });
+        const list = Array.isArray(res?.students) && res.students.length > 0
+          ? res.students
+          : (Array.isArray(res?.data) ? res.data : []);
+        if (isMounted && list.length > 0) {
+          const match = list.find((s) =>
+            (s.email && user?.email && s.email.toLowerCase() === user.email.toLowerCase()) ||
+            (s.admissionNumber && user?.admissionNumber && s.admissionNumber === user.admissionNumber)
+          ) || list[0];
+          setStudentData(match);
+        }
+      } catch (err) {
+        console.warn('Could not load student profile in academic view:', err);
+      }
+    };
+    fetchStudentProfile();
+    return () => { isMounted = false; };
+  }, [user?.profileId, user?.email]);
+
+  const studentName = studentData?.name || user?.name || user?.username || 'Student';
+  const className = studentData?.class || studentData?.className || user?.class || user?.className || 'Class 10';
+  const sectionName = studentData?.section || studentData?.sectionName || user?.section || user?.sectionName || 'Section A';
+  const admissionNumber = studentData?.admissionNumber || user?.admissionNumber || '';
+  const rollNumber = studentData?.rollNumber || user?.rollNumber || '01';
 
   const [subjects, setSubjects] = useState([]);
 
@@ -273,7 +309,7 @@ export const StudentAcademicView = ({ currentUser }) => {
       }
     };
 
-    if (className !== 'N/A') {
+    if (className && className !== 'N/A') {
       fetchCurriculum();
     }
     return () => {
@@ -282,7 +318,8 @@ export const StudentAcademicView = ({ currentUser }) => {
   }, [className, sectionName]);
 
   const classTeacher =
-    currentUser?.classTeacher ||
+    user?.classTeacher ||
+    studentData?.classTeacher ||
     subjects.find((s) => (s.teacherRole || '').toLowerCase().includes('class teacher'))?.teacher ||
     'N/A';
 
@@ -306,42 +343,43 @@ export const StudentAcademicView = ({ currentUser }) => {
   return (
     <div className="space-y-6 pb-12 animate-fadeIn">
       {/* ─── Hero Academic Student Banner ─────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#181716] via-[#2A180C] to-[#1F140A] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-orange-500/20">
+      <div className="relative overflow-hidden bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl border border-orange-200 dark:border-orange-500/20">
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute right-1/3 bottom-0 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-orange-200 text-xs font-bold tracking-wide border border-white/10">
-              <GraduationCap size={14} className="text-orange-400" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-white/10 backdrop-blur-md text-orange-700 dark:text-orange-200 text-xs font-bold tracking-wide border border-orange-200 dark:border-white/10 shadow-2xs">
+              <GraduationCap size={15} className="text-orange-600 dark:text-orange-400" />
               <span>Student Academic Hub • Session 2025–2026</span>
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Academic Curriculum & Courses
               </h1>
-              <p className="text-stone-300 text-xs sm:text-sm mt-1 max-w-xl">
-                Track your active courses, syllabus progress, weekly lecture schedule, and study materials for <span className="text-white font-semibold">{className} · {sectionName}</span>.
+              <p className="text-slate-600 dark:text-stone-300 text-xs sm:text-sm mt-1 max-w-xl">
+                Track your active courses, syllabus progress, weekly lecture schedule, and study materials for <span className="text-slate-900 dark:text-white font-bold">{className} · {sectionName}</span>.
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-              <span className="bg-stone-900/80 border border-orange-500/20 px-3 py-1 rounded-lg text-stone-200 font-semibold">
-                👤 Student: <span className="text-white font-bold">{studentName}</span>
+            {/* All details in one clean line, medium size */}
+            <div className="flex items-center gap-3 pt-2 text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
+              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3.5 py-1 rounded-xl text-slate-800 dark:text-stone-200 font-bold shadow-2xs">
+                👤 <span className="text-slate-900 dark:text-white font-black">{studentName}</span>
               </span>
-              <span className="bg-stone-900/80 border border-orange-500/20 px-3 py-1 rounded-lg text-stone-200 font-semibold">
-                🏫 Class: <span className="text-white font-bold">{className} ({sectionName})</span>
+              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3.5 py-1 rounded-xl text-orange-600 dark:text-orange-400 font-black shadow-2xs">
+                🏫 {className} ({sectionName})
               </span>
-              <span className="bg-stone-900/80 border border-orange-500/20 px-3 py-1 rounded-lg text-stone-200 font-semibold">
-                🎫 Roll No: <span className="text-white font-bold">#{rollNumber}</span>
+              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3.5 py-1 rounded-xl text-slate-800 dark:text-stone-200 font-bold shadow-2xs">
+                🎫 Roll No: <span className="text-slate-900 dark:text-white font-mono font-black">#{rollNumber}</span>
               </span>
             </div>
           </div>
 
           {/* Class Teacher Card */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 w-full sm:w-auto min-w-[280px] shadow-lg shrink-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-wider text-orange-300">
+          <div className="bg-white dark:bg-white/10 backdrop-blur-md border border-orange-200 dark:border-white/15 rounded-2xl p-4 w-full sm:w-auto min-w-[280px] shadow-sm dark:shadow-lg shrink-0">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-orange-600 dark:text-orange-300">
               Assigned Class Teacher
             </p>
             <div className="flex items-center gap-3 mt-2">
@@ -349,29 +387,29 @@ export const StudentAcademicView = ({ currentUser }) => {
                 {classTeacher.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-bold text-white">{classTeacher}</p>
-                <p className="text-[11px] text-stone-300">Head of Academic Guidance</p>
-                <p className="text-[10px] text-orange-300/80 mt-0.5">Room 101 • Academic Block A</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{classTeacher}</p>
+                <p className="text-xs text-slate-500 dark:text-stone-300 font-medium">Head of Academic Guidance</p>
+                <p className="text-xs text-orange-600/90 dark:text-orange-300/80 mt-0.5">Room 101 • Academic Block A</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Top Metric Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-orange-200/80 dark:border-white/10">
           {[
-            { label: 'Enrolled Courses', value: `${subjects.length} Subjects`, icon: BookOpen, color: 'text-orange-400' },
-            { label: 'Overall Attendance', value: '96.4%', icon: CheckCircle2, color: 'text-emerald-300' },
-            { label: 'Cumulative GPA', value: performanceData.gpa, icon: Award, color: 'text-amber-300' },
-            { label: 'Total Term Credits', value: `${totalCredits} Credits`, icon: Sparkles, color: 'text-amber-400' },
+            { label: 'Enrolled Courses', value: `${subjects.length} Subjects`, icon: BookOpen, color: 'text-orange-600 dark:text-orange-400', iconBg: 'bg-orange-500/10 dark:bg-white/10' },
+            { label: 'Overall Attendance', value: '96.4%', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-300', iconBg: 'bg-emerald-500/10 dark:bg-white/10' },
+            { label: 'Cumulative GPA', value: performanceData.gpa, icon: Award, color: 'text-amber-600 dark:text-amber-300', iconBg: 'bg-amber-500/10 dark:bg-white/10' },
+            { label: 'Total Term Credits', value: `${totalCredits} Credits`, icon: Sparkles, color: 'text-amber-600 dark:text-amber-400', iconBg: 'bg-amber-500/10 dark:bg-white/10' },
           ].map((item) => (
-            <div key={item.label} className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                <item.icon size={18} className={item.color} />
+            <div key={item.label} className="bg-white dark:bg-white/5 border border-orange-200/70 dark:border-white/10 rounded-2xl p-3.5 flex items-center gap-3 shadow-2xs">
+              <div className={`w-10 h-10 rounded-xl ${item.iconBg} flex items-center justify-center shrink-0`}>
+                <item.icon size={20} className={item.color} />
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-black text-white leading-tight">{item.value}</p>
-                <p className="text-[10px] text-stone-300 font-medium">{item.label}</p>
+                <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">{item.value}</p>
+                <p className="text-xs text-slate-500 dark:text-stone-300 font-medium">{item.label}</p>
               </div>
             </div>
           ))}

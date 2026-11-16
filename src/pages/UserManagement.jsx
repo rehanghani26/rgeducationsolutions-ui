@@ -169,21 +169,35 @@ const UserManagement = () => {
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
 
-      const [usersRes, rolesRes] = await Promise.all([
+      const [usersResult, rolesResult] = await Promise.allSettled([
         userService.getUsers({ limit: 100 }),
         userService.getRoles(),
       ]);
 
-      if (usersRes.success) {
-        // Double check no students or parents slip through
-        const staffOnly = (usersRes.users || []).filter(
+      if (usersResult.status === 'fulfilled' && usersResult.value) {
+        const res = usersResult.value;
+        const rawUsers =
+          res.users ||
+          res.data?.users ||
+          (Array.isArray(res.data) ? res.data : []) ||
+          [];
+        const staffOnly = rawUsers.filter(
           (u) => !['student', 'parent'].includes((u.role || '').toLowerCase())
         );
         setUsers(staffOnly);
+      } else if (usersResult.status === 'rejected') {
+        console.error('Failed to load users:', usersResult.reason);
+        toast.error(usersResult.reason?.response?.data?.message || 'Failed to load users');
       }
 
-      if (rolesRes.success) {
-        setRoles(rolesRes.roles || []);
+      if (rolesResult.status === 'fulfilled' && rolesResult.value) {
+        const res = rolesResult.value;
+        const rawRoles =
+          res.roles ||
+          res.data?.roles ||
+          (Array.isArray(res.data) ? res.data : []) ||
+          [];
+        setRoles(rawRoles);
       }
     } catch (err) {
       console.error('Failed to load user management data:', err);
@@ -570,8 +584,21 @@ const UserManagement = () => {
                       {/* User Info */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
+                          {u.avatar || u.photo || u.imagesRef?.img ? (
+                            <img
+                              src={u.avatar || u.photo || u.imagesRef?.img}
+                              alt={u.name || u.username}
+                              className={`h-10 w-10 flex-shrink-0 rounded-xl object-cover shadow-sm ring-2 ${roleCfg.ring}`}
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                const fallback = e.target.parentElement?.querySelector('.avatar-fallback');
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
                           <div
-                            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-bold shadow-sm ring-2 ${roleCfg.ring} ${roleCfg.avatarBg}`}
+                            className={`avatar-fallback h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-bold shadow-sm ring-2 ${roleCfg.ring} ${roleCfg.avatarBg}`}
+                            style={{ display: u.avatar || u.photo || u.imagesRef?.img ? 'none' : 'flex' }}
                           >
                             {(u.name || u.username || 'U').charAt(0).toUpperCase()}
                           </div>

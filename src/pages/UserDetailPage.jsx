@@ -156,28 +156,29 @@ const UserDetailPage = () => {
     try {
       setLoading(true);
       const res = await userService.getUserById(id);
-      if (res.success && res.user) {
-        setUser(res.user);
-        setSelectedRole(res.user.role || 'teacher');
-        setEditEmail(res.user.email || '');
+      const targetUser = res.user || res.data?.user;
+      if (res.success && targetUser) {
+        setUser(targetUser);
+        setSelectedRole(targetUser.role || 'teacher');
+        setEditEmail(targetUser.email || '');
         setEditForm({
-          name: res.user.name || '',
-          email: res.user.email || '',
-          phone: res.user.phone || '',
-          alternatePhone: res.user.alternatePhone || '',
-          gender: res.user.gender || '',
-          dob: res.user.dob ? new Date(res.user.dob).toISOString().slice(0, 10) : '',
-          address: res.user.address || '',
-          qualification: res.user.qualification || '',
-          designation: res.user.designation || '',
-          department: res.user.department || '',
-          joiningDate: res.user.joiningDate ? new Date(res.user.joiningDate).toISOString().slice(0, 10) : '',
-          salary: res.user.salary || '',
-          employeeId: res.user.employeeId || '',
+          name: targetUser.name || '',
+          email: targetUser.email || '',
+          phone: targetUser.phone || '',
+          alternatePhone: targetUser.alternatePhone || '',
+          gender: targetUser.gender || '',
+          dob: targetUser.dob ? new Date(targetUser.dob).toISOString().slice(0, 10) : '',
+          address: targetUser.address || '',
+          qualification: targetUser.qualification || '',
+          designation: targetUser.designation || '',
+          department: targetUser.department || '',
+          joiningDate: targetUser.joiningDate ? new Date(targetUser.joiningDate).toISOString().slice(0, 10) : '',
+          salary: targetUser.salary || '',
+          employeeId: targetUser.employeeId || '',
         });
         setAcademicState({
-          isClassTeacher: Boolean(res.user.isClassTeacher),
-          classTeacherOf: res.user.classTeacherOf || '',
+          isClassTeacher: Boolean(targetUser.isClassTeacher),
+          classTeacherOf: targetUser.classTeacherOf || '',
           classesAssigned: res.user.classesAssigned || [],
           sectionsAssigned: res.user.sectionsAssigned || [],
           subjectsAssigned: res.user.subjectsAssigned || [],
@@ -414,8 +415,21 @@ const UserDetailPage = () => {
       <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-4">
+            {user.avatar || user.photo || user.imagesRef?.img ? (
+              <img
+                src={user.avatar || user.photo || user.imagesRef?.img}
+                alt={user.name || user.username}
+                className={`h-20 w-20 flex-shrink-0 rounded-2xl object-cover shadow-lg ring-4 ${roleCfg.ring}`}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  const fallback = e.target.parentElement?.querySelector('.avatar-fallback-detail');
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+              />
+            ) : null}
             <div
-              className={`flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl text-2xl font-black shadow-lg ring-4 ${roleCfg.ring} ${roleCfg.avatarBg}`}
+              className={`avatar-fallback-detail h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl text-2xl font-black shadow-lg ring-4 ${roleCfg.ring} ${roleCfg.avatarBg}`}
+              style={{ display: user.avatar || user.photo || user.imagesRef?.img ? 'none' : 'flex' }}
             >
               {(user.name || user.username || 'U').charAt(0).toUpperCase()}
             </div>

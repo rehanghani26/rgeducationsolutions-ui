@@ -35,6 +35,7 @@ import {
   User,
   KeyRound,
   School,
+  Wallet,
 } from 'lucide-react';
 
 import { ROUTES }                                   from '../routes/routes.js';
@@ -67,21 +68,21 @@ export const NAV_SECTIONS = [
         path:       ROUTES.PROFILE,
         icon:       User,
         roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
-        permission: null,
+        permission: 'profile',
       },
       {
         name:       'Students',
         path:       ROUTES.STUDENTS.LIST,
         icon:       GraduationCap,
         roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.ACCOUNTANT, ROLES.PARENT, ROLES.STUDENT],
-        permission: 'student-management',
+        permission: 'students',
       },
       {
         name:       'Teachers',
         path:       ROUTES.TEACHERS.LIST,
         icon:       Users,
         roles:      [...ADMIN_ROLES, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.ACCOUNTANT],
-        permission: 'teacher-management',
+        permission: 'teachers',
       },
     ],
   },
@@ -118,14 +119,14 @@ export const NAV_SECTIONS = [
         path:       ROUTES.EXAMS.LIST,
         icon:       FileText,
         roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT, ROLES.PARENT],
-        permission: 'exam',
+        permission: 'exams',
       },
       {
         name:       'Results',
         path:       ROUTES.RESULTS,
         icon:       Award,
         roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.HEAD_TEACHER, ROLES.HOD, ROLES.COORDINATOR, ROLES.STUDENT, ROLES.PARENT],
-        permission: 'exam',
+        permission: 'results',
       },
       {
         name:       'Online Classes',
@@ -176,7 +177,14 @@ export const NAV_SECTIONS = [
         path:       ROUTES.FEES.LIST,
         icon:       ClipboardList,
         roles:      FINANCE_ROLES,
-        permission: 'fee',
+        permission: 'fees',
+      },
+      {
+        name:       'Budget Allocation',
+        path:       ROUTES.BUDGET,
+        icon:       Wallet,
+        roles:      [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.PRINCIPAL, ROLES.ACCOUNTANT],
+        permission: 'budget',
       },
       {
         name:       'Inventory',
@@ -190,7 +198,7 @@ export const NAV_SECTIONS = [
         path:       ROUTES.VENDORS.LIST,
         icon:       Truck,
         roles:      INVENTORY_ROLES,
-        permission: 'inventory',
+        permission: 'vendors',
       },
       {
         name:       'Library',
@@ -204,14 +212,14 @@ export const NAV_SECTIONS = [
         path:       ROUTES.TRANSPORT,
         icon:       Bus,
         roles:      FINANCE_ROLES,
-        permission: 'fee',
+        permission: 'transport',
       },
       {
         name:       'Hostel',
         path:       ROUTES.HOSTEL,
         icon:       Building2,
         roles:      FINANCE_ROLES,
-        permission: 'fee',
+        permission: 'hostel',
       },
       {
         name:       'Certificates & ID Cards',
@@ -233,7 +241,7 @@ export const NAV_SECTIONS = [
         path:       ROUTES.NOTIFICATIONS,
         icon:       Bell,
         roles:      [...ADMIN_ROLES, ROLES.TEACHER, ROLES.ACCOUNTANT],
-        permission: 'communication',
+        permission: 'notifications',
       },
       {
         name:       'Reports',
@@ -254,7 +262,7 @@ export const NAV_SECTIONS = [
         path:       ROUTES.AUDIT_LOGS,
         icon:       Shield,
         roles:      [ROLES.SUPER_ADMIN],
-        permission: null,
+        permission: 'audit-logs',
       },
       {
         name:       'Password Requests',
@@ -268,7 +276,7 @@ export const NAV_SECTIONS = [
         path:       ROUTES.SETTINGS,
         icon:       SettingsIcon,
         roles:      [...ALL_STAFF, ROLES.STUDENT, ROLES.PARENT],
-        permission: null,
+        permission: 'settings',
       },
     ],
   },
@@ -283,7 +291,7 @@ export const PRIVILEGED_ROLES = ADMIN_ROLES;
 
 /**
  * Filter the navigation tree to only sections/items
- * the given user is allowed to see based on role & permissions.
+ * the given user is allowed to see based on dynamic role permissions.
  * @param {{ role: string, permissions?: string[] } | null} user
  * @returns {typeof NAV_SECTIONS}
  */
@@ -291,41 +299,27 @@ export const filterNavForUser = (user) => {
   if (!user) return [];
   const rawRole = (user.role || '').trim().toLowerCase();
   const normRole = rawRole.replace(/_/g, '-');
-  const isStudent = normRole === 'student';
 
   return NAV_SECTIONS
     .map((section) => ({
       ...section,
-      items: section.items
-        .filter((item) => {
-          // Super-admin has access to everything
-          if (normRole === 'super-admin' || normRole === 'superadmin') return true;
+      items: section.items.filter((item) => {
+        // Super-admin has access to everything
+        if (normRole === 'super-admin' || normRole === 'superadmin') return true;
 
-          // User role MUST match an entry in item.roles
-          const itemRoles = (item.roles || []).map((r) => String(r).toLowerCase().replace(/_/g, '-'));
-          if (!itemRoles.includes(rawRole) && !itemRoles.includes(normRole)) return false;
+        // Dynamic Role-Based Module Permission Check
+        if (item.permission) {
+          return hasModuleAccess(normRole, item.permission);
+        }
 
-          // If privileged admin role, allow item
-          const privRoles = PRIVILEGED_ROLES.map((r) => String(r).toLowerCase().replace(/_/g, '-'));
-          if (privRoles.includes(rawRole) || privRoles.includes(normRole)) return true;
+        // Non-module fallback items (e.g. Password Requests)
+        if (item.roles && item.roles.length > 0) {
+          const itemRoles = item.roles.map((r) => String(r).toLowerCase().replace(/_/g, '-'));
+          return itemRoles.includes(rawRole) || itemRoles.includes(normRole);
+        }
 
-          // For non-privileged roles, if item requires permission, check user permissions or module access
-          if (item.permission) {
-            return (user.permissions || []).includes(item.permission) || hasModuleAccess(user, item.permission);
-          }
-
-          return true;
-        })
-        .map((item) => {
-          if (isStudent && item.path === ROUTES.STUDENTS.LIST) {
-            return {
-              ...item,
-              name: 'My Profile',
-              icon: User,
-            };
-          }
-          return item;
-        }),
+        return true;
+      }),
     }))
     .filter((section) => section.items.length > 0);
 };

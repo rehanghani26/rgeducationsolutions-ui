@@ -50,6 +50,7 @@ import {
   UserDetailPage,
   AiMode,
   VerifyCertificatePage,
+  SuspendedPage,
 } from '../pages/index.js';
 
 import { ROUTES } from './routes.js';
@@ -60,6 +61,7 @@ const appRoutes = [
   // ─── Public Authentication Routes ──────────────────────────────────────────
   { path: ROUTES.LOGIN, element: Login, name: 'login', public: true },
   { path: ROUTES.SIGNUP, element: Signup, name: 'signup', public: true },
+  { path: ROUTES.SUSPENDED, element: SuspendedPage, name: 'suspended', public: true },
   { path: ROUTES.VERIFY_CERTIFICATE, element: VerifyCertificatePage, name: 'verify-certificate', public: true },
 
   // ─── Protected Application Routes ───────────────────────────────────────────

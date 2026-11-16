@@ -251,11 +251,11 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
       />
 
       {/* ─── STUDENT CREDENTIAL BANNER ────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 p-6 shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl border border-orange-200 dark:border-slate-800 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 p-6 shadow-sm dark:shadow-2xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 dark:bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-sky-500/25 flex-shrink-0 border-2 border-sky-400/30">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-orange-500/25 flex-shrink-0 border-2 border-orange-400/30">
               {studentPhoto ? (
                 <img
                   src={studentPhoto}
@@ -269,58 +269,68 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
                 studentName.charAt(0)
               )}
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-black text-white">{studentName}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                  <CheckCircle2 size={12} /> Active Valid Student
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{studentName}</h2>
+                <span className="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} /> Active Valid Student
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                {className} · Section {sectionName} · Roll No: <span className="font-bold text-slate-200">{rollNumber}</span> · Adm No: <span className="font-bold text-sky-400 font-mono">{admissionNo}</span>
-              </p>
+              {/* All details in one clean line, medium size */}
+              <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
+                <span className="bg-white dark:bg-stone-800/80 px-3 py-1 rounded-xl border border-orange-200 dark:border-stone-700 font-bold text-orange-600 dark:text-orange-400 shadow-2xs">
+                  {className} · Section {sectionName}
+                </span>
+                <span>
+                  Roll No: <strong className="text-slate-900 dark:text-white font-extrabold">{rollNumber}</strong>
+                </span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span className="font-mono">
+                  Adm No: <strong className="text-orange-600 dark:text-orange-400 font-bold">{admissionNo}</strong>
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full md:w-auto text-xs">
-            <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-2xl">
-              <span className="text-[10px] text-slate-500 uppercase block font-semibold">ID Card</span>
-              <span className="font-bold text-emerald-400 flex items-center gap-1 mt-0.5">
+            <div className="p-3.5 bg-white dark:bg-slate-950/70 border border-orange-200/80 dark:border-slate-800 rounded-2xl shadow-2xs">
+              <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">ID Card</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5 text-xs">
                 <CheckCircle2 size={13} /> Active & Verified
               </span>
             </div>
-            <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-2xl">
-              <span className="text-[10px] text-slate-500 uppercase block font-semibold">Certificates</span>
-              <span className="font-bold text-amber-400 mt-0.5 block">
+            <div className="p-3.5 bg-white dark:bg-slate-950/70 border border-orange-200/80 dark:border-slate-800 rounded-2xl shadow-2xs">
+              <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">Certificates</span>
+              <span className="font-bold text-amber-600 dark:text-amber-400 mt-0.5 block text-xs">
                 {certificates.length} Issued Record{certificates.length === 1 ? '' : 's'}
               </span>
             </div>
-            <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-2xl col-span-2 sm:col-span-1">
-              <span className="text-[10px] text-slate-500 uppercase block font-semibold">Academic Year</span>
-              <span className="font-bold text-indigo-400 mt-0.5 block">2025-2026</span>
+            <div className="p-3.5 bg-white dark:bg-slate-950/70 border border-orange-200/80 dark:border-slate-800 rounded-2xl col-span-2 sm:col-span-1 shadow-2xs">
+              <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">Academic Year</span>
+              <span className="font-bold text-slate-900 dark:text-indigo-400 mt-0.5 block text-xs">2025-2026</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* ─── NAVIGATION TABS (Strictly: My ID Card & My Certificates) ───── */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-900/70 border border-slate-800 rounded-2xl backdrop-blur-md shadow-lg max-w-md">
+      <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-2xl backdrop-blur-md shadow-sm dark:shadow-lg max-w-md">
         <button
           type="button"
           onClick={() => setActiveTab('id-card')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer relative ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition cursor-pointer relative ${
             activeTab === 'id-card'
-              ? 'bg-slate-800 text-white shadow-md border border-slate-700/80'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700/80'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/40'
           }`}
         >
-          <CreditCard size={16} className={activeTab === 'id-card' ? 'text-sky-400' : 'text-slate-400'} />
+          <CreditCard size={16} className={activeTab === 'id-card' ? 'text-orange-600 dark:text-sky-400' : 'text-slate-400'} />
           <span>My Student ID Card</span>
           {activeTab === 'id-card' && (
             <motion.div
               layoutId="studentActivePill"
-              className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-sky-400 via-indigo-400 to-amber-400 rounded-full"
+              className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-full"
             />
           )}
         </button>
@@ -328,21 +338,21 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
         <button
           type="button"
           onClick={() => setActiveTab('certificates')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer relative ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition cursor-pointer relative ${
             activeTab === 'certificates'
-              ? 'bg-slate-800 text-white shadow-md border border-slate-700/80'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700/80'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/40'
           }`}
         >
-          <Award size={16} className={activeTab === 'certificates' ? 'text-amber-400' : 'text-slate-400'} />
+          <Award size={16} className={activeTab === 'certificates' ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400'} />
           <span>My Certificates</span>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
             {certificates.length}
           </span>
           {activeTab === 'certificates' && (
             <motion.div
               layoutId="studentActivePill"
-              className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-sky-400 via-indigo-400 to-amber-400 rounded-full"
+              className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-full"
             />
           )}
         </button>
@@ -363,28 +373,28 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
             <div className="lg:col-span-5 space-y-4">
               
               {/* Institutional Locked Standard Banner (student cannot change layout) */}
-              <div className="p-4 bg-slate-900/60 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+              <div className="p-4 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shadow-sm">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
                     <Lock size={15} />
                   </div>
                   <div>
-                    <span className="font-bold text-white block">Official Institutional Standard</span>
-                    <span className="text-[11px] text-slate-400">
-                      Standard Layout: <strong className="text-emerald-400">{activeTemplate?.name || 'Classic Student'}</strong>
+                    <span className="font-bold text-slate-900 dark:text-white block text-sm">Official Institutional Standard</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      Standard Layout: <strong className="text-emerald-600 dark:text-emerald-400">{activeTemplate?.name || 'Classic Student'}</strong>
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-full font-bold">
+                <span className="text-xs font-mono uppercase bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-bold">
                   Official Format
                 </span>
               </div>
 
               {/* Student Credential Summary Card */}
-              <div className="bg-slate-900/60 rounded-2xl border border-slate-800 p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-sky-400/30 flex-shrink-0">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-orange-400/30 flex-shrink-0">
                       {studentPhoto ? (
                         <img
                           src={studentPhoto}
@@ -399,52 +409,52 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
                       )}
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-white">{studentName}</h3>
-                      <p className="text-[11px] text-sky-400 font-mono">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white">{studentName}</h3>
+                      <p className="text-xs text-orange-600 dark:text-orange-400 font-mono font-semibold">
                         Admission ID: {admissionNo}
                       </p>
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-                    <CheckCircle2 size={12} /> Active Student
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+                    <CheckCircle2 size={13} /> Active Student
                   </span>
                 </div>
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase block font-semibold">Class & Section</span>
-                    <span className="font-bold text-slate-200">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">Class & Section</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">
                       {className} - {sectionName}
                     </span>
                   </div>
-                  <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase block font-semibold">Roll Number</span>
-                    <span className="font-bold text-slate-200">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">Roll Number</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">
                       {rollNumber}
                     </span>
                   </div>
-                  <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase block font-semibold">Blood Group</span>
-                    <span className="font-bold text-rose-400">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">Blood Group</span>
+                    <span className="font-bold text-rose-600 dark:text-rose-400 text-sm">
                       {student?.bloodGroup || 'O+'}
                     </span>
                   </div>
-                  <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase block font-semibold">Parent / Guardian</span>
-                    <span className="font-bold text-slate-200 truncate block">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 uppercase block font-bold">Parent / Guardian</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-200 truncate block text-sm">
                       {student?.parentName || 'Authorized Guardian'}
                     </span>
                   </div>
                 </div>
 
                 {/* Information Callout */}
-                <div className="p-3.5 bg-sky-500/10 border border-sky-500/25 rounded-xl flex items-start gap-3 text-xs text-slate-300">
-                  <ShieldCheck size={18} className="text-sky-400 flex-shrink-0 mt-0.5" />
+                <div className="p-3.5 bg-orange-50 dark:bg-sky-500/10 border border-orange-200 dark:border-sky-500/25 rounded-xl flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300">
+                  <ShieldCheck size={18} className="text-orange-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-white block">Official Institutional Identity</span>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                    <span className="font-bold text-slate-900 dark:text-white block text-sm">Official Institutional Identity</span>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
                       Use the interactive card viewer on the right to review both <strong>Front</strong> and <strong>Back</strong> sides. Click <strong>Print / PDF</strong> to generate an official printout.
                     </p>
                   </div>
@@ -476,37 +486,37 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
             className="space-y-6"
           >
             {/* Search Bar */}
-            <div className="flex items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+            <div className="flex items-center justify-between gap-4 bg-white dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
               <div className="flex-1 relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   value={searchCertQuery}
                   onChange={(e) => setSearchCertQuery(e.target.value)}
                   placeholder="Search my issued certificates by number or type (e.g. Bonafide, Character)..."
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
                 />
               </div>
 
-              <div className="text-xs text-slate-400 font-semibold px-2">
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold px-2">
                 Showing {filteredCertificates.length} of {certificates.length} certificate(s)
               </div>
             </div>
 
             {/* Certificate List / Empty State */}
             {loadingCertificates ? (
-              <div className="p-16 flex flex-col items-center justify-center gap-3 text-xs text-slate-400 bg-slate-900/40 rounded-2xl border border-slate-800">
-                <Loader2 size={24} className="animate-spin text-amber-400" />
+              <div className="p-16 flex flex-col items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <Loader2 size={24} className="animate-spin text-orange-500 dark:text-amber-400" />
                 <span>Loading your official certificates...</span>
               </div>
             ) : filteredCertificates.length === 0 ? (
-              <div className="p-12 text-center bg-slate-900/40 rounded-3xl border border-slate-800 space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto">
+              <div className="p-12 text-center bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+                <div className="w-16 h-16 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-amber-400 border border-orange-500/20 flex items-center justify-center mx-auto">
                   <Award size={32} />
                 </div>
                 <div className="max-w-md mx-auto space-y-1">
-                  <h3 className="text-base font-bold text-white">No Certificates Issued Yet</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">No Certificates Issued Yet</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                     You do not have any official institutional certificates issued under your student admission number at this time. Once issued by the principal or administration (such as Bonafide, Character, Merit, or Transfer certificates), they will appear here with live preview and high-resolution print capabilities.
                   </p>
                 </div>
@@ -518,36 +528,36 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
                   return (
                     <div
                       key={cert._id}
-                      className="bg-slate-900/60 hover:bg-slate-800/50 transition border border-slate-800 hover:border-slate-700 rounded-2xl p-5 space-y-4 flex flex-col justify-between shadow-lg group"
+                      className="bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700 rounded-2xl p-5 space-y-4 flex flex-col justify-between shadow-sm dark:shadow-lg group"
                     >
                       <div className="space-y-3">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 rounded-lg">
+                          <span className="text-xs font-mono font-bold text-orange-600 dark:text-amber-400 bg-orange-500/10 dark:bg-amber-500/10 border border-orange-500/25 dark:border-amber-500/25 px-2.5 py-1 rounded-lg">
                             {cert.certificateNumber}
                           </span>
                           {isValid ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                               VALID
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                               REVOKED
                             </span>
                           )}
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-extrabold text-white">
+                          <h4 className="text-base font-extrabold text-slate-900 dark:text-white">
                             {cert.certificateType} CERTIFICATE
                           </h4>
-                          <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
                             {cert.purposeNote || 'Official institutional academic & character certification.'}
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
                           <span>Session: {cert.academicSession || '2025-2026'}</span>
                           <span>
                             {formatDate(cert.issuedAt)}
@@ -556,11 +566,11 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
                       </div>
 
                       {/* Action Buttons: Preview & Print Only (student cannot verify) */}
-                      <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
+                      <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <button
                           type="button"
                           onClick={() => setActivePreviewCert(cert)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition cursor-pointer"
                         >
                           <Eye size={14} />
                           <span>Preview</span>

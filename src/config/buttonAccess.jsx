@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { ROLES } from '../constants/roles.js';
-import { getUserFromStorage, getUserRole } from './access.jsx';
+import { getUserFromStorage, getUserRole, getCustomRolePermissions } from './access.jsx';
 
 /**
  * Centralized Button-Level Access Configuration by Section / Module.
@@ -140,6 +140,13 @@ export const canAccessButton = (userOrRole, buttonId) => {
 
   // Super admin can access all buttons
   if (role === ROLES.SUPER_ADMIN || role === 'superadmin') return true;
+
+  // Check dynamic role configuration first
+  const dynamicConfig = getCustomRolePermissions(role);
+  if (dynamicConfig && Array.isArray(dynamicConfig.buttons)) {
+    if (dynamicConfig.buttons.includes('*')) return true;
+    return dynamicConfig.buttons.includes(buttonId);
+  }
 
   // Student and Parent are strictly forbidden from administrative or teacher creation/edit actions
   const BLOCKED_STUDENT_BUTTONS = [

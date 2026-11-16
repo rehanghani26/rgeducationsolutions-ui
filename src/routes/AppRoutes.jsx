@@ -12,6 +12,7 @@ import appRoutes from './appRoutes.js';
 import { ROLES } from '../constants/roles.js';
 import { hasModuleAccess } from '../config/access.jsx';
 import DashboardLayout from '../layouts/DashboardLayout.jsx';
+import { AccessDeniedPage } from '../components/index.js';
 
 /** Redirects unauthenticated users to /login */
 const AuthGuard = ({ children }) => {
@@ -19,7 +20,7 @@ const AuthGuard = ({ children }) => {
   return isAuthenticated ? children : <Navigate to={ROUTES.LOGIN} replace />;
 };
 
-/** Restricts access to users whose role is in allowedRoles or has module access */
+/** Restricts access to users based on dynamic module access or allowedRoles */
 const RoleGuard = ({ children, allowedRoles, module }) => {
   const { user } = useSelector((state) => state.auth);
   if (!user) return <Navigate to={ROUTES.LOGIN} replace />;
@@ -27,11 +28,25 @@ const RoleGuard = ({ children, allowedRoles, module }) => {
   const rawRole = (user.role || '').toLowerCase();
   const userRole = rawRole.replace(/_/g, '-');
   if (userRole === ROLES.SUPER_ADMIN || userRole === 'superadmin') return children;
-  if (module && hasModuleAccess(user, module)) return children;
+  if (module) {
+    return hasModuleAccess(user, module)
+      ? children
+      : (
+        <AccessDeniedPage
+          title="Access Denied"
+          message="You do not have permission to access this module. Please connect to your administrator."
+        />
+      );
+  }
   const allowed = allowedRoles && allowedRoles.map((r) => (r || '').toLowerCase().replace(/_/g, '-'));
   return allowed && (allowed.includes(userRole) || allowed.includes(rawRole))
     ? children
-    : <Navigate to={ROUTES.DASHBOARD} replace />;
+    : (
+      <AccessDeniedPage
+        title="Access Denied"
+        message="You do not have permission to access this module. Please connect to your administrator."
+      />
+    );
 };
 
 const AppRoutes = () => {
