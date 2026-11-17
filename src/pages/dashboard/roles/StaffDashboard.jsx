@@ -90,67 +90,67 @@ const StaffDashboard = () => {
     .toUpperCase();
 
   return (
-    <div className="space-y-6">
-      {/* 1. Quick Personal KPI Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      {/* 1. Quick Personal KPI Stats Cards (2 in one line on mobile) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         {/* Attendance */}
         <div
           onClick={() => navigate("/attendance")}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 shadow-xs hover:border-indigo-500/50 transition cursor-pointer group"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 sm:px-3.5 shadow-xs hover:border-indigo-500/50 transition cursor-pointer group"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
               My Attendance
             </span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-              <CalendarCheck size={16} />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <CalendarCheck size={15} />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white mt-1 truncate leading-tight">
             {attStats.total > 0 ? `${attStats.present} / ${attStats.total}` : "N/A"}
           </h3>
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1 flex items-center gap-1">
-            <CheckCircle2 size={12} /> {attStats.percentage !== "N/A" ? `${attStats.percentage}% Attendance Rate` : "N/A"}
+          <p className="text-[9.5px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1 flex items-center gap-1 truncate">
+            <CheckCircle2 size={11} className="shrink-0" /> {attStats.percentage !== "N/A" ? `${attStats.percentage}% Rate` : "N/A"}
           </p>
         </div>
 
         {/* Leaves */}
         <div
           onClick={() => navigate("/leave")}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 shadow-xs hover:border-orange-500/50 transition cursor-pointer group"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 sm:px-3.5 shadow-xs hover:border-orange-500/50 transition cursor-pointer group"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
               Leave Requests
             </span>
-            <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center">
-              <Palmtree size={16} />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+              <Palmtree size={15} />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white mt-1 truncate leading-tight">
             {leaveStats.approved} Approved
           </h3>
-          <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-1">
+          <p className="text-[9.5px] sm:text-[11px] text-amber-600 dark:text-amber-400 font-bold mt-1 truncate">
             {leaveStats.pending > 0
-              ? `⏳ ${leaveStats.pending} Pending Review`
-              : "✓ All requests reviewed"}
+              ? `⏳ ${leaveStats.pending} Pending`
+              : "✓ All reviewed"}
           </p>
         </div>
 
         {/* Monthly Net Salary */}
         <div
           onClick={() => navigate("/payroll")}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 shadow-xs hover:border-emerald-500/50 transition cursor-pointer group"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 sm:px-3.5 shadow-xs hover:border-emerald-500/50 transition cursor-pointer group"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Monthly Net Salary
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
+              Monthly Salary
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <DollarSign size={16} />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <DollarSign size={15} />
             </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white mt-1 truncate leading-tight">
             {formatCurrency(
               payrollData?.salaryStructure?.adjustedNetPay ||
                 payrollData?.salaryStructure?.netPay ||
@@ -158,7 +158,7 @@ const StaffDashboard = () => {
                 0
             )}
           </h3>
-          <p className="text-[11px] text-slate-500 mt-1 font-semibold">
+          <p className="text-[9.5px] sm:text-[11px] text-slate-500 mt-1 font-semibold truncate">
             Status:{" "}
             <span
               className={`font-black ${
@@ -175,29 +175,29 @@ const StaffDashboard = () => {
         {/* Profile Status */}
         <div
           onClick={() => navigate("/profile")}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 shadow-xs hover:border-purple-500/50 transition cursor-pointer group"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 sm:px-3.5 shadow-xs hover:border-purple-500/50 transition cursor-pointer group"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Employee Profile
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
+              Profile
             </span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-              <User size={16} />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <User size={15} />
             </div>
           </div>
-          <h3 className="text-base font-black text-slate-900 dark:text-white mt-1 truncate">
+          <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-900 dark:text-white mt-1 truncate leading-tight">
             {user.name || "Employee"}
           </h3>
-          <p className="text-[11px] text-purple-600 dark:text-purple-400 font-bold mt-1">
+          <p className="text-[9.5px] sm:text-[11px] text-purple-600 dark:text-purple-400 font-bold mt-1 truncate">
             {user.employeeId ? `ID: ${user.employeeId}` : roleLabel}
           </p>
         </div>
       </div>
 
       {/* 2. Quick Navigation Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
         {/* Attendance & Leave Hub */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
               <CalendarCheck size={18} className="text-indigo-500" />
@@ -230,7 +230,7 @@ const StaffDashboard = () => {
         </div>
 
         {/* Salary & Payslip Hub */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Briefcase size={18} className="text-emerald-500" />

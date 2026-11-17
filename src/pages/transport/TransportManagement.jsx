@@ -10,7 +10,7 @@ const TransportManagement = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-12"
+      className="space-y-4 pb-8"
     >
       <PageHeader
         title="School Transport & Vehicle Routes"
@@ -20,15 +20,15 @@ const TransportManagement = () => {
       />
 
       {mockTransport && mockTransport.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
           {mockTransport.map((tr) => (
             <div
               key={tr.id}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-all space-y-4"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm hover:shadow-md transition-all space-y-3 sm:space-y-4"
             >
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 font-bold">
-                  <Bus size={22} />
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 font-bold">
+                  <Bus size={18} />
                 </div>
                 <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
                   {tr.status}
@@ -36,7 +36,7 @@ const TransportManagement = () => {
               </div>
 
               <div>
-                <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
                   {tr.routeName}
                 </h3>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">

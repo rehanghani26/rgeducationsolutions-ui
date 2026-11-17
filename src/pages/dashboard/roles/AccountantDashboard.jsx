@@ -27,8 +27,8 @@ const AccountantDashboard = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         <StatCard
           icon={CreditCard}
           label="Fee Collected (Month)"

@@ -262,11 +262,11 @@ const TeacherManagement = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-4 pb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Teacher Management</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Create teacher records, credentials, roles, and permission sets.</p>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">Teacher Management</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">Create teacher records, credentials, roles, and permission sets.</p>
         </div>
         <Button variant="primary" icon={<Plus size={14} />} onClick={openCreate}>
           Create Teacher
@@ -280,11 +280,11 @@ const TeacherManagement = () => {
           placeholder="Search by name, employee ID, email, department..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm"
+          className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm"
         />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
         {loading ? (
           <Loader fullPage size="md" text="Loading teachers..." />
         ) : (

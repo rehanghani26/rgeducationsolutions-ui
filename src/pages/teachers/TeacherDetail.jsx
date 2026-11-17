@@ -339,8 +339,8 @@ const TeacherDetail = () => {
     switch (activeTab) {
       case "overview":
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5 sm:gap-4">
               <StatsCard
                 title="Employee ID"
                 value={teacher?.teacherId || teacher?.employeeId || "TCH-001"}
@@ -385,7 +385,7 @@ const TeacherDetail = () => {
         );
       case "academic":
         return (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <InfoGrid
               items={[
                 [
@@ -406,7 +406,7 @@ const TeacherDetail = () => {
             />
 
             {/* Class Teacher Appointment & History */}
-            <div className="bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="bg-slate-50 dark:bg-slate-800/40 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">

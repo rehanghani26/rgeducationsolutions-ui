@@ -84,23 +84,23 @@ export const Modal = ({
           >
             {/* Header */}
             {(title || showCloseButton || headerActions) && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm z-20 shrink-0">
-                <div className="flex-1 min-w-0 pr-4">
+              <div className="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 border-b border-slate-200/80 dark:border-slate-800 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm z-20 shrink-0">
+                <div className="flex-1 min-w-0 pr-3 sm:pr-4">
                   {typeof title === 'string' ? (
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
                       {title}
                     </h3>
                   ) : (
                     title
                   )}
                   {subtitle && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                       {subtitle}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   {headerActions}
                   {showCloseButton && handleClose && (
                     <button
@@ -119,7 +119,7 @@ export const Modal = ({
             {/* Body */}
             <div
               className={`flex-1 overflow-y-auto ${
-                noPadding ? '' : 'p-6'
+                noPadding ? '' : 'p-4 sm:p-5 md:p-6'
               } ${contentClassName} ${bodyClassName}`}
             >
               {typeof children === 'function' ? children() : children}
@@ -127,7 +127,7 @@ export const Modal = ({
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-3.5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-end gap-3 shrink-0">
+              <div className="px-4 py-3 sm:px-5 sm:py-3.5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-end gap-2.5 sm:gap-3 shrink-0">
                 {footer}
               </div>
             )}

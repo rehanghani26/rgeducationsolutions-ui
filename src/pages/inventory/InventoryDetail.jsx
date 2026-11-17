@@ -166,21 +166,21 @@ export default function InventoryDetail() {
   const vendorName = vendorObj?.name || item.supplier || 'Unassigned / Direct Purchase';
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-4 pb-8">
       {/* ─── BREADCRUMB & PRIMARY ACTION HEADER ────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <Link
           to={ROUTES.INVENTORY.LIST}
-          className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Inventory Hub
         </Link>
 
-        <div className="flex items-center flex-wrap gap-2.5">
+        <div className="flex items-center flex-wrap gap-2 sm:gap-2.5">
           <button
             onClick={handleOpenAdjust}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-primary-600 hover:bg-primary-700 text-white transition-all shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-primary-600 hover:bg-primary-700 text-white transition-all shadow-sm"
           >
             <ArrowLeftRight className="h-4 w-4" />
             Adjust Stock
@@ -188,7 +188,7 @@ export default function InventoryDetail() {
 
           <Link
             to={`/inventory/${id}/edit`}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 transition-all border border-gray-200 dark:border-neutral-700"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 transition-all border border-gray-200 dark:border-neutral-700"
           >
             <Edit2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             Edit Item
@@ -197,10 +197,10 @@ export default function InventoryDetail() {
       </div>
 
       {/* ─── PRODUCT HERO BANNER ────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-neutral-800 rounded-3xl border border-gray-200 dark:border-neutral-700 p-6 shadow-sm">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 flex-shrink-0 shadow-md">
+      <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-200 dark:border-neutral-700 p-3.5 sm:p-5 md:p-6 shadow-sm">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl overflow-hidden bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 flex-shrink-0 shadow-md">
               <img
                 src={item.imageUrl || getSchoolProductImage(item)}
                 alt={item.name}
@@ -216,19 +216,19 @@ export default function InventoryDetail() {
             <div>
               {/* Badges line */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-xs font-extrabold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-neutral-700 text-gray-700 dark:text-gray-300">
+                <span className="font-mono text-xs font-extrabold px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-neutral-700 text-gray-700 dark:text-gray-300">
                   {item.sku || 'SKU-GEN-001'}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-300">
+                <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-300">
                   {item.category || 'General'}
                 </span>
                 {item.subCategory && (
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-gray-300">
+                  <span className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-gray-300">
                     {item.subCategory}
                   </span>
                 )}
                 <span
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                  className={`px-2.5 py-0.5 rounded-lg text-xs font-bold ${
                     isOutOfStock
                       ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
                       : isLowStock
@@ -240,7 +240,7 @@ export default function InventoryDetail() {
                 </span>
               </div>
 
-              <h1 className="text-2xl font-black text-gray-900 dark:text-white mt-2">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {item.name}
               </h1>
 

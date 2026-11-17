@@ -241,7 +241,7 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-16"
+      className="space-y-4 pb-8"
     >
       {/* ─── TOP PAGE HEADER ──────────────────────────────────────────────── */}
       <PageHeader
@@ -251,11 +251,11 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
       />
 
       {/* ─── STUDENT CREDENTIAL BANNER ────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-orange-200 dark:border-slate-800 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 p-6 shadow-sm dark:shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl border border-orange-200 dark:border-slate-800 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950 p-3.5 sm:p-5 md:p-6 shadow-sm dark:shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 dark:bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-orange-500/25 flex-shrink-0 border-2 border-orange-400/30">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-lg shadow-orange-500/25 flex-shrink-0 border-2 border-orange-400/30">
               {studentPhoto ? (
                 <img
                   src={studentPhoto}
@@ -269,9 +269,9 @@ export default function StudentPageCertification({ authUser: propAuthUser = null
                 studentName.charAt(0)
               )}
             </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{studentName}</h2>
+            <div className="space-y-1 sm:space-y-1.5">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{studentName}</h2>
                 <span className="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
                   <CheckCircle2 size={13} /> Active Valid Student
                 </span>

@@ -203,7 +203,7 @@ const StaffPayrollDetail = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-16"
+      className="space-y-4 pb-8"
     >
       {/* Top Breadcrumb & Return Action */}
       <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200/70 dark:border-slate-800">
@@ -249,25 +249,25 @@ const StaffPayrollDetail = () => {
       </div>
 
       {/* Staff Profile Header Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
           {/* Avatar and Info */}
-          <div className="flex items-start sm:items-center gap-4">
+          <div className="flex items-start sm:items-center gap-3.5 sm:gap-4">
             {staff.avatar ? (
               <img
                 src={staff.avatar}
                 alt={staff.name}
-                className="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
               />
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-2xl flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-xl sm:text-2xl flex items-center justify-center shadow-md">
                 {staff.name?.charAt(0) || "U"}
               </div>
             )}
 
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                   {staff.name}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300">

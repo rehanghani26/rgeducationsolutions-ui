@@ -540,16 +540,16 @@ const RoleAndAccessSettings = () => {
   const activeButtonCount = roleButtons.includes('*') ? allButtons.length : roleButtons.length;
 
   return (
-    <div className="w-full space-y-6 font-sans text-slate-800 dark:text-slate-100">
+    <div className="w-full space-y-4 font-sans text-slate-800 dark:text-slate-100">
       {/* ── Top Header Bar with Mode and Actions ─────────────────────────── */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
+      <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
-              <Shield size={24} />
+            <span className="p-1.5 sm:p-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
+              <Shield size={20} />
             </span>
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                 Role & Permission Governance Hub
                 {isEditing ? (
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
@@ -569,14 +569,14 @@ const RoleAndAccessSettings = () => {
         </div>
 
         {/* Action Buttons: View mode vs Edit mode */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           {!isLockedMaster && !isEditing && (
             <button
               type="button"
               onClick={handleStartEdit}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer"
             >
-              <Edit3 size={15} />
+              <Edit3 size={14} />
               <span>Edit Permissions</span>
             </button>
           )}
@@ -587,9 +587,9 @@ const RoleAndAccessSettings = () => {
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={saving}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
+                className="inline-flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition cursor-pointer"
               >
-                <X size={15} />
+                <X size={14} />
                 <span>Cancel</span>
               </button>
 
@@ -597,10 +597,10 @@ const RoleAndAccessSettings = () => {
                 type="button"
                 onClick={handleSaveRole}
                 disabled={saving}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 sm:px-5 sm:py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-md shadow-orange-500/25 transition cursor-pointer disabled:opacity-50"
               >
-                <Save size={15} />
-                <span>{saving ? 'Saving Changes...' : 'Save Role Configuration'}</span>
+                <Save size={14} />
+                <span>{saving ? 'Saving...' : 'Save Role Configuration'}</span>
               </button>
             </>
           )}
@@ -611,9 +611,9 @@ const RoleAndAccessSettings = () => {
               onClick={() => setConfirmResetRole(activeRoleKey)}
               disabled={saving}
               title="Restore system defaults for this role"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs transition cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs transition cursor-pointer"
             >
-              <RotateCcw size={14} />
+              <RotateCcw size={13} />
               <span className="hidden sm:inline">Reset Defaults</span>
             </button>
           )}
@@ -621,7 +621,7 @@ const RoleAndAccessSettings = () => {
       </div>
 
       {/* ── Active Role Control Bar with ROLE DROPDOWN ─────────────────────── */}
-      <div className="w-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1C1B1A] p-5 shadow-xs">
+      <div className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1C1B1A] p-3.5 sm:p-4 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           {/* Left: Prominent Custom Role Selector Dropdown */}
           <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">

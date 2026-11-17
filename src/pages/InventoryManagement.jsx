@@ -66,19 +66,19 @@ const InventoryManagement = () => {
   });
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Inventory & Assets</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Audit school stocks, log adjustments, trigger alerts, and register suppliers.</p>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">Inventory & Assets</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">Audit school stocks, log adjustments, trigger alerts, and register suppliers.</p>
         </div>
 
         {/* Tab Switcher */}
         <div className="flex bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 text-xs font-bold gap-1 shadow-sm">
           <button 
             onClick={() => setActiveTab('items')}
-            className={`py-2 px-4 rounded-lg transition-colors ${
+            className={`py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg transition-colors ${
               activeTab === 'items' 
                 ? 'bg-indigo-600 text-white' 
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -88,7 +88,7 @@ const InventoryManagement = () => {
           </button>
           <button 
             onClick={() => setActiveTab('vendors')}
-            className={`py-2 px-4 rounded-lg transition-colors ${
+            className={`py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg transition-colors ${
               activeTab === 'vendors' 
                 ? 'bg-indigo-600 text-white' 
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -129,7 +129,7 @@ const InventoryManagement = () => {
           </div>
 
           {/* Table list and Search */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col justify-between">
             <div className="max-w-md mb-6">
               <div className="relative">
                 <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />

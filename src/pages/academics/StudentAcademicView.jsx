@@ -341,53 +341,53 @@ export const StudentAcademicView = ({ currentUser: propUser }) => {
   );
 
   return (
-    <div className="space-y-6 pb-12 animate-fadeIn">
+    <div className="space-y-4 pb-8 animate-fadeIn">
       {/* ─── Hero Academic Student Banner ─────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl border border-orange-200 dark:border-orange-500/20">
+      <div className="relative overflow-hidden bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] text-slate-900 dark:text-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 md:p-6 shadow-sm dark:shadow-xl border border-orange-200 dark:border-orange-500/20">
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute right-1/3 bottom-0 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-white/10 backdrop-blur-md text-orange-700 dark:text-orange-200 text-xs font-bold tracking-wide border border-orange-200 dark:border-white/10 shadow-2xs">
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-2.5 sm:space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-white/10 backdrop-blur-md text-orange-700 dark:text-orange-200 text-xs font-bold tracking-wide border border-orange-200 dark:border-white/10 shadow-2xs">
               <GraduationCap size={15} className="text-orange-600 dark:text-orange-400" />
               <span>Student Academic Hub • Session 2025–2026</span>
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Academic Curriculum & Courses
               </h1>
-              <p className="text-slate-600 dark:text-stone-300 text-xs sm:text-sm mt-1 max-w-xl">
+              <p className="text-slate-600 dark:text-stone-300 text-xs sm:text-sm mt-0.5 sm:mt-1 max-w-xl">
                 Track your active courses, syllabus progress, weekly lecture schedule, and study materials for <span className="text-slate-900 dark:text-white font-bold">{className} · {sectionName}</span>.
               </p>
             </div>
 
             {/* All details in one clean line, medium size */}
-            <div className="flex items-center gap-3 pt-2 text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
-              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3.5 py-1 rounded-xl text-slate-800 dark:text-stone-200 font-bold shadow-2xs">
+            <div className="flex items-center gap-2 sm:gap-3 pt-1 text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
+              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3 py-1 rounded-xl text-slate-800 dark:text-stone-200 font-bold shadow-2xs">
                 👤 <span className="text-slate-900 dark:text-white font-black">{studentName}</span>
               </span>
-              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3.5 py-1 rounded-xl text-orange-600 dark:text-orange-400 font-black shadow-2xs">
+              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3 py-1 rounded-xl text-orange-600 dark:text-orange-400 font-black shadow-2xs">
                 🏫 {className} ({sectionName})
               </span>
-              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3.5 py-1 rounded-xl text-slate-800 dark:text-stone-200 font-bold shadow-2xs">
+              <span className="bg-white dark:bg-stone-900/80 border border-orange-200 dark:border-orange-500/20 px-3 py-1 rounded-xl text-slate-800 dark:text-stone-200 font-bold shadow-2xs">
                 🎫 Roll No: <span className="text-slate-900 dark:text-white font-mono font-black">#{rollNumber}</span>
               </span>
             </div>
           </div>
 
           {/* Class Teacher Card */}
-          <div className="bg-white dark:bg-white/10 backdrop-blur-md border border-orange-200 dark:border-white/15 rounded-2xl p-4 w-full sm:w-auto min-w-[280px] shadow-sm dark:shadow-lg shrink-0">
+          <div className="bg-white dark:bg-white/10 backdrop-blur-md border border-orange-200 dark:border-white/15 rounded-2xl p-3.5 w-full sm:w-auto min-w-[260px] shadow-sm dark:shadow-lg shrink-0">
             <p className="text-xs font-extrabold uppercase tracking-wider text-orange-600 dark:text-orange-300">
               Assigned Class Teacher
             </p>
-            <div className="flex items-center gap-3 mt-2">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center font-extrabold text-white text-base shadow-md">
+            <div className="flex items-center gap-3 mt-1.5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center font-extrabold text-white text-sm shadow-md">
                 {classTeacher.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">{classTeacher}</p>
+                <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{classTeacher}</p>
                 <p className="text-xs text-slate-500 dark:text-stone-300 font-medium">Head of Academic Guidance</p>
                 <p className="text-xs text-orange-600/90 dark:text-orange-300/80 mt-0.5">Room 101 • Academic Block A</p>
               </div>
@@ -396,7 +396,7 @@ export const StudentAcademicView = ({ currentUser: propUser }) => {
         </div>
 
         {/* Top Metric Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-orange-200/80 dark:border-white/10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-4 pt-4 border-t border-orange-200/80 dark:border-white/10">
           {[
             { label: 'Enrolled Courses', value: `${subjects.length} Subjects`, icon: BookOpen, color: 'text-orange-600 dark:text-orange-400', iconBg: 'bg-orange-500/10 dark:bg-white/10' },
             { label: 'Overall Attendance', value: '96.4%', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-300', iconBg: 'bg-emerald-500/10 dark:bg-white/10' },
@@ -432,9 +432,9 @@ export const StudentAcademicView = ({ currentUser: propUser }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   isActive
-                    ? `${bg.brandGradient} text-white shadow-md ${shadow.brand} scale-[1.02]`
+                    ? `${bg.brandGradient} text-white shadow-md ${shadow.brand}`
                     : `${card.base} ${text.secondary} ${bg.hover}`
                 }`}
               >

@@ -51,7 +51,6 @@ import {
   MoreHorizontal,
   KeyRound,
 } from "lucide-react";
-import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
 import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
 import StatusBadge from "../../components/ui/StatusBadge.jsx";
 import Modal from "../../components/ui/Modal.jsx";
@@ -59,7 +58,6 @@ import Button from "../../components/ui/Button.jsx";
 import Loader from "../../components/ui/Loader.jsx";
 import EmbeddedPdfViewer from "../../components/ui/EmbeddedPdfViewer.jsx";
 import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
-import { permissionOptions } from "./StudentForm.jsx";
 import ResetStudentPasswordModal from "./ResetStudentPasswordModal.jsx";
 import {
   getStudentById,
@@ -477,7 +475,6 @@ const StudentDetail = () => {
     { id: "attendance", label: "Attendance", shortLabel: "Attendance", icon: CalendarCheck },
     { id: "leaves", label: "Leave History", shortLabel: "Leaves", icon: Calendar },
     { id: "fees", label: "Fee & Dues", shortLabel: "Fees", icon: DollarSign },
-    { id: "permissions", label: "Portal Access", shortLabel: "Access", icon: Lock },
     { id: "activity", label: "Audit Timeline", shortLabel: "Timeline", icon: Activity },
   ];
 
@@ -523,7 +520,7 @@ const StudentDetail = () => {
   }
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-4 pb-8">
       {/* ── Top Navigation Bar ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 min-w-0">
@@ -714,7 +711,7 @@ const StudentDetail = () => {
             {/* Student Name & Meta */}
             <div className="space-y-1 sm:space-y-2 mb-0.5 sm:mb-1 min-w-0 flex-1 sm:flex-initial">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate sm:whitespace-normal">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate sm:whitespace-normal">
                   {student.name}
                 </h1>
                 <div className="hidden sm:inline-flex">
@@ -1005,8 +1002,7 @@ const StudentDetail = () => {
                         )}
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Official student identity documents stored securely on
-                        Cloudinary.
+                        Official student identity documents stored securely.
                       </p>
                     </div>
                   </div>
@@ -2309,20 +2305,6 @@ const StudentDetail = () => {
                 Invoices, receipts, and fee status will appear here once
                 connected to fees.
               </p>
-            </div>
-          )}
-
-          {/* ── 7. PERMISSIONS / SECURITY TAB ────────────────────────────── */}
-          {activeTab === "permissions" && (
-            <div className="space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Student Account Access Control Matrix
-              </h4>
-              <PermissionMatrix
-                options={permissionOptions}
-                permissions={student.permissions || []}
-                readOnly
-              />
             </div>
           )}
 

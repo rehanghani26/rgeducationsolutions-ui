@@ -4,7 +4,7 @@ import ClassSyllabusSettings from "../settings/ClassSyllabusSettings.jsx";
 
 const ClassSyllabusPage = () => {
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Class Syllabus & Prescribed Books"
         subtitle="Configure standardized subjects, textbook names, full marks, and pass marks for all classes."
@@ -13,7 +13,7 @@ const ClassSyllabusPage = () => {
           { label: "Class Syllabus" },
         ]}
       />
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-sm">
         <ClassSyllabusSettings />
       </div>
     </div>

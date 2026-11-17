@@ -427,7 +427,7 @@ const OnlineClassesManagement = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Online Classes"
         subtitle="Schedule and manage virtual classes, track attendance, and share resources."
@@ -439,7 +439,7 @@ const OnlineClassesManagement = () => {
                 <button
                   id="btn-create-online-class"
                   onClick={openCreate}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all"
+                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-xl shadow-sm transition-all"
                 >
                   <Plus size={14} /> Schedule Class
                 </button>
@@ -450,11 +450,11 @@ const OnlineClassesManagement = () => {
       />
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5">
         {statsCards.map((card) => (
           <div
             key={card.label}
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center gap-3"
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center gap-3"
           >
             <div
               className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${card.bg}`}
@@ -462,7 +462,7 @@ const OnlineClassesManagement = () => {
               <card.icon size={16} className={card.color} />
             </div>
             <div>
-              <p className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">
+              <p className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white leading-none">
                 {card.value}
               </p>
               <p className="text-[10px] text-slate-400 font-medium mt-0.5">
@@ -474,8 +474,8 @@ const OnlineClassesManagement = () => {
       </div>
 
       {/* Table + Filters */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+        <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex flex-col sm:flex-row gap-3">
             <SearchFilters
               search={search}
@@ -520,7 +520,7 @@ const OnlineClassesManagement = () => {
           </div>
         </div>
 
-        <div className="p-5">
+        <div className="p-3.5 sm:p-4">
           {loading ? (
             <Loader fullPage size="lg" text="Loading online classes..." />
           ) : (

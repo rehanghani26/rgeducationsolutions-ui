@@ -16,7 +16,7 @@ const LibraryManagement = () => {
   );
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-12">
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pb-8">
       <PageHeader
         title="Library Management & Book Catalog"
         subtitle="Catalog Islamic books, academic textbooks, track borrowing history and rack positions"
@@ -48,15 +48,15 @@ const LibraryManagement = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 font-bold text-xs uppercase border-b border-slate-200 dark:border-slate-800">
-                <th className="p-3">ISBN</th>
-                <th className="p-3">Book Title</th>
-                <th className="p-3">Author</th>
-                <th className="p-3">Category</th>
-                <th className="p-3 text-center">Rack Position</th>
-                <th className="p-3 text-center">Total Copies</th>
-                <th className="p-3 text-center">Available</th>
-                <th className="p-3 text-center">Status</th>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 font-bold text-[10px] sm:text-[11px] uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                <th className="py-2.5 px-3">ISBN</th>
+                <th className="py-2.5 px-3">Book Title</th>
+                <th className="py-2.5 px-3">Author</th>
+                <th className="py-2.5 px-3">Category</th>
+                <th className="py-2.5 px-3 text-center">Rack Position</th>
+                <th className="py-2.5 px-3 text-center">Total Copies</th>
+                <th className="py-2.5 px-3 text-center">Available</th>
+                <th className="py-2.5 px-3 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">

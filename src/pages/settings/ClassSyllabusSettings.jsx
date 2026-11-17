@@ -180,9 +180,9 @@ const ClassSyllabusSettings = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-2xl p-3.5 sm:p-5 md:p-6 text-white shadow-xl relative overflow-hidden">
         <div className="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
           <BookMarked size={220} />
         </div>
@@ -194,7 +194,7 @@ const ClassSyllabusSettings = () => {
                 Curriculum Engine
               </span>
             </div>
-            <h3 className="text-2xl font-black tracking-tight flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
               <BookOpen className="text-indigo-300" /> Class Syllabus &
               Prescribed Books
             </h3>

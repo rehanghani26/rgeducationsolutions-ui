@@ -182,9 +182,9 @@ const EnterResultsView = ({ exams, loading }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Selectors */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm">
         <h3 className="font-extrabold text-sm text-slate-800 dark:text-white mb-4 flex items-center gap-2">
           <ClipboardList size={16} className="text-indigo-500" /> Select Exam, Class & Section
         </h3>
@@ -431,9 +431,9 @@ const ClassResultsView = ({ exams, role }) => {
   const canPublish = !role || ['super-admin', 'school-admin', 'admin', 'principal', 'head-teacher', 'teacher'].includes(role?.toLowerCase());
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Selectors */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <SelectField label="Examination" value={selectedExamId} onChange={(v) => { setSelectedExamId(v); setSelectedClassId(''); setSelectedSection('All'); }} options={exams.map((e) => ({ value: e._id || e.id, label: `${e.name} (${e.term})` }))} placeholder="— Select Exam —" />
           <SelectField

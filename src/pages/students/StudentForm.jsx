@@ -25,7 +25,6 @@ import Button from "../../components/ui/Button.jsx";
 import FormInput from "../../components/ui/FormInput.jsx";
 import FormSelect from "../../components/ui/FormSelect.jsx";
 import FormTextarea from "../../components/ui/FormTextarea.jsx";
-import PermissionMatrix from "../../components/ui/PermissionMatrix.jsx";
 import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
 import { getClasses, getSections } from "../../services";
 import { formatDate, formatTime } from "../../utils";
@@ -36,20 +35,11 @@ import {
   BLOOD_GROUP_STRINGS as BLOOD_GROUP_OPTIONS,
   STUDENT_STATUS_OPTIONS as STATUS_OPTIONS,
 } from "../../constants";
-import { getDefaultRolePermissions } from "../../config/access.jsx";
 import {
   uploadStudentFile,
   sendStudentEmailOtp,
   verifyStudentEmailOtp,
 } from "../../services/studentService.js";
-
-export const permissionOptions = [
-  ["dashboard", "Dashboard Access"],
-  ["academics", "Academic Access"],
-  ["attendance", "Attendance View"],
-  ["fees", "Fees View"],
-  ["exams", "Exams View"],
-];
 
 export const initialStudentForm = {
   firstName: "",
@@ -75,7 +65,8 @@ export const initialStudentForm = {
   aadhaarDocument: "",
   imagesRef: { id: "", img: "" },
   AdharRef: { id: "", pdf: "" },
-  permissions: getDefaultRolePermissions("student"),
+  academicYear: "2026-27",
+  sessionId: null,
   forcePasswordChange: true,
   password: "",
   confirmPassword: "",
@@ -159,7 +150,6 @@ const StudentForm = ({
   onSaveDraft,
   submitting,
   hideButtons = false,
-  showAccessControl = false,
 }) => {
   const [classes, setClasses] = useState(CLASS_OPTIONS);
   const [sections, setSections] = useState(SECTION_OPTIONS);
@@ -412,13 +402,6 @@ const StudentForm = ({
 
   const updateField = (field, value) => onChange({ ...form, [field]: value });
 
-  const togglePermission = (permission) => {
-    const permissions = form.permissions.includes(permission)
-      ? form.permissions.filter((p) => p !== permission)
-      : [...form.permissions, permission];
-    updateField("permissions", permissions);
-  };
-
   const generatePwd = () => {
     const next = randomPassword();
     onChange({ ...form, password: next, confirmPassword: next });
@@ -607,8 +590,7 @@ const StudentForm = ({
                 )}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Uploaded once to Cloudinary. Photo and Aadhaar PDF must be 1MB
-                or less.
+                Photo and Aadhaar PDF must be 1MB or less.
               </p>
             </div>
           </div>
@@ -647,7 +629,7 @@ const StudentForm = ({
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 size={13} />
-                    <span>Saved to Cloudinary</span>
+                    <span>Photo Uploaded</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -707,7 +689,7 @@ const StudentForm = ({
                       className="animate-spin text-orange-600 dark:text-orange-500"
                     />
                     <span className="text-xs font-medium text-slate-500">
-                      Uploading to Cloudinary...
+                      Uploading...
                     </span>
                   </div>
                 ) : (
@@ -759,7 +741,7 @@ const StudentForm = ({
                     </p>
                     <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
                       <CheckCircle2 size={11} />
-                      <span>Stored on Cloudinary</span>
+                      <span>Verified &amp; Attached</span>
                     </div>
                   </div>
                 </div>
@@ -843,7 +825,7 @@ const StudentForm = ({
                       className="animate-spin text-orange-600 dark:text-orange-500"
                     />
                     <span className="text-xs font-medium text-slate-500">
-                      Uploading PDF to Cloudinary...
+                      Uploading PDF...
                     </span>
                   </div>
                 ) : (
@@ -920,6 +902,20 @@ const StudentForm = ({
               onChange={(e) => updateField("lastName", e.target.value)}
               required
             />
+          </div>
+
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200/60 dark:border-orange-900/40">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Academic Session:
+              </span>
+              <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 font-mono">
+                {form.academicYear || form.sessionName || "2026-27"}
+              </span>
+            </div>
+            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Active Session
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -1007,6 +1003,20 @@ const StudentForm = ({
               </p>
             </div>
           )}
+
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200/60 dark:border-orange-900/40">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Academic Session:
+              </span>
+              <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 font-mono">
+                {form.academicYear || form.sessionName || "2026-27"}
+              </span>
+            </div>
+            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Active Session
+            </span>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <FormSelect
@@ -1281,14 +1291,6 @@ const StudentForm = ({
                 required
               />
             </div>
-          )}
-
-          {editing && (
-            <PermissionMatrix
-              permissions={form.permissions}
-              options={permissionOptions}
-              onChange={togglePermission}
-            />
           )}
 
           <div className="grid grid-cols-2 gap-3">

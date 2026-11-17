@@ -694,7 +694,7 @@ const AttendanceManagement = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12 text-slate-800 dark:text-slate-100 font-sans">
+    <div className="space-y-4 pb-8 text-slate-800 dark:text-slate-100 font-sans">
       <PageHeader
         title="Attendance Management"
         subtitle={
@@ -706,7 +706,7 @@ const AttendanceManagement = () => {
           viewMode === "list" && !isStudent ? (
             <button
               onClick={() => setViewMode("take_attendance")}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02]"
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02] cursor-pointer"
             >
               <Plus size={15} /> Take Attendance
             </button>
@@ -716,7 +716,7 @@ const AttendanceManagement = () => {
                 setViewMode("list");
                 setSelectedRecord(null);
               }}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-all"
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
             >
               <ArrowLeft size={15} /> Back to Attendance List
             </button>
@@ -729,13 +729,13 @@ const AttendanceManagement = () => {
         <div className="grid grid-cols-2 sm:flex sm:w-fit items-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl w-full shadow-xs">
           <button
             onClick={() => setActiveMainTab("student")}
-            className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all text-center ${
+            className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs transition-all text-center cursor-pointer ${
               activeMainTab === "student"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800"
             }`}
           >
-            <GraduationCap size={16} className="flex-shrink-0" />
+            <GraduationCap size={15} className="flex-shrink-0" />
             <span className="truncate">Student Attendance</span>
           </button>
 
@@ -757,12 +757,12 @@ const AttendanceManagement = () => {
 
       {/* ── 1. STUDENT LOGGED IN PERSONAL VIEW ("MY ATTENDANCE LIST") ─────── */}
       {isStudent ? (
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
               <div>
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                  <GraduationCap className="text-indigo-600 dark:text-indigo-400" size={24} />{" "}
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <GraduationCap className="text-indigo-600 dark:text-indigo-400" size={18} />{" "}
                   Student Personal Attendance List
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">

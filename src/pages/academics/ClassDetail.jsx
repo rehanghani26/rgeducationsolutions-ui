@@ -326,7 +326,7 @@ const ClassDetail = () => {
   const capPct = Math.min(100, Math.round((enrolledCount / cap) * 100));
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-4 pb-8">
       {/* ── Top Navigation & Hero ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <Link
@@ -356,24 +356,24 @@ const ClassDetail = () => {
       </div>
 
       {/* ── Hero Banner ───────────────────────────────────────────────────── */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white p-6 sm:p-8 border border-indigo-700/30 shadow-xl relative overflow-hidden">
+      <div className="rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white p-3.5 sm:p-5 md:p-6 border border-indigo-700/30 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 relative z-10">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+              <span className="text-[10px] sm:text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
                 Session: {classData?.sessionName || 'Academic Year'}
               </span>
-              <span className="text-[11px] font-extrabold px-3 py-1 rounded-full bg-white/10 text-white border border-white/20">
+              <span className="text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/20">
                 {classData?.room || 'Room N/A'}
               </span>
-              <span className="text-[11px] font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span className="text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                 {enrolledCount} / {cap} Enrolled ({capPct}%)
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">
               {classData?.displayName || `${classData?.className || 'Class'} · ${classData?.sectionName || 'Section'}`}
             </h1>
             <p className="text-xs text-indigo-200/80 font-mono">
@@ -382,15 +382,15 @@ const ClassDetail = () => {
           </div>
 
           {/* Current Class Teacher Quick Pill */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex items-center gap-3.5 max-w-sm">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white font-extrabold flex items-center justify-center text-sm shadow-md shrink-0">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-3 sm:p-3.5 rounded-2xl flex items-center gap-3 max-w-sm">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white font-extrabold flex items-center justify-center text-xs sm:text-sm shadow-md shrink-0">
               {currentTeacher?.teacherName?.slice(0, 2).toUpperCase() || 'CT'}
             </div>
             <div className="space-y-0.5 min-w-0">
               <span className="text-[10px] uppercase font-bold text-indigo-300 tracking-wider">
                 Class Teacher
               </span>
-              <p className="font-extrabold text-sm text-white truncate">
+              <p className="font-extrabold text-xs sm:text-sm text-white truncate">
                 {currentTeacher?.teacherName || 'Not Assigned Yet'}
               </p>
               <p className="text-[11px] text-indigo-200/70 truncate">

@@ -60,8 +60,8 @@ const StaffTab = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         <StatCard
           icon={Users}
           label="Total Faculty & Staff"
@@ -100,7 +100,7 @@ const StaffTab = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
         <SectionCard title="Faculty Directory & Designations">
           {teachers.length > 0 ? (
             <div className="space-y-2 text-xs">

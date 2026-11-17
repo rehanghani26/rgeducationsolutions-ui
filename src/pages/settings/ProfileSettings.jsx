@@ -544,22 +544,22 @@ const ProfileSettings = () => {
         <div className="absolute top-0 right-0 -mt-10 -mr-10 size-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 -mb-10 size-48 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative z-10 p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div className="relative z-10 p-3.5 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
             {/* Left: Avatar & Basic Information */}
-            <div className="flex items-center gap-4 sm:gap-5">
+            <div className="flex items-center gap-3.5 sm:gap-4">
               {/* Avatar with Camera Trigger in edit mode */}
               <div className="relative group shrink-0">
                 {activeAvatar && !avatarError ? (
                   <img
                     src={resolveImageUrl(activeAvatar)}
                     alt={p.name}
-                    className="size-18 sm:size-20 rounded-2xl object-cover ring-3 ring-indigo-400/40 shadow-md transition-transform duration-200"
+                    className="size-14 sm:size-16 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover shrink-0 ring-2 ring-indigo-400/40 shadow-md transition-transform duration-200"
                     onError={() => setAvatarError(true)}
                   />
                 ) : (
                   <div
-                    className={`size-18 sm:size-20 rounded-2xl bg-gradient-to-br ${roleInfo.gradient} flex items-center justify-center text-2xl sm:text-3xl font-black text-white ring-3 ring-indigo-400/30 shadow-md`}
+                    className={`size-14 sm:size-16 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${roleInfo.gradient} flex items-center justify-center text-xl sm:text-2xl font-black text-white ring-2 ring-indigo-400/30 shadow-md`}
                   >
                     {initials}
                   </div>
@@ -579,17 +579,17 @@ const ProfileSettings = () => {
                     setTimeout(() => fileInputRef.current?.click(), 50);
                   }}
                   disabled={uploadingS3}
-                  className="absolute -bottom-1.5 -right-1.5 size-7 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer disabled:opacity-60"
+                  className="absolute -bottom-1 -right-1 size-6 sm:size-7 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer disabled:opacity-60"
                   title="Upload profile photo"
                 >
-                  {uploadingS3 ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
+                  {uploadingS3 ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
                 </button>
               </div>
 
               {/* Title & Metadata */}
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight truncate">
                     {p.name || p.username}
                   </h2>
                   <span

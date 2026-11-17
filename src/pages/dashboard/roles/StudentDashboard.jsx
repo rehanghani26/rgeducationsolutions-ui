@@ -144,9 +144,9 @@ const StudentDashboard = () => {
   const upcomingExamsList = charts?.upcomingExams?.length ? charts.upcomingExams : [];
 
   return (
-    <div className="space-y-6 font-sans text-slate-900 dark:text-slate-100">
-      {/* ─── 4 TOP STAT CARDS ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4 font-sans text-slate-900 dark:text-slate-100">
+      {/* ─── 4 TOP STAT CARDS (2 in one line on mobile) ────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         <StatCard
           icon={Activity}
           label="My Attendance Rate"
@@ -182,11 +182,11 @@ const StudentDashboard = () => {
       </div>
 
       {/* ─── MODULE 1: PERSONAL STUDENT PROFILE IDENTITY CARD ───────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-800/80 dark:bg-[#1C1B1A]">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A]">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-indigo-600/30 flex-shrink-0 border-2 border-indigo-400/20">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 relative z-10">
+          <div className="flex items-center gap-3.5 sm:gap-5 flex-wrap sm:flex-nowrap">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-md shadow-indigo-600/30 flex-shrink-0 border-2 border-indigo-400/20">
               {(user?.photo || user?.avatar || user?.imagesRef?.img) ? (
                 <img
                   src={resolveImageUrl(user.photo || user.avatar || user.imagesRef?.img)}
@@ -202,7 +202,7 @@ const StudentDashboard = () => {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl font-black text-slate-900 dark:text-white sm:text-2xl">{studentProfile.fullName}</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{studentProfile.fullName}</h2>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                   <ShieldCheck size={12} /> {studentProfile.academicStatus}
                 </span>

@@ -59,12 +59,12 @@ const FormInput = forwardRef(
 
     const baseInput = [
       'w-full bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100',
-      'rounded-lg text-xs py-2.5 outline-none transition-all duration-150',
+      'rounded-xl text-xs py-2 outline-none transition-all duration-150',
       'focus:ring-2 placeholder:text-slate-400 dark:placeholder:text-slate-500',
       'disabled:opacity-50 disabled:cursor-not-allowed',
       baseBorder,
-      icon ? 'pl-10 pr-4' : 'px-4',
-      iconRight ? 'pr-10' : '',
+      icon ? 'pl-9 pr-3.5' : 'px-3.5',
+      iconRight ? 'pr-9' : '',
       inputClassName,
     ]
       .filter(Boolean)
@@ -91,7 +91,7 @@ const FormInput = forwardRef(
 
           {readOnly ? (
             <div
-              className={`${baseBorder} rounded-lg px-4 py-2.5 text-xs bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400`}
+              className={`${baseBorder} rounded-xl px-3.5 py-2 text-xs bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400`}
             >
               {value || 'Not specified'}
             </div>

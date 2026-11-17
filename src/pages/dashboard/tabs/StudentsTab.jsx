@@ -74,9 +74,9 @@ const StudentsTab = () => {
   const recentStudents = data?.recentlyAdmittedStudents || [];
 
   return (
-    <div className="space-y-6">
-      {/* Stat Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      {/* Stat Cards Row - 2 in one line on mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         <StatCard
           icon={GraduationCap}
           label="Total Enrolled Students"
@@ -112,7 +112,7 @@ const StudentsTab = () => {
       </div>
 
       {/* Row 1: 3 Rich Visual Graphs */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         {/* Graph 1: Enrollment Growth Area Chart */}
         <SectionCard title="Student Enrollment Growth Trend">
           <div className="h-52">
@@ -244,7 +244,7 @@ const StudentsTab = () => {
       </div>
 
       {/* Row 2: Attendance Rate by Class Level & Recently Admitted Students */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         <div className="lg:col-span-2">
           <SectionCard title="Attendance Rate by Class Level (%)">
             <div className="h-52">

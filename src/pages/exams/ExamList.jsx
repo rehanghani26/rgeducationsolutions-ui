@@ -266,16 +266,16 @@ const ExamList = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Examinations"
         subtitle="Create, schedule, and manage school examinations."
         breadcrumbs={[{ label: "Exams" }]}
         actions={
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/ai-mode?prompt=' + encodeURIComponent('Show all upcoming examinations and their subject papers with prescribed books and timings.'))}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow-sm transition-all"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-semibold py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-lg shadow-sm transition-all cursor-pointer"
               title="Ask RGES AI about exams"
             >
               <Sparkles size={13} className="text-amber-300" />
@@ -284,7 +284,7 @@ const ExamList = () => {
             <CanButton id="CREATE_EXAM">
               <button
                 onClick={() => setShowCreate(true)}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all"
+                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-3.5 rounded-lg shadow-sm transition-all cursor-pointer"
               >
                 <Plus size={14} /> Create Exam
               </button>
@@ -293,7 +293,7 @@ const ExamList = () => {
         }
       />
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {

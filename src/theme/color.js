@@ -582,6 +582,9 @@ export const syncDocumentThemeVariables = (combinationId = ACTIVE_COMBINATION) =
   }
 };
 
+import { typography, spacing } from './typography.js';
+export { typography, spacing };
+
 // Auto-run if running in browser
 if (typeof document !== 'undefined') {
   syncDocumentThemeVariables(ACTIVE_COMBINATION);

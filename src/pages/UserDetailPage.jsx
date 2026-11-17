@@ -372,7 +372,7 @@ const UserDetailPage = () => {
   }
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-4 pb-8">
       {/* ── Breadcrumb & Back Button ────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <button
@@ -389,7 +389,7 @@ const UserDetailPage = () => {
 
       {/* ── Deactivation Alert Banner ────────────────────────────────────────── */}
       {!user.isActive && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs dark:border-rose-900/60 dark:bg-rose-950/40">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-rose-300 bg-rose-50 p-3.5 sm:p-4 text-xs dark:border-rose-900/60 dark:bg-rose-950/40">
           <div className="flex items-center gap-3">
             <XCircle className="h-6 w-6 flex-shrink-0 text-rose-600 dark:text-rose-400" />
             <div>
@@ -404,7 +404,7 @@ const UserDetailPage = () => {
           <button
             type="button"
             onClick={() => setConfirmStatusToggle(true)}
-            className="self-start sm:self-auto rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 active:scale-95"
+            className="self-start sm:self-auto rounded-xl bg-rose-600 px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 active:scale-95"
           >
             Re-enable Account
           </button>
@@ -412,14 +412,14 @@ const UserDetailPage = () => {
       )}
 
       {/* ── Profile Header Banner ───────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-4">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5 md:p-6 shadow-sm dark:border-slate-800 dark:bg-[#1C1B1A]">
+        <div className="flex flex-col gap-4 sm:gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3.5 sm:gap-4">
             {user.avatar || user.photo || user.imagesRef?.img ? (
               <img
                 src={user.avatar || user.photo || user.imagesRef?.img}
                 alt={user.name || user.username}
-                className={`h-20 w-20 flex-shrink-0 rounded-2xl object-cover shadow-lg ring-4 ${roleCfg.ring}`}
+                className={`h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 rounded-2xl object-cover shadow-lg ring-4 ${roleCfg.ring}`}
                 onError={(e) => {
                   e.target.style.display = 'none';
                   const fallback = e.target.parentElement?.querySelector('.avatar-fallback-detail');
@@ -428,15 +428,15 @@ const UserDetailPage = () => {
               />
             ) : null}
             <div
-              className={`avatar-fallback-detail h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl text-2xl font-black shadow-lg ring-4 ${roleCfg.ring} ${roleCfg.avatarBg}`}
+              className={`avatar-fallback-detail h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 items-center justify-center rounded-2xl text-xl sm:text-2xl font-black shadow-lg ring-4 ${roleCfg.ring} ${roleCfg.avatarBg}`}
               style={{ display: user.avatar || user.photo || user.imagesRef?.img ? 'none' : 'flex' }}
             >
               {(user.name || user.username || 'U').charAt(0).toUpperCase()}
             </div>
 
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
                   {user.name}
                 </h1>
                 <span

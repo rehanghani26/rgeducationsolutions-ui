@@ -76,8 +76,8 @@ const TeacherDashboard = () => {
   const assignedClassesText = assignedClasses.join(", ") || "N/A";
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         <StatCard
           icon={BookOpen}
           label="Assigned Classes"
@@ -91,7 +91,7 @@ const TeacherDashboard = () => {
         <StatCard icon={FileText} label="Pending Assessments" value="N/A" sub="Assessments & Homework" iconBg="bg-rose-600/20" iconColor="text-rose-400" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         <div className="lg:col-span-2 space-y-4">
           <SectionCard title={`Today's Teaching Schedule (${todayDay.toUpperCase()})`} action="View Full Timetable" onAction={() => navigate('/timetable')}>
             {displaySchedule.length === 0 ? (
@@ -127,7 +127,7 @@ const TeacherDashboard = () => {
           </SectionCard>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <SectionCard title="Class Teacher Overview">
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between rounded-lg bg-slate-100 p-2.5 dark:bg-slate-800/40">

@@ -151,7 +151,7 @@ export default function CertificatesManagement() {
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-16"
+      className="space-y-4 pb-8"
     >
       {/* Top Header */}
       <PageHeader
@@ -161,7 +161,7 @@ export default function CertificatesManagement() {
       />
 
       {/* Modern Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-900/70 border border-slate-800 rounded-2xl backdrop-blur-md shadow-lg">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-900/70 border border-slate-800 rounded-2xl backdrop-blur-md shadow-lg">
         {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -171,7 +171,7 @@ export default function CertificatesManagement() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer relative ${
+              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition cursor-pointer relative ${
                 isActive
                   ? 'bg-slate-800 text-white shadow-md border border-slate-700/80'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'

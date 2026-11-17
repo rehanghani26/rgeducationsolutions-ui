@@ -49,14 +49,14 @@ export default function VerifyCertificatePage() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col justify-between py-10 px-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col justify-between py-6 sm:py-10 px-3.5 sm:px-6">
       <div className="max-w-xl mx-auto w-full">
         {/* Top Institutional Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-indigo-500/20 border border-sky-500/30 mb-3 shadow-xl shadow-sky-500/10">
-            <ShieldCheck size={32} className="text-sky-400" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-sky-500/20 to-indigo-500/20 border border-sky-500/30 mb-2.5 sm:mb-3 shadow-xl shadow-sky-500/10">
+            <ShieldCheck size={26} className="text-sky-400" />
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight">
             Institutional Verification
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -65,7 +65,7 @@ export default function VerifyCertificatePage() {
         </div>
 
         {/* Status Card */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl backdrop-blur-xl">
           {loading ? (
             <div className="py-12 text-center space-y-3">
               <Loader2 size={32} className="animate-spin text-sky-400 mx-auto" />

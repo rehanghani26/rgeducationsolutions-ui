@@ -47,15 +47,15 @@ const ConfirmDialog = ({
 
   return (
     <Modal open={isShow} onClose={handleCancel} title={null} size="sm">
-      <div className="flex flex-col items-center text-center gap-4 pb-2">
+      <div className="flex flex-col items-center text-center gap-3 sm:gap-4 pb-1">
         {/* Icon badge */}
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${iconBg}`}>
-          <Icon size={28} strokeWidth={2} />
+        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center ${iconBg}`}>
+          <Icon size={22} strokeWidth={2} />
         </div>
 
         {/* Title */}
         <div>
-          <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100">
+          <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">
             {title}
           </h3>
           {message && (

@@ -83,14 +83,14 @@ const FeeDetail = () => {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
               <StatsCard title="Total Fee Assigned" value={formatCurrency(fee?.totalAmount || fee?.amount || 0)} />
               <StatsCard title="Total Paid" value={formatCurrency(fee?.paidAmount || 0)} />
               <StatsCard title="Outstanding Due" value={formatCurrency(fee?.dueAmount || 0)} />
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-4">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Fee Account Details</h4>
               <InfoGrid
                 items={[
@@ -110,7 +110,7 @@ const FeeDetail = () => {
 
       case 'invoices':
         return (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-3">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Generated Invoices</h4>
             <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs">
               <div>

@@ -72,7 +72,7 @@ const withSettingsWrapper = (
     const isStudent = userRole === 'student';
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Unified Subpage Header & Breadcrumb */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200/70 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -530,7 +530,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-3 sm:p-4 min-h-full bg-[var(--surface-1)] border border-[var(--border-soft)] rounded-xl shadow-xs space-y-4">
+    <div className="p-3.5 sm:p-4 min-h-full bg-[var(--surface-1)] border border-[var(--border-soft)] rounded-2xl shadow-xs space-y-4">
       {outlet ? <Outlet context={outletContext} /> : <SettingsOverview />}
     </div>
   );

@@ -74,7 +74,7 @@ const FeeEdit = () => {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Edit Fee Record"
         subtitle={fee?.studentName || student?.name}
@@ -84,7 +84,7 @@ const FeeEdit = () => {
           { label: 'Edit' },
         ]}
       />
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm max-w-lg">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-sm max-w-lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <CurrencyInput
             label="Pending Amount"

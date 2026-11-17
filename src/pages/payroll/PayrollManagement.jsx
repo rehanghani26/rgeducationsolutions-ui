@@ -337,7 +337,7 @@ const PayrollManagement = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-12"
+      className="space-y-4 pb-8"
     >
       {/* Header */}
       <PageHeader
@@ -417,7 +417,7 @@ const PayrollManagement = () => {
       />
 
       {/* Monthly Metrics Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
             Payroll Billing Cycle

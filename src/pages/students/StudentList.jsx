@@ -27,6 +27,7 @@ import {
   FileText,
   Bookmark,
   MoreVertical,
+  Trash2,
 } from "lucide-react";
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
@@ -45,10 +46,12 @@ import StudentForm, {
 } from "./StudentForm.jsx";
 import ResetStudentPasswordModal from "./ResetStudentPasswordModal.jsx";
 import {
+  api,
   getStudents,
   getStudentCredentials,
   createStudent,
   bulkImportStudents,
+  cleanCorruptedStudents,
   exportStudentsCsv,
 } from "../../services";
 import {
@@ -372,6 +375,31 @@ const StudentList = () => {
   });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [activeSession, setActiveSession] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    api
+      .get("/sessions/active")
+      .then((res) => {
+        if (!isMounted) return;
+        const sess = res.data?.session || res.data?.data?.session;
+        if (sess) {
+          setActiveSession(sess);
+          setForm((prev) => ({
+            ...prev,
+            academicYear: sess.sessionName || prev.academicYear || "2026-27",
+            sessionId: sess._id || sess.id || prev.sessionId || null,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not fetch active academic session:", err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Bulk Excel/CSV Import state
   const [showExcelImport, setShowExcelImport] = useState(false);
@@ -442,10 +470,12 @@ const StudentList = () => {
     setTimeout(() => setCopiedField(""), 2000);
   };
 
-  const getInitialStudentForm = () => {
+  const getInitialStudentForm = (sess = activeSession) => {
     const pass = randomPassword();
     return {
       ...blankStudentForm,
+      academicYear: sess?.sessionName || "2026-27",
+      sessionId: sess?._id || sess?.id || null,
       password: pass,
       confirmPassword: pass,
     };
@@ -784,10 +814,24 @@ const StudentList = () => {
       );
     }
 
+    const currentYear = (() => {
+      const yr = new Date().getFullYear();
+      const m = new Date().getMonth();
+      return m >= 3 ? `${yr}-${String(yr + 1).slice(-2)}` : `${yr - 1}-${String(yr).slice(-2)}`;
+    })();
+
+    const sessionName = activeSession?.sessionName || form.academicYear || form.sessionName || currentYear;
+    const sessionId = activeSession?._id || activeSession?.id || form.sessionId || null;
+
     const payloadForm = {
       ...form,
+      academicYear: sessionName,
+      sessionId,
+      sessionName,
       confirmPassword: form.confirmPassword || form.password,
     };
+    // Remove permissions from payload as requested
+    delete payloadForm.permissions;
 
     setSubmitting(true);
     try {
@@ -831,20 +875,222 @@ const StudentList = () => {
     }
   };
 
-  // Download Sample CSV Template — admissionNumber and rollNumber are auto-assigned by server
-  const downloadSampleExcelTemplate = () => {
-    const header =
-      "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password";
-    const sampleClasses = ["cls-9", "cls-10", "cls-11", "cls-12"];
-    const sampleSections = ["sec-a", "sec-b", "sec-c"];
+  // Ensure SheetJS (XLSX) is available in browser
+  const ensureXlsxLoaded = async () => {
+    if (window.XLSX) return window.XLSX;
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[src*="xlsx"]');
+      if (existing && window.XLSX) return resolve(window.XLSX);
+      const script = document.createElement("script");
+      script.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+      script.onload = () => resolve(window.XLSX);
+      script.onerror = () =>
+        reject(
+          new Error(
+            "Failed to load Excel parsing engine. Please verify your internet connection or upload a .csv file."
+          )
+        );
+      document.head.appendChild(script);
+    });
+  };
 
-    let csvContent = header + "\n";
-    for (let i = 1; i <= 10; i++) {
-      const cls = sampleClasses[i % sampleClasses.length];
-      const sec = sampleSections[i % sampleSections.length];
-      csvContent += `Student${i},User${i},Male,2010-05-${String(i).padStart(2, "0")},O+,+91987654${String(i).padStart(4, "0")},+91987654${String(i).padStart(4, "0")},student${i}@school.local,Building ${i} School Road,2026-06-01,${cls},${sec},Parent Of Student${i},+91987654${String(i).padStart(4, "0")},parent${i}@school.local,1234567890${String(i).padStart(2, "0")},Std@2026pass${i}\n`;
+  const formatExcelDate = (val) => {
+    if (!val) return "";
+    if (val instanceof Date && !isNaN(val.getTime())) {
+      return val.toISOString().slice(0, 10);
+    }
+    if (typeof val === "number" && val > 1000 && val < 60000) {
+      const date = new Date((val - (25567 + 2)) * 86400 * 1000);
+      if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+    }
+    const str = String(val).trim();
+    const ddmmyyyy = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (ddmmyyyy) {
+      const [, d, m, y] = ddmmyyyy;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    return str;
+  };
+
+  const isBinaryOrControl = (str) => {
+    if (!str || typeof str !== "string") return false;
+    return /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/.test(str);
+  };
+
+  const normalizeStudentRow = (rowObj) => {
+    const firstName = String(
+      rowObj.firstName || rowObj.first || rowObj.name || ""
+    ).trim();
+    const lastName = String(rowObj.lastName || rowObj.last || "").trim();
+
+    if (
+      !firstName ||
+      isBinaryOrControl(firstName) ||
+      isBinaryOrControl(lastName)
+    ) {
+      return null;
     }
 
+    const lowerFirst = firstName.toLowerCase();
+    if (
+      [
+        "firstname",
+        "first name",
+        "total",
+        "subtotal",
+        "classid",
+        "sectionid",
+        "students",
+        "summary",
+        "count",
+      ].includes(lowerFirst)
+    ) {
+      return null;
+    }
+
+    if (lowerFirst.startsWith("cls-") && !lastName) {
+      return null;
+    }
+
+    if (!/[a-zA-Z0-9\u00C0-\u024F\u0900-\u097F]/.test(firstName)) {
+      return null;
+    }
+
+    let rawClass = String(
+      rowObj.classId || rowObj.class || rowObj.className || ""
+    ).trim();
+    let rawSec = String(
+      rowObj.sectionId || rowObj.section || rowObj.sectionName || ""
+    ).trim();
+
+    const matchedCls = CLASS_OPTIONS.find(
+      (c) =>
+        c.id.toLowerCase() === rawClass.toLowerCase() ||
+        c.name.toLowerCase() === rawClass.toLowerCase() ||
+        c.name.toLowerCase().replace("class ", "") ===
+          rawClass.toLowerCase().replace("cls-", "")
+    );
+    const resolvedClassId = matchedCls ? matchedCls.id : rawClass || "cls-1";
+    const resolvedClassName = matchedCls
+      ? matchedCls.name
+      : rawClass || "Class 1";
+
+    const matchedSec = SECTION_OPTIONS.find(
+      (s) =>
+        s.id.toLowerCase() === rawSec.toLowerCase() ||
+        s.name.toLowerCase() === rawSec.toLowerCase() ||
+        s.name.toLowerCase().replace("section ", "") ===
+          rawSec.toLowerCase().replace("sec-", "")
+    );
+    const resolvedSectionId = matchedSec ? matchedSec.id : rawSec || "sec-a";
+    const resolvedSectionName = matchedSec
+      ? matchedSec.name
+      : rawSec || "Section A";
+
+    return {
+      firstName,
+      lastName,
+      name: `${firstName} ${lastName}`.trim(),
+      gender: rowObj.gender || "Male",
+      dob: formatExcelDate(rowObj.dob),
+      bloodGroup: (rowObj.bloodGroup || "").trim(),
+      contactNumber: String(rowObj.contactNumber || "")
+        .replace(/\.0$/, "")
+        .trim(),
+      alternatePhone: String(rowObj.alternatePhone || "")
+        .replace(/\.0$/, "")
+        .trim(),
+      email: (rowObj.email || "").trim(),
+      address: (rowObj.address || "").trim(),
+      joiningDate:
+        formatExcelDate(rowObj.joiningDate) ||
+        new Date().toISOString().slice(0, 10),
+      classId: resolvedClassId,
+      className: resolvedClassName,
+      class: resolvedClassName,
+      sectionId: resolvedSectionId,
+      sectionName: resolvedSectionName,
+      section: resolvedSectionName,
+      parentName:
+        (rowObj.parentName || "").trim() ||
+        `Guardian of ${firstName} ${lastName}`.trim(),
+      parentContact: String(
+        rowObj.parentContact || rowObj.contactNumber || ""
+      )
+        .replace(/\.0$/, "")
+        .trim(),
+      parentEmail: (rowObj.parentEmail || "").trim(),
+      aadhaarNumber: String(rowObj.aadhaarNumber || "")
+        .replace(/\.0$/, "")
+        .trim(),
+      password: (rowObj.password || "").trim(),
+      academicYear: activeSession?.sessionName || "2026-27",
+      sessionId: activeSession?._id || undefined,
+      sessionName: activeSession?.sessionName || "2026-27",
+    };
+  };
+
+  // Download Sample CSV / Excel Template
+  const downloadSampleExcelTemplate = async (format = "csv") => {
+    const sampleData = [
+      {
+        firstName: "Rahul",
+        lastName: "Sharma",
+        gender: "Male",
+        dob: "2010-05-15",
+        bloodGroup: "O+",
+        contactNumber: "9876543210",
+        alternatePhone: "9876543211",
+        email: "rahul.sharma@school.local",
+        address: "123 School Road, Delhi",
+        joiningDate: "2026-06-01",
+        classId: "cls-10",
+        sectionId: "sec-a",
+        parentName: "Rajesh Sharma",
+        parentContact: "9876543210",
+        parentEmail: "rajesh.sharma@gmail.com",
+        aadhaarNumber: "123456789012",
+        password: "Std@Password123",
+      },
+      {
+        firstName: "Priya",
+        lastName: "Verma",
+        gender: "Female",
+        dob: "2011-08-20",
+        bloodGroup: "B+",
+        contactNumber: "9876543220",
+        alternatePhone: "9876543221",
+        email: "priya.verma@school.local",
+        address: "45 Park Avenue, Delhi",
+        joiningDate: "2026-06-01",
+        classId: "cls-9",
+        sectionId: "sec-b",
+        parentName: "Sunil Verma",
+        parentContact: "9876543220",
+        parentEmail: "sunil.verma@gmail.com",
+        aadhaarNumber: "123456789013",
+        password: "Std@Password123",
+      },
+    ];
+
+    if (format === "xlsx") {
+      try {
+        const XLSX = await ensureXlsxLoaded();
+        const ws = XLSX.utils.json_to_sheet(sampleData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Students");
+        XLSX.writeFile(wb, "Student_Import_Template.xlsx");
+        toast.success("Downloaded Excel template (.xlsx)!");
+        return;
+      } catch (_e) {
+        // Fallback to CSV
+      }
+    }
+
+    const header = Object.keys(sampleData[0]).join(",");
+    const rows = sampleData.map((s) => Object.values(s).join(","));
+    const csvContent = [header, ...rows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -853,7 +1099,7 @@ const StudentList = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("Downloaded student import template (.csv)!");
+    toast.success("Downloaded CSV template (.csv)!");
   };
 
   const handleCopyInstructions = () => {
@@ -865,7 +1111,7 @@ STUDENT BULK CSV / EXCEL IMPORT GUIDE
 firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password
 
 NOTE: admissionNumber and rollNumber are AUTO-ASSIGNED by the server.
-Do NOT include them in your CSV.
+Do NOT include them in your CSV / Excel sheet.
 
 2. FIELD DESCRIPTIONS:
 - firstName     (Required): First name (e.g. Rahul)
@@ -929,128 +1175,165 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
     return result;
   };
 
-  // Handle CSV File Selection & Parse — admission/roll are skipped (auto-assigned by server)
-  const handleFileUpload = (e) => {
+  // Handle Excel / CSV File Selection & Parse
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setImportFileName(file.name);
+    setImporting(true);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const text = event.target.result;
-        const lines = text
-          .split(/\r\n|\n/)
+    try {
+      const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+      let parsedRows = [];
+
+      if (isExcel) {
+        const XLSX = await ensureXlsxLoaded();
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(new Uint8Array(arrayBuffer), {
+          type: "array",
+          cellDates: true,
+        });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawJson = XLSX.utils.sheet_to_json(worksheet, {
+          defval: "",
+          raw: false,
+        });
+
+        if (!rawJson || rawJson.length === 0) {
+          throw new Error("Excel sheet contains no data rows");
+        }
+
+        for (const rawRow of rawJson) {
+          const rowObj = {};
+          Object.entries(rawRow).forEach(([key, val]) => {
+            const cleanKey = String(key).toLowerCase().replace(/[^a-z0-9]/g, "");
+            if (cleanKey.includes("admission") || cleanKey.includes("roll")) return;
+
+            if (cleanKey === "firstname" || cleanKey === "first") rowObj.firstName = val;
+            else if (cleanKey === "lastname" || cleanKey === "last") rowObj.lastName = val;
+            else if (cleanKey === "name" || cleanKey === "studentname") {
+              if (!rowObj.firstName) {
+                const parts = String(val).trim().split(" ");
+                rowObj.firstName = parts[0];
+                rowObj.lastName = parts.slice(1).join(" ");
+              }
+            } else if (cleanKey.includes("email") && !cleanKey.includes("parent") && !cleanKey.includes("guardian")) {
+              rowObj.email = val;
+            } else if (cleanKey === "password" || cleanKey === "pass") {
+              rowObj.password = val;
+            } else if (cleanKey === "gender" || cleanKey === "sex") {
+              rowObj.gender = val;
+            } else if (cleanKey === "dob" || cleanKey === "dateofbirth" || cleanKey === "birth") {
+              rowObj.dob = val;
+            } else if (cleanKey === "bloodgroup" || cleanKey === "blood") {
+              rowObj.bloodGroup = val;
+            } else if (["phone", "contact", "contactnumber", "mobile", "mobilenumber"].includes(cleanKey)) {
+              rowObj.contactNumber = val;
+            } else if (["alternatephone", "alternate", "altphone"].includes(cleanKey)) {
+              rowObj.alternatePhone = val;
+            } else if (cleanKey === "address") {
+              rowObj.address = val;
+            } else if (["joiningdate", "joining", "joined", "admissiondate"].includes(cleanKey)) {
+              rowObj.joiningDate = val;
+            } else if (["classid", "class", "classname", "grade", "standard"].includes(cleanKey)) {
+              rowObj.classId = val;
+            } else if (["sectionid", "section", "sectionname", "sec"].includes(cleanKey)) {
+              rowObj.sectionId = val;
+            } else if (["parentname", "guardian", "parent", "fathername", "mothername"].includes(cleanKey)) {
+              rowObj.parentName = val;
+            } else if (["parentcontact", "parentphone", "parentnumber", "guardiancontact"].includes(cleanKey)) {
+              rowObj.parentContact = val;
+            } else if (["parentemail", "guardianemail"].includes(cleanKey)) {
+              rowObj.parentEmail = val;
+            } else if (cleanKey.includes("aadhaar") || cleanKey.includes("adhar")) {
+              rowObj.aadhaarNumber = val;
+            }
+          });
+
+          const student = normalizeStudentRow(rowObj);
+          if (student) parsedRows.push(student);
+        }
+      } else {
+        // Plain CSV / Text parsing with UTF-8 BOM removal
+        const text = await file.text();
+        const cleanText = text.replace(/^\uFEFF/, "");
+        const lines = cleanText
+          .split(/\r\n|\n|\r/)
           .filter((line) => line.trim() !== "");
+
         if (lines.length < 2) {
-          return toast.error("File is empty or missing data rows");
+          throw new Error("CSV file is empty or missing data rows");
         }
 
         const headers = parseCSVLine(lines[0]);
-        const parsedRows = [];
-
         for (let i = 1; i < lines.length; i++) {
           const cols = parseCSVLine(lines[i]);
-          if (cols.length === 0 || cols.every((c) => c === "")) continue;
+          if (!cols || cols.length === 0 || cols.every((c) => c === "")) continue;
 
           const rowObj = {};
           headers.forEach((h, idx) => {
             const val = (cols[idx] || "").trim();
-            const key = h.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-            // Skip admission number and roll number — server auto-assigns these
+            const key = String(h).toLowerCase().replace(/[^a-z0-9]/g, "");
             if (key.includes("admission") || key.includes("roll")) return;
 
             if (key === "firstname" || key === "first") rowObj.firstName = val;
-            else if (key === "lastname" || key === "last")
-              rowObj.lastName = val;
-            else if (key.includes("email") && !key.includes("parent"))
-              rowObj.email = val;
-            else if (key === "password" || key === "pass")
-              rowObj.password = val;
-            else if (key === "gender") rowObj.gender = val;
-            else if (key === "dob" || key === "dateofbirth" || key === "birth")
-              rowObj.dob = val;
-            else if (key === "bloodgroup" || key === "blood")
-              rowObj.bloodGroup = val;
-            else if (
-              key === "phone" ||
-              key === "contact" ||
-              key === "contactnumber"
-            )
-              rowObj.contactNumber = val;
-            else if (key === "alternatephone" || key === "alternate")
-              rowObj.alternatePhone = val;
-            else if (key === "address") rowObj.address = val;
-            else if (
-              key === "joiningdate" ||
-              key === "joining" ||
-              key === "joined"
-            )
-              rowObj.joiningDate = val;
-            else if (
-              key === "classid" ||
-              key === "class" ||
-              key === "classname"
-            ) {
-              rowObj.classId = val;
-              rowObj.class = val;
-            } else if (
-              key === "sectionid" ||
-              key === "section" ||
-              key === "sectionname"
-            ) {
-              rowObj.sectionId = val;
-              rowObj.section = val;
-            } else if (
-              key === "parentname" ||
-              key === "guardian" ||
-              key === "parent"
-            )
-              rowObj.parentName = val;
-            else if (
-              key === "parentcontact" ||
-              key === "parentphone" ||
-              key === "parentnumber"
-            )
-              rowObj.parentContact = val;
-            else if (key === "parentemail") rowObj.parentEmail = val;
-            else if (key.includes("aadhaar") || key.includes("adhar")) {
-              if (key.includes("pdf") || key.includes("doc")) {
-                rowObj.aadhaarDocument = val;
-              } else {
-                rowObj.aadhaarNumber = val;
+            else if (key === "lastname" || key === "last") rowObj.lastName = val;
+            else if (key === "name" || key === "studentname") {
+              if (!rowObj.firstName) {
+                const parts = val.split(" ");
+                rowObj.firstName = parts[0];
+                rowObj.lastName = parts.slice(1).join(" ");
               }
-            } else if (
-              key.includes("photo") ||
-              key.includes("img") ||
-              key.includes("picture")
-            ) {
-              rowObj.photo = val;
-            }
+            } else if (key.includes("email") && !key.includes("parent") && !key.includes("guardian")) {
+              rowObj.email = val;
+            } else if (key === "password" || key === "pass") rowObj.password = val;
+            else if (key === "gender") rowObj.gender = val;
+            else if (key === "dob" || key === "dateofbirth" || key === "birth") rowObj.dob = val;
+            else if (key === "bloodgroup" || key === "blood") rowObj.bloodGroup = val;
+            else if (["phone", "contact", "contactnumber", "mobile"].includes(key)) rowObj.contactNumber = val;
+            else if (["alternatephone", "alternate", "altphone"].includes(key)) rowObj.alternatePhone = val;
+            else if (key === "address") rowObj.address = val;
+            else if (["joiningdate", "joining", "joined"].includes(key)) rowObj.joiningDate = val;
+            else if (["classid", "class", "classname", "grade"].includes(key)) rowObj.classId = val;
+            else if (["sectionid", "section", "sectionname", "sec"].includes(key)) rowObj.sectionId = val;
+            else if (["parentname", "guardian", "parent", "fathername"].includes(key)) rowObj.parentName = val;
+            else if (["parentcontact", "parentphone", "guardiancontact"].includes(key)) rowObj.parentContact = val;
+            else if (["parentemail", "guardianemail"].includes(key)) rowObj.parentEmail = val;
+            else if (key.includes("aadhaar") || key.includes("adhar")) rowObj.aadhaarNumber = val;
           });
 
           if (!rowObj.firstName && cols[0]) rowObj.firstName = cols[0];
           if (!rowObj.lastName && cols[1]) rowObj.lastName = cols[1];
 
-          if (rowObj.firstName) parsedRows.push(rowObj);
+          const student = normalizeStudentRow(rowObj);
+          if (student) parsedRows.push(student);
         }
-
-        setImportedData(parsedRows);
-        toast.success(
-          `Parsed ${parsedRows.length} student records from ${file.name}`
-        );
-      } catch (err) {
-        toast.error("Failed to parse file. Please verify CSV formatting.");
       }
-    };
-    reader.readAsText(file);
+
+      if (parsedRows.length === 0) {
+        throw new Error(
+          "No valid student rows found in the file. Please check file formatting."
+        );
+      }
+
+      setImportedData(parsedRows);
+      toast.success(
+        `Parsed ${parsedRows.length} valid student records from ${file.name}`
+      );
+    } catch (err) {
+      toast.error(err.message || "Failed to parse file. Please verify formatting.");
+      setImportedData([]);
+    } finally {
+      setImporting(false);
+    }
   };
 
   // Submit parsed rows to backend bulk import API
   const handleExecuteBulkImport = async () => {
     if (importedData.length === 0) {
-      return toast.warning("Please upload a valid CSV file first");
+      return toast.warning("Please upload a valid CSV or Excel file first");
     }
     setImporting(true);
     try {
@@ -1066,13 +1349,34 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
     }
   };
 
+  // Handle Clean Corrupted Records in Database
+  const [cleaningCorrupted, setCleaningCorrupted] = useState(false);
+  const handleCleanCorruptedRecords = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to clean up all corrupted student records created during failed imports? This will purge records with binary or null characters."
+      )
+    ) {
+      return;
+    }
+    setCleaningCorrupted(true);
+    try {
+      await cleanCorruptedStudents();
+      fetchStudentsData();
+    } catch (_err) {
+      // Handled in service
+    } finally {
+      setCleaningCorrupted(false);
+    }
+  };
+
   // If a student is logged in, show their dedicated, comprehensive profile view
   if (isStudent) {
     return <StudentProfileView authUser={user} />;
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Students Directory"
         subtitle="Manage student admissions, profiles, roll numbers, and academic records."
@@ -1617,17 +1921,36 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
                     className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow"
                   >
                     <Copy size={14} />
-                    <span>Copy Full Instructions</span>
+                    <span>Copy Instructions</span>
                   </button>
                   <Button
                     variant="secondary"
                     size="sm"
                     icon={<Download size={14} />}
-                    onClick={downloadSampleExcelTemplate}
+                    onClick={() => downloadSampleExcelTemplate("xlsx")}
+                    className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold border-none shadow"
+                  >
+                    Template (.xlsx)
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={<Download size={14} />}
+                    onClick={() => downloadSampleExcelTemplate("csv")}
                     className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold border-none shadow-md shadow-orange-500/25"
                   >
-                    Download Template (.csv)
+                    Template (.csv)
                   </Button>
+                  <button
+                    type="button"
+                    onClick={handleCleanCorruptedRecords}
+                    disabled={cleaningCorrupted}
+                    className="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[11px] font-bold transition flex items-center gap-1 ml-auto"
+                    title="Purge corrupted binary import records from database"
+                  >
+                    <Trash2 size={13} />
+                    <span>{cleaningCorrupted ? "Purging..." : "Purge Corrupted Records"}</span>
+                  </button>
                 </div>
               </div>
 

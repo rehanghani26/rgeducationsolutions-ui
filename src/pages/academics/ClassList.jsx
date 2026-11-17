@@ -280,7 +280,7 @@ const ClassList = () => {
   const activeSessionObj = sessions.find((s) => (s._id || s.id) === selectedSessionId);
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-4 pb-8">
       {/* ── Top Header ────────────────────────────────────────────────────────── */}
       <PageHeader
         title="Classroom & Session Management"
@@ -298,10 +298,10 @@ const ClassList = () => {
                 setHistoryError('');
                 setHistoryModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/30 transition shadow-xs"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/30 transition shadow-xs"
               title="Lookup student enrollment and progression history across sessions"
             >
-              <GraduationCap size={16} className="text-amber-600 dark:text-amber-400" />
+              <GraduationCap size={15} className="text-amber-600 dark:text-amber-400" />
               <span>Student History Journey</span>
             </button>
 
@@ -312,9 +312,9 @@ const ClassList = () => {
                     setCreateError('');
                     setIsCreateModalOpen(true);
                   }}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-indigo-500/20 transition-all"
+                  className="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-md shadow-indigo-500/20 transition-all cursor-pointer"
                 >
-                  <Plus size={16} />
+                  <Plus size={15} />
                   <span>New ClassRoom</span>
                 </button>
               </CanButton>
@@ -324,15 +324,15 @@ const ClassList = () => {
       />
 
       {/* ── Session Switcher & Quick Search Banner ────────────────────────────── */}
-      <div className="bg-gradient-to-br from-indigo-900/90 via-slate-900 to-slate-950 text-white rounded-3xl p-5 sm:p-6 border border-indigo-700/30 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-900/90 via-slate-900 to-slate-950 text-white rounded-2xl p-3.5 sm:p-4 border border-indigo-700/30 shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
-          <div className="space-y-1.5 max-w-xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+          <div className="space-y-1 max-w-xl">
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-white/10 backdrop-blur-md text-indigo-300 text-sm">
-                <School size={18} />
+              <span className="p-1.5 rounded-xl bg-white/10 backdrop-blur-md text-indigo-300 text-xs">
+                <School size={16} />
               </span>
-              <h3 className="text-lg font-black tracking-tight text-white">
+              <h3 className="text-sm sm:text-base font-bold tracking-tight text-white">
                 Academic Session: {activeSessionObj?.name || 'Active Session'}
               </h3>
               {activeSessionObj?.isCurrent && (

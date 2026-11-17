@@ -56,7 +56,7 @@ export default function AIWelcomeScreen({
           </div>
 
           {/* Greeting Heading */}
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#FFFFFF]">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight text-[#FFFFFF]">
             Hello,{" "}
             <span className="bg-gradient-to-r from-[#FF7900] via-[#FFA000] to-amber-300 bg-clip-text text-transparent">
               {userName}
@@ -64,12 +64,12 @@ export default function AIWelcomeScreen({
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-2 text-base sm:text-lg font-semibold text-[#FFA000]">
+          <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base font-semibold text-[#FFA000]">
             Your intelligent School Management Assistant.
           </p>
 
           {/* Description */}
-          <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-[#A1A1AA]">
+          <p className="mt-1.5 sm:mt-2 max-w-xl text-xs sm:text-[13px] leading-relaxed text-[#A1A1AA]">
             Query students, track attendance, monitor fees, analyze exam
             results, or execute ERP actions instantly using natural language
             commands.

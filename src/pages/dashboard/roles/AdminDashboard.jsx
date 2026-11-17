@@ -13,7 +13,7 @@ const AdminDashboard = ({ activeTab: propActiveTab }) => {
   const activeTab = propActiveTab || outletContext?.activeDashboardTab || localTab;
 
   return (
-    <div className="space-y-6 font-sans text-slate-900 dark:text-slate-100">
+    <div className="space-y-4 font-sans text-slate-900 dark:text-slate-100">
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}

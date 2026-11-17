@@ -183,41 +183,41 @@ const Login = () => {
       <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-orange-500/10 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-500/10 blur-[100px]" />
 
-      <div className="relative z-10 w-full max-w-md bg-[#1C1B1A]/85 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/50">
+      <div className="relative z-10 w-full max-w-md bg-[#1C1B1A]/85 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl shadow-black/50">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <img
             src={rgLogo}
             alt="RG EduCore Logo"
             style={{ mixBlendMode: "screen" }}
-            className="inline-block w-24 h-24 object-contain mb-4"
+            className="inline-block w-18 h-18 sm:w-22 sm:h-22 object-contain mb-3 sm:mb-4"
           />
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
             RG EduCore
           </h2>
-          <p className="text-orange-400/90 text-xs mt-2 uppercase tracking-widest font-bold">
+          <p className="text-orange-400/90 text-[11px] sm:text-xs mt-1.5 sm:mt-2 uppercase tracking-widest font-bold">
             The Core of Smarter School Management
           </p>
         </div>
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-200 text-xs rounded-xl flex items-center gap-2">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-500/10 border border-red-500/20 text-red-200 text-xs rounded-xl flex items-center gap-2">
             <span>⚠️</span>
             <p>{error}</p>
           </div>
         )}
 
         {/* Login Form: ALWAYS visible directly (no self-registration from client ERP) */}
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           {/* Username / Email */}
           <div>
-            <label className="block text-stone-300 text-xs font-semibold mb-2">
+            <label className="block text-stone-300 text-xs font-semibold mb-1.5 sm:mb-2">
               Username / Official Email
             </label>
             <div className="relative">
               <Mail
-                className="absolute left-3.5 top-3.5 text-stone-500"
+                className="absolute left-3.5 top-3 text-stone-500"
                 size={16}
               />
               <input
@@ -226,7 +226,7 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
+                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-2.5 sm:py-3 pl-10 pr-4 text-white text-xs sm:text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
               />
             </div>
             {localErrors.username && (
@@ -238,7 +238,7 @@ const Login = () => {
 
           {/* Password */}
           <div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-1.5 sm:mb-2">
               <label className="block text-stone-300 text-xs font-semibold">
                 Password
               </label>
@@ -255,7 +255,7 @@ const Login = () => {
             </div>
             <div className="relative">
               <Lock
-                className="absolute left-3.5 top-3.5 text-stone-500"
+                className="absolute left-3.5 top-3 text-stone-500"
                 size={16}
               />
               <input
@@ -264,12 +264,12 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
+                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-2.5 sm:py-3 pl-10 pr-10 text-white text-xs sm:text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3.5 text-stone-500 hover:text-stone-300 transition-colors focus:outline-none cursor-pointer"
+                className="absolute right-3.5 top-3 text-stone-500 hover:text-stone-300 transition-colors focus:outline-none cursor-pointer"
                 tabIndex={-1}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -288,7 +288,7 @@ const Login = () => {
             type="button"
             onClick={handleLogin}
             disabled={loading || checkingSchool}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3.5 px-4 rounded-xl text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50 cursor-pointer transition-all"
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs sm:text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50 cursor-pointer transition-all"
           >
             {loading || checkingSchool ? (
               <Loader2 className="animate-spin" size={18} />
@@ -308,7 +308,7 @@ const Login = () => {
       {/* ── Forgot Password Modal ────────────────────────────────────────── */}
       {showForgotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
-          <div className="relative w-full max-w-md bg-[#1C1B1A] border border-orange-500/20 rounded-3xl p-6 shadow-2xl text-left">
+          <div className="relative w-full max-w-md bg-[#1C1B1A] border border-orange-500/20 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl text-left">
             {/* Close button */}
             <button
               type="button"
@@ -317,18 +317,18 @@ const Login = () => {
                 setForgotError("");
                 setForgotMsg("");
               }}
-              className="absolute top-5 right-5 text-stone-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-stone-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
 
             {/* Modal Header */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/25 flex items-center justify-center text-orange-400 shrink-0">
-                <KeyRound size={20} />
+            <div className="flex items-center gap-3 mb-4 sm:mb-5">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-500/15 border border-orange-500/25 flex items-center justify-center text-orange-400 shrink-0">
+                <KeyRound size={18} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Reset Password
                 </h3>
                 <p className="text-stone-400 text-xs">

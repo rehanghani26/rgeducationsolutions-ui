@@ -153,7 +153,7 @@ const FeeList = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Finance & Fees"
         subtitle="Fee collection, student invoices, balance dues, and school expenses."
@@ -163,7 +163,7 @@ const FeeList = () => {
             <CanButton id="ADD_EXPENSE">
               <button
                 onClick={() => setShowExpense(true)}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg border border-slate-700 transition-all cursor-pointer"
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2 px-3.5 rounded-lg border border-slate-700 transition-all cursor-pointer"
               >
                 <Banknote size={14} /> Add Expense
               </button>
@@ -171,7 +171,7 @@ const FeeList = () => {
             <CanButton id="COLLECT_FEE">
               <button
                 onClick={() => setShowCollect(true)}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm transition-all cursor-pointer"
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-3.5 rounded-lg shadow-sm transition-all cursor-pointer"
               >
                 <Plus size={14} /> Collect Fee
               </button>
@@ -180,13 +180,13 @@ const FeeList = () => {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
         <StatsCard title="Fee Collection (Month)" value="₹18,45,000" />
         <StatsCard title="Pending Dues" value="₹2,15,000" />
         <StatsCard title="Collection Rate" value="89.5%" />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {

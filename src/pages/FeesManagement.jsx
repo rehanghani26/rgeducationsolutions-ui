@@ -146,12 +146,12 @@ const FeesManagement = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Financial Accounts</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Audit fee collections, track outstanding invoices, and log operations expenses.</p>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">Financial Accounts</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">Audit fee collections, track outstanding invoices, and log operations expenses.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="primary" icon={<Plus size={14} />} onClick={() => setShowCollectModal(true)}>
@@ -164,18 +164,18 @@ const FeesManagement = () => {
       </div>
 
       {/* KPI Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {[
           { label: 'Fees Collected', value: formatCurrency(totalCollectedFees), icon: <Banknote size={18} />, color: 'emerald' },
           { label: 'Pending Receivables', value: formatCurrency(totalPendingFees), icon: <Landmark size={18} />, color: 'rose' },
           { label: 'Total Expenditures', value: formatCurrency(totalExpenditures), icon: <Receipt size={18} />, color: 'amber' },
           { label: 'Operating Balance', value: formatCurrency(netOperatingIncome), icon: <Wallet size={18} />, color: netOperatingIncome >= 0 ? 'emerald' : 'rose' },
         ].map(({ label, value, icon, color }) => (
-          <div key={label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <div key={label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
             <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">{label}</span>
-            <div className="flex items-center justify-between mt-2">
-              <span className={`text-2xl font-extrabold tracking-tight ${color === 'rose' && netOperatingIncome < 0 && label === 'Operating Balance' ? 'text-rose-500' : ''}`}>{value}</span>
-              <div className={`p-2.5 rounded-xl bg-${color}-500/10 text-${color}-500`}>{icon}</div>
+            <div className="flex items-center justify-between mt-1 sm:mt-2">
+              <span className={`text-lg sm:text-xl md:text-2xl font-black tracking-tight ${color === 'rose' && netOperatingIncome < 0 && label === 'Operating Balance' ? 'text-rose-500' : ''}`}>{value}</span>
+              <div className={`p-2 rounded-xl bg-${color}-500/10 text-${color}-500`}>{icon}</div>
             </div>
           </div>
         ))}

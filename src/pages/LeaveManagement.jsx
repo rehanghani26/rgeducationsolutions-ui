@@ -404,7 +404,7 @@ const LeaveManagement = () => {
   }).length;
 
   return (
-    <div className="space-y-6 pb-16 text-slate-800 dark:text-slate-100 font-sans">
+    <div className="space-y-4 pb-8 text-slate-800 dark:text-slate-100 font-sans">
       <PageHeader
         title="Institutional Leave Management Hub"
         subtitle={
@@ -414,7 +414,7 @@ const LeaveManagement = () => {
         }
         breadcrumbs={[{ label: 'Attendance & HR' }, { label: 'Leave Hub' }]}
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="secondary"
               icon={<RefreshCw size={14} className={loading ? 'animate-spin text-orange-500' : ''} />}
@@ -429,7 +429,7 @@ const LeaveManagement = () => {
                 setApplyTargetType('self');
                 setSelectedApplicant(null);
               }}
-              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+              className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs shadow-md shadow-orange-500/20 transition-all cursor-pointer"
             >
               <Plus size={16} /> Apply for Leave
             </button>
@@ -438,14 +438,14 @@ const LeaveManagement = () => {
       />
 
       {/* 4 Dynamic Metric KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Pending Approvals */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-xs border-l-4 border-l-amber-500">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs border-l-4 border-l-amber-500">
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               Pending Approvals
             </p>
-            <h4 className="text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-center gap-2">
+            <h4 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-1 flex items-center gap-2">
               {pendingCount}
               {pendingCount > 0 && (
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
@@ -455,62 +455,62 @@ const LeaveManagement = () => {
               Awaiting review decision
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-            <Clock size={22} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <Clock size={18} />
           </div>
         </div>
 
         {/* Approved & Synced */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-xs border-l-4 border-l-emerald-500">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs border-l-4 border-l-emerald-500">
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               Approved Applications
             </p>
-            <h4 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{approvedCount}</h4>
+            <h4 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-1">{approvedCount}</h4>
             <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold flex items-center gap-1">
               <ShieldCheck size={12} /> Synced with Attendance
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <CheckCircle size={22} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <CheckCircle size={18} />
           </div>
         </div>
 
         {/* Active on Leave Today */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-xs border-l-4 border-l-indigo-500">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs border-l-4 border-l-indigo-500">
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               On Leave Today
             </p>
-            <h4 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{activeTodayCount}</h4>
+            <h4 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-1">{activeTodayCount}</h4>
             <p className="text-[11px] text-indigo-600 dark:text-indigo-400 mt-0.5 font-bold">
               Marked "L" in daily rosters
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-            <CalendarDays size={22} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <CalendarDays size={18} />
           </div>
         </div>
 
         {/* Disallowed Requests */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-xs border-l-4 border-l-rose-500">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs border-l-4 border-l-rose-500">
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               Rejected / Cancelled
             </p>
-            <h4 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{rejectedCount}</h4>
+            <h4 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-1">{rejectedCount}</h4>
             <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 font-bold">
               Unexcused absences
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-            <XCircle size={22} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <XCircle size={18} />
           </div>
         </div>
       </div>
 
       {/* Directory & Management View */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden p-3.5 sm:p-4 space-y-3 sm:space-y-4">
         {/* Navigation Tabs for Administrative Roles */}
         {isElevated && (
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 overflow-x-auto no-scrollbar">

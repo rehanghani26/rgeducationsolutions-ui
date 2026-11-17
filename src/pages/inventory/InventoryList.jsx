@@ -175,26 +175,26 @@ export default function InventoryList() {
   const budget = summary?.budgetHealth;
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 mb-4">
         <div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <Warehouse className="h-7 w-7 text-primary-600" />
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+            <Warehouse className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
             Dynamic School Inventory Management
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             Real-time stock valuation, inward product intake catalog, and
             Session Budget synchronization.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => handleOpenAddProduct()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-500/20 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-md shadow-primary-500/20 transition-all cursor-pointer"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             New Products
           </button>
         </div>
@@ -202,13 +202,13 @@ export default function InventoryList() {
 
       {/* ─── LIVE BUDGET HEALTH & OVERRUN SAFEGUARD GAUGE ─────────────────────── */}
       {budget && (
-        <div className="bg-gradient-to-r from-blue-500/10 via-primary-500/10 to-indigo-500/10 p-5 rounded-2xl border border-primary-200 dark:border-primary-900/50 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-gradient-to-r from-blue-500/10 via-primary-500/10 to-indigo-500/10 p-3.5 sm:p-4 rounded-2xl border border-primary-200 dark:border-primary-900/50 shadow-sm">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
             <div>
-              <span className="text-xs font-black uppercase text-primary-600 dark:text-primary-400 tracking-wider">
+              <span className="text-[10px] sm:text-xs font-black uppercase text-primary-600 dark:text-primary-400 tracking-wider">
                 Active Session Budget Linkage • {budget.sessionName}
               </span>
-              <h3 className="text-lg font-black text-gray-900 dark:text-white mt-0.5">
+              <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white mt-0.5">
                 School Requirements & Inventory Budget
               </h3>
             </div>

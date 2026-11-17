@@ -7,7 +7,7 @@ import { mockReports } from '../../data/mockData.js';
 
 const ReportsManagement = () => {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-12">
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pb-8">
       <PageHeader
         title="Reports & ERP Analytics"
         subtitle="Institutional performance metrics, financial growth summaries, and academic analytics"
@@ -15,54 +15,54 @@ const ReportsManagement = () => {
         actions={<Button icon={<Download size={16} />}>Export Full ERP Audit PDF</Button>}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3 sm:space-y-4">
           <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <BarChart3 className="text-indigo-500" size={24} />
+            <BarChart3 className="text-indigo-500" size={20} />
             <div>
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">Attendance Summary</h3>
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Attendance Summary</h3>
               <p className="text-xs text-slate-400">{mockReports.attendanceOverview}</p>
             </div>
           </div>
-          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-800 dark:text-emerald-300 text-sm font-semibold">
+          <div className="p-3 sm:p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold">
             ✨ Monthly Student Attendance Metric: N/A
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3 sm:space-y-4">
           <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <TrendingUp className="text-emerald-500" size={24} />
+            <TrendingUp className="text-emerald-500" size={20} />
             <div>
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">Finance & Fee Collection</h3>
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Finance & Fee Collection</h3>
               <p className="text-xs text-slate-400">{mockReports.feeCollectionOverview}</p>
             </div>
           </div>
-          <div className="p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-800 dark:text-indigo-300 text-sm font-semibold">
+          <div className="p-3 sm:p-3.5 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-800 dark:text-indigo-300 text-xs sm:text-sm font-semibold">
             💳 Total Fee Collection Metric: N/A
           </div>
         </div>
       </div>
 
       {/* Top Performers Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 space-y-4">
-        <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
-          <Award className="text-amber-500" size={20} /> Academic Honor Roll & Top Performers
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3.5 sm:p-4 space-y-3 sm:space-y-4">
+        <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <Award className="text-amber-500" size={18} /> Academic Honor Roll & Top Performers
         </h3>
         {mockReports.topPerformers?.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5">
             {mockReports.topPerformers.map((st, i) => (
-              <div key={st.name} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div key={st.name} className="bg-slate-50 dark:bg-slate-800 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-amber-600">Rank #{i + 1}</span>
-                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">{st.name}</h4>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{st.name}</h4>
                   <p className="text-xs text-slate-400">{st.grade}</p>
                 </div>
-                <span className="text-lg font-extrabold text-emerald-600">{st.score}</span>
+                <span className="text-base sm:text-lg font-bold text-emerald-600">{st.score}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="py-8 text-center text-xs text-slate-400">
+          <div className="py-6 sm:py-8 text-center text-xs text-slate-400">
             No academic honor roll records available (N/A)
           </div>
         )}

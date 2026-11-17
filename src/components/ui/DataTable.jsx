@@ -238,7 +238,7 @@ const DataTable = ({
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     {title && (
-                      <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
                         {title}
                       </h3>
                     )}
@@ -328,7 +328,7 @@ const DataTable = ({
                     key={col.key || idx}
                     style={{ width: col.width }}
                     onClick={() => canSort && handleSort(col.key)}
-                    className={`py-2.5 px-3 sm:py-3.5 sm:px-4 ${alignClass} ${col.className || ''} ${mobileCellClass} ${
+                    className={`py-2 px-3 sm:py-2.5 sm:px-4 ${alignClass} ${col.className || ''} ${mobileCellClass} ${
                       canSort ? 'cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400' : ''
                     } transition-colors`}
                   >
@@ -463,7 +463,7 @@ const DataTable = ({
                       return (
                         <td
                           key={col.key || cIdx}
-                          className={`py-2.5 px-3 sm:py-3.5 sm:px-4 ${compact ? 'py-2' : ''} ${alignClass} ${
+                          className={`py-2 px-3 sm:py-2.5 sm:px-4 ${compact ? 'py-1.5' : ''} ${alignClass} ${
                             col.className || ''
                           } ${mobileCellClass} text-slate-700 dark:text-slate-300`}
                         >

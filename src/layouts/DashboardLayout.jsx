@@ -256,12 +256,9 @@ const DashboardLayout = () => {
             <div className="flex flex-col min-w-0">
               <span
                 className="truncate text-sm font-extrabold tracking-tight text-stone-900 dark:text-stone-100"
-                title={schoolName || "RGES School"}
+                title={schoolName || "RGES "}
               >
-                {schoolName || "RGES School"}
-              </span>
-              <span className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 truncate">
-                Campus Management
+                {schoolName || "RGES"}
               </span>
             </div>
           </div>
@@ -417,9 +414,6 @@ const DashboardLayout = () => {
                   >
                     {schoolName || "RGES School"}
                   </span>
-                  <span className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 truncate">
-                    Campus Management
-                  </span>
                 </div>
               </div>
               <button
@@ -550,24 +544,24 @@ const DashboardLayout = () => {
         <header
           className={`sticky top-0 z-20 shrink-0 border-b ${border.default} ${bg.header}`}
         >
-          {/* Main header row */}
-          <div className="flex h-16 items-center justify-between gap-2 px-3 sm:px-5">
+          {/* Main header row - compact h-[52px] on mobile */}
+          <div className="flex h-[52px] sm:h-14 md:h-16 items-center justify-between gap-2 px-3 sm:px-4 md:px-5">
             {/* LEFT: mobile hamburger + school branding (hidden on desktop) */}
-            <div className="flex md:hidden items-center gap-2 min-w-0">
+            <div className="flex md:hidden items-center gap-1.5 sm:gap-2 min-w-0">
               {/* Mobile open-drawer button */}
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(true)}
-                className={`rounded-xl p-2 ${button.ghost} shrink-0`}
+                className={`rounded-lg p-1.5 ${button.ghost} shrink-0`}
                 aria-label="Open sidebar"
               >
-                <Menu size={20} />
+                <Menu size={18} />
               </button>
 
               {/* Mobile: school logo + name shown in header instead of sidebar */}
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <div
-                  className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg overflow-hidden ${bg.active} p-1 border ${border.brand}`}
+                  className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg overflow-hidden ${bg.active} p-1 border ${border.brand}`}
                 >
                   <img
                     src={schoolLogo || rgLogo}
@@ -585,11 +579,8 @@ const DashboardLayout = () => {
                   />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="truncate text-xs font-extrabold text-stone-900 dark:text-stone-100 leading-tight max-w-[120px]">
+                  <span className="truncate text-xs font-bold text-stone-900 dark:text-stone-100 leading-tight max-w-[130px]">
                     {schoolName || "RGES School"}
-                  </span>
-                  <span className="text-[9px] font-semibold text-stone-400 dark:text-stone-500">
-                    Campus Management
                   </span>
                 </div>
               </div>
@@ -608,7 +599,7 @@ const DashboardLayout = () => {
             </div>
 
             {/* RIGHT: Actions */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* AI Mode Button */}
               <button
                 type="button"
@@ -627,11 +618,11 @@ const DashboardLayout = () => {
               {/* Notification Bell */}
               <button
                 type="button"
-                className={`relative rounded-xl p-2 ${button.ghost}`}
+                className={`relative rounded-lg p-1.5 sm:p-2 ${button.ghost}`}
                 title="Notifications"
               >
-                <Bell size={18} />
-                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white">
+                <Bell size={17} />
+                <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white">
                   3
                 </span>
               </button>
@@ -663,16 +654,24 @@ const DashboardLayout = () => {
                   aria-label="User profile menu"
                 >
                   {/* Avatar with online dot */}
-                  <div className="relative flex h-8 w-8 sm:h-8.5 sm:w-8.5 shrink-0 items-center justify-center rounded-full">
+                  <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full" style={{ width: "36px", height: "36px", minWidth: "36px", minHeight: "36px", maxWidth: "36px", maxHeight: "36px" }}>
                     <div
-                      className={`h-full w-full rounded-full overflow-hidden flex items-center justify-center ${bg.brandGradient} text-white font-extrabold text-xs shadow-xs ring-1 ring-orange-500/20`}
+                      className={`h-8 w-8 sm:h-9 sm:w-9 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${bg.brandGradient} text-white font-extrabold text-xs shadow-xs ring-1 ring-orange-500/20`}
+                      style={{ width: "36px", height: "36px", minWidth: "36px", minHeight: "36px", maxWidth: "36px", maxHeight: "36px" }}
                     >
                       {userAvatarUrl && !avatarImgError ? (
                         <img
                           src={userAvatarUrl}
                           alt={user?.name || "User"}
                           onError={() => setAvatarImgError(true)}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover shrink-0 block rounded-full"
+                          style={{
+                            width: "36px",
+                            height: "36px",
+                            maxWidth: "36px",
+                            maxHeight: "36px",
+                            objectFit: "cover",
+                          }}
                         />
                       ) : (
                         <span>{userInitials}</span>
@@ -710,14 +709,19 @@ const DashboardLayout = () => {
                       <div className="flex items-center gap-3">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
                           <div
-                            className={`h-full w-full rounded-full overflow-hidden flex items-center justify-center ${bg.brandGradient} text-white font-black text-sm shadow-sm ring-2 ring-orange-500/20`}
+                            className={`h-10 w-10 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${bg.brandGradient} text-white font-black text-sm shadow-sm ring-2 ring-orange-500/20`}
                           >
                             {userAvatarUrl && !avatarImgError ? (
                               <img
                                 src={userAvatarUrl}
                                 alt={user?.name || "User"}
                                 onError={() => setAvatarImgError(true)}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full max-h-full max-w-full object-cover shrink-0 block rounded-full"
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
                               />
                             ) : (
                               <span>{userInitials}</span>
@@ -787,7 +791,7 @@ const DashboardLayout = () => {
         </header>
 
         {/* Main Content Viewport */}
-        <main className="flex-1 min-h-0 overflow-y-auto bg-[#FAF7F2] p-3 sm:p-5 md:p-6 text-stone-900 dark:bg-[#121214] dark:text-[#FAF7F2]">
+        <main className="flex-1 min-h-0 overflow-y-auto bg-[#FAF7F2] p-2.5 sm:p-4 md:p-5 lg:p-6 text-stone-900 dark:bg-[#121214] dark:text-[#FAF7F2]">
           <ErrorBoundary compact>
             <Outlet context={{ activeDashboardTab, setActiveDashboardTab }} />
           </ErrorBoundary>

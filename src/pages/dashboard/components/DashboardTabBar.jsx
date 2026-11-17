@@ -52,9 +52,12 @@ const DashboardTabBar = ({ activeTab = "home", onTabChange }) => {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-[#EFE8DD] bg-white/90 p-1.5 shadow-sm backdrop-blur-md dark:border-[#2C2927] dark:bg-[#181615]/90 transition-all">
-        {/* Tab Buttons Row */}
-        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-0.5 scrollbar-none flex-1 min-w-0">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-[#EFE8DD] bg-white/95 p-1 sm:p-1.5 shadow-xs backdrop-blur-md dark:border-[#2C2927] dark:bg-[#181615]/95 transition-all">
+        {/* Tab Buttons Row - Scrollbar completely hidden with smooth touch scroll */}
+        <div
+          className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scroll-smooth touch-pan-x flex-1 min-w-0 py-0.5 px-0.5"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           {DASHBOARD_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
@@ -64,10 +67,10 @@ const DashboardTabBar = ({ activeTab = "home", onTabChange }) => {
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange?.(tab.id)}
-                className={`group relative flex items-center gap-2 whitespace-nowrap rounded-xl px-3 sm:px-4 py-2 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                className={`group relative flex h-8 sm:h-9 items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl px-2.5 sm:px-3.5 text-xs font-bold transition-all duration-200 cursor-pointer shrink-0 select-none ${
                   isActive
-                    ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white shadow-md shadow-orange-500/25 scale-[1.01]"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/80 dark:text-stone-400 dark:hover:text-stone-100 dark:hover:bg-stone-800/60"
+                    ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white shadow-sm shadow-orange-500/25 scale-[1.01]"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/90 dark:text-stone-400 dark:hover:text-stone-100 dark:hover:bg-stone-800/60"
                 }`}
                 title={tab.description}
               >
@@ -82,7 +85,7 @@ const DashboardTabBar = ({ activeTab = "home", onTabChange }) => {
                 <span className="truncate">{tab.label}</span>
 
                 {isActive && (
-                  <span className="hidden lg:inline-block h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="hidden sm:inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-pulse" />
                 )}
               </button>
             );

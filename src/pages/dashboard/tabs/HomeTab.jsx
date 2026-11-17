@@ -141,9 +141,9 @@ const HomeTab = () => {
   const feeCollectionAmount = stats?.feeCollectionToday ? formatCurrency(stats.feeCollectionToday) : "₹4,52,300";
 
   return (
-    <div className="space-y-6">
-      {/* ─── 4 MAIN STAT CARDS (FROM REFERENCE IMAGE) ─────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      {/* ─── 4 MAIN STAT CARDS (2 in one line on mobile, 4 on desktop) ────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         {/* Total Students */}
         <StatCard
           icon={Users}
@@ -194,9 +194,9 @@ const HomeTab = () => {
       </div>
 
       {/* ─── MIDDLE ROW: ATTENDANCE, RECENT ACTIVITIES, UPCOMING EVENTS ──────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         {/* Attendance Overview */}
-        <div className="rounded-3xl border border-[#EFE8DD] bg-white p-5 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+        <div className="rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2">
               <span className="flex h-2.5 w-2.5 rounded-full bg-orange-500" />
@@ -260,7 +260,7 @@ const HomeTab = () => {
         </div>
 
         {/* Recent Activities */}
-        <div className="rounded-3xl border border-[#EFE8DD] bg-white p-5 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+        <div className="rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2">
               <Clock size={16} className="text-orange-500" />
@@ -307,7 +307,7 @@ const HomeTab = () => {
         </div>
 
         {/* Upcoming Events */}
-        <div className="rounded-3xl border border-[#EFE8DD] bg-white p-5 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+        <div className="rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-orange-500" />
@@ -359,9 +359,9 @@ const HomeTab = () => {
       </div>
 
       {/* ─── BOTTOM ROW: STUDENTS BY CLASS, FEE TREND, QUICK ACTIONS ────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
         {/* Students by Class */}
-        <div className="rounded-3xl border border-[#EFE8DD] bg-white p-5 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+        <div className="rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-2">
               <Users size={16} className="text-orange-500" />
@@ -439,7 +439,7 @@ const HomeTab = () => {
         </div>
 
         {/* Fee Collection Trend */}
-        <div className="rounded-3xl border border-[#EFE8DD] bg-white p-5 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+        <div className="rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-2">
               <CreditCard size={16} className="text-orange-500" />
@@ -495,7 +495,7 @@ const HomeTab = () => {
         </div>
 
         {/* Quick Actions (From Mockup) */}
-        <div className="rounded-3xl border border-[#EFE8DD] bg-white p-5 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+        <div className="rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
           <div className="flex items-center justify-between pb-3">
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-orange-500" />

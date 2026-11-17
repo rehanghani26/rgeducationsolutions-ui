@@ -87,26 +87,26 @@ const SuspendedPage = () => {
       <div className="pointer-events-none absolute -top-28 -right-28 w-96 h-96 rounded-full bg-red-600/10 blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-28 -left-28 w-96 h-96 rounded-full bg-orange-600/10 blur-[120px]" />
 
-      <div className="relative z-10 w-full max-w-lg bg-[#1a1412]/90 backdrop-blur-2xl border border-red-500/20 rounded-3xl p-8 shadow-2xl shadow-black/80 text-center">
+      <div className="relative z-10 w-full max-w-lg bg-[#1a1412]/90 backdrop-blur-2xl border border-red-500/20 rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl shadow-black/80 text-center">
         {/* Header & Logo */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-5 sm:mb-6">
           <img
             src={rgLogo}
             alt="RG EduCore"
             style={{ mixBlendMode: "screen" }}
-            className="w-20 h-20 object-contain mb-3 opacity-90"
+            className="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-3 opacity-90"
           />
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-2">
             <AlertTriangle size={13} />
             <span>Institution Suspended</span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight">
             School Access Suspended
           </h1>
         </div>
 
         {/* School Identifier Card */}
-        <div className="mb-6 p-4 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-left">
+        <div className="mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-left">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/20 flex items-center justify-center text-red-400">
               <Building2 size={20} />

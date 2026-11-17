@@ -689,14 +689,14 @@ const AcademicManagement = () => {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       {/* Page Header with Action Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">
             Academic Structures
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">
             Configure class levels, sections catalogs, and course subject
             allocations.
           </p>
@@ -705,7 +705,7 @@ const AcademicManagement = () => {
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           <button
             onClick={() => setAdminViewMode("student-preview")}
-            className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all text-xs"
+            className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all text-xs"
             title="Preview how students and parents view Academics"
           >
             <GraduationCap size={15} className="text-indigo-500" />
@@ -718,7 +718,7 @@ const AcademicManagement = () => {
                 <CanButton id="ASSIGN_CURRICULUM">
                   <button
                     onClick={() => handleOpenAssignCurriculum()}
-                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all duration-150 text-xs"
+                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-bold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-md transition-all duration-150 text-xs"
                   >
                     <Plus size={16} />
                     <span>Assign Curriculum & Course</span>
@@ -736,7 +736,7 @@ const AcademicManagement = () => {
                 >
                   <button
                     onClick={openModal}
-                    className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all duration-150 text-xs"
+                    className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-md transition-all duration-150 text-xs"
                   >
                     <Plus size={16} />
                     <span>
@@ -823,7 +823,7 @@ const AcademicManagement = () => {
       </div>
 
       {/* Main card box */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
         {loading ? (
           <Loader
             fullPage

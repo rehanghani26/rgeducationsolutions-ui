@@ -33,10 +33,10 @@ const variantMap = {
 };
 
 const sizeMap = {
-  xs: 'px-2.5 py-1.5 text-[10px] gap-1',
-  sm: 'px-3 py-2 text-xs gap-1.5',
-  md: 'px-4 py-2.5 text-xs gap-2',
-  lg: 'px-5 py-3 text-sm gap-2',
+  xs: 'h-7 px-2.5 py-1 text-[10px] gap-1',
+  sm: 'h-8 sm:h-9 px-3 py-1.5 text-xs gap-1.5',
+  md: 'h-9 sm:h-10 px-3.5 sm:px-4 py-2 text-xs gap-2',
+  lg: 'h-10 sm:h-11 px-4 sm:px-5 py-2.5 text-xs sm:text-sm gap-2',
 };
 
 const iconSizeMap = {

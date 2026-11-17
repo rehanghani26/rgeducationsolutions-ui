@@ -844,7 +844,7 @@ const TimetableManagement = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-12"
+      className="space-y-4 pb-8"
     >
       {/* Page Header */}
       <PageHeader
@@ -852,7 +852,7 @@ const TimetableManagement = () => {
         subtitle="Manage master period timings, teacher allocations, and class schedules dynamically"
         breadcrumbs={[{ label: "Academics" }, { label: "Timetable" }]}
         actions={
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <Button
               variant="outline"
               icon={<Download size={16} />}
@@ -865,7 +865,7 @@ const TimetableManagement = () => {
                 type="button"
                 onClick={handleSaveClassTimetable}
                 disabled={saving}
-                className={`flex items-center gap-2 text-white font-extrabold px-5 py-2.5 rounded-xl shadow-md transition-all text-xs ${
+                className={`flex items-center gap-2 text-white font-bold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-md transition-all text-xs ${
                   isDirty
                     ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-500/20 animate-pulse"
                     : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 shadow-indigo-500/20"
@@ -888,13 +888,13 @@ const TimetableManagement = () => {
       />
 
       {/* Master Period Live timing header info bar */}
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 text-white rounded-2xl p-5 shadow-md shadow-indigo-600/15 dark:shadow-none border border-indigo-500/20 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 text-white rounded-2xl p-3.5 sm:p-4 shadow-md shadow-indigo-600/15 dark:shadow-none border border-indigo-500/20 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-white/20 dark:bg-indigo-500/30 text-white dark:text-indigo-300 text-[10px] font-extrabold uppercase tracking-wider border border-white/25 dark:border-indigo-400/20">
               Live Master Period Structure
             </span>
-            <span className="text-xs text-indigo-200 dark:text-slate-400">
+            <span className="text-xs text-indigo-200 dark:slate-400">
               •
             </span>
             <span className="text-xs font-semibold text-emerald-300 dark:text-emerald-400 flex items-center gap-1">
@@ -902,8 +902,8 @@ const TimetableManagement = () => {
               {masterSchedule?.name || "Regular Day Schedule"}
             </span>
           </div>
-          <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
-            <Clock size={20} className="text-indigo-200 dark:text-indigo-400" />
+          <h3 className="text-sm sm:text-base font-bold tracking-tight flex items-center gap-2">
+            <Clock size={18} className="text-indigo-200 dark:text-indigo-400" />
             School Timing:{" "}
             <span className="text-indigo-100 dark:text-indigo-200">
               {masterSchedule?.schoolStartTime || "07:00"} -{" "}
@@ -912,7 +912,7 @@ const TimetableManagement = () => {
           </h3>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <div className="bg-white/15 dark:bg-white/10 backdrop-blur px-3.5 py-2 rounded-xl border border-white/20 dark:border-white/10 text-xs flex items-center gap-2 font-medium shadow-xs">
             <Layers
               size={15}
@@ -945,7 +945,7 @@ const TimetableManagement = () => {
       </div>
 
       {/* Toolbar: View Switcher & Class & Day Selector */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-between shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex flex-wrap gap-3 sm:gap-4 items-center justify-between shadow-sm">
         {/* Class Selection Dropdown */}
         <div className="flex items-center gap-3 flex-wrap">
           <Filter size={18} className="text-indigo-500" />

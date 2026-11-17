@@ -1,7 +1,7 @@
 import React from "react";
 
 export const SectionCard = ({ title, action, onAction, icon: Icon, children }) => (
-  <div className="space-y-4 rounded-2xl border border-[#EFE8DD] bg-white p-5 shadow-xs transition-all dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
+  <div className="space-y-4 rounded-2xl border border-[#EFE8DD] bg-white p-3.5 sm:p-4 shadow-xs transition-all dark:border-[#2E2C2A] dark:bg-[#1C1B1A]">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         {Icon && <Icon size={16} className="text-orange-500" />}

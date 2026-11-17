@@ -66,7 +66,6 @@ export const STUDENT_MGMT_ROLES = [
   ROLES.HOD,
   ROLES.COORDINATOR,
   ROLES.ACCOUNTANT,
-  ROLES.PARENT,
 ];
 
 /** Roles with teacher management access */

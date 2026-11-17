@@ -277,13 +277,13 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
       />
 
       {/* ─── PROFILE HERO BANNER ──────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-orange-200 dark:border-orange-500/20 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] p-6 md:p-8 shadow-sm dark:shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl border border-orange-200 dark:border-orange-500/20 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] p-3.5 sm:p-5 md:p-6 shadow-xs dark:shadow-xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
           
           {/* Avatar & Core Identity */}
-          <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-orange-500/20 flex-shrink-0 border-2 border-orange-400/40">
+          <div className="flex items-center gap-3.5 sm:gap-5 flex-wrap sm:flex-nowrap">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gradient-to-tr from-orange-500 to-amber-600 flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-md shadow-orange-500/20 flex-shrink-0 border-2 border-orange-400/40">
               {studentPhoto ? (
                 <img
                   src={resolveImageUrl(studentPhoto)}
@@ -298,9 +298,9 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+            <div className="space-y-1.5 sm:space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white">
                   {student?.name || 'Student Name'}
                 </h2>
                 <span className="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">

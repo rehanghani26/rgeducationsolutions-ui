@@ -123,11 +123,6 @@ const StudentEdit = () => {
         AdharRef,
         admissionNumber: student.admissionNumber || '',
         rollNumber: student.rollNumber != null ? student.rollNumber : null,
-        permissions: Array.isArray(student.permissions) && student.permissions.length > 0
-          ? student.permissions
-          : (Array.isArray(student.user?.permissions) && student.user.permissions.length > 0
-            ? student.user.permissions
-            : blankStudentForm.permissions),
         forcePasswordChange: Boolean(student.forcePasswordChange ?? student.user?.forcePasswordChange),
         twoFactorEnabled: Boolean(student.twoFactorEnabled ?? student.user?.twoFactorEnabled),
         loginRestriction: student.loginRestriction || student.user?.loginRestriction || 'none',
@@ -149,6 +144,7 @@ const StudentEdit = () => {
       delete payload.password;
       delete payload.confirmPassword;
     }
+    delete payload.permissions;
 
     try {
       setSubmitting(true);
@@ -179,7 +175,7 @@ const StudentEdit = () => {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title={isEdit ? "Edit Student" : "Add Student"}
         subtitle={isEdit ? student?.name : "Register a new student"}
@@ -189,7 +185,7 @@ const StudentEdit = () => {
           { label: isEdit ? 'Edit' : 'Create' },
         ]}
       />
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-sm">
         <StudentForm
           form={form}
           onChange={setForm}

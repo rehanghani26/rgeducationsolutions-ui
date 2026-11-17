@@ -69,14 +69,14 @@ const AuditLogList = () => {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Audit Logs"
         subtitle="System-wide activity, login history, and admin actions."
         breadcrumbs={[{ label: "Audit Logs" }]}
       />
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {
@@ -140,8 +140,8 @@ const AuditLogList = () => {
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
-        <h3 className="text-sm font-bold mb-4">Recent Activity Timeline</h3>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
+        <h3 className="text-sm sm:text-base font-bold mb-3 sm:mb-4">Recent Activity Timeline</h3>
         <ActivityTimeline logs={logs.slice(0, 15)} />
       </div>
     </div>

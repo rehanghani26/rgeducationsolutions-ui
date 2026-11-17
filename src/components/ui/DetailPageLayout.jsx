@@ -24,17 +24,17 @@ const DetailPageLayout = ({
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-12">
-      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 pb-8">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3 sm:gap-4">
+        <div className="flex items-start gap-3 sm:gap-4">
           {backTo && (
-            <Link to={backTo} className="mt-1 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
+            <Link to={backTo} className="mt-1 p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
               <ArrowLeft size={18} />
             </Link>
           )}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {avatar && (
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-orange-500/20 overflow-hidden flex-shrink-0">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center font-bold text-base sm:text-xl shadow-md shadow-orange-500/20 overflow-hidden flex-shrink-0">
                 {typeof avatar === 'string' &&
                 (avatar.startsWith('http://') ||
                   avatar.startsWith('https://') ||
@@ -47,15 +47,15 @@ const DetailPageLayout = ({
               </div>
             )}
             <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-extrabold">{title}</h1>
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">{title}</h1>
                 {status && <StatusBadge status={status} />}
               </div>
-              {subtitle && <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+              {subtitle && <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {actions}
         </div>
       </div>

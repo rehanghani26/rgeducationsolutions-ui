@@ -192,24 +192,24 @@ const StudentManagement = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-4 pb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Student Management</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Manage student records, credentials, status, and permissions.</p>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">Student Management</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">Manage student records, credentials, status, and permissions.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => toast.success('Student directory export prepared')} className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm">
+          <button onClick={() => toast.success('Student directory export prepared')} className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-xl shadow-sm">
             <FolderDown size={14} /> Export
           </button>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow-sm shadow-orange-500/25">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-xl shadow-sm shadow-orange-500/25">
             <Plus size={14} /> Create Student
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 shadow-sm">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3.5 sm:gap-4">
+        <div className="xl:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
           <div className="relative mb-6">
             <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
             <input

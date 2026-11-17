@@ -2,7 +2,7 @@ import axios from "axios";
 const DEV_URL = "https://inventorymanagementserver-9tyo.onrender.com";
 const LOCAL_URL = "http://localhost:5000";
 
-const baseURL = `${DEV_URL}/api/v1`;
+const baseURL = `${LOCAL_URL}/api/v1`;
 
 const api = axios.create({
   baseURL,
@@ -121,9 +121,7 @@ api.interceptors.response.use(
           error.response?.data?.schoolId ||
           localStorage.getItem("rges_school_id") ||
           "",
-        schoolName:
-          error.response?.data?.schoolName ||
-          "Your School",
+        schoolName: error.response?.data?.schoolName || "Your School",
         message:
           error.response?.data?.message ||
           "Access to your school has been suspended. Please contact RGES Support.",

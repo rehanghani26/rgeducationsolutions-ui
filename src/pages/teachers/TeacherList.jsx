@@ -361,7 +361,7 @@ const TeacherList = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-8">
       <PageHeader
         title="Faculty & Teachers Directory"
         subtitle="Manage faculty members, designations, subjects, and salaries."
@@ -403,7 +403,7 @@ const TeacherList = () => {
         }
       />
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-sm">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {
