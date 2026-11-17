@@ -2,7 +2,7 @@ import axios from "axios";
 const DEV_URL = "https://inventorymanagementserver-9tyo.onrender.com";
 const LOCAL_URL = "http://localhost:5000";
 
-const baseURL = `${LOCAL_URL}/api/v1`;
+const baseURL = `${DEV_URL}/api/v1`;
 
 const api = axios.create({
   baseURL,
