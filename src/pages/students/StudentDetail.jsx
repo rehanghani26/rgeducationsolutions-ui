@@ -1,11 +1,20 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  useParams,
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { format, differenceInYears } from "date-fns";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import { getUserFromStorage } from "../../config/access.jsx";
-import { ROLES, MONTH_OPTIONS as MONTH_NAMES, YEAR_OPTIONS } from "../../constants";
+import {
+  ROLES,
+  MONTH_OPTIONS as MONTH_NAMES,
+  YEAR_OPTIONS,
+} from "../../constants";
 import { formatCurrency, formatDate } from "../../utils";
 import {
   User,
@@ -50,6 +59,11 @@ import {
   Plus,
   MoreHorizontal,
   KeyRound,
+  Building2,
+  HeartHandshake,
+  Compass,
+  Users,
+  GraduationCap,
 } from "lucide-react";
 import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
 import StatusBadge from "../../components/ui/StatusBadge.jsx";
@@ -71,7 +85,10 @@ import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
 import IdCardPreview from "../certificates/components/IdCardPreview.jsx";
 import CertificatePreview from "../certificates/components/CertificatePreview.jsx";
 import IssueModal from "../certificates/components/IssueModal.jsx";
-import { getDefaultTemplate, getIssuedCertificates } from "../certificates/services/documentService.js";
+import {
+  getDefaultTemplate,
+  getIssuedCertificates,
+} from "../certificates/services/documentService.js";
 import { getTemplateById } from "../certificates/templates/registry.js";
 import { getVerificationUrl } from "../certificates/utils/qrUtils.js";
 
@@ -111,9 +128,14 @@ const StudentDetail = () => {
     }
   }, [urlTab]);
 
-  const canManage = [ROLES.SUPER_ADMIN, "superadmin", "school-admin", "admin", "principal", "director"].includes(
-    String(userRole || "").toLowerCase()
-  );
+  const canManage = [
+    ROLES.SUPER_ADMIN,
+    "superadmin",
+    "school-admin",
+    "admin",
+    "principal",
+    "director",
+  ].includes(String(userRole || "").toLowerCase());
 
   const [student, setStudent] = useState(null);
   const [activity, setActivity] = useState({ logs: [], loginHistory: [] });
@@ -139,7 +161,10 @@ const StudentDetail = () => {
       if (mobileTabsRef.current && !mobileTabsRef.current.contains(e.target)) {
         setMobileTabsMenuOpen(false);
       }
-      if (mobileActionsRef.current && !mobileActionsRef.current.contains(e.target)) {
+      if (
+        mobileActionsRef.current &&
+        !mobileActionsRef.current.contains(e.target)
+      ) {
         setMobileActionsOpen(false);
       }
     };
@@ -159,7 +184,14 @@ const StudentDetail = () => {
 
   // Student Attendance State
   const [attendanceData, setAttendanceData] = useState({
-    summary: { totalDays: 0, presentCount: 0, absentCount: 0, lateCount: 0, halfDayCount: 0, percentage: "0%" },
+    summary: {
+      totalDays: 0,
+      presentCount: 0,
+      absentCount: 0,
+      lateCount: 0,
+      halfDayCount: 0,
+      percentage: "0%",
+    },
     logs: [],
   });
   const [attendanceLoading, setAttendanceLoading] = useState(false);
@@ -168,7 +200,9 @@ const StudentDetail = () => {
   const [attStartDate, setAttStartDate] = useState("");
   const [attEndDate, setAttEndDate] = useState("");
   const [attYear, setAttYear] = useState(new Date().getFullYear().toString());
-  const [attMonth, setAttMonth] = useState((new Date().getMonth() + 1).toString());
+  const [attMonth, setAttMonth] = useState(
+    (new Date().getMonth() + 1).toString()
+  );
   const [attStatusFilter, setAttStatusFilter] = useState("all");
 
   // Student Academic Session History
@@ -178,7 +212,12 @@ const StudentDetail = () => {
   // Student Leave Management State
   const [leaveData, setLeaveData] = useState({
     profile: null,
-    summary: { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+    summary: {
+      totalApplications: 0,
+      approvedDays: 0,
+      pendingCount: 0,
+      rejectedCount: 0,
+    },
     activeLeave: null,
     requests: [],
   });
@@ -186,7 +225,8 @@ const StudentDetail = () => {
 
   // Fetch Student Leave Profile and Records (View Only by ID)
   const fetchStudentLeaves = useCallback(async () => {
-    const targetId = student?._id || student?.id || studentId || student?.admissionNumber;
+    const targetId =
+      student?._id || student?.id || studentId || student?.admissionNumber;
     if (!targetId) return;
     setLeaveLoading(true);
     try {
@@ -195,12 +235,18 @@ const StudentDetail = () => {
       if (payload && (payload.success || payload.summary)) {
         setLeaveData({
           profile: payload.applicant || null,
-          summary: payload.summary || { totalApplications: 0, approvedDays: 0, pendingCount: 0, rejectedCount: 0 },
+          summary: payload.summary || {
+            totalApplications: 0,
+            approvedDays: 0,
+            pendingCount: 0,
+            rejectedCount: 0,
+          },
           activeLeave: payload.activeLeave || payload.activeLeaveNow || null,
-          requests: payload.requests || payload.records || [
-            ...(payload.pendingRequests || []),
-            ...(payload.history || []),
-          ],
+          requests: payload.requests ||
+            payload.records || [
+              ...(payload.pendingRequests || []),
+              ...(payload.history || []),
+            ],
         });
       }
     } catch (e) {
@@ -247,7 +293,8 @@ const StudentDetail = () => {
           c.recipientId === String(student?._id) ||
           c.recipientId === String(student?.id) ||
           c.recipientId === String(studentId) ||
-          (student?.admissionNumber && c.recipientIdSnapshot === student.admissionNumber)
+          (student?.admissionNumber &&
+            c.recipientIdSnapshot === student.admissionNumber)
       );
       setStudentCertificates(matched);
       if (matched.length > 0) {
@@ -274,7 +321,12 @@ const StudentDetail = () => {
     } else if (activeTab === "certificates") {
       fetchStudentCertificates();
     }
-  }, [activeTab, fetchDefaultIdTemplate, fetchStudentCertificates, defaultIdTemplate]);
+  }, [
+    activeTab,
+    fetchDefaultIdTemplate,
+    fetchStudentCertificates,
+    defaultIdTemplate,
+  ]);
 
   const handleCertIssuedSuccess = (newCert) => {
     fetchStudentCertificates();
@@ -287,7 +339,8 @@ const StudentDetail = () => {
   };
 
   const fetchAttendance = useCallback(async () => {
-    const targetId = student?._id || student?.id || studentId || student?.admissionNumber;
+    const targetId =
+      student?._id || student?.id || studentId || student?.admissionNumber;
     if (!targetId) return;
 
     setAttendanceLoading(true);
@@ -310,7 +363,20 @@ const StudentDetail = () => {
       const res = await getStudentAttendance(targetId, params);
       if (res?.summary || res?.data?.summary) {
         setAttendanceData({
-          summary: res.summary || res.data?.summary || {
+          summary: res.summary ||
+            res.data?.summary || {
+              totalDays: 0,
+              presentCount: 0,
+              absentCount: 0,
+              lateCount: 0,
+              halfDayCount: 0,
+              percentage: "0%",
+            },
+          logs: res.logs || res.data?.logs || [],
+        });
+      } else {
+        setAttendanceData({
+          summary: {
             totalDays: 0,
             presentCount: 0,
             absentCount: 0,
@@ -318,11 +384,6 @@ const StudentDetail = () => {
             halfDayCount: 0,
             percentage: "0%",
           },
-          logs: res.logs || res.data?.logs || [],
-        });
-      } else {
-        setAttendanceData({
-          summary: { totalDays: 0, presentCount: 0, absentCount: 0, lateCount: 0, halfDayCount: 0, percentage: "0%" },
           logs: [],
         });
       }
@@ -354,7 +415,8 @@ const StudentDetail = () => {
 
   // Fetch Student Academic Session History
   const fetchSessionHistory = useCallback(async () => {
-    const targetId = student?._id || student?.id || studentId || student?.admissionNumber;
+    const targetId =
+      student?._id || student?.id || studentId || student?.admissionNumber;
     if (!targetId) return;
     setSessionHistoryLoading(true);
     try {
@@ -467,15 +529,55 @@ const StudentDetail = () => {
 
   const tabs = [
     { id: "overview", label: "Overview", shortLabel: "Overview", icon: User },
-    { id: "academic", label: "Academic & Enrollment", shortLabel: "Academic", icon: ClipboardList },
-    { id: "id-card", label: "Student ID Card", shortLabel: "ID Card", icon: CreditCard },
-    { id: "certificates", label: "Certificates", shortLabel: "Certificates", icon: Award },
-    { id: "documents", label: "Identity & Documents", shortLabel: "Documents", icon: ShieldCheck },
-    { id: "parent", label: "Guardian & Family", shortLabel: "Family", icon: FileText },
-    { id: "attendance", label: "Attendance", shortLabel: "Attendance", icon: CalendarCheck },
-    { id: "leaves", label: "Leave History", shortLabel: "Leaves", icon: Calendar },
+    {
+      id: "academic",
+      label: "Academic & Enrollment",
+      shortLabel: "Academic",
+      icon: ClipboardList,
+    },
+    {
+      id: "id-card",
+      label: "Student ID Card",
+      shortLabel: "ID Card",
+      icon: CreditCard,
+    },
+    {
+      id: "certificates",
+      label: "Certificates",
+      shortLabel: "Certificates",
+      icon: Award,
+    },
+    {
+      id: "documents",
+      label: "Identity & Documents",
+      shortLabel: "Documents",
+      icon: ShieldCheck,
+    },
+    {
+      id: "parent",
+      label: "Guardian & Family",
+      shortLabel: "Family",
+      icon: FileText,
+    },
+    {
+      id: "attendance",
+      label: "Attendance",
+      shortLabel: "Attendance",
+      icon: CalendarCheck,
+    },
+    {
+      id: "leaves",
+      label: "Leave History",
+      shortLabel: "Leaves",
+      icon: Calendar,
+    },
     { id: "fees", label: "Fee & Dues", shortLabel: "Fees", icon: DollarSign },
-    { id: "activity", label: "Audit Timeline", shortLabel: "Timeline", icon: Activity },
+    {
+      id: "activity",
+      label: "Audit Timeline",
+      shortLabel: "Timeline",
+      icon: Activity,
+    },
   ];
 
   const primaryTabs = tabs.slice(0, 2);
@@ -576,7 +678,10 @@ const StudentDetail = () => {
         </div>
 
         {/* Mobile Actions: Edit Profile + Three-dot dropdown for DB Credentials & ID Card */}
-        <div className="flex sm:hidden items-center gap-1.5 shrink-0" ref={mobileActionsRef}>
+        <div
+          className="flex sm:hidden items-center gap-1.5 shrink-0"
+          ref={mobileActionsRef}
+        >
           <Link
             to={`/students/${studentId}/edit`}
             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 transition shadow-sm"
@@ -649,7 +754,7 @@ const StudentDetail = () => {
       {/* ── Modern Profile Hero Banner ────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
         {/* Decorative Header Gradient Banner */}
-        <div className="h-20 sm:h-44 w-full bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] relative overflow-hidden border-b border-orange-500/20">
+        <div className="h-16 sm:h-36 md:h-44 w-full bg-gradient-to-r from-[#181716] via-[#2A180C] to-[#1F140A] relative overflow-hidden border-b border-orange-500/20">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(249,115,22,0.25),transparent_60%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(245,158,11,0.18),transparent_50%)]" />
           <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
@@ -664,12 +769,12 @@ const StudentDetail = () => {
         </div>
 
         {/* Profile Details overlapping the banner */}
-        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-4 -mt-10 sm:-mt-20">
-          <div className="flex items-center sm:items-end gap-3.5 sm:gap-5 w-full md:w-auto">
+        <div className="px-3 sm:px-6 pb-3 sm:pb-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-3 sm:gap-4 -mt-8 sm:-mt-16 md:-mt-20">
+          <div className="flex items-center sm:items-end gap-3 sm:gap-5 w-full md:w-auto min-w-0">
             {/* Avatar with Click-to-Zoom */}
             <div
               onClick={() => photoUrl && setPhotoModalOpen(true)}
-              className={`relative w-16 h-16 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden border-2 sm:border-4 border-white dark:border-slate-900 shadow-xl sm:shadow-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex-shrink-0 ${
+              className={`relative w-14 h-14 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-xl sm:rounded-2xl overflow-hidden border-2 sm:border-4 border-white dark:border-slate-900 shadow-lg sm:shadow-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex-shrink-0 ${
                 photoUrl ? "cursor-pointer group" : ""
               }`}
             >
@@ -687,8 +792,11 @@ const StudentDetail = () => {
                 </>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-white">
-                  <User size={24} className="sm:hidden text-white/80" />
-                  <User size={40} className="hidden sm:block text-white/80 mb-1" />
+                  <User size={20} className="sm:hidden text-white/80" />
+                  <User
+                    size={40}
+                    className="hidden sm:block text-white/80 mb-1"
+                  />
                   <span className="font-extrabold text-[10px] sm:text-xs uppercase tracking-wider">
                     {student.name?.slice(0, 2) || "ST"}
                   </span>
@@ -709,9 +817,9 @@ const StudentDetail = () => {
             </div>
 
             {/* Student Name & Meta */}
-            <div className="space-y-1 sm:space-y-2 mb-0.5 sm:mb-1 min-w-0 flex-1 sm:flex-initial">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate sm:whitespace-normal">
+            <div className="space-y-1 sm:space-y-2 mb-0.5 sm:mb-1 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h1 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate">
                   {student.name}
                 </h1>
                 <div className="hidden sm:inline-flex">
@@ -725,11 +833,14 @@ const StudentDetail = () => {
                 )}
               </div>
 
-              {/* Mobile-only small class tag */}
-              <div className="flex sm:hidden items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-bold border border-orange-500/20">
-                  <School size={11} className="text-orange-500" />
-                  <span>{classSection}</span>
+              {/* Mobile-only small class tag & status */}
+              <div className="flex sm:hidden items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10.5px] font-bold border border-orange-500/20">
+                  <School size={10} className="text-orange-500 shrink-0" />
+                  <span className="truncate">{classSection}</span>
+                </span>
+                <span className="font-mono text-[10px] font-bold text-slate-500 px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">
+                  {student.admissionNumber || "ADM-N/A"}
                 </span>
               </div>
 
@@ -796,15 +907,23 @@ const StudentDetail = () => {
                   className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/60 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-bold transition border border-slate-200/80 dark:border-slate-700"
                 >
                   <Mail size={13} className="text-orange-500" />
-                  <span className="truncate max-w-[150px]">{student.email}</span>
+                  <span className="truncate max-w-[150px]">
+                    {student.email}
+                  </span>
                 </a>
                 {student.isEmailVerified ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold shadow-xs" title="Student email is verified">
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold shadow-xs"
+                    title="Student email is verified"
+                  >
                     <CheckCircle2 size={13} />
                     <span>Verified</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold shadow-xs" title="Student email is not verified">
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold shadow-xs"
+                    title="Student email is not verified"
+                  >
                     <AlertCircle size={13} />
                     <span>Not Verified</span>
                   </span>
@@ -816,38 +935,38 @@ const StudentDetail = () => {
 
         {/* ── Key Highlights Strip ────────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 divide-x divide-slate-200/80 dark:divide-slate-800 text-xs">
-          <div className="p-3.5 sm:px-6">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-2.5 sm:p-3.5 sm:px-6">
+            <p className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
               Class &amp; Section
             </p>
-            <p className="font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 truncate">
+            <p className="font-extrabold text-xs sm:text-sm text-slate-800 dark:text-slate-100 mt-0.5 truncate">
               {classSection}
             </p>
           </div>
-          <div className="p-3.5 sm:px-6">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-2.5 sm:p-3.5 sm:px-6">
+            <p className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
               Roll Number
             </p>
-            <p className="font-extrabold font-mono text-slate-800 dark:text-slate-100 mt-0.5">
+            <p className="font-extrabold font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-100 mt-0.5 truncate">
               {student.rollNumber != null ? `#${student.rollNumber}` : "—"}
             </p>
           </div>
-          <div className="p-3.5 sm:px-6">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-2.5 sm:p-3.5 sm:px-6">
+            <p className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
               UIDAI Aadhaar
             </p>
-            <p className="font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 truncate">
+            <p className="font-extrabold text-xs sm:text-sm text-slate-800 dark:text-slate-100 mt-0.5 truncate">
               {student.aadhaarNumber
                 ? `•••• ${student.aadhaarNumber.slice(-4)}`
                 : "Not Attached"}
             </p>
           </div>
-          <div className="p-3.5 sm:px-6">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-2.5 sm:p-3.5 sm:px-6">
+            <p className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
               Blood Group
             </p>
-            <div className="flex items-center gap-1 font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">
-              <Droplet size={12} className="fill-current" />
+            <div className="flex items-center gap-1 font-extrabold text-xs sm:text-sm text-rose-600 dark:text-rose-400 mt-0.5 truncate">
+              <Droplet size={11} className="fill-current shrink-0" />
               <span>{student.bloodGroup || "—"}</span>
             </div>
           </div>
@@ -855,145 +974,55 @@ const StudentDetail = () => {
       </div>
 
       {/* ── Navigation Tabs ──────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm">
-        {/* Desktop Tab Row: all tabs visible & scrollable */}
-        <div className="hidden sm:flex items-center gap-1 p-2 border-b border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-xs overflow-hidden">
+        {/* Unified Tab Row: all tabs visible & smoothly scrollable on touch */}
+        <div
+          className="flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 border-b border-slate-200/80 dark:border-slate-800 overflow-x-auto no-scrollbar scroll-smooth touch-pan-x"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap shrink-0 cursor-pointer select-none ${
                   isActive
-                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white shadow-xs shadow-orange-500/25 scale-[1.01]"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/90 dark:hover:bg-slate-800/60"
                 }`}
+                title={tab.label}
               >
-                <Icon size={15} />
+                <Icon
+                  size={14}
+                  className={`shrink-0 ${
+                    isActive
+                      ? "text-white"
+                      : "text-orange-500 dark:text-orange-400"
+                  }`}
+                />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Mobile Tab Row with Three-Dot Overflow */}
-        <div className="flex sm:hidden items-center justify-between gap-1.5 p-2 border-b border-slate-200/80 dark:border-slate-800 relative" ref={mobileTabsRef}>
-          {/* Visible primary tabs (Overview & Academic) */}
-          <div className="flex items-center gap-1 flex-1 min-w-0">
-            {primaryTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    setMobileTabsMenuOpen(false);
-                  }}
-                  className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold transition truncate ${
-                    isActive
-                      ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <Icon size={14} className="shrink-0" />
-                  <span className="truncate">{tab.shortLabel || tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Three-Dot Menu button */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => setMobileTabsMenuOpen((prev) => !prev)}
-              className={`flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold transition ${
-                isOverflowTabActive
-                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 ring-1 ring-orange-500/40"
-                  : mobileTabsMenuOpen
-                  ? "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-300 dark:border-orange-800"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50"
-              }`}
-              aria-expanded={mobileTabsMenuOpen}
-              aria-label="More tabs"
-            >
-              {isOverflowTabActive && activeOverflowTab ? (
-                <>
-                  <activeOverflowTab.icon size={14} className="shrink-0" />
-                  <span className="max-w-[70px] truncate">{activeOverflowTab.shortLabel || activeOverflowTab.label}</span>
-                  <MoreHorizontal size={13} className="shrink-0 opacity-80" />
-                </>
-              ) : (
-                <>
-                  <MoreHorizontal size={15} className="shrink-0" />
-                  <span className="text-[11px] font-bold">More</span>
-                </>
-              )}
-            </button>
-
-            {/* Dropdown Menu */}
-            {mobileTabsMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 max-h-80 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 scrollbar-thin">
-                <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    More Modules
-                  </span>
-                  <span className="text-[9px] font-bold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded-full">
-                    {overflowTabs.length} tabs
-                  </span>
-                </div>
-                {overflowTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        setActiveTab(tab.id);
-                        setMobileTabsMenuOpen(false);
-                      }}
-                      className={`flex w-full items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                        isActive
-                          ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold shadow-xs"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                            isActive ? "bg-white/20 text-white" : "bg-orange-500/10 text-orange-600 dark:text-orange-400"
-                          }`}
-                        >
-                          <Icon size={13} />
-                        </div>
-                        <span className="truncate">{tab.label}</span>
-                      </div>
-                      {isActive && <Check size={14} className="text-white shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Tab Content Area */}
-        <div className="p-6">
+        <div className="p-3 sm:p-5 md:p-6">
           {/* ── 1. OVERVIEW TAB ──────────────────────────────────────────── */}
           {activeTab === "overview" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Government & Identity Proof Card */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/40 dark:from-stone-800/80 dark:via-stone-900 dark:to-orange-950/40 border border-orange-100 dark:border-orange-900/50 shadow-sm space-y-4">
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/40 dark:from-stone-800/80 dark:via-stone-900 dark:to-orange-950/40 border border-orange-100 dark:border-orange-900/50 shadow-sm space-y-3 sm:space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-orange-100/80 dark:border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25">
-                      <ShieldCheck size={20} />
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 shrink-0">
+                      <ShieldCheck size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5 sm:gap-2">
                         Government Identity Verification (UIDAI)
                         {student.aadhaarNumber && (
                           <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
@@ -1001,7 +1030,7 @@ const StudentDetail = () => {
                           </span>
                         )}
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                         Official student identity documents stored securely.
                       </p>
                     </div>
@@ -1012,32 +1041,32 @@ const StudentDetail = () => {
                       <button
                         type="button"
                         onClick={() => setPdfModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shadow-md shadow-orange-500/25 transition cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shadow-md shadow-orange-500/25 transition cursor-pointer"
                       >
-                        <Eye size={14} />
+                        <Eye size={13} />
                         <span>Preview PDF</span>
                       </button>
                       <a
                         href={aadhaarPdfUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition"
                       >
-                        <ExternalLink size={13} />
+                        <ExternalLink size={12} />
                         <span>Browser View</span>
                       </a>
                     </div>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
                   {/* Aadhaar Number */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/80 space-y-1">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/80 space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       12-Digit Aadhaar Number
                     </p>
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-mono font-extrabold text-slate-800 dark:text-slate-100">
+                      <p className="text-xs sm:text-sm font-mono font-extrabold text-slate-800 dark:text-slate-100">
                         {formatAadhaar(student.aadhaarNumber)}
                       </p>
                       {student.aadhaarNumber && (
@@ -1059,7 +1088,7 @@ const StudentDetail = () => {
                   </div>
 
                   {/* Photo Cloudinary Ref */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/80 space-y-1">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/80 space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       Photo Reference ID
                     </p>
@@ -1082,7 +1111,7 @@ const StudentDetail = () => {
                   </div>
 
                   {/* Aadhaar PDF Cloudinary Ref */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/80 space-y-1">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/80 space-y-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       Aadhaar PDF Ref ID
                     </p>
@@ -1110,50 +1139,50 @@ const StudentDetail = () => {
               </div>
 
               {/* Personal & Academic Details Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-6">
                 {/* Personal Information */}
-                <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 sm:space-y-4">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <User size={15} className="text-orange-500" />
                     <span>Personal Information</span>
                   </h4>
 
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         First Name
                       </span>
-                      <p className="font-bold text-slate-800 dark:text-slate-100">
+                      <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
                         {student.firstName ||
                           student.name?.split(" ")[0] ||
                           "—"}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         Last Name
                       </span>
-                      <p className="font-bold text-slate-800 dark:text-slate-100">
+                      <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
                         {student.lastName ||
                           student.name?.split(" ").slice(1).join(" ") ||
                           "—"}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         Date of Birth
                       </span>
-                      <p className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                        <Cake size={13} className="text-orange-500" />
-                        <span>
+                      <p className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5 truncate">
+                        <Cake size={13} className="text-orange-500 shrink-0" />
+                        <span className="truncate">
                           {student.dob
                             ? format(new Date(student.dob), "dd MMM yyyy")
                             : "—"}
-                          {studentAge != null && ` (${studentAge} yrs)`}
+                          {studentAge != null && ` (${studentAge}y)`}
                         </span>
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         Gender
                       </span>
@@ -1161,34 +1190,66 @@ const StudentDetail = () => {
                         {student.gender || "—"}
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         Blood Group
                       </span>
                       <p className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                        <Droplet size={13} className="fill-current" />
+                        <Droplet size={13} className="fill-current shrink-0" />
                         <span>{student.bloodGroup || "—"}</span>
                       </p>
                     </div>
-                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         Admission Date
                       </span>
-                      <p className="font-bold text-slate-800 dark:text-slate-100">
-                        {student.joiningDate
-                          ? format(new Date(student.joiningDate), "dd MMM yyyy")
+                      <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                        {student.admissionDate || student.joiningDate
+                          ? format(new Date(student.admissionDate || student.joiningDate), "dd MMM yyyy")
                           : "—"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                        Student Category
+                      </span>
+                      <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                        {student.studentCategory || "General"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                        Nationality
+                      </span>
+                      <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                        {student.nationality || "Indian"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                        Mother Tongue
+                      </span>
+                      <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                        {student.motherTongue || "Hindi"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                        House / Team
+                      </span>
+                      <p className="font-bold text-orange-600 dark:text-orange-400 truncate">
+                        {student.houseName || "—"}
                       </p>
                     </div>
                   </div>
 
                   {/* Address */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1 text-xs">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1 text-xs">
                     <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                      <MapPin size={12} className="text-orange-500" />
+                      <MapPin size={12} className="text-orange-500 shrink-0" />
                       <span>Residential Address</span>
                     </span>
-                    <p className="font-semibold text-slate-700 dark:text-slate-200">
+                    <p className="font-semibold text-slate-700 dark:text-slate-200 leading-relaxed">
                       {typeof student.address === "object"
                         ? student.address?.street ||
                           student.address?.city ||
@@ -1199,33 +1260,33 @@ const StudentDetail = () => {
                 </div>
 
                 {/* Guardian & Contact Information */}
-                <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3 sm:space-y-4">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <FileText size={15} className="text-orange-500" />
                     <span>Parent &amp; Guardian Information</span>
                   </h4>
 
-                  <div className="space-y-3 text-xs">
-                    <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between">
-                      <div>
+                  <div className="space-y-2.5 sm:space-y-3 text-xs">
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">
                           Guardian / Parent Name
                         </span>
-                        <p className="font-bold text-sm text-slate-900 dark:text-white mt-0.5">
+                        <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-0.5 truncate">
                           {student.parentName || student.parentId?.name || "—"}
                         </p>
                       </div>
-                      <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
-                        <User size={18} />
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold shrink-0">
+                        <User size={16} />
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between">
-                      <div>
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">
                           Primary Contact
                         </span>
-                        <p className="font-bold text-slate-800 dark:text-slate-100 mt-0.5">
+                        <p className="font-bold text-slate-800 dark:text-slate-100 mt-0.5 truncate font-mono">
                           {student.parentContact ||
                             student.parentId?.phone ||
                             student.contactNumber ||
@@ -1235,7 +1296,7 @@ const StudentDetail = () => {
                       {(student.parentContact || student.contactNumber) && (
                         <a
                           href={`tel:${student.parentContact || student.contactNumber}`}
-                          className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold flex items-center gap-1 transition"
+                          className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold flex items-center gap-1 transition shrink-0"
                         >
                           <Phone size={12} />
                           <span>Call</span>
@@ -1243,12 +1304,12 @@ const StudentDetail = () => {
                       )}
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between">
-                      <div>
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">
                           Parent Email
                         </span>
-                        <p className="font-bold text-slate-800 dark:text-slate-100 mt-0.5">
+                        <p className="font-bold text-slate-800 dark:text-slate-100 mt-0.5 truncate font-mono text-[11px] sm:text-xs">
                           {student.parentEmail ||
                             student.parentId?.email ||
                             "—"}
@@ -1257,7 +1318,7 @@ const StudentDetail = () => {
                       {student.parentEmail && (
                         <a
                           href={`mailto:${student.parentEmail}`}
-                          className="px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold flex items-center gap-1 transition"
+                          className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold flex items-center gap-1 transition shrink-0"
                         >
                           <Mail size={12} />
                           <span>Email</span>
@@ -1265,19 +1326,17 @@ const StudentDetail = () => {
                       )}
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between">
-                      <div>
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">
                           Student Portal Login
                         </span>
-                        <p className="font-mono font-bold text-slate-800 dark:text-slate-100 mt-0.5">
+                        <p className="font-mono font-bold text-slate-800 dark:text-slate-100 mt-0.5 truncate text-[11px] sm:text-xs">
                           {student.email || "student@school.local"}
                         </p>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                        {student.status === "active"
-                          ? "Active Account"
-                          : "Inactive"}
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shrink-0">
+                        {student.status === "active" ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </div>
@@ -1288,30 +1347,34 @@ const StudentDetail = () => {
 
           {/* ── 2. ACADEMIC TAB ─────────────────────────────────────────── */}
           {activeTab === "academic" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Enrolled Class & Section Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
-                    Enrolled Class
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs">
+                <div className="p-2.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-0.5 sm:space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase truncate block">
+                    Class
                   </span>
-                  <p className="text-base font-extrabold text-slate-900 dark:text-white">
-                    {className || sessionHistoryData?.student?.className || "Not Assigned"}
+                  <p className="text-xs sm:text-base font-extrabold text-slate-900 dark:text-white truncate">
+                    {className ||
+                      sessionHistoryData?.student?.className ||
+                      "Not Assigned"}
                   </p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
-                    Assigned Section
+                <div className="p-2.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-0.5 sm:space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase truncate block">
+                    Section
                   </span>
-                  <p className="text-base font-extrabold text-slate-900 dark:text-white">
-                    {sectionName || sessionHistoryData?.student?.sectionName || "Not Assigned"}
+                  <p className="text-xs sm:text-base font-extrabold text-slate-900 dark:text-white truncate">
+                    {sectionName ||
+                      sessionHistoryData?.student?.sectionName ||
+                      "Not Assigned"}
                   </p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
-                    Roll Number
+                <div className="p-2.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-0.5 sm:space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase truncate block">
+                    Roll No
                   </span>
-                  <p className="text-base font-mono font-extrabold text-orange-600 dark:text-orange-400">
+                  <p className="text-xs sm:text-base font-mono font-extrabold text-orange-600 dark:text-orange-400 truncate">
                     {student.rollNumber != null
                       ? `#${student.rollNumber}`
                       : "—"}
@@ -1319,22 +1382,139 @@ const StudentDetail = () => {
                 </div>
               </div>
 
+              {/* Academic Profile & Lifecycle Grid */}
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <GraduationCap size={15} className="text-orange-500" />
+                  <span>Academic Profile &amp; Enrollment Status</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 text-xs">
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Admission Date</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.admissionDate || student.joiningDate
+                        ? format(new Date(student.admissionDate || student.joiningDate), "dd MMM yyyy")
+                        : "—"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Admission Type</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.admissionType || "New Admission"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Enrollment Status</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      {student.enrollmentStatus || "Enrolled"}
+                    </span>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">House Allocation</span>
+                    <p className="font-extrabold text-orange-600 dark:text-orange-400 truncate">
+                      {student.houseName || "—"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Student Type</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.studentType || "Day Scholar"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Medium of Instruction</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.mediumOfInstruction || "English"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Special Needs (SEN)</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.specialEducationNeeds || "None"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Career Interest</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.careerInterest || "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transfer Certificate & Previous Schooling Record */}
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Building2 size={15} className="text-orange-500" />
+                  <span>Transfer Certificate (TC) &amp; Prior Schooling History</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 text-xs">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Previous School Name</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.previousSchoolName || "Not Recorded"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Previous Class Studied</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.previousClass || "—"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Previous Education Board</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.previousBoard || "—"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">TC / Migration Number</span>
+                    <p className="font-mono font-extrabold text-orange-600 dark:text-orange-400 truncate">
+                      {student.transferCertificateNumber || "—"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">TC Issue Date</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.transferCertificateDate
+                        ? format(new Date(student.transferCertificateDate), "dd MMM yyyy")
+                        : "—"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">TC Verification</span>
+                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold ${
+                      student.transferCertificateNumber
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-slate-400"
+                    }`}>
+                      {student.transferCertificateNumber ? <CheckCircle2 size={13} /> : null}
+                      <span>{student.transferCertificateNumber ? "TC Recorded" : "No TC Attached"}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Current Class Teacher & Session Card */}
               {sessionHistoryData?.currentClassTeacher && (
-                <div className="p-5 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-200/70 dark:border-orange-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold flex items-center justify-center text-sm shadow-md shrink-0">
-                      {sessionHistoryData.currentClassTeacher.name?.slice(0, 2).toUpperCase() || "CT"}
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-200/70 dark:border-orange-800/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold flex items-center justify-center text-xs sm:text-sm shadow-md shrink-0">
+                      {sessionHistoryData.currentClassTeacher.name
+                        ?.slice(0, 2)
+                        .toUpperCase() || "CT"}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-[10px] uppercase font-bold text-orange-600 dark:text-orange-400 tracking-wider">
                         Assigned Class Teacher
                       </span>
-                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                      <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
                         {sessionHistoryData.currentClassTeacher.name}
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {sessionHistoryData.currentClassTeacher.email || sessionHistoryData.currentClassTeacher.phone || "Faculty Mentor"}
+                      <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+                        {sessionHistoryData.currentClassTeacher.email ||
+                          sessionHistoryData.currentClassTeacher.phone ||
+                          "Faculty Mentor"}
                       </p>
                     </div>
                   </div>
@@ -1352,7 +1532,7 @@ const StudentDetail = () => {
               )}
 
               {/* Session Progression Journey Timeline */}
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-4">
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <Clock size={15} className="text-orange-500" />
@@ -1376,12 +1556,23 @@ const StudentDetail = () => {
                             </span>
                           </div>
                           <div className="flex items-center gap-3 text-slate-500 text-[11px]">
-                            <span>Roll Number: <strong className="text-slate-700 dark:text-slate-300">#{h.rollNumber || "—"}</strong></span>
-                            <span>Status: <strong className="text-emerald-600 dark:text-emerald-400">{h.status || "Enrolled"}</strong></span>
+                            <span>
+                              Roll Number:{" "}
+                              <strong className="text-slate-700 dark:text-slate-300">
+                                #{h.rollNumber || "—"}
+                              </strong>
+                            </span>
+                            <span>
+                              Status:{" "}
+                              <strong className="text-emerald-600 dark:text-emerald-400">
+                                {h.status || "Enrolled"}
+                              </strong>
+                            </span>
                           </div>
                           {h.promotedTo && (
                             <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold pt-1 border-t border-slate-100 dark:border-slate-700">
-                              ↗ Promoted to: {h.promotedTo.className} ({h.promotedTo.sessionName})
+                              ↗ Promoted to: {h.promotedTo.className} (
+                              {h.promotedTo.sessionName})
                             </p>
                           )}
                         </div>
@@ -1390,7 +1581,8 @@ const StudentDetail = () => {
                   </div>
                 ) : (
                   <div className="py-6 text-center text-xs text-slate-400">
-                    No multi-session promotion history recorded yet. Current active session is active.
+                    No multi-session promotion history recorded yet. Current
+                    active session is active.
                   </div>
                 )}
               </div>
@@ -1463,9 +1655,13 @@ const StudentDetail = () => {
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">
                       Active layout:{" "}
                       <strong className="text-slate-700 dark:text-slate-200 font-semibold">
-                        {defaultIdTemplate?.name || resolvedIdTemplate?.name || "Classic Student Card"}
+                        {defaultIdTemplate?.name ||
+                          resolvedIdTemplate?.name ||
+                          "Classic Student Card"}
                       </strong>{" "}
-                      <span className="text-slate-400">({resolvedIdTemplate?.orientation || "portrait"})</span>
+                      <span className="text-slate-400">
+                        ({resolvedIdTemplate?.orientation || "portrait"})
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -1485,27 +1681,42 @@ const StudentDetail = () => {
               </div>
 
               {/* ID Card Display Card */}
-              <div className="p-6 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/80">
+              <div className="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 shadow-sm space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-3 border-b border-slate-100 dark:border-slate-700/80">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-                    <CheckCircle2 size={16} className="text-emerald-500" />
-                    <span>
-                      Live ID Card for {student.name || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "Student"} ({student.admissionNumber || "N/A"})
+                    <CheckCircle2
+                      size={16}
+                      className="text-emerald-500 shrink-0"
+                    />
+                    <span className="truncate">
+                      Live ID Card for{" "}
+                      {student.name ||
+                        `${student.firstName || ""} ${student.lastName || ""}`.trim() ||
+                        "Student"}{" "}
+                      ({student.admissionNumber || "N/A"})
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400">
-                    Format: {defaultIdTemplate?.templateId || "student-id-classic"}
+                  <span className="text-[10px] sm:text-[11px] font-mono text-slate-400">
+                    Format:{" "}
+                    {defaultIdTemplate?.templateId || "student-id-classic"}
                   </span>
                 </div>
 
-                <div className="flex justify-center p-4 bg-slate-950/10 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-slate-800 min-h-[480px]">
+                <div className="flex justify-center p-2.5 sm:p-4 bg-slate-950/10 dark:bg-slate-950/50 rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-800 min-h-[380px] sm:min-h-[480px] overflow-x-auto">
                   <IdCardPreview
                     template={resolvedIdTemplate}
                     recipient={{
                       ...student,
-                      id: student._id || student.id || student.admissionNumber || "N/A",
+                      id:
+                        student._id ||
+                        student.id ||
+                        student.admissionNumber ||
+                        "N/A",
                       admissionNumber: student.admissionNumber || "N/A",
-                      name: student.name || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "N/A",
+                      name:
+                        student.name ||
+                        `${student.firstName || ""} ${student.lastName || ""}`.trim() ||
+                        "N/A",
                       class: className || "N/A",
                       section: sectionName || "N/A",
                       bloodGroup: student.bloodGroup || "N/A",
@@ -1513,7 +1724,8 @@ const StudentDetail = () => {
                       rollNumber: student.rollNumber || "N/A",
                       photo: photoUrl || "",
                       parentName: student.parentName || "N/A",
-                      contactNumber: student.contactNumber || student.phone || "N/A",
+                      contactNumber:
+                        student.contactNumber || student.phone || "N/A",
                     }}
                     recipientType="student"
                     schoolSettings={schoolBranding}
@@ -1527,9 +1739,9 @@ const StudentDetail = () => {
 
           {/* ── 4. CERTIFICATES TAB (STUDENT ISSUED CREDENTIALS) ─────────── */}
           {activeTab === "certificates" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Header card with Issue Certificate button */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50/70 via-slate-50 to-orange-50/40 dark:from-slate-800/80 dark:via-slate-900 dark:to-amber-950/40 border border-amber-100 dark:border-amber-900/50 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-50/70 via-slate-50 to-orange-50/40 dark:from-slate-800/80 dark:via-slate-900 dark:to-amber-950/40 border border-amber-100 dark:border-amber-900/50 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20">
                     <Award size={22} />
@@ -1544,7 +1756,8 @@ const StudentDetail = () => {
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Cryptographically verifiable institutional credentials issued to {student.name}.
+                      Cryptographically verifiable institutional credentials
+                      issued to {student.name}.
                     </p>
                   </div>
                 </div>
@@ -1557,7 +1770,10 @@ const StudentDetail = () => {
                     className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white transition cursor-pointer"
                     title="Refresh Certificates"
                   >
-                    <RefreshCw size={15} className={certsLoading ? "animate-spin" : ""} />
+                    <RefreshCw
+                      size={15}
+                      className={certsLoading ? "animate-spin" : ""}
+                    />
                   </button>
 
                   {canManage && (
@@ -1576,7 +1792,10 @@ const StudentDetail = () => {
               {/* Certificates List & Live Preview Split */}
               {certsLoading ? (
                 <div className="p-12 text-center text-slate-400 flex items-center justify-center gap-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-                  <RefreshCw size={18} className="animate-spin text-amber-500" />
+                  <RefreshCw
+                    size={18}
+                    className="animate-spin text-amber-500"
+                  />
                   <span>Loading issued certificate credentials...</span>
                 </div>
               ) : studentCertificates.length === 0 ? (
@@ -1587,7 +1806,8 @@ const StudentDetail = () => {
                       No Certificates Issued Yet
                     </p>
                     <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                      Official credentials like Bonafide, Character, or Transfer certificates will appear here once issued.
+                      Official credentials like Bonafide, Character, or Transfer
+                      certificates will appear here once issued.
                     </p>
                   </div>
                   {canManage && (
@@ -1642,8 +1862,8 @@ const StudentDetail = () => {
                               {cert.certificateType} Certificate
                             </p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              Session: {cert.academicSession || "2025-2026"} • Issued on{" "}
-                              {formatDate(cert.issuedAt)}
+                              Session: {cert.academicSession || "N/a"} • Issued
+                              on {formatDate(cert.issuedAt)}
                             </p>
                             {cert.purposeNote && (
                               <p className="text-[11px] text-slate-400 italic mt-1 line-clamp-1">
@@ -1654,12 +1874,15 @@ const StudentDetail = () => {
 
                           <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700 text-xs">
                             <span className="text-[10px] text-slate-400 font-medium">
-                              Issued by: {cert.issuedBy?.name || "School Authority"}
+                              Issued by:{" "}
+                              {cert.issuedBy?.name || "School Authority"}
                             </span>
                             <div className="flex items-center gap-1.5">
                               {cert.verificationToken && (
                                 <a
-                                  href={getVerificationUrl(cert.verificationToken)}
+                                  href={getVerificationUrl(
+                                    cert.verificationToken
+                                  )}
                                   target="_blank"
                                   rel="noreferrer"
                                   onClick={(e) => e.stopPropagation()}
@@ -1671,7 +1894,9 @@ const StudentDetail = () => {
                               )}
                               <span
                                 className={`text-[11px] font-bold ${
-                                  isSelected ? "text-amber-500" : "text-slate-400"
+                                  isSelected
+                                    ? "text-amber-500"
+                                    : "text-slate-400"
                                 }`}
                               >
                                 {isSelected ? "Viewing" : "Click to View"}
@@ -1688,7 +1913,10 @@ const StudentDetail = () => {
                     {activeCertPreview ? (
                       <div className="sticky top-6">
                         <CertificatePreview
-                          template={getTemplateById(activeCertPreview.templateId || "certificate-classic")}
+                          template={getTemplateById(
+                            activeCertPreview.templateId ||
+                              "certificate-classic"
+                          )}
                           certificateData={activeCertPreview}
                           schoolSettings={schoolBranding}
                           title={`${activeCertPreview.certificateNumber} — ${activeCertPreview.certificateType}`}
@@ -1707,10 +1935,10 @@ const StudentDetail = () => {
 
           {/* ── 5. IDENTITY & DOCUMENTS TAB ─────────────────────────────── */}
           {activeTab === "documents" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6">
                 {/* 1. Student Official Photograph */}
-                <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-4 shadow-sm">
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-3 sm:space-y-4 shadow-sm">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
@@ -1753,8 +1981,8 @@ const StudentDetail = () => {
                           <span>Stored on Cloudinary CDN</span>
                         </div>
                         <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                          Used dynamically across Vertical ID cards, Modern Amber
-                          ID cards, and official certificates.
+                          Used dynamically across Vertical ID cards, Modern
+                          Amber ID cards, and official certificates.
                         </p>
                         <div className="flex items-center gap-2 pt-1">
                           <button
@@ -1794,7 +2022,7 @@ const StudentDetail = () => {
                 </div>
 
                 {/* 2. Aadhaar Document (PDF) */}
-                <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-4 shadow-sm">
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-3 sm:space-y-4 shadow-sm">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600">
@@ -1918,34 +2146,127 @@ const StudentDetail = () => {
 
           {/* ── 4. GUARDIAN / PARENT TAB ─────────────────────────────────── */}
           {activeTab === "parent" && (
-            <div className="space-y-6">
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-4">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Primary Guardian Profile
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+            <div className="space-y-4 sm:space-y-6">
+              {/* Primary Guardian Card */}
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                  <div className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+                    <User size={16} />
+                  </div>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Primary Guardian Profile
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 text-xs">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase">
                       Guardian Name
                     </span>
-                    <p className="font-extrabold text-slate-900 dark:text-white text-sm">
+                    <p className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm truncate">
                       {student.parentName || "—"}
                     </p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase">
                       Contact Number
                     </span>
-                    <p className="font-extrabold text-slate-900 dark:text-white text-sm">
+                    <p className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm font-mono truncate">
                       {student.parentContact || "—"}
                     </p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase">
                       Email Address
                     </span>
-                    <p className="font-extrabold text-slate-900 dark:text-white text-sm">
+                    <p className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm font-mono truncate">
                       {student.parentEmail || "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Father & Mother Background Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6">
+                {/* Father Profile */}
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                    <div className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+                      <User size={16} />
+                    </div>
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Father Profile
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Occupation</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                        {student.fatherOccupation || "Not Specified"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Organization / Workplace</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                        {student.fatherOrganization || "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mother Profile */}
+                <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                    <div className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+                      <HeartHandshake size={16} />
+                    </div>
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Mother Profile
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Mother Name</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                        {student.motherName || "—"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Contact Number</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white font-mono truncate">
+                        {student.motherContact || "—"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Occupation</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                        {student.motherOccupation || "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alternate Guardian */}
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700">
+                  <div className="p-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+                    <Users size={16} />
+                  </div>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Alternate / Local Guardian Record
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4 text-xs">
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Relationship</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.guardianRelation || "Not Assigned"}
+                    </p>
+                  </div>
+                  <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Alternate Address</span>
+                    <p className="font-extrabold text-slate-900 dark:text-white truncate">
+                      {student.guardianAddress || "—"}
                     </p>
                   </div>
                 </div>
@@ -1955,19 +2276,19 @@ const StudentDetail = () => {
 
           {/* ── 5. ATTENDANCE TAB ────────────────────────────────────────── */}
           {activeTab === "attendance" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Header & Controls */}
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-slate-100 dark:border-slate-700/80">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
-                      <CalendarCheck size={20} />
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-3 border-b border-slate-100 dark:border-slate-700/80">
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold shrink-0">
+                      <CalendarCheck size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                      <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
                         Student Attendance Records
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                         Filter by specific date, date range, or month &amp; year
                       </p>
                     </div>
@@ -1981,10 +2302,18 @@ const StudentDetail = () => {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                       title="Refresh Attendance"
                     >
-                      <RefreshCw size={13} className={attendanceLoading ? "animate-spin text-orange-500" : ""} />
+                      <RefreshCw
+                        size={13}
+                        className={
+                          attendanceLoading
+                            ? "animate-spin text-orange-500"
+                            : ""
+                        }
+                      />
                       <span>Refresh</span>
                     </button>
-                    {(attendanceFilterType !== "all" || attStatusFilter !== "all") && (
+                    {(attendanceFilterType !== "all" ||
+                      attStatusFilter !== "all") && (
                       <button
                         type="button"
                         onClick={handleResetAttendanceFilters}
@@ -1998,9 +2327,9 @@ const StudentDetail = () => {
                 </div>
 
                 {/* Filter Mode Selector */}
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                <div className="space-y-2.5 sm:space-y-3">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
                       Filter Mode:
                     </span>
                     {[
@@ -2013,7 +2342,7 @@ const StudentDetail = () => {
                         key={mode.id}
                         type="button"
                         onClick={() => setAttendanceFilterType(mode.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                        className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-xs font-bold transition ${
                           attendanceFilterType === mode.id
                             ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm shadow-orange-500/25"
                             : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -2130,52 +2459,53 @@ const StudentDetail = () => {
               </div>
 
               {/* KPI Summary Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="p-4 rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300 truncate">
                     Attendance Rate
                   </p>
-                  <p className="text-2xl font-black text-orange-600 dark:text-orange-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-orange-600 dark:text-orange-400 mt-0.5 sm:mt-1 truncate">
                     {attendanceData.summary?.percentage || "0%"}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
                     Total Sessions
                   </p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 sm:mt-1 truncate">
                     {attendanceData.summary?.totalDays || 0}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 truncate">
                     Present Days
                   </p>
-                  <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 sm:mt-1 truncate">
                     {attendanceData.summary?.presentCount || 0}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">
+                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
                     Absent Days
                   </p>
-                  <p className="text-2xl font-black text-rose-700 dark:text-rose-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-rose-700 dark:text-rose-400 mt-0.5 sm:mt-1 truncate">
                     {attendanceData.summary?.absentCount || 0}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
                     Late / Half Day
                   </p>
-                  <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mt-1">
-                    {(attendanceData.summary?.lateCount || 0) + (attendanceData.summary?.halfDayCount || 0)}
+                  <p className="text-lg sm:text-2xl font-black text-amber-700 dark:text-amber-400 mt-0.5 sm:mt-1 truncate">
+                    {(attendanceData.summary?.lateCount || 0) +
+                      (attendanceData.summary?.halfDayCount || 0)}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300 truncate">
                     Approved Leave
                   </p>
-                  <p className="text-2xl font-black text-purple-700 dark:text-purple-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-purple-700 dark:text-purple-400 mt-0.5 sm:mt-1 truncate">
                     {attendanceData.summary?.leaveCount || 0}
                   </p>
                 </div>
@@ -2188,14 +2518,18 @@ const StudentDetail = () => {
                 </div>
               ) : attendanceData.logs.length === 0 ? (
                 <div className="py-16 text-center text-xs text-slate-400 space-y-3 bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                  <CalendarCheck size={36} className="mx-auto text-slate-300 dark:text-slate-600" />
+                  <CalendarCheck
+                    size={36}
+                    className="mx-auto text-slate-300 dark:text-slate-600"
+                  />
                   <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
                     No Attendance Records Found
                   </p>
                   <p className="max-w-xs mx-auto text-slate-500">
                     No attendance logs match your selected filter criteria.
                   </p>
-                  {(attendanceFilterType !== "all" || attStatusFilter !== "all") && (
+                  {(attendanceFilterType !== "all" ||
+                    attStatusFilter !== "all") && (
                     <button
                       type="button"
                       onClick={handleResetAttendanceFilters}
@@ -2209,7 +2543,8 @@ const StudentDetail = () => {
                 <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
                   <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                     <span className="font-bold text-slate-600 dark:text-slate-400">
-                      Showing {attendanceData.logs.length} session{attendanceData.logs.length === 1 ? "" : "s"}
+                      Showing {attendanceData.logs.length} session
+                      {attendanceData.logs.length === 1 ? "" : "s"}
                     </span>
                   </div>
 
@@ -2233,9 +2568,14 @@ const StudentDetail = () => {
                           >
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
-                                <Calendar size={13} className="text-orange-500" />
+                                <Calendar
+                                  size={13}
+                                  className="text-orange-500"
+                                />
                                 <span>
-                                  {log.date ? format(new Date(log.date), "dd MMM yyyy") : "—"}
+                                  {log.date
+                                    ? format(new Date(log.date), "dd MMM yyyy")
+                                    : "—"}
                                 </span>
                                 <span className="text-[11px] font-normal text-slate-400">
                                   ({log.dayName || "School Day"})
@@ -2267,7 +2607,10 @@ const StudentDetail = () => {
                                 <Clock size={12} className="text-slate-400" />
                                 <span>
                                   {log.attendanceTakenDate
-                                    ? format(new Date(log.attendanceTakenDate), "dd MMM yyyy, hh:mm a")
+                                    ? format(
+                                        new Date(log.attendanceTakenDate),
+                                        "dd MMM yyyy, hh:mm a"
+                                      )
                                     : "—"}
                                 </span>
                               </div>
@@ -2276,7 +2619,9 @@ const StudentDetail = () => {
                               {log.classSection || classSection}
                             </td>
                             <td className="py-3 px-4 text-slate-500 dark:text-slate-400 italic">
-                              {log.remarks && log.remarks !== "—" ? log.remarks : "No notes"}
+                              {log.remarks && log.remarks !== "—"
+                                ? log.remarks
+                                : "No notes"}
                             </td>
                             <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">
                               {log.markedBy || "Administration"}
@@ -2350,7 +2695,11 @@ const StudentDetail = () => {
                         Currently On Approved Leave
                       </p>
                       <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">
-                        {leaveData.activeLeave.category} &bull; {leaveData.activeLeave.startDate} to {leaveData.activeLeave.endDate} ({leaveData.activeLeave.totalDays} day{leaveData.activeLeave.totalDays > 1 ? "s" : ""})
+                        {leaveData.activeLeave.category} &bull;{" "}
+                        {leaveData.activeLeave.startDate} to{" "}
+                        {leaveData.activeLeave.endDate} (
+                        {leaveData.activeLeave.totalDays} day
+                        {leaveData.activeLeave.totalDays > 1 ? "s" : ""})
                       </p>
                     </div>
                   </div>
@@ -2371,7 +2720,8 @@ const StudentDetail = () => {
                       Leave History &amp; Applications
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Complete verified leave applications, approval records, and institutional attendance sync.
+                      Complete verified leave applications, approval records,
+                      and institutional attendance sync.
                     </p>
                   </div>
                 </div>
@@ -2383,43 +2733,48 @@ const StudentDetail = () => {
                     disabled={leaveLoading}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                   >
-                    <RefreshCw size={13} className={leaveLoading ? "animate-spin text-purple-600" : ""} />
+                    <RefreshCw
+                      size={13}
+                      className={
+                        leaveLoading ? "animate-spin text-purple-600" : ""
+                      }
+                    />
                     <span>Refresh</span>
                   </button>
                 </div>
               </div>
 
               {/* Dynamic Leave Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+                <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
                     Total Applications
                   </p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 sm:mt-1 truncate">
                     {leaveData.summary?.totalApplications || 0}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-                    Approved Leave Days
+                <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 truncate">
+                    Approved Days
                   </p>
-                  <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 sm:mt-1 truncate">
                     {leaveData.summary?.approvedDays || 0}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 truncate">
                     Pending Requests
                   </p>
-                  <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-amber-700 dark:text-amber-400 mt-0.5 sm:mt-1 truncate">
                     {leaveData.summary?.pendingCount || 0}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 text-center shadow-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">
+                <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 text-center shadow-2xs">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 truncate">
                     Rejected Requests
                   </p>
-                  <p className="text-2xl font-black text-rose-700 dark:text-rose-400 mt-1">
+                  <p className="text-lg sm:text-2xl font-black text-rose-700 dark:text-rose-400 mt-0.5 sm:mt-1 truncate">
                     {leaveData.summary?.rejectedCount || 0}
                   </p>
                 </div>
@@ -2432,12 +2787,16 @@ const StudentDetail = () => {
                 </div>
               ) : (leaveData.requests || []).length === 0 ? (
                 <div className="py-16 text-center text-xs text-slate-400 space-y-3 bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                  <Calendar size={36} className="mx-auto text-slate-300 dark:text-slate-600" />
+                  <Calendar
+                    size={36}
+                    className="mx-auto text-slate-300 dark:text-slate-600"
+                  />
                   <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">
                     No Leave Applications Recorded
                   </p>
                   <p className="max-w-xs mx-auto text-slate-500">
-                    This student does not have any pending or historical leave applications on file.
+                    This student does not have any pending or historical leave
+                    applications on file.
                   </p>
                 </div>
               ) : (
@@ -2457,7 +2816,10 @@ const StudentDetail = () => {
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
                         {leaveData.requests.map((req) => (
-                          <tr key={req._id || req.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                          <tr
+                            key={req._id || req.id}
+                            className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition"
+                          >
                             <td className="py-3 px-4 font-mono font-bold text-purple-600 dark:text-purple-400">
                               {req.leaveCode || req._id?.slice(-6) || "—"}
                             </td>
@@ -2471,13 +2833,20 @@ const StudentDetail = () => {
                             </td>
                             <td className="py-3 px-4">
                               <p className="font-semibold text-slate-700 dark:text-slate-200">
-                                {req.startDate} {req.endDate && req.endDate !== req.startDate ? `to ${req.endDate}` : ""}
+                                {req.startDate}{" "}
+                                {req.endDate && req.endDate !== req.startDate
+                                  ? `to ${req.endDate}`
+                                  : ""}
                               </p>
                               <p className="text-[10px] font-bold text-slate-400">
-                                {req.totalDays} working day{req.totalDays > 1 ? "s" : ""}
+                                {req.totalDays} working day
+                                {req.totalDays > 1 ? "s" : ""}
                               </p>
                             </td>
-                            <td className="py-3 px-4 max-w-[200px] truncate text-slate-600 dark:text-slate-300" title={req.reason}>
+                            <td
+                              className="py-3 px-4 max-w-[200px] truncate text-slate-600 dark:text-slate-300"
+                              title={req.reason}
+                            >
                               {req.reason || "—"}
                             </td>
                             <td className="py-3 px-4">
@@ -2486,10 +2855,10 @@ const StudentDetail = () => {
                                   req.status === "approved"
                                     ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                     : req.status === "pending"
-                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                    : req.status === "rejected"
-                                    ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
-                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20"
+                                      ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                      : req.status === "rejected"
+                                        ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                                        : "bg-slate-500/10 text-slate-600 border-slate-500/20"
                                 }`}
                               >
                                 {req.status}
@@ -2499,16 +2868,25 @@ const StudentDetail = () => {
                               {req.status === "approved" ? (
                                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                                   <CheckCircle2 size={13} />
-                                  <span>{req.attendanceSync?.isSynced ? "Synced to Roster" : "Pending Sync"}</span>
+                                  <span>
+                                    {req.attendanceSync?.isSynced
+                                      ? "Synced to Roster"
+                                      : "Pending Sync"}
+                                  </span>
                                 </span>
                               ) : (
-                                <span className="text-[11px] text-slate-400">—</span>
+                                <span className="text-[11px] text-slate-400">
+                                  —
+                                </span>
                               )}
                             </td>
                             <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
                               {req.reviewRemarks ? (
                                 <span>
-                                  <strong className="text-slate-700 dark:text-slate-300">{req.reviewedBy?.name || "Admin"}:</strong> {req.reviewRemarks}
+                                  <strong className="text-slate-700 dark:text-slate-300">
+                                    {req.reviewedBy?.name || "Admin"}:
+                                  </strong>{" "}
+                                  {req.reviewRemarks}
                                 </span>
                               ) : (
                                 "—"
@@ -2693,6 +3071,5 @@ const StudentDetail = () => {
     </div>
   );
 };
-
 
 export default StudentDetail;

@@ -141,9 +141,9 @@ const HomeTab = () => {
   const feeCollectionAmount = stats?.feeCollectionToday ? formatCurrency(stats.feeCollectionToday) : "₹4,52,300";
 
   return (
-    <div className="space-y-4">
-      {/* ─── 4 MAIN STAT CARDS (2 in one line on mobile, 4 on desktop) ────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      {/* ─── 4 MAIN STAT CARDS (2 per row on mobile, 4 on desktop) ────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5 md:gap-4">
         {/* Total Students */}
         <StatCard
           icon={Users}

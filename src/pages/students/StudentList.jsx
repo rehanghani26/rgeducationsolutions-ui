@@ -111,7 +111,7 @@ const StudentAvatar = ({ row }) => {
   const showImage = Boolean(photo && !imgError);
 
   return (
-    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-gradient-to-br from-orange-500 to-amber-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm border border-orange-200/50 dark:border-orange-800/40 select-none">
+    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-orange-500 to-amber-600 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-2xs sm:shadow-sm border border-orange-200/50 dark:border-orange-800/40 select-none">
       {showImage ? (
         <img
           src={photo}
@@ -121,7 +121,7 @@ const StudentAvatar = ({ row }) => {
           loading="lazy"
         />
       ) : (
-        <span className="uppercase tracking-wider font-extrabold text-[11px] sm:text-xs text-white">
+        <span className="uppercase tracking-wider font-extrabold text-[10px] sm:text-xs text-white">
           {initials}
         </span>
       )}
@@ -1004,14 +1004,35 @@ const StudentList = () => {
       email: (rowObj.email || "").trim(),
       address: (rowObj.address || "").trim(),
       joiningDate:
-        formatExcelDate(rowObj.joiningDate) ||
+        formatExcelDate(rowObj.admissionDate || rowObj.joiningDate) ||
         new Date().toISOString().slice(0, 10),
+      // ── 1. Admission & Previous School (Fields 1-8) ──
+      admissionDate:
+        formatExcelDate(rowObj.admissionDate || rowObj.joiningDate) ||
+        new Date().toISOString().slice(0, 10),
+      admissionType: (rowObj.admissionType || "New Admission").trim(),
+      previousSchoolName: (rowObj.previousSchoolName || "").trim(),
+      previousClass: (rowObj.previousClass || "").trim(),
+      previousBoard: (rowObj.previousBoard || "").trim(),
+      transferCertificateNumber: String(rowObj.transferCertificateNumber || "").trim().toUpperCase(),
+      transferCertificateDate: formatExcelDate(rowObj.transferCertificateDate),
+      enrollmentStatus: (rowObj.enrollmentStatus || "Enrolled").trim(),
+      // ── 2. Academic & Student Profile (Fields 9-16) ──
+      houseName: (rowObj.houseName || "").trim(),
+      studentCategory: (rowObj.studentCategory || "General").trim(),
+      nationality: (rowObj.nationality || "Indian").trim(),
+      motherTongue: (rowObj.motherTongue || "Hindi").trim(),
+      mediumOfInstruction: (rowObj.mediumOfInstruction || "English").trim(),
+      studentType: (rowObj.studentType || "Day Scholar").trim(),
+      specialEducationNeeds: (rowObj.specialEducationNeeds || "None").trim(),
+      careerInterest: (rowObj.careerInterest || "").trim(),
       classId: resolvedClassId,
       className: resolvedClassName,
       class: resolvedClassName,
       sectionId: resolvedSectionId,
       sectionName: resolvedSectionName,
       section: resolvedSectionName,
+      // ── 3. Family & Guardian (Fields 17-23) ──
       parentName:
         (rowObj.parentName || "").trim() ||
         `Guardian of ${firstName} ${lastName}`.trim(),
@@ -1021,6 +1042,13 @@ const StudentList = () => {
         .replace(/\.0$/, "")
         .trim(),
       parentEmail: (rowObj.parentEmail || "").trim(),
+      fatherOccupation: (rowObj.fatherOccupation || "").trim(),
+      fatherOrganization: (rowObj.fatherOrganization || "").trim(),
+      motherName: (rowObj.motherName || "").trim(),
+      motherContact: String(rowObj.motherContact || "").replace(/\.0$/, "").trim(),
+      motherOccupation: (rowObj.motherOccupation || "").trim(),
+      guardianRelation: (rowObj.guardianRelation || "").trim(),
+      guardianAddress: (rowObj.guardianAddress || "").trim(),
       aadhaarNumber: String(rowObj.aadhaarNumber || "")
         .replace(/\.0$/, "")
         .trim(),
@@ -1044,12 +1072,34 @@ const StudentList = () => {
         alternatePhone: "9876543211",
         email: "rahul.sharma@school.local",
         address: "123 School Road, Delhi",
-        joiningDate: "2026-06-01",
+        admissionDate: "2026-04-05",
+        admissionType: "New Admission",
+        previousSchoolName: "Delhi Public School",
+        previousClass: "Class 9",
+        previousBoard: "CBSE",
+        transferCertificateNumber: "TC-2026-1024",
+        transferCertificateDate: "2026-03-28",
+        enrollmentStatus: "Enrolled",
+        houseName: "Blue House",
+        studentCategory: "General",
+        nationality: "Indian",
+        motherTongue: "Hindi",
+        mediumOfInstruction: "English",
+        studentType: "Day Scholar",
+        specialEducationNeeds: "None",
+        careerInterest: "Engineering",
         classId: "cls-10",
         sectionId: "sec-a",
         parentName: "Rajesh Sharma",
         parentContact: "9876543210",
         parentEmail: "rajesh.sharma@gmail.com",
+        fatherOccupation: "Business",
+        fatherOrganization: "ABC Enterprises",
+        motherName: "Neha Sharma",
+        motherContact: "9876543212",
+        motherOccupation: "Teacher",
+        guardianRelation: "Father",
+        guardianAddress: "Delhi",
         aadhaarNumber: "123456789012",
         password: "Std@Password123",
       },
@@ -1063,12 +1113,34 @@ const StudentList = () => {
         alternatePhone: "9876543221",
         email: "priya.verma@school.local",
         address: "45 Park Avenue, Delhi",
-        joiningDate: "2026-06-01",
+        admissionDate: "2026-04-10",
+        admissionType: "Transfer",
+        previousSchoolName: "St. Xavier High School",
+        previousClass: "Class 8",
+        previousBoard: "ICSE",
+        transferCertificateNumber: "TC-2026-1055",
+        transferCertificateDate: "2026-03-30",
+        enrollmentStatus: "Enrolled",
+        houseName: "Red House",
+        studentCategory: "OBC",
+        nationality: "Indian",
+        motherTongue: "Hindi",
+        mediumOfInstruction: "English",
+        studentType: "Day Scholar",
+        specialEducationNeeds: "None",
+        careerInterest: "Medicine",
         classId: "cls-9",
         sectionId: "sec-b",
         parentName: "Sunil Verma",
         parentContact: "9876543220",
         parentEmail: "sunil.verma@gmail.com",
+        fatherOccupation: "Doctor",
+        fatherOrganization: "City Hospital",
+        motherName: "Sunita Verma",
+        motherContact: "9876543222",
+        motherOccupation: "Professor",
+        guardianRelation: "Mother",
+        guardianAddress: "Delhi",
         aadhaarNumber: "123456789013",
         password: "Std@Password123",
       },
@@ -1108,29 +1180,51 @@ STUDENT BULK CSV / EXCEL IMPORT GUIDE
 ================================================
 
 1. CSV HEADER LINE (Paste in Row 1 of your file):
-firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password
+firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,admissionDate,admissionType,previousSchoolName,previousClass,previousBoard,transferCertificateNumber,transferCertificateDate,enrollmentStatus,houseName,studentCategory,nationality,motherTongue,mediumOfInstruction,studentType,specialEducationNeeds,careerInterest,classId,sectionId,parentName,parentContact,parentEmail,fatherOccupation,fatherOrganization,motherName,motherContact,motherOccupation,guardianRelation,guardianAddress,aadhaarNumber,password
 
 NOTE: admissionNumber and rollNumber are AUTO-ASSIGNED by the server.
 Do NOT include them in your CSV / Excel sheet.
 
 2. FIELD DESCRIPTIONS:
-- firstName     (Required): First name (e.g. Rahul)
-- lastName      (Required): Last name (e.g. Sharma)
-- classId       (Required): Class ID from reference below (e.g. cls-10)
-- sectionId     (Required): Section ID from reference below (e.g. sec-a)
-- gender        (Optional): Male / Female / Other
-- dob           (Optional): YYYY-MM-DD (e.g. 2011-05-15)
-- bloodGroup    (Optional): e.g. O+, A+, B+
-- contactNumber (Optional): Student phone number
-- alternatePhone(Optional): Alternate phone
-- email         (Optional): Student email (auto-provisioned if blank)
-- address       (Optional): Full address
-- joiningDate   (Optional): YYYY-MM-DD
-- parentName    (Optional): Parent / Guardian name
-- parentContact (Optional): Parent phone
-- parentEmail   (Optional): Parent email
-- aadhaarNumber (Optional): 12-digit Aadhaar
-- password      (Optional): Login password (auto-generated if blank)
+- firstName                  (Required): First name (e.g. Rahul)
+- lastName                   (Required): Last name (e.g. Sharma)
+- classId                    (Required): Class ID from reference below (e.g. cls-10)
+- sectionId                  (Required): Section ID from reference below (e.g. sec-a)
+- gender                     (Optional): Male / Female / Other
+- dob                        (Optional): YYYY-MM-DD (e.g. 2011-05-15)
+- bloodGroup                 (Optional): e.g. O+, A+, B+
+- contactNumber              (Optional): Student phone number
+- alternatePhone             (Optional): Alternate phone
+- email                      (Optional): Student email (auto-provisioned if blank)
+- address                    (Optional): Full address
+- admissionDate              (Optional): Admission date (YYYY-MM-DD)
+- admissionType              (Optional): New Admission / Transfer / Re-admission
+- previousSchoolName         (Optional): Prior school name
+- previousClass              (Optional): Class studied before
+- previousBoard              (Optional): CBSE / ICSE / State Board / Other
+- transferCertificateNumber  (Optional): TC Number (e.g. TC-2026-1024)
+- transferCertificateDate    (Optional): TC Issue Date (YYYY-MM-DD)
+- enrollmentStatus           (Optional): Enrolled / Pending / Withdrawn / Transferred
+- houseName                  (Optional): Red House / Blue House / Green House / Yellow House
+- studentCategory            (Optional): General / OBC / SC / ST / EWS
+- nationality                (Optional): e.g. Indian
+- motherTongue               (Optional): Primary language (e.g. Hindi)
+- mediumOfInstruction        (Optional): English / Hindi
+- studentType                (Optional): Day Scholar / Boarding
+- specialEducationNeeds      (Optional): None / ADHD / Dyslexia / Physical / Other
+- careerInterest             (Optional): Future career interest (e.g. Engineering)
+- parentName                 (Optional): Parent / Guardian name
+- parentContact              (Optional): Parent phone
+- parentEmail                (Optional): Parent email
+- fatherOccupation           (Optional): Father's occupation
+- fatherOrganization         (Optional): Father's workplace
+- motherName                 (Optional): Mother's full name
+- motherContact              (Optional): Mother's phone
+- motherOccupation           (Optional): Mother's occupation
+- guardianRelation           (Optional): Alternate guardian relation (e.g. Uncle)
+- guardianAddress            (Optional): Alternate guardian address
+- aadhaarNumber              (Optional): 12-digit Aadhaar
+- password                   (Optional): Login password (auto-generated if blank)
 
 3. VALID CLASS IDs:
 ${CLASS_OPTIONS.map((c) => `- ${c.name.padEnd(12)} => classId: "${c.id}"`).join("\n")}
@@ -1144,7 +1238,7 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
 
   const handleCopyHeaderLine = () => {
     const header =
-      "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password";
+      "firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,admissionDate,admissionType,previousSchoolName,previousClass,previousBoard,transferCertificateNumber,transferCertificateDate,enrollmentStatus,houseName,studentCategory,nationality,motherTongue,mediumOfInstruction,studentType,specialEducationNeeds,careerInterest,classId,sectionId,parentName,parentContact,parentEmail,fatherOccupation,fatherOrganization,motherName,motherContact,motherOccupation,guardianRelation,guardianAddress,aadhaarNumber,password";
     navigator.clipboard.writeText(header);
     toast.success("CSV Header line copied to clipboard!");
   };
@@ -1173,6 +1267,104 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
     }
     result.push(cur.trim().replace(/^"|"$/g, ""));
     return result;
+  };
+
+  const mapColumnToRowObj = (rawKey, val, rowObj) => {
+    const cleanKey = String(rawKey || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (
+      cleanKey.includes("admissionnumber") ||
+      cleanKey.includes("admissionno") ||
+      cleanKey.includes("rollnumber") ||
+      cleanKey.includes("rollno") ||
+      cleanKey === "roll"
+    ) {
+      return;
+    }
+
+    if (cleanKey === "firstname" || cleanKey === "first") rowObj.firstName = val;
+    else if (cleanKey === "lastname" || cleanKey === "last") rowObj.lastName = val;
+    else if (cleanKey === "name" || cleanKey === "studentname") {
+      if (!rowObj.firstName) {
+        const parts = String(val).trim().split(" ");
+        rowObj.firstName = parts[0];
+        rowObj.lastName = parts.slice(1).join(" ");
+      }
+    } else if (cleanKey.includes("email") && !cleanKey.includes("parent") && !cleanKey.includes("guardian")) {
+      rowObj.email = val;
+    } else if (cleanKey === "password" || cleanKey === "pass") {
+      rowObj.password = val;
+    } else if (cleanKey === "gender" || cleanKey === "sex") {
+      rowObj.gender = val;
+    } else if (cleanKey === "dob" || cleanKey === "dateofbirth" || cleanKey === "birth") {
+      rowObj.dob = val;
+    } else if (cleanKey === "bloodgroup" || cleanKey === "blood") {
+      rowObj.bloodGroup = val;
+    } else if (["phone", "contact", "contactnumber", "mobile", "mobilenumber"].includes(cleanKey)) {
+      rowObj.contactNumber = val;
+    } else if (["alternatephone", "alternate", "altphone"].includes(cleanKey)) {
+      rowObj.alternatePhone = val;
+    } else if (cleanKey === "address") {
+      rowObj.address = val;
+    } else if (["admissiondate", "joiningdate", "joining", "joined"].includes(cleanKey)) {
+      rowObj.admissionDate = val;
+      rowObj.joiningDate = val;
+    } else if (cleanKey === "admissiontype") {
+      rowObj.admissionType = val;
+    } else if (["previousschoolname", "previousschool", "priorschool"].includes(cleanKey)) {
+      rowObj.previousSchoolName = val;
+    } else if (["previousclass", "priorclass"].includes(cleanKey)) {
+      rowObj.previousClass = val;
+    } else if (["previousboard", "priorboard"].includes(cleanKey)) {
+      rowObj.previousBoard = val;
+    } else if (["transfercertificatenumber", "tcnumber", "tcno", "transfercertificate"].includes(cleanKey)) {
+      rowObj.transferCertificateNumber = val;
+    } else if (["transfercertificatedate", "tcdate"].includes(cleanKey)) {
+      rowObj.transferCertificateDate = val;
+    } else if (cleanKey === "enrollmentstatus") {
+      rowObj.enrollmentStatus = val;
+    } else if (["housename", "house"].includes(cleanKey)) {
+      rowObj.houseName = val;
+    } else if (["studentcategory", "category"].includes(cleanKey)) {
+      rowObj.studentCategory = val;
+    } else if (cleanKey === "nationality") {
+      rowObj.nationality = val;
+    } else if (cleanKey === "mothertongue") {
+      rowObj.motherTongue = val;
+    } else if (["mediumofinstruction", "medium"].includes(cleanKey)) {
+      rowObj.mediumOfInstruction = val;
+    } else if (cleanKey === "studenttype") {
+      rowObj.studentType = val;
+    } else if (["specialeducationneeds", "sen", "specialneeds"].includes(cleanKey)) {
+      rowObj.specialEducationNeeds = val;
+    } else if (cleanKey === "careerinterest") {
+      rowObj.careerInterest = val;
+    } else if (cleanKey === "fatheroccupation") {
+      rowObj.fatherOccupation = val;
+    } else if (["fatherorganization", "fatherorg", "fathercompany"].includes(cleanKey)) {
+      rowObj.fatherOrganization = val;
+    } else if (cleanKey === "mothername") {
+      rowObj.motherName = val;
+    } else if (["mothercontact", "motherphone", "mothermobile"].includes(cleanKey)) {
+      rowObj.motherContact = val;
+    } else if (cleanKey === "motheroccupation") {
+      rowObj.motherOccupation = val;
+    } else if (["guardianrelation", "relationship"].includes(cleanKey)) {
+      rowObj.guardianRelation = val;
+    } else if (cleanKey === "guardianaddress") {
+      rowObj.guardianAddress = val;
+    } else if (["classid", "class", "classname", "grade", "standard"].includes(cleanKey)) {
+      rowObj.classId = val;
+    } else if (["sectionid", "section", "sectionname", "sec"].includes(cleanKey)) {
+      rowObj.sectionId = val;
+    } else if (["parentname", "guardian", "parent", "fathername"].includes(cleanKey)) {
+      rowObj.parentName = val;
+    } else if (["parentcontact", "parentphone", "parentnumber", "guardiancontact"].includes(cleanKey)) {
+      rowObj.parentContact = val;
+    } else if (["parentemail", "guardianemail"].includes(cleanKey)) {
+      rowObj.parentEmail = val;
+    } else if (cleanKey.includes("aadhaar") || cleanKey.includes("adhar")) {
+      rowObj.aadhaarNumber = val;
+    }
   };
 
   // Handle Excel / CSV File Selection & Parse
@@ -1208,48 +1400,7 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
         for (const rawRow of rawJson) {
           const rowObj = {};
           Object.entries(rawRow).forEach(([key, val]) => {
-            const cleanKey = String(key).toLowerCase().replace(/[^a-z0-9]/g, "");
-            if (cleanKey.includes("admission") || cleanKey.includes("roll")) return;
-
-            if (cleanKey === "firstname" || cleanKey === "first") rowObj.firstName = val;
-            else if (cleanKey === "lastname" || cleanKey === "last") rowObj.lastName = val;
-            else if (cleanKey === "name" || cleanKey === "studentname") {
-              if (!rowObj.firstName) {
-                const parts = String(val).trim().split(" ");
-                rowObj.firstName = parts[0];
-                rowObj.lastName = parts.slice(1).join(" ");
-              }
-            } else if (cleanKey.includes("email") && !cleanKey.includes("parent") && !cleanKey.includes("guardian")) {
-              rowObj.email = val;
-            } else if (cleanKey === "password" || cleanKey === "pass") {
-              rowObj.password = val;
-            } else if (cleanKey === "gender" || cleanKey === "sex") {
-              rowObj.gender = val;
-            } else if (cleanKey === "dob" || cleanKey === "dateofbirth" || cleanKey === "birth") {
-              rowObj.dob = val;
-            } else if (cleanKey === "bloodgroup" || cleanKey === "blood") {
-              rowObj.bloodGroup = val;
-            } else if (["phone", "contact", "contactnumber", "mobile", "mobilenumber"].includes(cleanKey)) {
-              rowObj.contactNumber = val;
-            } else if (["alternatephone", "alternate", "altphone"].includes(cleanKey)) {
-              rowObj.alternatePhone = val;
-            } else if (cleanKey === "address") {
-              rowObj.address = val;
-            } else if (["joiningdate", "joining", "joined", "admissiondate"].includes(cleanKey)) {
-              rowObj.joiningDate = val;
-            } else if (["classid", "class", "classname", "grade", "standard"].includes(cleanKey)) {
-              rowObj.classId = val;
-            } else if (["sectionid", "section", "sectionname", "sec"].includes(cleanKey)) {
-              rowObj.sectionId = val;
-            } else if (["parentname", "guardian", "parent", "fathername", "mothername"].includes(cleanKey)) {
-              rowObj.parentName = val;
-            } else if (["parentcontact", "parentphone", "parentnumber", "guardiancontact"].includes(cleanKey)) {
-              rowObj.parentContact = val;
-            } else if (["parentemail", "guardianemail"].includes(cleanKey)) {
-              rowObj.parentEmail = val;
-            } else if (cleanKey.includes("aadhaar") || cleanKey.includes("adhar")) {
-              rowObj.aadhaarNumber = val;
-            }
+            mapColumnToRowObj(key, val, rowObj);
           });
 
           const student = normalizeStudentRow(rowObj);
@@ -1275,33 +1426,7 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
           const rowObj = {};
           headers.forEach((h, idx) => {
             const val = (cols[idx] || "").trim();
-            const key = String(h).toLowerCase().replace(/[^a-z0-9]/g, "");
-            if (key.includes("admission") || key.includes("roll")) return;
-
-            if (key === "firstname" || key === "first") rowObj.firstName = val;
-            else if (key === "lastname" || key === "last") rowObj.lastName = val;
-            else if (key === "name" || key === "studentname") {
-              if (!rowObj.firstName) {
-                const parts = val.split(" ");
-                rowObj.firstName = parts[0];
-                rowObj.lastName = parts.slice(1).join(" ");
-              }
-            } else if (key.includes("email") && !key.includes("parent") && !key.includes("guardian")) {
-              rowObj.email = val;
-            } else if (key === "password" || key === "pass") rowObj.password = val;
-            else if (key === "gender") rowObj.gender = val;
-            else if (key === "dob" || key === "dateofbirth" || key === "birth") rowObj.dob = val;
-            else if (key === "bloodgroup" || key === "blood") rowObj.bloodGroup = val;
-            else if (["phone", "contact", "contactnumber", "mobile"].includes(key)) rowObj.contactNumber = val;
-            else if (["alternatephone", "alternate", "altphone"].includes(key)) rowObj.alternatePhone = val;
-            else if (key === "address") rowObj.address = val;
-            else if (["joiningdate", "joining", "joined"].includes(key)) rowObj.joiningDate = val;
-            else if (["classid", "class", "classname", "grade"].includes(key)) rowObj.classId = val;
-            else if (["sectionid", "section", "sectionname", "sec"].includes(key)) rowObj.sectionId = val;
-            else if (["parentname", "guardian", "parent", "fathername"].includes(key)) rowObj.parentName = val;
-            else if (["parentcontact", "parentphone", "guardiancontact"].includes(key)) rowObj.parentContact = val;
-            else if (["parentemail", "guardianemail"].includes(key)) rowObj.parentEmail = val;
-            else if (key.includes("aadhaar") || key.includes("adhar")) rowObj.aadhaarNumber = val;
+            mapColumnToRowObj(h, val, rowObj);
           });
 
           if (!rowObj.firstName && cols[0]) rowObj.firstName = cols[0];
@@ -1560,59 +1685,62 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
         }
       />
 
-      {/* ── Summary Metric Strip ────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
-          <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+      {/* ── Summary Metric Strip (2 in one line on mobile, compact & proportional) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5 md:gap-4">
+        <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs sm:shadow-sm flex items-center justify-between gap-1.5 min-w-0">
+          <div className="space-y-0.5 min-w-0 flex-1">
+            <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
               Total Enrolled
             </p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">
+            <p className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight truncate">
               {pagination.total || students.length}
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center">
-            <Users size={24} />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl md:rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center shrink-0">
+            <Users size={16} className="sm:hidden" />
+            <Users size={22} className="hidden sm:block" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
-          <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs sm:shadow-sm flex items-center justify-between gap-1.5 min-w-0">
+          <div className="space-y-0.5 min-w-0 flex-1">
+            <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
               Active Students
             </p>
-            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            <p className="text-lg sm:text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate">
               {
                 students.filter((s) => (s.status || "active") === "active")
                   .length
               }
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-            <UserCheck size={24} />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl md:rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <UserCheck size={16} className="sm:hidden" />
+            <UserCheck size={22} className="hidden sm:block" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
-          <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs sm:shadow-sm flex items-center justify-between gap-1.5 min-w-0">
+          <div className="space-y-0.5 min-w-0 flex-1">
+            <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
               Aadhaar Verified
             </p>
-            <p className="text-2xl font-black text-orange-600 dark:text-orange-500">
+            <p className="text-lg sm:text-xl md:text-2xl font-black text-orange-600 dark:text-orange-500 leading-tight truncate">
               {students.filter((s) => Boolean(s.aadhaarNumber)).length}
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center">
-            <ShieldCheck size={24} />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl md:rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-500 flex items-center justify-center shrink-0">
+            <ShieldCheck size={16} className="sm:hidden" />
+            <ShieldCheck size={22} className="hidden sm:block" />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
-          <div className="space-y-0.5">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Passout / Graduated
+        <div className="p-2.5 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs sm:shadow-sm flex items-center justify-between gap-1.5 min-w-0">
+          <div className="space-y-0.5 min-w-0 flex-1">
+            <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">
+              Passout / Grad
             </p>
-            <p className="text-2xl font-black text-slate-700 dark:text-slate-300">
+            <p className="text-lg sm:text-xl md:text-2xl font-black text-slate-700 dark:text-slate-300 leading-tight truncate">
               {
                 students.filter((s) =>
                   (s.status || "").toLowerCase().includes("passout")
@@ -1620,13 +1748,14 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
               }
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center">
-            <GraduationCap size={24} />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl md:rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0">
+            <GraduationCap size={16} className="sm:hidden" />
+            <GraduationCap size={22} className="hidden sm:block" />
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-5 md:p-6 shadow-sm space-y-3 sm:space-y-4">
         <SearchFilters
           search={search}
           onSearchChange={(v) => {
@@ -1970,7 +2099,7 @@ ${SECTION_OPTIONS.map((s) => `- ${s.name.padEnd(12)} => sectionId: "${s.id}"`).j
                   </button>
                 </div>
                 <div className="bg-slate-900/90 p-2.5 rounded-lg font-mono text-[11px] text-emerald-400 overflow-x-auto select-all border border-slate-800">
-                  firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,joiningDate,classId,sectionId,parentName,parentContact,parentEmail,aadhaarNumber,password
+                  firstName,lastName,gender,dob,bloodGroup,contactNumber,alternatePhone,email,address,admissionDate,admissionType,previousSchoolName,previousClass,previousBoard,transferCertificateNumber,transferCertificateDate,enrollmentStatus,houseName,studentCategory,nationality,motherTongue,mediumOfInstruction,studentType,specialEducationNeeds,careerInterest,classId,sectionId,parentName,parentContact,parentEmail,fatherOccupation,fatherOrganization,motherName,motherContact,motherOccupation,guardianRelation,guardianAddress,aadhaarNumber,password
                 </div>
               </div>
 

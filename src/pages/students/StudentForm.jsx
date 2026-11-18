@@ -18,6 +18,12 @@ import {
   RefreshCw,
   X,
   Mail,
+  GraduationCap,
+  Building2,
+  School,
+  HeartHandshake,
+  Compass,
+  Users,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
@@ -34,6 +40,15 @@ import {
   GENDER_STRINGS as GENDER_OPTIONS,
   BLOOD_GROUP_STRINGS as BLOOD_GROUP_OPTIONS,
   STUDENT_STATUS_OPTIONS as STATUS_OPTIONS,
+  ADMISSION_TYPE_OPTIONS,
+  ENROLLMENT_STATUS_OPTIONS,
+  HOUSE_OPTIONS,
+  STUDENT_CATEGORY_OPTIONS,
+  STUDENT_TYPE_OPTIONS,
+  MEDIUM_OF_INSTRUCTION_OPTIONS,
+  SPECIAL_EDUCATION_NEEDS_OPTIONS,
+  PREVIOUS_BOARD_OPTIONS,
+  GUARDIAN_RELATION_OPTIONS,
 } from "../../constants";
 import {
   uploadStudentFile,
@@ -53,13 +68,41 @@ export const initialStudentForm = {
   isEmailVerified: false,
   address: "",
   joiningDate: new Date().toISOString().slice(0, 10),
+  // ── 1. Admission & Previous School (Fields 1-8) ──
+  admissionDate: new Date().toISOString().slice(0, 10),
+  admissionType: "New Admission",
+  previousSchoolName: "",
+  previousClass: "",
+  previousBoard: "",
+  transferCertificateNumber: "",
+  transferCertificateDate: "",
+  enrollmentStatus: "Enrolled",
+  // ── 2. Academic & Student Profile (Fields 9-16) ──
+  houseName: "",
+  studentCategory: "General",
+  nationality: "Indian",
+  motherTongue: "Hindi",
+  mediumOfInstruction: "English",
+  studentType: "Day Scholar",
+  specialEducationNeeds: "None",
+  careerInterest: "",
+  // ── Class & Section ──
   classId: "",
   sectionId: "",
   class: "",
   section: "",
+  // ── 3. Family & Guardian (Fields 17-23) ──
   parentName: "",
   parentContact: "",
   parentEmail: "",
+  fatherOccupation: "",
+  fatherOrganization: "",
+  motherName: "",
+  motherContact: "",
+  motherOccupation: "",
+  guardianRelation: "",
+  guardianAddress: "",
+  // ── Identity & Gov Docs ──
   aadhaarNumber: "",
   photo: "",
   aadhaarDocument: "",
@@ -133,6 +176,12 @@ export const isStudentFormDirty = (form) => {
       form.photo?.trim() ||
       form.aadhaarDocument?.trim() ||
       form.address?.trim() ||
+      form.previousSchoolName?.trim() ||
+      form.transferCertificateNumber?.trim() ||
+      form.houseName?.trim() ||
+      form.motherName?.trim() ||
+      form.fatherOccupation?.trim() ||
+      form.careerInterest?.trim() ||
       form.classId ||
       form.sectionId
   );
@@ -574,14 +623,14 @@ const StudentForm = ({
       )}
 
       {/* ── Section: Identity, Photo & Aadhaar Documents ─────────────────── */}
-      <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/50 dark:from-stone-800/60 dark:via-stone-900 dark:to-orange-950/30 border border-orange-100 dark:border-orange-900/40 shadow-sm space-y-4">
+      <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-50/70 via-stone-50 to-amber-50/50 dark:from-stone-800/60 dark:via-stone-900 dark:to-orange-950/30 border border-orange-100 dark:border-orange-900/40 shadow-sm space-y-3 sm:space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-orange-200/60 dark:border-stone-800">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 shrink-0">
               <ShieldCheck size={18} />
             </div>
             <div>
-              <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <h4 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 flex items-center gap-1.5 sm:gap-2">
                 Identity &amp; Government Verification
                 {!editing && (
                   <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
@@ -589,16 +638,16 @@ const StudentForm = ({
                   </span>
                 )}
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                 Photo and Aadhaar PDF must be 1MB or less.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5">
           {/* 1. Student Photo */}
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+          <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
                 Student Photo
@@ -710,7 +759,7 @@ const StudentForm = ({
           </div>
 
           {/* 2. Aadhaar Document (PDF) */}
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+          <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
                 Aadhaar Document (PDF)
@@ -846,7 +895,7 @@ const StudentForm = ({
           </div>
 
           {/* 3. Aadhaar Number */}
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex flex-col justify-between space-y-3">
+          <div className="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 flex flex-col justify-between space-y-2.5 sm:space-y-3">
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
@@ -880,14 +929,24 @@ const StudentForm = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Section 1: Personal Information ───────────────────────────── */}
-        <section className="space-y-3">
-          <h4 className="font-bold text-sm text-slate-700 dark:text-slate-200">
-            Personal Information
-          </h4>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* ── Section 1: Personal & Demographic Information ───────────────────── */}
+        <section className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+              <User size={18} />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
+                Personal &amp; Demographic Profile
+              </h4>
+              <p className="text-[11px] text-slate-400">
+                Core student identity, language and contact information
+              </p>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormInput
               label="First Name"
               name="firstName"
@@ -904,21 +963,7 @@ const StudentForm = ({
             />
           </div>
 
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200/60 dark:border-orange-900/40">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Academic Session:
-              </span>
-              <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 font-mono">
-                {form.academicYear || form.sessionName || "2026-27"}
-              </span>
-            </div>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-              Active Session
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <FormSelect
               label="Gender"
               name="gender"
@@ -933,37 +978,83 @@ const StudentForm = ({
               value={form.dob || ""}
               onChange={(e) => updateField("dob", e.target.value)}
             />
+            <FormSelect
+              label="Blood Group"
+              name="bloodGroup"
+              value={form.bloodGroup || ""}
+              onChange={(e) => updateField("bloodGroup", e.target.value)}
+              options={BLOOD_GROUP_OPTIONS}
+              placeholder="Select Blood Group"
+            />
           </div>
 
-          <FormInput
-            label="Phone Number"
-            name="contactNumber"
-            type="tel"
-            value={form.contactNumber || ""}
-            onChange={(e) => updateField("contactNumber", e.target.value)}
-            required
-          />
-          <FormInput
-            label="Alternate Phone"
-            name="alternatePhone"
-            type="tel"
-            value={form.alternatePhone || ""}
-            onChange={(e) => updateField("alternatePhone", e.target.value)}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <FormSelect
+              label="Student Category"
+              name="studentCategory"
+              value={form.studentCategory || "General"}
+              onChange={(e) => updateField("studentCategory", e.target.value)}
+              options={STUDENT_CATEGORY_OPTIONS}
+            />
+            <FormInput
+              label="Nationality"
+              name="nationality"
+              value={form.nationality || "Indian"}
+              onChange={(e) => updateField("nationality", e.target.value)}
+              placeholder="e.g. Indian"
+            />
+            <FormInput
+              label="Mother Tongue"
+              name="motherTongue"
+              value={form.motherTongue || "Hindi"}
+              onChange={(e) => updateField("motherTongue", e.target.value)}
+              placeholder="e.g. Hindi, Punjabi"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormInput
+              label="Student Phone Number"
+              name="contactNumber"
+              type="tel"
+              value={form.contactNumber || ""}
+              onChange={(e) => updateField("contactNumber", e.target.value)}
+              required
+            />
+            <FormInput
+              label="Alternate Phone"
+              name="alternatePhone"
+              type="tel"
+              value={form.alternatePhone || ""}
+              onChange={(e) => updateField("alternatePhone", e.target.value)}
+            />
+          </div>
+
           <FormTextarea
-            label="Address"
+            label="Residential Address"
             name="address"
             value={form.address || ""}
             onChange={(e) => updateField("address", e.target.value)}
-            rows={3}
+            rows={2}
+            placeholder="Street address, City, State, PIN code"
           />
         </section>
 
-        {/* ── Section 2: Academic & Guardian ────────────────────────────── */}
-        <section className="space-y-3">
-          <h4 className="font-bold text-sm text-slate-700 dark:text-slate-200">
-            Academic &amp; Guardian
-          </h4>
+        {/* ── Section 2: Academic & Enrollment Record ────────────────────────── */}
+        <section className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+              <GraduationCap size={18} />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
+                Academic &amp; Enrollment Record
+              </h4>
+              <p className="text-[11px] text-slate-400">
+                Class allocation, admission lifecycle and institutional status
+              </p>
+            </div>
+          </div>
 
           {/* Auto-assigned badge when editing */}
           {editing && (form.admissionNumber || form.rollNumber) && (
@@ -992,14 +1083,12 @@ const StudentForm = ({
           )}
 
           {!editing && (
-            <div className="p-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/40">
-              <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span className="text-emerald-400 font-bold">
+            <div className="p-2.5 sm:p-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                   Auto-Assigned:
                 </span>
-                Admission Number is globally unique (STD-
-                {new Date().getFullYear()}-XXXX). Roll Number is assigned
-                automatically per class &amp; section starting from 1.
+                Admission No (STD-{new Date().getFullYear()}-XXXX) &amp; Class Roll No are generated on save.
               </p>
             </div>
           )}
@@ -1018,7 +1107,7 @@ const StudentForm = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormSelect
               label="Class"
               name="classId"
@@ -1064,256 +1153,488 @@ const StudentForm = ({
             />
           </div>
 
-          <FormSelect
-            label="Blood Group"
-            name="bloodGroup"
-            value={form.bloodGroup || ""}
-            onChange={(e) => updateField("bloodGroup", e.target.value)}
-            options={BLOOD_GROUP_OPTIONS}
-            placeholder="Select Blood Group"
-          />
-          <FormInput
-            label="Parent / Guardian"
-            name="parentName"
-            value={form.parentName || ""}
-            onChange={(e) => updateField("parentName", e.target.value)}
-            required
-          />
-          <FormInput
-            label="Parent Contact"
-            name="parentContact"
-            type="tel"
-            value={form.parentContact || ""}
-            onChange={(e) => updateField("parentContact", e.target.value)}
-            required
-          />
-          <FormInput
-            label="Parent Email"
-            name="parentEmail"
-            type="email"
-            value={form.parentEmail || ""}
-            onChange={(e) => updateField("parentEmail", e.target.value)}
-          />
-        </section>
-
-        {/* ── Section 3: Account & Credentials ─────────────────────────── */}
-        <section className="space-y-3">
-          <h4 className="font-bold text-sm text-orange-600 dark:text-orange-500">
-            Student Account &amp; Login Credentials
-          </h4>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
-                <span>Student Login Email</span>
-                <span className="text-rose-500 font-bold">*</span>
-              </label>
-
-              {form.isEmailVerified ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-bold shadow-xs">
-                  <CheckCircle2 size={12} className="shrink-0" />
-                  <span>Verified</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-bold shadow-xs">
-                  <AlertCircle size={12} className="shrink-0" />
-                  <span>Not Verified</span>
-                </span>
-              )}
-            </div>
-
-            <div className="flex gap-2 items-center">
-              <div className="flex-1 min-w-0">
-                <FormInput
-                  name="email"
-                  type="email"
-                  value={form.email || ""}
-                  onChange={handleEmailChange}
-                  placeholder="e.g. student101@school.com"
-                  required
-                />
-              </div>
-
-              {!form.isEmailVerified && (
-                <button
-                  type="button"
-                  onClick={handleSendEmailOtp}
-                  disabled={sendingOtp || !form.email || !form.email.includes("@")}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer shadow-xs ${
-                    form.email && form.email.includes("@")
-                      ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-orange-500/25 active:scale-95"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                  }`}
-                  title="Verify student email with 6-digit OTP code"
-                >
-                  {sendingOtp ? (
-                    <>
-                      <Loader2 size={13} className="animate-spin" />
-                      <span>Sending...</span>
-                    </>
-                  ) : (
-                    <>
-                      <KeyRound size={13} />
-                      <span>{showOtpBox ? "Resend OTP" : "Verify Email"}</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-
-            {/* Inline OTP Verification Panel */}
-            {showOtpBox && !form.isEmailVerified && (
-              <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-br from-orange-50/80 to-amber-50/40 dark:from-stone-800 dark:to-orange-950/40 border border-orange-200/80 dark:border-orange-900/60 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-orange-700 dark:text-orange-400">
-                    <KeyRound size={14} className="text-orange-600 dark:text-orange-500" />
-                    <span>Enter 6-Digit Verification Code</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowOtpBox(false);
-                      setOtpValue("");
-                      setOtpError("");
-                    }}
-                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700 transition cursor-pointer"
-                    title="Close verification"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-
-                <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                  A 6-digit verification code was sent to <strong className="text-orange-600 dark:text-orange-400">{form.email}</strong>.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      maxLength={6}
-                      value={otpValue}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                        setOtpValue(val);
-                        setOtpError("");
-                      }}
-                      placeholder="• • • • • •"
-                      className="w-full px-3 py-2 text-center font-mono font-bold tracking-[8px] text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      autoFocus
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleVerifyEmailOtp}
-                    disabled={verifyingOtp || otpValue.length !== 6}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md ${
-                      otpValue.length === 6 && !verifyingOtp
-                        ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20 active:scale-95"
-                        : "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
-                    }`}
-                  >
-                    {verifyingOtp ? (
-                      <>
-                        <Loader2 size={13} className="animate-spin" />
-                        <span>Verifying...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 size={13} />
-                        <span>Verify OTP</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {otpError && (
-                  <p className="text-xs text-rose-500 dark:text-rose-400 font-semibold flex items-center gap-1">
-                    <AlertCircle size={12} />
-                    <span>{otpError}</span>
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between pt-1 border-t border-orange-200/60 dark:border-stone-800 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span>Didn't receive code?</span>
-                  {countdown > 0 ? (
-                    <span className="font-mono text-slate-400">
-                      Resend in {countdown}s
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSendEmailOtp}
-                      disabled={sendingOtp}
-                      className="font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer flex items-center gap-1"
-                    >
-                      <RefreshCw size={11} className={sendingOtp ? "animate-spin" : ""} />
-                      <span>Resend OTP Code</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <FormInput
+              label="Admission Date"
+              name="admissionDate"
+              type="date"
+              value={form.admissionDate || form.joiningDate || ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                onChange({
+                  ...form,
+                  admissionDate: val,
+                  joiningDate: val,
+                });
+              }}
+              required
+            />
+            <FormSelect
+              label="Admission Type"
+              name="admissionType"
+              value={form.admissionType || "New Admission"}
+              onChange={(e) => updateField("admissionType", e.target.value)}
+              options={ADMISSION_TYPE_OPTIONS}
+            />
+            <FormSelect
+              label="Enrollment Status"
+              name="enrollmentStatus"
+              value={form.enrollmentStatus || "Enrolled"}
+              onChange={(e) => updateField("enrollmentStatus", e.target.value)}
+              options={ENROLLMENT_STATUS_OPTIONS}
+            />
           </div>
 
-          {!editing && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-                <FormInput
-                  label="Account Login Password"
-                  name="password"
-                  type="text"
-                  value={form.password || ""}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    onChange({ ...form, password: val, confirmPassword: val });
-                  }}
-                  placeholder="Enter login password"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon={<Wand2 size={16} />}
-                  onClick={generatePwd}
-                  className="mb-[1px] p-2 bg-orange-50 dark:bg-orange-900/40 text-orange-600 hover:bg-orange-100 !rounded-lg"
-                  title="Auto-generate password"
-                />
-              </div>
-              <FormInput
-                label="Confirm Password"
-                name="confirmPassword"
-                type="text"
-                value={form.confirmPassword || ""}
-                onChange={(e) => updateField("confirmPassword", e.target.value)}
-                required
-              />
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <FormSelect
-              label="Status"
-              name="status"
-              value={form.status || "active"}
-              onChange={(e) => updateField("status", e.target.value)}
-              options={STATUS_OPTIONS}
+              label="House / Team"
+              name="houseName"
+              value={form.houseName || ""}
+              onChange={(e) => updateField("houseName", e.target.value)}
+              options={HOUSE_OPTIONS}
+              placeholder="Select House"
+            />
+            <FormSelect
+              label="Student Type"
+              name="studentType"
+              value={form.studentType || "Day Scholar"}
+              onChange={(e) => updateField("studentType", e.target.value)}
+              options={STUDENT_TYPE_OPTIONS}
+            />
+            <FormSelect
+              label="Instruction Medium"
+              name="mediumOfInstruction"
+              value={form.mediumOfInstruction || "English"}
+              onChange={(e) => updateField("mediumOfInstruction", e.target.value)}
+              options={MEDIUM_OF_INSTRUCTION_OPTIONS}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormSelect
+              label="Special Learning Support (SEN)"
+              name="specialEducationNeeds"
+              value={form.specialEducationNeeds || "None"}
+              onChange={(e) => updateField("specialEducationNeeds", e.target.value)}
+              options={SPECIAL_EDUCATION_NEEDS_OPTIONS}
             />
             <FormInput
-              label="Expiry Date"
-              name="accountExpiryDate"
+              label="Career Interest / Aspiring Field"
+              name="careerInterest"
+              value={form.careerInterest || ""}
+              onChange={(e) => updateField("careerInterest", e.target.value)}
+              placeholder="e.g. Engineering, Medicine, Civil Services"
+            />
+          </div>
+        </section>
+
+        {/* ── Section 3: Previous School & Transfer Certificate (TC) ───────────── */}
+        <section className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+              <School size={18} />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
+                Previous Schooling &amp; Transfer Certificate
+              </h4>
+              <p className="text-[11px] text-slate-400">
+                Prior institutional history, board affiliation and transfer records
+              </p>
+            </div>
+          </div>
+
+          <FormInput
+            label="Previous School Name"
+            name="previousSchoolName"
+            value={form.previousSchoolName || ""}
+            onChange={(e) => updateField("previousSchoolName", e.target.value)}
+            placeholder="e.g. Delhi Public School, R.K. Puram"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormInput
+              label="Previous Class Studied"
+              name="previousClass"
+              value={form.previousClass || ""}
+              onChange={(e) => updateField("previousClass", e.target.value)}
+              placeholder="e.g. Class 9 / 10"
+            />
+            <FormSelect
+              label="Previous Education Board"
+              name="previousBoard"
+              value={form.previousBoard || ""}
+              onChange={(e) => updateField("previousBoard", e.target.value)}
+              options={PREVIOUS_BOARD_OPTIONS}
+              placeholder="Select Board"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormInput
+              label="Transfer Certificate (TC) No."
+              name="transferCertificateNumber"
+              value={form.transferCertificateNumber || ""}
+              onChange={(e) =>
+                updateField("transferCertificateNumber", e.target.value.toUpperCase())
+              }
+              placeholder="e.g. TC-2026-1024"
+            />
+            <FormInput
+              label="TC Issue Date"
+              name="transferCertificateDate"
               type="date"
-              value={form.accountExpiryDate || ""}
-              onChange={(e) => updateField("accountExpiryDate", e.target.value)}
+              value={form.transferCertificateDate || ""}
+              onChange={(e) => updateField("transferCertificateDate", e.target.value)}
+            />
+          </div>
+        </section>
+
+        {/* ── Section 4: Family & Guardian Details ────────────────────────────── */}
+        <section className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+              <Users size={18} />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
+                Family &amp; Guardian Information
+              </h4>
+              <p className="text-[11px] text-slate-400">
+                Parents, alternate guardians and emergency contact details
+              </p>
+            </div>
+          </div>
+
+          {/* Primary Parent / Guardian */}
+          <div className="space-y-3 p-3 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+              Primary Guardian
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <FormInput
+                label="Guardian / Parent Name"
+                name="parentName"
+                value={form.parentName || ""}
+                onChange={(e) => updateField("parentName", e.target.value)}
+                required
+              />
+              <FormInput
+                label="Guardian Contact"
+                name="parentContact"
+                type="tel"
+                value={form.parentContact || ""}
+                onChange={(e) => updateField("parentContact", e.target.value)}
+                required
+              />
+              <FormInput
+                label="Guardian Email"
+                name="parentEmail"
+                type="email"
+                value={form.parentEmail || ""}
+                onChange={(e) => updateField("parentEmail", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Father Profile */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormInput
+              label="Father Occupation"
+              name="fatherOccupation"
+              value={form.fatherOccupation || ""}
+              onChange={(e) => updateField("fatherOccupation", e.target.value)}
+              placeholder="e.g. Business, Engineer, Doctor"
+            />
+            <FormInput
+              label="Father Organization / Workplace"
+              name="fatherOrganization"
+              value={form.fatherOrganization || ""}
+              onChange={(e) => updateField("fatherOrganization", e.target.value)}
+              placeholder="e.g. ABC Enterprises, Govt Dept"
+            />
+          </div>
+
+          {/* Mother Profile */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <FormInput
+              label="Mother Name"
+              name="motherName"
+              value={form.motherName || ""}
+              onChange={(e) => updateField("motherName", e.target.value)}
+              placeholder="e.g. Neha Kumar"
+            />
+            <FormInput
+              label="Mother Contact"
+              name="motherContact"
+              type="tel"
+              value={form.motherContact || ""}
+              onChange={(e) => updateField("motherContact", e.target.value)}
+              placeholder="e.g. 9876543210"
+            />
+            <FormInput
+              label="Mother Occupation"
+              name="motherOccupation"
+              value={form.motherOccupation || ""}
+              onChange={(e) => updateField("motherOccupation", e.target.value)}
+              placeholder="e.g. Teacher, Homemaker"
+            />
+          </div>
+
+          {/* Alternate Guardian */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormSelect
+              label="Alternate Guardian Relation"
+              name="guardianRelation"
+              value={form.guardianRelation || ""}
+              onChange={(e) => updateField("guardianRelation", e.target.value)}
+              options={GUARDIAN_RELATION_OPTIONS}
+              placeholder="Select Relationship"
+            />
+            <FormInput
+              label="Alternate Guardian Address"
+              name="guardianAddress"
+              value={form.guardianAddress || ""}
+              onChange={(e) => updateField("guardianAddress", e.target.value)}
+              placeholder="e.g. Ghaziabad, UP"
             />
           </div>
         </section>
       </div>
 
+      {/* ── Section 5: Student Portal Login & Credentials ────────────────────── */}
+      <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 sm:space-y-4">
+        <div className="flex items-center gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+          <div className="p-2 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
+            <KeyRound size={18} />
+          </div>
+          <div>
+            <h4 className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
+              Student Account &amp; Login Credentials
+            </h4>
+            <p className="text-[11px] text-slate-400">
+              Official school portal access email, OTP verification and password
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                  <span>Student Login Email</span>
+                  <span className="text-rose-500 font-bold">*</span>
+                </label>
+
+                {form.isEmailVerified ? (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-bold shadow-xs">
+                    <CheckCircle2 size={12} className="shrink-0" />
+                    <span>Verified</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-bold shadow-xs">
+                    <AlertCircle size={12} className="shrink-0" />
+                    <span>Not Verified</span>
+                  </span>
+                )}
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <div className="flex-1 min-w-0">
+                  <FormInput
+                    name="email"
+                    type="email"
+                    value={form.email || ""}
+                    onChange={handleEmailChange}
+                    placeholder="e.g. student101@school.com"
+                    required
+                  />
+                </div>
+
+                {!form.isEmailVerified && (
+                  <button
+                    type="button"
+                    onClick={handleSendEmailOtp}
+                    disabled={sendingOtp || !form.email || !form.email.includes("@")}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                      form.email && form.email.includes("@")
+                        ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-orange-500/25 active:scale-95"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                    }`}
+                    title="Verify student email with 6-digit OTP code"
+                  >
+                    {sendingOtp ? (
+                      <>
+                        <Loader2 size={13} className="animate-spin" />
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <KeyRound size={13} />
+                        <span>{showOtpBox ? "Resend OTP" : "Verify Email"}</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Inline OTP Verification Panel */}
+              {showOtpBox && !form.isEmailVerified && (
+                <div className="mt-3 p-3.5 rounded-xl bg-gradient-to-br from-orange-50/80 to-amber-50/40 dark:from-stone-800 dark:to-orange-950/40 border border-orange-200/80 dark:border-orange-900/60 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-orange-700 dark:text-orange-400">
+                      <KeyRound size={14} className="text-orange-600 dark:text-orange-500" />
+                      <span>Enter 6-Digit Verification Code</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowOtpBox(false);
+                        setOtpValue("");
+                        setOtpError("");
+                      }}
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700 transition cursor-pointer"
+                      title="Close verification"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    A 6-digit verification code was sent to <strong className="text-orange-600 dark:text-orange-400">{form.email}</strong>.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={otpValue}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                          setOtpValue(val);
+                          setOtpError("");
+                        }}
+                        placeholder="• • • • • •"
+                        className="w-full px-3 py-2 text-center font-mono font-bold tracking-[8px] text-base rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        autoFocus
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleVerifyEmailOtp}
+                      disabled={verifyingOtp || otpValue.length !== 6}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md ${
+                        otpValue.length === 6 && !verifyingOtp
+                          ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20 active:scale-95"
+                          : "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
+                      }`}
+                    >
+                      {verifyingOtp ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" />
+                          <span>Verifying...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={13} />
+                          <span>Verify OTP</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {otpError && (
+                    <p className="text-xs text-rose-500 dark:text-rose-400 font-semibold flex items-center gap-1">
+                      <AlertCircle size={12} />
+                      <span>{otpError}</span>
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1 border-t border-orange-200/60 dark:border-stone-800 text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>Didn't receive code?</span>
+                    {countdown > 0 ? (
+                      <span className="font-mono text-slate-400">
+                        Resend in {countdown}s
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendEmailOtp}
+                        disabled={sendingOtp}
+                        className="font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <RefreshCw size={11} className={sendingOtp ? "animate-spin" : ""} />
+                        <span>Resend OTP Code</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {!editing && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+                  <FormInput
+                    label="Account Login Password"
+                    name="password"
+                    type="text"
+                    value={form.password || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      onChange({ ...form, password: val, confirmPassword: val });
+                    }}
+                    placeholder="Enter login password"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    icon={<Wand2 size={16} />}
+                    onClick={generatePwd}
+                    className="mb-[1px] p-2 bg-orange-50 dark:bg-orange-900/40 text-orange-600 hover:bg-orange-100 !rounded-lg"
+                    title="Auto-generate password"
+                  />
+                </div>
+                <FormInput
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="text"
+                  value={form.confirmPassword || ""}
+                  onChange={(e) => updateField("confirmPassword", e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormSelect
+                label="Status"
+                name="status"
+                value={form.status || "active"}
+                onChange={(e) => updateField("status", e.target.value)}
+                options={STATUS_OPTIONS}
+              />
+              <FormInput
+                label="Expiry Date"
+                name="accountExpiryDate"
+                type="date"
+                value={form.accountExpiryDate || ""}
+                onChange={(e) => updateField("accountExpiryDate", e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {!hideButtons && onCancel && (
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3.5 sm:pt-4 border-t border-slate-100 dark:border-slate-800">
           <div>
             {!editing && draftInfo && (
               <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
@@ -1321,7 +1642,7 @@ const StudentForm = ({
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
             <Button type="button" variant="secondary" onClick={onCancel}>
               Cancel
             </Button>

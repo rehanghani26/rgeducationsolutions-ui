@@ -156,7 +156,30 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
         email: data?.email || user?.email || user?.username || '—',
         isEmailVerified: data?.isEmailVerified !== undefined ? data.isEmailVerified : Boolean(user?.email),
         address: data?.address || user?.address || '—',
-        joiningDate: data?.joiningDate || user?.joiningDate || '2025-04-01',
+        joiningDate: data?.admissionDate || data?.joiningDate || user?.admissionDate || user?.joiningDate || '2025-04-01',
+        admissionDate: data?.admissionDate || data?.joiningDate || user?.admissionDate || user?.joiningDate || '2025-04-01',
+        admissionType: data?.admissionType || 'New Admission',
+        previousSchoolName: data?.previousSchoolName || '',
+        previousClass: data?.previousClass || '',
+        previousBoard: data?.previousBoard || '',
+        transferCertificateNumber: data?.transferCertificateNumber || '',
+        transferCertificateDate: data?.transferCertificateDate || '',
+        enrollmentStatus: data?.enrollmentStatus || 'Enrolled',
+        houseName: data?.houseName || '',
+        studentCategory: data?.studentCategory || 'General',
+        nationality: data?.nationality || 'Indian',
+        motherTongue: data?.motherTongue || 'Hindi',
+        mediumOfInstruction: data?.mediumOfInstruction || 'English',
+        studentType: data?.studentType || 'Day Scholar',
+        specialEducationNeeds: data?.specialEducationNeeds || 'None',
+        careerInterest: data?.careerInterest || '',
+        fatherOccupation: data?.fatherOccupation || '',
+        fatherOrganization: data?.fatherOrganization || '',
+        motherName: data?.motherName || '',
+        motherContact: data?.motherContact || '',
+        motherOccupation: data?.motherOccupation || '',
+        guardianRelation: data?.guardianRelation || '',
+        guardianAddress: data?.guardianAddress || '',
         academicYear: data?.academicYear || '2025-2026',
         parentName: data?.parentName || user?.parentName || 'Authorized Guardian',
         parentContact: data?.parentContact || data?.guardianContact || '—',
@@ -318,8 +341,8 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               </div>
 
               {/* All details in one clean line, medium size */}
-              <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
-                <span className="bg-white dark:bg-stone-800/80 px-3 py-1 rounded-xl border border-orange-200 dark:border-stone-700 font-bold text-orange-600 dark:text-orange-400 shadow-2xs">
+              <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium flex-wrap">
+                <span className="bg-white dark:bg-stone-800/80 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-xl border border-orange-200 dark:border-stone-700 font-bold text-orange-600 dark:text-orange-400 shadow-2xs">
                   {student?.class} · {student?.section}
                 </span>
                 <span>
@@ -347,22 +370,22 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           </div>
 
           {/* Quick Credential Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
             <button
               type="button"
               onClick={() => navigate('/certificates?tab=id-cards')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-none transition shadow-lg shadow-orange-500/20 cursor-pointer"
+              className="flex items-center justify-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-none transition shadow-md sm:shadow-lg shadow-orange-500/20 cursor-pointer"
             >
-              <CreditCard size={16} />
+              <CreditCard size={15} />
               <span>View My ID Card</span>
             </button>
 
             <button
               type="button"
               onClick={() => navigate('/certificates?tab=certificates')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-amber-500/15 hover:bg-amber-50 dark:hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 transition shadow-xs cursor-pointer"
+              className="flex items-center justify-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white dark:bg-amber-500/15 hover:bg-amber-50 dark:hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 transition shadow-2xs sm:shadow-xs cursor-pointer"
             >
-              <Award size={16} />
+              <Award size={15} />
               <span>My Certificates</span>
             </button>
 
@@ -373,10 +396,10 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                 fetchStudentProfile();
               }}
               disabled={refreshing}
-              className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center justify-center shadow-xs"
+              className="p-2 sm:p-2.5 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer flex items-center justify-center shadow-2xs sm:shadow-xs"
               title="Refresh Profile Details"
             >
-              <RefreshCw size={16} className={refreshing ? 'animate-spin text-orange-500' : ''} />
+              <RefreshCw size={15} className={refreshing ? 'animate-spin text-orange-500' : ''} />
             </button>
           </div>
         </div>
@@ -389,79 +412,99 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
         <div className="lg:col-span-7 space-y-6">
 
           {/* SECTION 1: Personal & Demographic Details */}
-          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-sm dark:shadow-xl">
+          <div className="bg-white dark:bg-slate-900/60 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-5 md:p-6 space-y-3.5 sm:space-y-5 shadow-sm dark:shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/25 flex items-center justify-center">
-                <User size={18} />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/25 flex items-center justify-center shrink-0">
+                <User size={17} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Personal & Demographic Information</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Student individual bio-data and contact details</p>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Personal & Demographic Information</h3>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Student individual bio-data and contact details</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">First Name</span>
-                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.firstName || '—'}</span>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">First Name</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.firstName || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Last Name</span>
-                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.lastName || '—'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Last Name</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.lastName || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Gender</span>
-                <span className="font-bold text-sm text-slate-900 dark:text-white capitalize">{student?.gender || '—'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Gender</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white capitalize">{student?.gender || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Date of Birth & Age</span>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-slate-900 dark:text-white">{formattedDob}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Date of Birth</span>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">{formattedDob}</span>
                   {studentAge !== null && (
-                    <span className="text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-2.5 py-0.5 rounded-full border border-orange-500/20">
-                      {studentAge} Years Old
+                    <span className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold px-1.5 py-0.2 rounded-full border border-orange-500/20 shrink-0">
+                      {studentAge}y
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Blood Group</span>
-                <span className="font-bold text-sm text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                  <Droplet size={14} className="fill-rose-500/30" />
-                  {student?.bloodGroup || '—'}
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Blood Group</span>
+                <span className="font-bold text-xs sm:text-sm text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                  <Droplet size={13} className="fill-rose-500/30 shrink-0" />
+                  <span>{student?.bloodGroup || '—'}</span>
                 </span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Primary Mobile Phone</span>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">{student?.contactNumber || '—'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Category</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.studentCategory || 'General'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Nationality</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.nationality || 'Indian'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Mother Tongue</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.motherTongue || 'Hindi'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">House Allocation</span>
+                <span className="font-bold text-xs sm:text-sm text-orange-600 dark:text-orange-400 truncate block">{student?.houseName || '—'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Mobile Phone</span>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white font-mono truncate">{student?.contactNumber || '—'}</span>
                   {student?.contactNumber && student?.contactNumber !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.contactNumber, 'Phone Number')}
-                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 shrink-0"
                       title="Copy Mobile"
                     >
-                      {copiedField === 'Phone Number' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                      {copiedField === 'Phone Number' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Alternate Phone</span>
-                <span className="font-bold text-sm text-slate-700 dark:text-slate-300 font-mono">{student?.alternatePhone || '—'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Alternate Phone</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-mono truncate block">{student?.alternatePhone || '—'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Registered Student Email</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Student Email</span>
                 <div className="flex items-center justify-between gap-1">
-                  <span className="font-bold text-sm text-orange-600 dark:text-orange-400 truncate font-mono">{student?.email}</span>
+                  <span className="font-bold text-xs sm:text-sm text-orange-600 dark:text-orange-400 truncate font-mono">{student?.email}</span>
                   {student?.email && student?.email !== '—' && (
                     <button
                       type="button"
@@ -469,7 +512,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                       className="text-slate-400 hover:text-slate-700 dark:hover:text-white flex-shrink-0 p-1"
                       title="Copy Email"
                     >
-                      {copiedField === 'Email' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                      {copiedField === 'Email' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
                     </button>
                   )}
                 </div>
@@ -477,92 +520,141 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
             </div>
 
             {/* Address Row */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1.5 text-xs">
-              <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block flex items-center gap-1.5">
-                <MapPin size={14} className="text-orange-500" /> Residential & Permanent Address
+            <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1.5 text-xs">
+              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block flex items-center gap-1.5">
+                <MapPin size={13} className="text-orange-500 shrink-0" /> Residential & Permanent Address
               </span>
-              <p className="font-medium text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              <p className="font-medium text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                 {student?.address && student.address !== '—' ? student.address : 'Address records not specified.'}
               </p>
             </div>
           </div>
 
           {/* SECTION 2: Academic & Institutional Enrollment */}
-          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-sm dark:shadow-xl">
+          <div className="bg-white dark:bg-slate-900/60 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-5 md:p-6 space-y-3.5 sm:space-y-5 shadow-sm dark:shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center">
-                <GraduationCap size={18} />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center shrink-0">
+                <GraduationCap size={17} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Academic & Institutional Enrollment</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Class, roll number, and official school session records</p>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Academic & Institutional Enrollment</h3>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Class, roll number, and official school session records</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs">
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Assigned Class</span>
-                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.class || 'Class 10'}</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3.5 text-xs">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Assigned Class</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.class || 'Class 10'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Section</span>
-                <span className="font-bold text-sm text-slate-900 dark:text-white">{student?.section || 'Section A'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Section</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.section || 'Section A'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Roll Number</span>
-                <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-base">{student?.rollNumber || '01'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Roll Number</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-sm sm:text-base truncate block">{student?.rollNumber || '01'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Admission Number</span>
-                <span className="font-bold text-orange-600 dark:text-orange-400 font-mono text-sm">{student?.admissionNumber}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Admission Number</span>
+                <span className="font-bold text-orange-600 dark:text-orange-400 font-mono text-xs sm:text-sm truncate block">{student?.admissionNumber}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Academic Year</span>
-                <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">{student?.academicYear || '2025-2026'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Academic Year</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white font-mono truncate block">{student?.academicYear || '2025-2026'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Admission Date</span>
-                <span className="font-bold text-sm text-slate-700 dark:text-slate-300">{formattedJoiningDate}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Admission Date</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-700 dark:text-slate-300 truncate block">{formattedJoiningDate}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Admission Type</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.admissionType || 'New Admission'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Enrollment Status</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  {student?.enrollmentStatus || 'Enrolled'}
+                </span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Student Type</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.studentType || 'Day Scholar'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Medium</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.mediumOfInstruction || 'English'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Special Needs</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.specialEducationNeeds || 'None'}</span>
+              </div>
+
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Career Goal</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">{student?.careerInterest || '—'}</span>
               </div>
             </div>
+
+            {/* Previous School & TC Tile if exists */}
+            {(student?.previousSchoolName || student?.transferCertificateNumber) && (
+              <div className="p-3 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1 text-xs">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">
+                  Prior School &amp; Transfer Certificate
+                </span>
+                <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                  {student?.previousSchoolName} {student?.previousClass ? `(${student.previousClass})` : ''} {student?.previousBoard ? `· ${student.previousBoard}` : ''}
+                </p>
+                {student?.transferCertificateNumber && (
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    TC No: <span className="font-bold text-orange-600 dark:text-orange-400">{student.transferCertificateNumber}</span> {student?.transferCertificateDate ? `issued on ${student.transferCertificateDate}` : ''}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* ─── RIGHT COLUMN: GUARDIAN, KYC & ACCOUNT STATUS (5 cols) ─── */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-5 space-y-4 sm:space-y-6">
 
           {/* SECTION 3: Parent & Guardian Information */}
-          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm dark:shadow-xl">
+          <div className="bg-white dark:bg-slate-900/60 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-5 md:p-6 space-y-3 sm:space-y-4 shadow-sm dark:shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center">
-                <Users size={18} />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center shrink-0">
+                <Users size={17} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Parent & Guardian Contacts</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Emergency & registered guardian details</p>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Parent & Guardian Contacts</h3>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Emergency & registered guardian details</p>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Guardian Full Name</span>
-                <span className="font-bold text-slate-900 dark:text-white text-sm">{student?.parentName || 'Authorized Parent'}</span>
+            <div className="space-y-2.5 sm:space-y-3 text-xs">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Guardian Full Name</span>
+                <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate block">{student?.parentName || 'Authorized Parent'}</span>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Guardian Phone / Mobile</span>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">{student?.parentContact || '—'}</span>
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Guardian Phone / Mobile</span>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-bold text-slate-900 dark:text-white font-mono text-xs sm:text-sm truncate">{student?.parentContact || '—'}</span>
                   {student?.parentContact && student?.parentContact !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.parentContact, 'Guardian Phone')}
-                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 shrink-0"
                       title="Copy Phone"
                     >
                       {copiedField === 'Guardian Phone' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
@@ -571,37 +663,79 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block">Guardian Email Address</span>
-                <span className="font-bold text-slate-700 dark:text-slate-300 truncate block font-mono text-sm">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold block truncate">Guardian Email Address</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 truncate block font-mono text-xs sm:text-sm">
                   {student?.parentEmail || '—'}
                 </span>
               </div>
+
+              {/* Father Background */}
+              {(student?.fatherOccupation || student?.fatherOrganization) && (
+                <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Father Occupation</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate block">{student.fatherOccupation || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Organization</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate block">{student.fatherOrganization || '—'}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Mother Background */}
+              {(student?.motherName || student?.motherContact || student?.motherOccupation) && (
+                <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Mother Name</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate block">{student.motherName || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Mother Contact</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate block font-mono">{student.motherContact || '—'}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Alternate Guardian */}
+              {(student?.guardianRelation || student?.guardianAddress) && (
+                <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Alt Guardian</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate block">{student.guardianRelation || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Alt Address</span>
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate block">{student.guardianAddress || '—'}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* SECTION 4: Identity & KYC Documents */}
-          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm dark:shadow-xl">
+          <div className="bg-white dark:bg-slate-900/60 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-5 md:p-6 space-y-3 sm:space-y-4 shadow-sm dark:shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center">
-                <ShieldCheck size={18} />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                <ShieldCheck size={17} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Identity & KYC Verification</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Institutional records and verified identity tokens</p>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Identity & KYC Verification</h3>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Institutional records and verified identity tokens</p>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-2.5 sm:space-y-3 text-xs">
               {/* Aadhaar Number with Toggle */}
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1.5">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Government Aadhaar Number</span>
+                  <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Government Aadhaar Number</span>
                   {student?.aadhaarNumber && student?.aadhaarNumber !== '—' && (
                     <button
                       type="button"
                       onClick={() => setShowAadhaarNumber(!showAadhaarNumber)}
-                      className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 text-xs font-semibold transition cursor-pointer"
+                      className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 text-[11px] sm:text-xs font-semibold transition cursor-pointer"
                     >
                       {showAadhaarNumber ? <EyeOff size={13} /> : <Eye size={13} />}
                       <span>{showAadhaarNumber ? 'Mask' : 'Reveal'}</span>
@@ -609,15 +743,15 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm font-bold text-slate-900 dark:text-white tracking-wider">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white tracking-wider truncate">
                     {formattedAadhaar}
                   </span>
                   {student?.aadhaarNumber && student?.aadhaarNumber !== '—' && (
                     <button
                       type="button"
                       onClick={() => handleCopy(student.aadhaarNumber, 'Aadhaar Number')}
-                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
+                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 shrink-0"
                       title="Copy Aadhaar"
                     >
                       {copiedField === 'Aadhaar Number' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
@@ -627,12 +761,12 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               </div>
 
               {/* Uploaded Aadhaar Document */}
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <FileText size={18} className="text-emerald-600 dark:text-emerald-400" />
-                  <div>
-                    <span className="font-bold text-slate-900 dark:text-white block text-sm">Aadhaar Card Document</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText size={17} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="min-w-0">
+                    <span className="font-bold text-slate-900 dark:text-white block text-xs sm:text-sm truncate">Aadhaar Card Document</span>
+                    <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono truncate block">
                       {student?.aadhaarDocument ? 'Verified Document Uploaded' : 'No document on file'}
                     </span>
                   </div>
@@ -647,37 +781,37 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
                         title: `${student.name} - Aadhaar Document`,
                       })
                     }
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold transition cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold transition cursor-pointer shrink-0"
                   >
-                    <Eye size={13} />
+                    <Eye size={12} />
                     <span>View PDF</span>
                   </button>
                 ) : (
-                  <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                  <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 shrink-0">
                     Not Uploaded
                   </span>
                 )}
               </div>
 
               {/* Student Photo ID Document */}
-              <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+              <div className="p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
                     {studentPhoto ? (
                       <img src={studentPhoto} alt="Photo" className="w-full h-full object-cover" />
                     ) : (
                       <User size={15} className="text-slate-500 dark:text-slate-400" />
                     )}
                   </div>
-                  <div>
-                    <span className="font-bold text-slate-900 dark:text-white block text-sm">Student Profile Photograph</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                  <div className="min-w-0">
+                    <span className="font-bold text-slate-900 dark:text-white block text-xs sm:text-sm truncate">Student Profile Photograph</span>
+                    <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate block">
                       {studentPhoto ? 'High-Resolution S3 Synced' : 'Default Avatar In Use'}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 sm:px-2.5 py-0.5 rounded-full shrink-0">
                   Verified
                 </span>
               </div>
@@ -685,32 +819,32 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
           </div>
 
           {/* SECTION 5: Security & Portal Account */}
-          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-sm dark:shadow-xl">
+          <div className="bg-white dark:bg-slate-900/60 rounded-xl sm:rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-5 md:p-6 space-y-3 sm:space-y-4 shadow-sm dark:shadow-xl">
             <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                <Lock size={18} />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+                <Lock size={17} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">Security & Portal Access</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Account status and authentication records</p>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Security & Portal Access</h3>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Account status and authentication records</p>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+            <div className="space-y-2.5 sm:space-y-3 text-xs">
+              <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
                 <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Portal Login ID</span>
-                <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">{student?.admissionNumber}</span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono text-xs sm:text-sm">{student?.admissionNumber}</span>
               </div>
 
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+              <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
                 <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Account Access State</span>
                 <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xs">
-                  <CheckCircle2 size={14} /> Active & Enabled
+                  <CheckCircle2 size={13} /> Active & Enabled
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
-                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Two-Factor Authentication (2FA)</span>
+              <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800/80">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Two-Factor Auth (2FA)</span>
                 <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
                   {student?.twoFactorEnabled ? 'Enabled' : 'Disabled'}
                 </span>
@@ -719,7 +853,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
               <button
                 type="button"
                 onClick={() => navigate('/settings/password-security')}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 font-bold transition cursor-pointer text-xs mt-2"
+                className="w-full flex items-center justify-center gap-2 p-2 sm:p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 font-bold transition cursor-pointer text-xs mt-2"
               >
                 <KeyRound size={13} />
                 <span>Request Password Change</span>

@@ -52,10 +52,10 @@ const DashboardTabBar = ({ activeTab = "home", onTabChange }) => {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-[#EFE8DD] bg-white/95 p-1 sm:p-1.5 shadow-xs backdrop-blur-md dark:border-[#2C2927] dark:bg-[#181615]/95 transition-all">
-        {/* Tab Buttons Row - Scrollbar completely hidden with smooth touch scroll */}
+      <div className="flex items-center rounded-2xl border border-[#EFE8DD] bg-white/95 p-1 shadow-xs backdrop-blur-md dark:border-[#2C2927] dark:bg-[#181615]/95 transition-all">
+        {/* Tab Buttons Row — single horizontal scrollable row, no wrapping */}
         <div
-          className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scroll-smooth touch-pan-x flex-1 min-w-0 py-0.5 px-0.5"
+          className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar scroll-smooth touch-pan-x flex-1 min-w-0"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {DASHBOARD_TABS.map((tab) => {
@@ -67,33 +67,29 @@ const DashboardTabBar = ({ activeTab = "home", onTabChange }) => {
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange?.(tab.id)}
-                className={`group relative flex h-8 sm:h-9 items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-xl px-2.5 sm:px-3.5 text-xs font-bold transition-all duration-200 cursor-pointer shrink-0 select-none ${
+                className={`group relative flex h-7 sm:h-9 items-center gap-1 sm:gap-1.5 whitespace-nowrap rounded-xl px-2 sm:px-3.5 text-[11px] sm:text-xs font-bold transition-all duration-200 cursor-pointer shrink-0 select-none ${
                   isActive
-                    ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white shadow-sm shadow-orange-500/25 scale-[1.01]"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/90 dark:text-stone-400 dark:hover:text-stone-100 dark:hover:bg-stone-800/60"
+                    ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white shadow-sm shadow-orange-500/25"
+                    : "text-stone-500 hover:text-stone-900 hover:bg-stone-100/90 dark:text-stone-400 dark:hover:text-stone-100 dark:hover:bg-stone-800/60"
                 }`}
                 title={tab.description}
               >
                 <Icon
-                  size={15}
-                  className={`flex-shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                  size={13}
+                  className={`flex-shrink-0 ${
                     isActive
                       ? "text-white"
                       : "text-orange-500 dark:text-orange-400"
                   }`}
                 />
-                <span className="truncate">{tab.label}</span>
-
-                {isActive && (
-                  <span className="hidden sm:inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-pulse" />
-                )}
+                <span className="truncate">{tab.shortLabel || tab.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Right side active status indicator badge */}
-        <div className="hidden xl:flex items-center gap-2 px-3 py-1 text-[11px] font-semibold text-stone-500 dark:text-stone-400 border-l border-stone-200 dark:border-stone-800 shrink-0">
+        <div className="hidden xl:flex items-center gap-2 px-3 py-1 text-[11px] font-semibold text-stone-500 dark:text-stone-400 border-l border-stone-200 dark:border-stone-800 shrink-0 ml-1">
           <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="truncate max-w-[220px]">
             {activeItem.description}

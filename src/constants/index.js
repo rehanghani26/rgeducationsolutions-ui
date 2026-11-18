@@ -13,4 +13,5 @@ export * from './teacherOptions.js';
 export * from './dateTime.js';
 export * from './commonOptions.js';
 export * from './inventoryOptions.js';
+export * from './studentOptions.js';
 export * from '../config/access.jsx';

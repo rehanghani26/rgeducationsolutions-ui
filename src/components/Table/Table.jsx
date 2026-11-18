@@ -87,7 +87,10 @@ const Table = ({
         <div className="flex items-center gap-2 flex-wrap">
           {searchPlaceholder && (
             <div className="relative min-w-[240px]">
-              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <SearchIcon
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
               <input
                 id={searchPlaceholder.split(" ").join("-").toLowerCase()}
                 name={searchPlaceholder.split(" ").join("-").toLowerCase()}
@@ -126,8 +129,12 @@ const Table = ({
         <div className="flex items-center gap-3">
           {totalDataLabel && (
             <div className="rounded-lg border border-[#E5E9F0] bg-[#F8FAFF] dark:bg-slate-800 px-3 py-1.5 flex items-center gap-1.5 text-sm font-medium">
-              <span className="text-[#6B7280] dark:text-slate-400">{totalDataLabel}:</span>
-              <span className="font-bold text-[#0064E0] dark:text-blue-400">{totalDataValue}</span>
+              <span className="text-[#6B7280] dark:text-slate-400">
+                {totalDataLabel}:
+              </span>
+              <span className="font-bold text-[#0064E0] dark:text-blue-400">
+                {totalDataValue}
+              </span>
             </div>
           )}
           {additionalButtons && additionalButtons}
@@ -155,11 +162,16 @@ const Table = ({
                     layout?.showOnMobile !== undefined
                       ? Boolean(layout.showOnMobile)
                       : layout?.hideOnMobile !== undefined
-                      ? !layout.hideOnMobile
-                      : Array.isArray(mobileColumns) && mobileColumns.length > 0
-                      ? mobileColumns.includes(layout?.key) || mobileColumns.includes(layout?.headData) || mobileColumns.includes(index)
-                      : index < mobileColumnsCount;
-                  const mobileClass = isVisibleOnMobile ? "" : "hidden md:table-cell";
+                        ? !layout.hideOnMobile
+                        : Array.isArray(mobileColumns) &&
+                            mobileColumns.length > 0
+                          ? mobileColumns.includes(layout?.key) ||
+                            mobileColumns.includes(layout?.headData) ||
+                            mobileColumns.includes(index)
+                          : index < mobileColumnsCount;
+                  const mobileClass = isVisibleOnMobile
+                    ? ""
+                    : "hidden md:table-cell";
 
                   return (
                     <th
@@ -206,11 +218,18 @@ const Table = ({
                               layout?.showOnMobile !== undefined
                                 ? Boolean(layout.showOnMobile)
                                 : layout?.hideOnMobile !== undefined
-                                ? !layout.hideOnMobile
-                                : Array.isArray(mobileColumns) && mobileColumns.length > 0
-                                ? mobileColumns.includes(layout?.key) || mobileColumns.includes(layout?.headData) || mobileColumns.includes(layoutIndex)
-                                : layoutIndex < mobileColumnsCount;
-                            const mobileClass = isVisibleOnMobile ? "" : "hidden md:table-cell";
+                                  ? !layout.hideOnMobile
+                                  : Array.isArray(mobileColumns) &&
+                                      mobileColumns.length > 0
+                                    ? mobileColumns.includes(layout?.key) ||
+                                      mobileColumns.includes(
+                                        layout?.headData
+                                      ) ||
+                                      mobileColumns.includes(layoutIndex)
+                                    : layoutIndex < mobileColumnsCount;
+                            const mobileClass = isVisibleOnMobile
+                              ? ""
+                              : "hidden md:table-cell";
 
                             // Get the rendered cell value
                             const cellValue = layout?.bodyData(

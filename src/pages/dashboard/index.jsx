@@ -73,7 +73,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-2.5 sm:space-y-4 pb-6 sm:pb-8 font-sans text-slate-900 dark:text-slate-100">
+    <div className="space-y-2 sm:space-y-4 pb-4 sm:pb-8 font-sans text-slate-900 dark:text-slate-100">
       {/* 1. Welcome Card */}
       <GreetingBanner user={user} />
 

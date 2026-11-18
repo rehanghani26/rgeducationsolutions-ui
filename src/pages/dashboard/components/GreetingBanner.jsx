@@ -16,7 +16,7 @@ const GreetingBanner = ({ user }) => {
   const displayName = user?.name || user?.username || "Rehan Ghani";
 
   return (
-    <div className="relative w-full mb-2.5 sm:mb-4 overflow-hidden rounded-xl sm:rounded-2xl border border-orange-300/70 bg-gradient-to-br from-[#FFFDF9] via-[#FFF6EB] to-[#FFEDE0] px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs dark:border-orange-500/25 dark:from-[#1F1C18] dark:via-[#171513] dark:to-[#100F0E] dark:shadow-md dark:shadow-black/40 transition-all duration-300">
+    <div className="relative w-full mb-2 sm:mb-4 overflow-hidden rounded-xl sm:rounded-2xl border border-orange-300/70 bg-gradient-to-br from-[#FFFDF9] via-[#FFF6EB] to-[#FFEDE0] px-3 py-2 sm:px-4 sm:py-3 shadow-xs dark:border-orange-500/25 dark:from-[#1F1C18] dark:via-[#171513] dark:to-[#100F0E] dark:shadow-md dark:shadow-black/40 transition-all duration-300">
       {/* ── Top Highlight Glow Line ── */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500/70 to-transparent opacity-90" />
 
