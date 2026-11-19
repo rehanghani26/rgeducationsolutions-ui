@@ -1,511 +1,174 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-} from "recharts";
+  Activity, Award, BookOpen, CalendarCheck, CalendarDays, ClipboardCheck,
+  ClipboardList, Clock3, CreditCard, GraduationCap, NotebookPen, TrendingUp,
+} from 'lucide-react';
+import useDashboardOverview from '../../../hooks/useDashboardOverview.js';
+import { ROUTES } from '../../../routes/routes.js';
+import { formatCurrency } from '../../../utils';
 import {
-  Activity,
-  GraduationCap,
-  CreditCard,
-  BookOpen,
-  User,
-  CheckCircle2,
-  Clock,
-  Calendar,
-  ShieldCheck,
-  Award,
-  FileText,
-  Star,
-  Sparkles,
-  Phone,
-  BookMarked,
-  Layers,
-} from "lucide-react";
-import api from "../../../services/api.js";
-import StatCard from "../components/StatCard.jsx";
-import SectionCard from "../components/SectionCard.jsx";
-import { formatCurrency } from "../../../utils";
+  OverviewStatus, OverviewDates, OverviewEmpty, OverviewMetric, OverviewPanel,
+  dashboardNumber, dashboardPercent, dateLabel, monthLabel,
+} from '../components/DashboardOverview.jsx';
 
-const resolveImageUrl = (url) => {
-  if (!url || typeof url !== 'string') return '';
-  const clean = url.trim().replace(/\\/g, '/');
-  if (!clean) return '';
-  if (
-    clean.startsWith('http://') ||
-    clean.startsWith('https://') ||
-    clean.startsWith('data:') ||
-    clean.startsWith('blob:')
-  ) {
-    return clean;
-  }
-  if (clean.startsWith('/uploads/') || clean.startsWith('uploads/')) {
-    const norm = clean.startsWith('/') ? clean : `/${clean}`;
-    return `http://localhost:5000${norm}`;
-  }
-  return `http://localhost:5000/api/v1/students/file/${clean}?redirect=true`;
-};
-import NoticeBoardTab from "../tabs/NoticeBoardTab.jsx";
-import StudentAttendance from "../components/StudentAttendance.jsx";
-import { getUserFromStorage } from "../../../config/access.jsx";
+import StudentCharts from '../components/StudentCharts.jsx';
 
-const StudentDashboard = () => {
-  const navigate = useNavigate();
-  const authUser = useSelector((state) => state.auth?.user);
-  const user = authUser || getUserFromStorage() || {};
+const attendanceLabels = { present: 'Present', late: 'Late', absent: 'Absent', halfDay: 'Half day', leave: 'Leave' };
 
-  const [stats, setStats] = useState(null);
-  const [charts, setCharts] = useState(null);
-  const [loadingData, setLoadingData] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    setLoadingData(true);
-
-    Promise.all([
-      api.get("/dashboard/stats").catch(() => null),
-      api.get("/dashboard/charts").catch(() => null),
-    ])
-      .then(([statsRes, chartsRes]) => {
-        if (!isMounted) return;
-        if (statsRes?.data?.data) setStats(statsRes.data.data);
-        else if (statsRes?.data?.stats) setStats(statsRes.data.stats);
-
-        if (chartsRes?.data?.data) setCharts(chartsRes.data.data);
-      })
-      .finally(() => {
-        if (isMounted) setLoadingData(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // ─── 6 CHART DATASETS (From API or Empty) ───────────────────────────────────
-
-  // Chart 1: Academic Grades Performance (% Marks)
-  const recentGrades = charts?.recentGrades || [];
-
-  // Chart 2: Fee Payment & Dues Distribution
-  const feePaid = Number(stats?.paidFees) || 0;
-  const feePending = Number(stats?.pendingFees) || 0;
-  const feePieSlices = [
-    { name: "Tuition Paid", value: feePaid, color: "#10b981" },
-    { name: "Pending Dues", value: feePending, color: "#ef4444" },
-  ].filter((s) => s.value > 0);
-
-  // Chart 3: Term-Wise Score Growth vs Class Benchmark
-  const termComparison = charts?.termComparison || [];
-
-  // Chart 4: Monthly Attendance Trend (%)
-  const monthlyAttendance = charts?.monthlyAttendance || [];
-
-  // Chart 5: Library & Reading Book Distribution
-  const libraryReading = charts?.libraryReading || [];
-
-  // Chart 6: Student Skill & Behavior Competencies Assessment (%)
-  const skillCompetencies = charts?.skillCompetencies || [];
-
-  // ─── 4 DATA MODULE DATASETS ────────────────────────────────────────────────
-
-  // Module 1: Personal Academic Profile & Details
-  const studentProfile = {
-    fullName: user?.name || user?.username || "N/A",
-    admissionNo: user?.admissionNumber || stats?.admissionNumber || "N/A",
-    rollNo: user?.rollNumber || stats?.rollNumber || "N/A",
-    className: user?.className || stats?.className || "N/A",
-    sectionName: user?.sectionName || stats?.sectionName || "N/A",
-    houseGroup: stats?.houseGroup || "N/A",
-    bloodGroup: stats?.bloodGroup || "N/A",
-    guardianName: stats?.guardianName || "N/A",
-    guardianContact: stats?.guardianContact || "N/A",
-    classTeacher: stats?.classTeacher || "N/A",
-    academicStatus: stats?.academicStatus || "N/A",
-  };
-
-  // Module 2: Daily Class Timetable & Schedule Today
-  const studentSchedule = charts?.timetable?.length ? charts.timetable : [];
-
-  // Module 3: Upcoming Exams & Deadlines
-  const upcomingExamsList = charts?.upcomingExams?.length ? charts.upcomingExams : [];
+function StudentMetrics({ attendance, homework, results, exams, library, period }) {
+  const best = results.latest?.subjects.reduce((current, subject) =>
+    !current || subject.percent > current.percent ? subject : current, null);
+  const metrics = [
+    { icon: CalendarDays, label: 'Days recorded', value: attendance.total, detail: period, tone: 'neutral' },
+    { icon: Activity, label: 'Days absent', value: attendance.absent, detail: period, tone: 'danger' },
+    { icon: Clock3, label: 'Late arrivals', value: attendance.late, detail: period, tone: 'brand' },
+    { icon: CalendarCheck, label: 'Half days', value: attendance.halfDay, detail: period, tone: 'neutral' },
+    { icon: ClipboardList, label: 'Homework due soon', value: homework.dueSoon, detail: 'Next 7 days', tone: 'brand' },
+    { icon: NotebookPen, label: 'Missing homework', value: homework.overdue, detail: 'Last 30 days', tone: 'danger' },
+    { icon: ClipboardCheck, label: 'Homework completion', value: dashboardPercent(homework.completion), detail: homework.due ? `${homework.completed} of ${homework.due} due submitted` : 'Nothing due in the last 30 days', tone: 'success' },
+    { icon: Award, label: 'Latest exam score', value: dashboardPercent(results.latest?.score), detail: results.latest?.name || 'No published result', tone: 'neutral' },
+    { icon: TrendingUp, label: 'Best subject', value: best?.name || '—', detail: best ? `${dashboardPercent(best.percent)} in the latest result` : 'No published subject marks', tone: 'success' },
+    { icon: BookOpen, label: 'Overdue books', value: library.overdue, detail: `${library.borrowed} currently borrowed`, tone: 'danger' },
+  ];
 
   return (
-    <div className="space-y-4 font-sans text-slate-900 dark:text-slate-100">
-      {/* ─── 4 TOP STAT CARDS (2 in one line on mobile) ────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
-        <StatCard
-          icon={Activity}
-          label="My Attendance Rate"
-          value={stats?.attendanceRate || "N/A"}
-          sub={stats?.daysPresent !== undefined ? `Present ${stats.daysPresent} of ${(stats.daysPresent || 0) + (stats.daysAbsent || 0)} total days` : "N/A"}
-          iconBg="bg-emerald-600/20"
-          iconColor="text-emerald-400"
-        />
-        <StatCard
-          icon={GraduationCap}
-          label="My Class & Roll No"
-          value={`${studentProfile.className} - ${studentProfile.sectionName}`}
-          sub={`Roll No: ${studentProfile.rollNo} | Adm: ${studentProfile.admissionNo}`}
-          iconBg="bg-indigo-600/20"
-          iconColor="text-indigo-400"
-        />
-        <StatCard
-          icon={CreditCard}
-          label="Fee Account Status"
-          value={feePending > 0 ? "Pending Dues" : (feePaid > 0 ? "Paid & Settled" : "N/A")}
-          sub={feePending > 0 ? `Pending: ${formatCurrency(feePending)}` : (feePaid > 0 ? `Paid: ${formatCurrency(feePaid)}` : "N/A")}
-          iconBg={feePending > 0 ? "bg-amber-600/20" : "bg-cyan-600/20"}
-          iconColor={feePending > 0 ? "text-amber-400" : "text-cyan-400"}
-        />
-        <StatCard
-          icon={BookOpen}
-          label="Courses & Library"
-          value={stats?.activeCourses !== undefined ? `${stats.activeCourses} Enrolled Courses` : "N/A"}
-          sub={stats?.booksIssued !== undefined ? `${stats.booksIssued} Library Books Borrowed` : "N/A"}
-          iconBg="bg-purple-600/20"
-          iconColor="text-purple-400"
-        />
+    <section className="space-y-3" aria-labelledby="student-progress-heading">
+      <div>
+        <h2 className="text-lg font-bold" id="student-progress-heading">Attendance and coursework</h2>
       </div>
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5 sm:gap-3">
+        {metrics.map(({ label, ...props }) => <OverviewMetric key={label} label={label} {...props} />)}
+      </div>
+      <p className="overview-muted text-sm">
+        {dashboardNumber(exams.count)} {exams.count === 1 ? 'upcoming exam' : 'upcoming exams'} for your class.
+      </p>
+    </section>
+  );
+}
 
-      {/* ─── MODULE 1: PERSONAL STUDENT PROFILE IDENTITY CARD ───────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm dark:border-slate-800/80 dark:bg-[#1C1B1A]">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 relative z-10">
-          <div className="flex items-center gap-3.5 sm:gap-5 flex-wrap sm:flex-nowrap">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-md shadow-indigo-600/30 flex-shrink-0 border-2 border-indigo-400/20">
-              {(user?.photo || user?.avatar || user?.imagesRef?.img) ? (
-                <img
-                  src={resolveImageUrl(user.photo || user.avatar || user.imagesRef?.img)}
-                  alt={studentProfile.fullName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              ) : (
-                studentProfile.fullName.charAt(0)
+function AttendanceHistory({ records }) {
+  const [month, setMonth] = useState('');
+  const [status, setStatus] = useState('');
+  const [limit, setLimit] = useState(12);
+  const months = [...new Set(records.map((row) => row.date.slice(0, 7)))];
+  const filtered = records.filter((row) => (!month || row.date.startsWith(month)) && (!status || row.status === status));
+  const asItem = ({ date, status: mark, remarks, checkIn, checkOut }) => ({
+    id: date, date, title: attendanceLabels[mark],
+    detail: [[checkIn, checkOut].filter(Boolean).join(' – '), remarks].filter(Boolean).join(' · '),
+  });
+  if (!records.length) return <OverviewEmpty>No attendance entries have been recorded.</OverviewEmpty>;
+  return (
+    <>
+      <OverviewDates items={records.slice(0, 5).map(asItem)} />
+      <details className="mt-2 border-t border-[var(--border-color)] pt-2">
+        <summary className="cursor-pointer text-sm font-semibold">View attendance history</summary>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <label className="space-y-1 text-sm">
+            <span className="overview-muted">Month</span>
+            <select className="overview-select" value={month} onChange={(event) => { setMonth(event.target.value); setLimit(12); }}>
+              <option value="">All months</option>
+              {months.map((key) => <option key={key} value={key}>{monthLabel(key)} {key.slice(0, 4)}</option>)}
+            </select>
+          </label>
+          <label className="space-y-1 text-sm">
+            <span className="overview-muted">Status</span>
+            <select className="overview-select" value={status} onChange={(event) => { setStatus(event.target.value); setLimit(12); }}>
+              <option value="">All statuses</option>
+              {Object.entries(attendanceLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="mt-2">
+          <OverviewDates items={filtered.slice(0, limit).map(asItem)} empty="No attendance records match these filters." />
+          {filtered.length > limit && <button type="button" className="overview-link" onClick={() => setLimit(limit + 12)}>Show more</button>}
+        </div>
+      </details>
+    </>
+  );
+}
+
+export default function StudentDashboard() {
+  const { data, loading, error, reload } = useDashboardOverview('/dashboard/student-overview');
+  if (loading || error) {
+    return <div className="dashboard-overview"><OverviewStatus loading={loading} error={error} onRetry={reload} label="Loading your student dashboard…" /></div>;
+  }
+
+  const { date, student, attendance, homework, results, fees, library, exams, schedule, notices } = data;
+  const placement = [student.className, student.sectionName].filter(Boolean).join(' · ');
+  const period = monthLabel(date.slice(0, 7));
+  return (
+    <div className="dashboard-overview">
+      <section className="overview-panel student-day-header" aria-labelledby="student-overview-heading">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="flex min-w-0 gap-3">
+            <span className="overview-icon"><GraduationCap size={19} aria-hidden="true" /></span>
+            <div className="min-w-0">
+              <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl" id="student-overview-heading">My school day</h2>
+              <p className="overview-muted mt-1 text-sm">{dateLabel(date, true)}{placement ? ` · ${placement}` : ''}</p>
+              {[student.session, student.rollNumber, student.admissionNumber].some((value) => value != null && value !== '') && (
+                <p className="overview-muted mt-1 break-words text-sm">
+                  {[student.session, student.rollNumber != null && `Roll ${student.rollNumber}`, student.admissionNumber].filter(Boolean).join(' · ')}
+                </p>
               )}
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{studentProfile.fullName}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                  <ShieldCheck size={12} /> {studentProfile.academicStatus}
-                </span>
-              </div>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                {studentProfile.className} ({studentProfile.sectionName}) · Roll No: <span className="font-bold text-slate-700 dark:text-slate-200">{studentProfile.rollNo}</span> · Adm No: <span className="font-bold text-indigo-600 dark:text-indigo-400">{studentProfile.admissionNo}</span>
-              </p>
-            </div>
           </div>
-
-          <div className="grid w-full grid-cols-2 gap-4 border-t border-slate-200 pt-4 text-xs dark:border-slate-800 sm:grid-cols-4 lg:w-auto lg:border-l lg:border-t-0 lg:pt-0 lg:pl-6">
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Class Teacher</span>
-              <span className="font-bold text-slate-700 dark:text-slate-200">{studentProfile.classTeacher}</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">House Group</span>
-              <span className="text-indigo-400 font-bold">{studentProfile.houseGroup}</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Blood Group</span>
-              <span className="text-rose-400 font-bold">{studentProfile.bloodGroup}</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase block">Guardian</span>
-              <span className="font-bold text-slate-700 dark:text-slate-200">{studentProfile.guardianName}</span>
-            </div>
-          </div>
-
-          {/* Quick Credential Action Links */}
-          <div className="flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-800 w-full lg:w-auto lg:border-t-0 lg:pt-0">
-            <button
-              type="button"
-              onClick={() => navigate('/students')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition shadow-sm cursor-pointer"
-              title="View Complete Academic Profile"
-            >
-              <User size={14} />
-              <span>My Profile</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/certificates?tab=id-cards')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition shadow-sm cursor-pointer"
-              title="View & Print Official Student Identity Card"
-            >
-              <CreditCard size={14} />
-              <span>My ID Card</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/certificates?tab=certificates')}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition shadow-sm cursor-pointer"
-              title="View & Print Verified Institutional Certificates"
-            >
-              <Award size={14} />
-              <span>My Certificates</span>
-            </button>
+          <div className="student-dashboard-actions">
+            <a className="overview-link" href="#student-insights">View charts</a>
+            <Link className="overview-link" to={ROUTES.STUDENTS.LIST}>My profile</Link>
+            <Link className="overview-link" to={ROUTES.CERTIFICATES + '?tab=id-cards'}>My ID card</Link>
+            <Link className="overview-link" to={ROUTES.CERTIFICATES + '?tab=certificates'}>My certificates</Link>
           </div>
         </div>
+      </section>
+
+      <div className="student-summary-grid" aria-label="Student summary">
+        <OverviewMetric icon={Activity} label="Attendance rate" value={dashboardPercent(attendance.rate)}
+          detail={attendance.rate == null ? 'No eligible days recorded this month' : `${period} · approved leave excluded`} tone="success" />
+        <OverviewMetric icon={CreditCard} label="Fee balance" value={fees ? formatCurrency(fees.due) : '—'}
+          detail={fees ? fees.dueDate ? `Due ${dateLabel(fees.dueDate)} · ${formatCurrency(fees.paid)} paid` : `${formatCurrency(fees.paid)} paid` : 'No fee account recorded'} />
+        <OverviewMetric icon={BookOpen} label="Library loans" value={library.borrowed} detail="Books currently borrowed" tone="neutral" />
       </div>
 
-      {/* ─── CHARTS ROW 1: (CHART 1 & CHART 2) ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* CHART 1: Academic Subject Marks Performance */}
-        <div className="lg:col-span-2">
-          <SectionCard title="Chart 1: My Subject Academic Performance (% Marks)">
-            <div className="h-64">
-              {recentGrades.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={recentGrades}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} />
-                    <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} />
-                    <Tooltip
-                      contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "12px", color: "#fff" }}
-                      formatter={(value) => [`${value}% Obtained`, "Grade Score"]}
-                    />
-                    <Bar dataKey="obtained" fill="#f97316" radius={[6, 6, 0, 0]}>
-                      {recentGrades.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.obtained >= 90 ? "#10b981" : entry.obtained >= 75 ? "#f97316" : "#f59e0b"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
-                  No grade records available (N/A)
-                </div>
-              )}
-            </div>
-          </SectionCard>
-        </div>
+      <StudentMetrics attendance={attendance} homework={homework} results={results} exams={exams} library={library} period={period} />
 
-        {/* CHART 2: Fee Account Overview Donut */}
-        <SectionCard title="Chart 2: Fee Account Payment Distribution">
-          <div className="h-48 flex items-center justify-center">
-            {feePieSlices.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={feePieSlices} cx="50%" cy="50%" innerRadius={48} outerRadius={70} paddingAngle={4} dataKey="value">
-                    {feePieSlices.map((e, i) => (
-                      <Cell key={i} fill={e.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
-                No fee dues or payments recorded (N/A)
-              </div>
-            )}
-          </div>
-          {feePieSlices.length > 0 && (
-            <div className="space-y-2 border-t border-slate-200 pt-3 text-xs dark:border-slate-800/80">
-              {feePieSlices.map((item) => (
-                <div key={item.name} className="flex items-center justify-between text-slate-700 dark:text-slate-300">
-                  <span className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                    {item.name}
-                  </span>
-                  <span className="font-bold">{formatCurrency(item.value)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </SectionCard>
-      </div>
+      <StudentCharts date={date} attendance={attendance} homework={homework} results={results} fees={fees} library={library} />
 
-      {/* ─── CHARTS ROW 2: (CHART 3 & CHART 4) ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* CHART 3: Term-Wise Growth vs Class Benchmark */}
-        <SectionCard title="Chart 3: Term Score Growth vs Class Benchmark">
-          <div className="h-56">
-            {termComparison.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={termComparison}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                  <XAxis dataKey="term" stroke="#64748b" fontSize={11} />
-                  <YAxis stroke="#64748b" fontSize={11} domain={[60, 100]} />
-                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                  <Line type="monotone" dataKey="score" stroke="#10b981" strokeWidth={3} name="My Score %" />
-                  <Line type="monotone" dataKey="avg" stroke="#f97316" strokeWidth={2} strokeDasharray="5 5" name="Class Avg %" />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
-                No term benchmark records available (N/A)
-              </div>
-            )}
-          </div>
-        </SectionCard>
-
-        {/* CHART 4: Monthly Attendance Area Chart */}
-        <SectionCard title="Chart 4: Monthly Attendance Trend (%)">
-          <div className="h-56">
-            {monthlyAttendance.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyAttendance}>
-                  <defs>
-                    <linearGradient id="studentAttGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                  <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
-                  <YAxis stroke="#64748b" fontSize={11} domain={[70, 100]} />
-                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                  <Area type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#studentAttGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
-                No monthly attendance trend records available (N/A)
-              </div>
-            )}
-          </div>
-        </SectionCard>
-      </div>
-
-      {/* ─── CHARTS ROW 3: (CHART 5 & CHART 6) ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* CHART 5: Library Reading Breakdown */}
-        <SectionCard title="Chart 5: Library Books Read by Category">
-          <div className="h-52">
-            {libraryReading.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={libraryReading} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                  <XAxis type="number" stroke="#64748b" fontSize={10} />
-                  <YAxis dataKey="category" type="category" stroke="#94a3b8" fontSize={10} width={90} />
-                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                  <Bar dataKey="books" fill="#ec4899" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
-                No library reading records available (N/A)
-              </div>
-            )}
-          </div>
-        </SectionCard>
-
-        {/* CHART 6: Student Skill & Behavior Competencies */}
-        <SectionCard title="Chart 6: Student Conduct & Skill Competencies (%)">
-          <div className="h-52">
-            {skillCompetencies.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={skillCompetencies}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2C2A" />
-                  <XAxis dataKey="skill" stroke="#64748b" fontSize={10} />
-                  <YAxis stroke="#64748b" fontSize={10} domain={[0, 100]} />
-                  <Tooltip contentStyle={{ background: "#1C1B1A", border: "1px solid #334155", borderRadius: "8px" }} />
-                  <Bar dataKey="score" fill="#f97316" radius={[4, 4, 0, 0]}>
-                    {skillCompetencies.map((entry, index) => (
-                      <Cell key={`cell-skill-${index}`} fill={entry.color || '#f97316'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-semibold">
-                No competency assessment records available (N/A)
-              </div>
-            )}
-          </div>
-        </SectionCard>
-      </div>
-
-      {/* ─── MODULE 2: DAILY CLASS TIMETABLE & SCHEDULE TODAY ────────────────── */}
-      <SectionCard title="Module 2: My Personal Class Timetable & Schedule Today" action="View Full Schedule" onAction={() => navigate("/timetable")}>
-        {studentSchedule.length === 0 ? (
-          <div className="py-8 text-center text-xs text-slate-500 font-semibold">
-            No class schedule available (N/A)
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {studentSchedule.map((item, idx) => (
-              <div key={idx} className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-wide">{item.period}</span>
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded capitalize ${
-                    item.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                    item.status === 'ongoing' ? 'bg-indigo-500/20 text-indigo-400 animate-pulse border border-indigo-500/30' :
-                    'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                  }`}>
-                    {item.status}
-                  </span>
-                </div>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">{item.subject}</h4>
-                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">{item.time}</p>
-                </div>
-                <div className="flex items-center justify-between border-t border-slate-200 pt-2 text-[10px] dark:border-slate-800/80">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">{item.teacher}</span>
-                  <span className="text-slate-500 font-bold font-mono">{item.room}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </SectionCard>
-
-      {/* ─── MODULE 3 & MODULE 4: EXAMS & NOTICE BOARD ────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* MODULE 3: Upcoming Exams & Deadlines */}
-        <SectionCard title="Module 3: Upcoming Exams & Test Deadlines">
-          {upcomingExamsList.length === 0 ? (
-            <div className="py-8 text-center text-xs text-slate-500 font-semibold">
-              No upcoming exams scheduled (N/A)
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {upcomingExamsList.map((exam, idx) => (
-                <div key={idx} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-indigo-400 uppercase">{exam.subject || "Exam"}</span>
-                    <h4 className="text-xs font-bold leading-snug text-slate-900 dark:text-white">{exam.name || exam.title}</h4>
-                    <p className="text-[10px] text-slate-400">
-                      {exam.date ? `Date: ${exam.date}` : "Scheduled Soon"} · {exam.duration || "2 Hours"} · {exam.room || "Exam Hall"}
-                    </p>
+      <div className="grid gap-3 lg:grid-cols-2 sm:gap-4">
+        <OverviewPanel title="Today's timetable" icon={CalendarDays}>
+          {schedule.length ? (
+            <ul className="overview-list">
+              {schedule.map(({ period: number, subject, starts, ends, teacher, room }, index) => (
+                <li key={`${number}-${index}`} className="flex items-start justify-between gap-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="break-words text-sm font-semibold">{subject}</p>
+                    {(teacher || room) && <p className="overview-muted mt-0.5 break-words text-sm">{[teacher, room].filter(Boolean).join(' · ')}</p>}
                   </div>
-                  <span className="text-[10px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-xl whitespace-nowrap">
-                    {exam.daysLeft || "Upcoming"}
+                  <span className="overview-muted shrink-0 text-right text-sm tabular-nums">
+                    {[starts, ends].filter(Boolean).join(' – ') || `Period ${number}`}
                   </span>
-                </div>
+                </li>
               ))}
-            </div>
-          )}
-        </SectionCard>
+            </ul>
+          ) : <OverviewEmpty>No timetable periods are scheduled for today.</OverviewEmpty>}
+        </OverviewPanel>
 
-        {/* MODULE 4: Official School Notice Board */}
-        <div className="lg:col-span-2">
-          <NoticeBoardTab />
-        </div>
+        <OverviewPanel title="Homework deadlines" description="Outstanding work due this week or recently overdue" icon={NotebookPen}>
+          <OverviewDates items={homework.upcoming.map((item) => ({ ...item, detail: item.subject }))} empty="No outstanding homework in this window." />
+        </OverviewPanel>
+
+        <OverviewPanel title="Upcoming exams" icon={GraduationCap}>
+          <OverviewDates items={exams.upcoming.map((item) => ({ ...item, detail: item.term }))} empty="No exams are scheduled for your class." />
+        </OverviewPanel>
+
+        <OverviewPanel title="Recent attendance" icon={CalendarCheck}>
+          <AttendanceHistory records={attendance.records} />
+        </OverviewPanel>
       </div>
 
-      {/* ─── DYNAMIC DAY-WISE STUDENT ATTENDANCE SECTION ────────────────────── */}
-      <StudentAttendance />
+      <OverviewPanel title="School notices" icon={ClipboardList}>
+        <OverviewDates items={notices.map((item) => ({ ...item, detail: item.message }))} empty="No notices for students." />
+      </OverviewPanel>
     </div>
   );
-};
-
-export default StudentDashboard;
+}

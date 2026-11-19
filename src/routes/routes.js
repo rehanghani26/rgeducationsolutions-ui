@@ -18,6 +18,7 @@ export const ROUTES = {
   STUDENTS: {
     LIST:         '/students',
     CREATE:       '/students/new',
+    BULK_IMPORT:  '/students/import',
     DETAIL_PARAM: '/students/:studentId',
     EDIT_PARAM:   '/students/:studentId/edit',
     detail: (id = ':studentId') => `/students/${id}`,

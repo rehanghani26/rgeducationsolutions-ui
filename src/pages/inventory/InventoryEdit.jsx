@@ -1,206 +1,203 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { Save } from "lucide-react";
-import PageHeader from "../../components/ui/PageHeader.jsx";
-import Loader from "../../components/ui/Loader.jsx";
-import Button from "../../components/ui/Button.jsx";
-import inventoryService from "../../services/inventoryService.js";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Plus } from 'lucide-react';
+import PageHeader from '../../components/ui/PageHeader.jsx';
+import { Empty, ErrorMessage, Field, Pending } from '../../components/ui/ProcurementUI.jsx';
+import { useProcurementAccess, useProcurementResource } from '../../hooks/useProcurement.js';
+import { ROUTES } from '../../routes/routes.js';
+import { createBulkInventoryItems, createInventoryItem, getInventoryById, updateInventoryItem, uploadInventoryFiles } from '../../services/inventoryService.js';
+import { makeInventoryDraft, MAX_CATALOG_ITEMS, openingStockValue, validateInventoryDrafts } from '../../utils/inventoryDraft.js';
+import { recordId } from '../../utils/procurement.js';
+import InventoryDocuments from './InventoryDocuments.jsx';
+import InventoryItemEditor from './InventoryItemEditor.jsx';
+import InventoryPresetCatalog from './InventoryPresetCatalog.jsx';
+import InventorySelection, { InventoryMobileSelection } from './InventorySelection.jsx';
+import './inventoryEditor.css';
 
-const CATEGORIES = [
-  "Books",
-  "Computers",
-  "Lab Equipment",
-  "Furniture",
-  "Sports Items",
-  "Stationery",
-  "Uniforms",
-  "Electronics",
-];
-const inputCls =
-  "w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none";
-const labelCls =
-  "block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase";
+function InventoryPageHeader({ editing, item, actions }) {
+  return <PageHeader title={editing ? 'Edit inventory item' : 'Add inventory items'}
+    subtitle={editing ? item?.name : 'Browse school supplies or create a custom item for your inventory.'}
+    breadcrumbs={[{ label: 'Inventory', to: ROUTES.INVENTORY.LIST }, { label: editing ? 'Edit item' : 'Add items' }]}
+    actions={actions} />;
+}
 
-const InventoryEdit = () => {
-  const { id } = useParams();
+function CatalogWorkspace({ item }) {
   const navigate = useNavigate();
-  const [item, setItem] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    sku: "",
-    category: "Books",
-    quantity: 0,
-    unit: "pcs",
-    minStockLevel: 5,
-    price: 0,
-  });
+  const editing = Boolean(item);
+  const back = editing ? ROUTES.INVENTORY.detail(recordId(item)) : ROUTES.INVENTORY.LIST;
+  const [rows, setRows] = useState(() => item ? [makeInventoryDraft(item)] : []);
+  const [activeKey, setActiveKey] = useState(null);
+  const [review, setReview] = useState(false);
+  const [attachments, setAttachments] = useState(item?.additionalAttachments || []);
+  const [files, setFiles] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [issue, setIssue] = useState(null);
+  const [error, setError] = useState(null);
+  const form = useRef(null);
+  const focusAfterRender = useRef(null);
+
+  const reviewing = editing || review;
+  const active = rows.find((row) => row.key === activeKey) || rows[0];
+  const full = rows.length >= MAX_CATALOG_ITEMS;
+  const selections = new Map(rows.filter((row) => row.presetId).map((row) => [row.presetId, row.key]));
+  const stockValue = openingStockValue(rows);
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    inventoryService
-      .getById(id)
-      .then((res) => {
-        const found =
-          res?.item || res?.data?.item || (res?._id || res?.id ? res : null);
-        if (found) {
-          setItem(found);
-        } else {
-          toast.error("Inventory item not found");
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load inventory item:", err);
-        toast.error("Failed to load inventory item from server");
-        setItem(null);
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+    const selector = focusAfterRender.current;
+    if (!selector) return;
+    focusAfterRender.current = null;
+    const target = form.current?.querySelector(selector);
+    if (!target) return;
+    const collapsed = target.closest('details');
+    if (collapsed) collapsed.open = true;
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: 'nearest' });
+  }, [reviewing, active?.key, issue]);
 
-  useEffect(() => {
-    if (item) {
-      setForm({
-        name: item.name || "",
-        sku: item.sku || "N/A",
-        category: item.category || "Books",
-        quantity: item.quantity ?? 0,
-        unit: item.unit || "pcs",
-        minStockLevel: item.minStockLevel ?? 5,
-        price: item.price ?? 450,
-      });
-    }
-  }, [item]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setSubmitting(true);
-      await inventoryService
-        .update(id, {
-          ...form,
-          quantity: Number(form.quantity),
-          minStockLevel: Number(form.minStockLevel),
-          price: Number(form.price),
-        })
-        .catch(() => null);
-      toast.success("Item updated");
-      navigate(`/inventory/${id}`);
-    } catch (err) {
-      toast.error("Update failed");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Loader
-        fullPage
-        size="lg"
-        text="Loading inventory item from API..."
-        className="py-24"
-      />
-    );
+  function openItem(key, focus = '#inventory-item-heading') {
+    if (!key) return;
+    if (!reviewing || key !== active?.key) focusAfterRender.current = focus;
+    setActiveKey(key);
+    setReview(true);
   }
 
-  return (
-    <div className="space-y-4 pb-8">
-      <PageHeader
-        title="Edit Inventory Item"
-        subtitle={item?.name}
-        breadcrumbs={[
-          { label: "Inventory", to: "/inventory" },
-          { label: item?.name || "Item", to: `/inventory/${id}` },
-          { label: "Edit" },
-        ]}
-      />
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-sm max-w-lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className={labelCls}>Name</label>
-            <input
-              required
-              className={inputCls}
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelCls}>SKU</label>
-            <input
-              required
-              className={inputCls}
-              value={form.sku}
-              onChange={(e) => setForm({ ...form, sku: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelCls}>Category</label>
-            <select
-              className={inputCls}
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className={labelCls}>Quantity</label>
-              <input
-                type="number"
-                className={inputCls}
-                value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Min Stock</label>
-              <input
-                type="number"
-                className={inputCls}
-                value={form.minStockLevel}
-                onChange={(e) =>
-                  setForm({ ...form, minStockLevel: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Price</label>
-              <input
-                type="number"
-                className={inputCls}
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate(`/inventory/${id}`)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              icon={<Save size={14} />}
-              loading={submitting}
-            >
-              Save
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+  function addPreset(preset) {
+    if (full || selections.has(preset.id)) return;
+    const row = makeInventoryDraft({ ...preset, unitCost: preset.unitPrice }, preset.id);
+    setRows((current) => current.length >= MAX_CATALOG_ITEMS || current.some((entry) => entry.presetId === preset.id)
+      ? current : [...current, row]);
+    setActiveKey(row.key);
+    setError(null);
+  }
 
-export default InventoryEdit;
+  function addCustom() {
+    if (full) return;
+    const row = makeInventoryDraft();
+    setRows((current) => [...current, row]);
+    openItem(row.key, '[data-inventory-field="name"]');
+    setIssue(null);
+    setError(null);
+  }
+
+  function browse() {
+    focusAfterRender.current = '.inventory-catalog input[type="search"]';
+    setReview(false);
+    setIssue(null);
+    setError(null);
+  }
+
+  function removeItem(key) {
+    const remaining = rows.filter((row) => row.key !== key);
+    setRows(remaining);
+    if (key === active?.key) setActiveKey(remaining[0]?.key || null);
+    if (!remaining.length && reviewing) browse();
+    if (issue?.key === key) setIssue(null);
+    setError(null);
+  }
+
+  function changeItem(key, values, vendor) {
+    setRows((current) => current.map((row) => row.key === key ? {
+      ...row,
+      values: { ...row.values, ...values },
+      ...(vendor !== undefined ? { vendor } : {}),
+    } : row));
+    const fixesStockBounds = issue?.field === 'maxStockLevel' && Object.hasOwn(values, 'minStockLevel');
+    if (issue?.key === key && (Object.hasOwn(values, issue.field) || fixesStockBounds)) {
+      setIssue(null);
+    }
+  }
+
+  async function save(event) {
+    event.preventDefault();
+    if (!reviewing || saving || !rows.length) return;
+    setError(null);
+    const problem = validateInventoryDrafts(rows, editing);
+    setIssue(problem);
+    if (problem) {
+      focusAfterRender.current = '[data-inventory-field="' + problem.field + '"]';
+      setActiveKey(problem.key);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const uploaded = files.length ? await uploadInventoryFiles(files) : [];
+      const additionalAttachments = [...attachments, ...uploaded];
+      if (files.length) {
+        setAttachments(additionalAttachments);
+        setFiles([]);
+      }
+      const items = rows.map(({ values }) => ({ ...values, additionalAttachments }));
+      if (editing) {
+        const changes = items[0];
+        delete changes.quantity;
+        await updateInventoryItem(recordId(item), changes);
+      } else if (items.length === 1) {
+        await createInventoryItem(items[0]);
+      } else {
+        await createBulkInventoryItems({ items });
+      }
+      navigate(back);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return <div className={'proc-page inventory-workspace' + (rows.length > 0 ? ' inventory-workspace--selected' : '')}>
+    <InventoryPageHeader editing={editing} item={item} actions={editing ?
+      <Link className="proc-btn" to={back}><ArrowLeft size={15} /> Cancel</Link> : <>
+      {reviewing && <button className="proc-btn" type="button" onClick={browse} disabled={saving}><ArrowLeft size={15} /> Back to catalog</button>}
+      <button className={'proc-btn' + (reviewing ? '' : ' proc-primary')} type="button" disabled={full || saving} onClick={addCustom}>
+        <Plus size={16} /> Add custom item
+      </button>
+    </>} />
+    <form ref={form} onSubmit={save} noValidate onKeyDown={(event) => {
+      if (event.key === 'Enter' && event.target.type === 'search') event.preventDefault();
+    }}>
+      <div className="inventory-workspace__layout" aria-busy={saving || undefined}>
+        <div className="inventory-workspace__main">
+          {!editing && <div hidden={reviewing}>
+            <InventoryPresetCatalog selections={selections} full={full} onAdd={addPreset} onEdit={openItem} />
+          </div>}
+          {reviewing && active && <fieldset className="inventory-workspace__fields" disabled={saving}><div className="inventory-workspace__review">
+            {!editing && rows.length > 1 && <div className="proc-panel inventory-workspace__switch">
+              <Field label="Editing item">
+                <select value={active.key} onChange={(event) => openItem(event.target.value)}>
+                  {rows.map((row) => <option value={row.key} key={row.key}>{row.values.name || 'Custom item'}</option>)}
+                </select>
+              </Field>
+            </div>}
+            {item?.legacyBundle && <p className="proc-message proc-warn">The original bundle contents are available in the item history.</p>}
+            <ErrorMessage error={issue?.message || error} />
+            <InventoryItemEditor key={active.key} row={active} editing={editing} issue={issue?.key === active.key ? issue : null} onChange={changeItem} />
+            <InventoryDocuments attachments={attachments} files={files} onFilesChange={setFiles}
+              onRemoveAttachment={(index) => setAttachments((current) => current.filter((_, position) => position !== index))} />
+          </div></fieldset>}
+        </div>
+        <InventorySelection rows={rows} activeKey={active?.key} reviewing={reviewing} editing={editing} saving={saving}
+          value={stockValue} onReview={() => openItem(active?.key)} onSelect={openItem} onRemove={removeItem}
+          onQuantity={(key, quantity) => changeItem(key, { quantity })} />
+      </div>
+      <InventoryMobileSelection count={rows.length} reviewing={reviewing} editing={editing} saving={saving} value={stockValue}
+        onReview={() => openItem(active?.key)} />
+    </form>
+  </div>;
+}
+
+export default function InventoryEdit() {
+  const { id } = useParams();
+  const { canManageStock } = useProcurementAccess();
+  const load = useCallback(async () => (await getInventoryById(id)).data.item, [id]);
+  const resource = useProcurementResource(load, Boolean(id) && canManageStock);
+  if (canManageStock && !resource.loading && !resource.error) {
+    return <CatalogWorkspace key={id || 'new'} item={resource.data} />;
+  }
+  return <div className="proc-page">
+    <InventoryPageHeader editing={Boolean(id)} />
+    {!canManageStock ? <Empty title="Your role has read-only inventory access" /> :
+      resource.loading ? <Pending label="Loading item" /> :
+      <ErrorMessage error={resource.error} onRetry={resource.refresh} />}
+  </div>;
+}

@@ -9,6 +9,7 @@ import {
   Signup,
   Dashboard,
   StudentList,
+  StudentBulkImport,
   StudentDetail,
   StudentEdit,
   TeacherList,
@@ -70,6 +71,7 @@ const appRoutes = [
   // Students
   { path: ROUTES.STUDENTS.LIST, element: StudentList, name: 'student-list', module: 'students' },
   { path: ROUTES.STUDENTS.CREATE, element: StudentEdit, name: 'student-create', module: 'students' },
+  { path: ROUTES.STUDENTS.BULK_IMPORT, element: StudentBulkImport, name: 'student-import', allowedRoles: ADMIN_ROLES },
   { path: ROUTES.STUDENTS.DETAIL_PARAM, element: StudentDetail, name: 'student-detail', module: 'students' },
   { path: ROUTES.STUDENTS.EDIT_PARAM, element: StudentEdit, name: 'student-edit', module: 'students' },
 

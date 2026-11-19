@@ -553,6 +553,8 @@ export const syncDocumentThemeVariables = (combinationId = ACTIVE_COMBINATION) =
   const root = document.documentElement;
   const isDark = root.classList.contains('dark');
 
+  root.style.setProperty('--brand-accent', r.accent || r.primary);
+
   if (isDark) {
     root.style.setProperty('--bg-primary', r.bgDark);
     root.style.setProperty('--bg-secondary', r.cardDark);

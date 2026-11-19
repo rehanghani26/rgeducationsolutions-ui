@@ -5,6 +5,7 @@
  */
 
 export { default as StudentList }        from './StudentList.jsx';
+export { default as StudentBulkImport }  from './StudentBulkImport.jsx';
 export { default as StudentDetail }      from './StudentDetail.jsx';
 export { default as StudentEdit }        from './StudentEdit.jsx';
 export { default as StudentForm }        from './StudentForm.jsx';

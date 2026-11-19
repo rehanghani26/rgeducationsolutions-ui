@@ -1,0 +1,134 @@
+.student-registration {
+  @apply w-full min-w-0 space-y-3 pb-8 text-slate-900 dark:text-slate-100 sm:space-y-5;
+  color-scheme: light;
+}
+
+.dark .student-registration { color-scheme: dark; }
+
+.student-page-heading { @apply space-y-2.5 sm:space-y-3; }
+.student-breadcrumb { @apply flex gap-2 text-sm text-slate-600 dark:text-slate-400; }
+.student-breadcrumb a { @apply font-medium hover:text-orange-700 hover:underline dark:hover:text-orange-300; }
+.student-page-title { @apply flex items-center gap-3; }
+.student-page-icon {
+  @apply hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 sm:flex;
+}
+.student-page-title h1 { @apply text-2xl font-extrabold tracking-tight sm:text-3xl; }
+.student-page-title p { @apply text-sm text-slate-600 dark:text-slate-400; }
+
+.student-wizard { @apply grid gap-3 lg:grid-cols-[13rem_minmax(0,1fr)] lg:items-start lg:gap-5; }
+.student-steps {
+  @apply min-w-0 rounded-xl border border-slate-200 bg-white p-2.5 dark:border-slate-700 dark:bg-slate-900 sm:p-3;
+}
+.student-mobile-progress { @apply mb-2 flex justify-between gap-2 px-1 text-sm text-slate-600 dark:text-slate-400 lg:hidden; }
+.student-mobile-progress strong { @apply font-semibold text-slate-900 dark:text-slate-100; }
+.student-steps ol { @apply grid list-none grid-cols-3 gap-1 sm:grid-cols-6 sm:gap-1.5 lg:grid-cols-1; }
+.student-step {
+  @apply flex min-h-10 w-full items-center justify-center gap-0.5 rounded-lg bg-slate-50 text-xs font-semibold text-slate-700
+    transition enabled:hover:bg-orange-100 disabled:cursor-default dark:bg-slate-800 dark:text-slate-200 dark:enabled:hover:bg-orange-950
+    sm:flex-col sm:gap-1 sm:px-1 sm:py-2 sm:text-sm lg:flex-row lg:justify-start lg:gap-2.5 lg:p-2;
+}
+.student-step[aria-current='step'] { @apply bg-orange-100 text-orange-900 dark:bg-orange-950 dark:text-orange-200; }
+.student-step:disabled:not([aria-current='step']) { @apply text-slate-500 dark:text-slate-400; }
+.student-step-icon { @apply flex h-6 w-5 shrink-0 items-center justify-center rounded-md sm:h-7 sm:w-7; }
+.student-step[aria-current='step'] .student-step-icon { @apply bg-orange-700 text-white dark:bg-orange-600; }
+
+.student-card {
+  @apply min-w-0 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900;
+}
+.student-card-heading {
+  @apply flex min-w-0 items-start gap-2.5 border-b border-slate-200 bg-slate-50/80 px-3 py-3 dark:border-slate-700
+    dark:bg-slate-800/50 sm:gap-3 sm:px-6 sm:py-4;
+  border-radius: 0.7rem 0.7rem 0 0;
+}
+.student-heading-icon {
+  @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 sm:h-11 sm:w-11;
+}
+.student-card-heading h2 { @apply scroll-mt-24 text-lg font-bold leading-tight tracking-tight outline-none sm:text-xl; }
+.student-card-heading p { @apply mt-0.5 text-sm leading-snug text-slate-600 dark:text-slate-400; }
+.student-card-body { @apply space-y-4 px-3 py-3 sm:space-y-5 sm:px-6 sm:py-5; }
+.student-group + .student-group { @apply border-t border-slate-200 pt-4 dark:border-slate-700 sm:pt-5; }
+.student-group h3, .student-review h3 { @apply mb-2.5 text-base font-bold; }
+.student-fields { @apply grid min-w-0 grid-cols-1 gap-x-2.5 gap-y-2.5 min-[360px]:grid-cols-2 sm:gap-x-4 sm:gap-y-3; }
+.student-field { @apply min-w-0 space-y-1; }
+.student-wide { @apply col-span-full; }
+.student-fit { @apply justify-self-start; }
+.student-align-end { @apply self-end; }
+.student-field label { @apply block text-sm font-semibold leading-snug text-slate-700 dark:text-slate-200; }
+.student-field label span { @apply text-rose-700 dark:text-rose-400; }
+.student-control {
+  @apply block min-h-10 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-base leading-snug text-slate-900
+    outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-500/30 disabled:opacity-60
+    dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-orange-400;
+}
+select.student-control {
+  @apply appearance-none bg-no-repeat pr-8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 16 16'%3E%3Cpath stroke='%23718096' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.6rem center;
+}
+.student-control[aria-invalid='true'] { @apply border-rose-600 dark:border-rose-400; }
+.student-error { @apply break-words text-sm font-medium text-rose-700 dark:text-rose-300; }
+.student-hint { @apply text-sm text-slate-600 dark:text-slate-400; }
+.student-toggle {
+  @apply flex min-w-0 cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5
+    text-sm dark:border-slate-700 dark:bg-slate-800/60 sm:px-3;
+}
+.student-toggle small, .student-upload small { @apply mt-0.5 block text-sm leading-snug text-slate-600 dark:text-slate-400; }
+.student-toggle input {
+  @apply relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-slate-500 transition-colors checked:bg-orange-700;
+}
+.student-toggle input::before {
+  @apply absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform content-[''];
+}
+.student-toggle input:checked::before { @apply translate-x-5; }
+
+.student-record {
+  @apply min-w-0 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800/50;
+}
+.student-record legend { @apply px-1 text-sm font-semibold; }
+.student-upload { @apply min-w-0 space-y-2.5 rounded-lg border border-dashed border-slate-300 p-2.5 dark:border-slate-600 sm:p-3; }
+.student-upload-copy { @apply flex items-center gap-2.5 text-sm; }
+.student-upload-copy img, .student-upload-icon {
+  @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-orange-100 object-cover text-orange-800 dark:bg-orange-950 dark:text-orange-300;
+}
+.student-upload-actions, .student-password-actions { @apply flex flex-wrap items-center gap-x-3 gap-y-1.5; }
+.student-file-input:focus-visible + label { @apply outline outline-2 outline-offset-2 outline-orange-600; }
+.student-email, .student-email-verification { @apply space-y-2; }
+.student-verified { @apply flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-300; }
+
+.student-review { @apply grid gap-2.5 md:grid-cols-2 sm:gap-3; }
+.student-review-card { @apply min-w-0 rounded-lg border border-slate-200 p-3 dark:border-slate-700; }
+.student-review-card > div { @apply flex items-center justify-between gap-2; }
+.student-review-card h3 { @apply mb-0; }
+.student-review-card dl { @apply mt-1.5 space-y-1.5; }
+.student-review-card dl div { @apply grid grid-cols-2 gap-2 text-sm; }
+.student-review-card dt { @apply text-slate-600 dark:text-slate-400; }
+.student-review-card dd { @apply break-words font-medium; }
+
+.student-footer {
+  @apply flex flex-wrap items-center gap-1.5 border-t border-slate-200 px-2.5 py-2.5 dark:border-slate-700 sm:gap-2 sm:px-6 sm:py-3;
+}
+.student-button {
+  @apply inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-center text-sm
+    font-semibold leading-tight transition disabled:cursor-wait disabled:opacity-60 sm:px-3;
+}
+.student-primary {
+  @apply ml-auto border-orange-700 bg-orange-700 text-white hover:bg-orange-800 dark:border-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700;
+}
+.student-secondary {
+  @apply border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+}
+.student-draft svg { @apply hidden min-[365px]:block; }
+.student-link {
+  @apply inline-flex min-h-8 items-center gap-1 rounded text-sm font-semibold text-orange-800 hover:underline dark:text-orange-300;
+}
+.student-remove { @apply text-rose-700 dark:text-rose-300; }
+.student-button:focus-visible, .student-link:focus-visible, .student-step:focus-visible, .student-toggle input:focus-visible {
+  @apply outline outline-2 outline-offset-2 outline-orange-600;
+}
+.student-draft-banner {
+  @apply flex flex-wrap items-center justify-between gap-x-3 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5
+    text-sm text-orange-900 dark:border-orange-900 dark:bg-orange-950/60 dark:text-orange-200;
+}
+.student-draft-banner > * { @apply flex items-center gap-3; }
+.student-draft-message { @apply text-sm text-slate-600 dark:text-slate-400; }
+.student-submit-error { @apply mx-3 mb-3 rounded-lg bg-rose-50 px-3 py-2 dark:bg-rose-950/40 sm:mx-6; }

@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../routes/routes.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
 import { Edit3, Eye, FolderDown, GraduationCap, KeyRound, Plus, Save, Search, Trash2, UserX, Wand2, X } from 'lucide-react';
 import {
   fetchStudents,
-  registerStudent,
   removeStudent,
   resetStudentPassword,
   updateStudent,
@@ -65,6 +66,7 @@ const StudentManagement = () => {
   const { students, loading } = useSelector((state) => state.erp);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchStudents());
@@ -90,12 +92,7 @@ const StudentManagement = () => {
     }));
   };
 
-  const openCreate = () => {
-    setEditing(null);
-    const password = randomPassword();
-    setForm({ ...blankForm, password, confirmPassword: password });
-    setShowForm(true);
-  };
+  const openCreate = () => navigate(ROUTES.STUDENTS.CREATE);
 
   const openEdit = (student) => {
     setEditing(student);
@@ -143,9 +140,8 @@ const StudentManagement = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const payload = payloadFromForm();
-    const action = editing
-      ? updateStudent({ id: editing.id || editing._id, data: payload })
-      : registerStudent(payload);
+    if (!editing) return;
+    const action = updateStudent({ id: editing.id || editing._id, data: payload });
 
     dispatch(action).then((res) => {
       if (res.meta.requestStatus !== 'fulfilled') {
@@ -298,12 +294,12 @@ const StudentManagement = () => {
         </aside>
       </div>
 
-      {/* Create / Edit Form Modal */}
+      {/* Edit student form */}
       <Modal
         open={showForm}
         onClose={() => setShowForm(false)}
         size="2xl"
-        title={editing ? 'Edit Student' : 'Create Student'}
+        title="Edit Student"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
 

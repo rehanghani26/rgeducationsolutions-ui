@@ -1572,9 +1572,26 @@ const RAW_SCHOOL_CATALOG = [
   },
 ];
 
+export const SCHOOL_PRODUCT_PHOTOS = {
+  'sta-01': 'copier-paper',
+  'sta-09': 'ballpoint-pens',
+  'lab-01': 'microscope',
+  'spt-03': 'football',
+  'sta-12': 'school-register',
+  'it-03': 'keyboard-mouse',
+  'sta-04': 'whiteboard-markers',
+  'med-01': 'first-aid-kit',
+  'uni-03': 'school-polo',
+  'fur-02': 'classroom-desk',
+  'mnt-02': 'handwash-refill',
+  'sta-05': 'marker-ink',
+};
+
 export const SCHOOL_PRODUCT_CATALOG = RAW_SCHOOL_CATALOG.map((item) => ({
   ...item,
-  imageUrl: getSchoolProductImage(item),
+  imageUrl: SCHOOL_PRODUCT_PHOTOS[item.id]
+    ? '/inventory-catalog/' + SCHOOL_PRODUCT_PHOTOS[item.id] + '.jpg'
+    : getSchoolProductImage(item),
 }));
 
 export default {

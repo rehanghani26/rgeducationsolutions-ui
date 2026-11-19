@@ -19,7 +19,8 @@ export const useInventory = (params = {}) => {
     setLoading(true);
     try {
       const res = await inventoryService.getAll(params);
-      if (res.data?.items) setData(res.data);
+      const items = res.data?.inventory ?? res.data?.items;
+      if (items) setData({ ...res.data, items });
       else setData({ items: [], pagination: { total: 0, page: 1, pages: 1 } });
     } catch (err) {
       setError(err);

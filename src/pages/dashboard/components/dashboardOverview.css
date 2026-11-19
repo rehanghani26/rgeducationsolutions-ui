@@ -1,0 +1,146 @@
+.dashboard-overview {
+  --overview-brand-ink: color-mix(in srgb, var(--brand-primary) 57%, var(--text-primary));
+  --overview-brand-border: color-mix(in srgb, var(--brand-primary) 28%, var(--border-color));
+  --insight-primary: color-mix(in srgb, var(--brand-primary) 85%, var(--text-primary));
+  --insight-accent: color-mix(in srgb, var(--brand-accent) 80%, var(--text-primary));
+  --insight-success: theme('colors.emerald.700');
+  --insight-danger: theme('colors.rose.700');
+  --insight-neutral: var(--text-secondary);
+  @apply min-w-0 space-y-4 sm:space-y-5;
+  color: var(--text-primary);
+}
+
+.dark .dashboard-overview {
+  --insight-success: theme('colors.emerald.400');
+  --insight-danger: theme('colors.rose.400');
+}
+
+.overview-muted { color: var(--text-secondary); }
+.overview-panel, .overview-metric {
+  @apply min-w-0 rounded-xl border shadow-sm;
+  border-color: var(--border-color);
+  background-color: var(--surface-1);
+}
+.overview-panel { @apply p-3.5 sm:p-5; }
+.overview-panel-header { @apply mb-3 flex flex-wrap items-start justify-between gap-2; }
+.overview-metric { @apply flex min-h-[6rem] flex-col items-start gap-1.5 px-3 py-2.5 sm:flex-row sm:gap-2.5 sm:px-3.5 sm:py-3.5; }
+.overview-icon {
+  --icon-tone: var(--brand-primary);
+  @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg;
+  background-color: color-mix(in srgb, var(--icon-tone) 15%, var(--surface-1));
+  color: color-mix(in srgb, var(--icon-tone) 55%, var(--text-primary));
+}
+.overview-icon[data-tone='success'] { --icon-tone: var(--insight-success); }
+.overview-icon[data-tone='danger'] { --icon-tone: var(--insight-danger); }
+.overview-icon[data-tone='neutral'] { --icon-tone: var(--insight-neutral); }
+.overview-link {
+  @apply inline-flex min-h-8 items-center rounded-md px-1 text-sm font-semibold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+  color: var(--overview-brand-ink);
+}
+.overview-action {
+  @apply border;
+  border-color: var(--border-color);
+  background-color: var(--surface-2);
+}
+.overview-link:focus-visible, .overview-select:focus-visible,
+.insight-filters button:focus-visible, .insight-day:focus-visible, .insight-day[aria-pressed='true'] {
+  outline-color: var(--brand-primary);
+}
+.overview-empty {
+  @apply flex min-h-24 items-center justify-center rounded-lg border border-dashed p-3 text-center text-sm;
+  border-color: var(--border-color);
+  background-color: var(--surface-2);
+  color: var(--text-secondary);
+}
+.overview-list { @apply divide-y divide-[var(--border-color)]; }
+.overview-select {
+  @apply block min-h-9 w-full min-w-0 rounded-md border px-2 text-sm focus-visible:outline focus-visible:outline-2;
+  border-color: var(--border-color);
+  background-color: var(--surface-2);
+  color: var(--text-primary);
+}
+.dark .overview-select { color-scheme: dark; }
+.overview-chart { @apply h-48 w-full min-w-0 overflow-hidden sm:h-56; }
+.overview-chart .recharts-default-tooltip {
+  max-width: min(14rem, calc(100vw - 5rem));
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+.overview-legend { @apply mb-2 flex flex-wrap gap-x-3 gap-y-1 text-sm; }
+.overview-legend li { @apply flex items-center gap-1.5; }
+.overview-legend li > span { @apply h-2.5 w-2.5 shrink-0 rounded-full; }
+
+.student-day-header {
+  border-color: var(--overview-brand-border);
+  background-image: linear-gradient(135deg, color-mix(in srgb, var(--brand-primary) 9%, var(--surface-1)), var(--surface-1));
+}
+.student-dashboard-actions { @apply flex w-full flex-wrap gap-1.5 sm:w-auto; }
+.student-dashboard-actions .overview-link {
+  @apply min-h-9 rounded-lg border px-2.5;
+  border-color: var(--overview-brand-border);
+  background-color: var(--surface-1);
+}
+.student-summary-grid { @apply grid grid-cols-2 gap-2.5 min-[560px]:grid-cols-3 sm:gap-3; }
+.student-summary-grid > :last-child { @apply col-span-2 min-[560px]:col-span-1; }
+
+.insight-section { @apply min-w-0 scroll-mt-6 space-y-3 sm:space-y-4; }
+.insight-heading {
+  @apply flex flex-col gap-3 border-b pb-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between;
+  border-color: var(--border-color);
+}
+.insight-filters {
+  @apply grid grid-cols-2 gap-1 rounded-xl p-1 sm:flex sm:flex-wrap;
+  background-color: var(--surface-2);
+}
+.insight-filters button {
+  @apply min-h-9 rounded-lg px-3 py-1.5 text-sm font-semibold focus-visible:outline focus-visible:outline-2;
+  color: var(--text-secondary);
+}
+.insight-filters button:hover { background-color: color-mix(in srgb, var(--brand-primary) 7%, var(--surface-2)); }
+.insight-filters button[aria-pressed='true'] {
+  @apply shadow-sm;
+  background-color: var(--surface-1);
+  color: var(--overview-brand-ink);
+}
+.insight-grid { @apply grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3 sm:gap-4; }
+.insight-grid .overview-panel { @apply h-full; }
+
+.insight-composition {
+  @apply grid min-h-36 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 sm:gap-4;
+}
+.insight-ring {
+  @apply grid aspect-square shrink-0 place-items-center rounded-full;
+  width: clamp(5.25rem, 27vw, 8.25rem);
+}
+.insight-ring-center {
+  @apply flex aspect-square w-[72%] flex-col items-center justify-center rounded-full text-center leading-tight;
+  background-color: var(--surface-1);
+}
+.insight-bars { @apply max-h-72 space-y-2.5 overflow-y-auto pr-1; }
+.insight-bar-track {
+  @apply flex h-2.5 w-full overflow-hidden rounded-full;
+  background-color: var(--surface-2);
+}
+
+.insight-calendar { @apply grid grid-cols-7 gap-1; }
+.insight-day {
+  @apply flex min-h-9 min-w-0 items-center justify-center rounded-md text-sm font-semibold tabular-nums;
+}
+.insight-day:focus-visible, .insight-day[aria-pressed='true'] { @apply outline outline-2; }
+.insight-day[aria-current='date'] { @apply underline decoration-2 underline-offset-2; }
+.insight-calendar-detail {
+  @apply flex min-h-10 flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-lg px-2.5 py-2 text-sm;
+  background-color: var(--surface-2);
+}
+.insight-day, .insight-day-swatch {
+  background-color: color-mix(in srgb, var(--attendance-tone, var(--surface-2)) 18%, var(--surface-2));
+  color: color-mix(in srgb, var(--attendance-tone, var(--text-secondary)) 45%, var(--text-primary));
+}
+.insight-calendar [data-status='present'], .insight-day-swatch[data-status='present'] { --attendance-tone: var(--insight-success); }
+.insight-calendar [data-status='late'], .insight-day-swatch[data-status='late'] { --attendance-tone: var(--insight-accent); }
+.insight-calendar [data-status='absent'], .insight-day-swatch[data-status='absent'] { --attendance-tone: var(--insight-danger); }
+.insight-calendar [data-status='halfDay'], .insight-day-swatch[data-status='halfDay'] { --attendance-tone: var(--insight-primary); }
+.insight-calendar [data-status='leave'], .insight-day-swatch[data-status='leave'] { --attendance-tone: var(--insight-neutral); }
+.insight-day[data-status='leave'], .insight-day-swatch[data-status='leave'] {
+  background-color: color-mix(in srgb, var(--attendance-tone) 28%, var(--surface-2));
+}

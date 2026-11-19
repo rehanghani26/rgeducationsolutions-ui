@@ -67,6 +67,7 @@ export const INVENTORY_URLS = {
   ALERTS:            '/inventory/alerts',
   STOCK_ADJUST:      '/inventory/stock-adjust',
   TRANSACTIONS:      '/inventory/transactions',
+  PURCHASES:         '/inventory/purchases',
   VENDORS:           '/vendors',
 };
 

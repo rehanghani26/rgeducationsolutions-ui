@@ -90,7 +90,7 @@ export async function createStudent(data) {
     return { status: response.status, data: response.data };
   } catch (error) {
     toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
+    throw { status: error.response?.status, message: error.response?.data?.message || error.message };
   }
 }
 
@@ -106,7 +106,7 @@ export async function updateStudent(id, data) {
     return { status: response.status, data: response.data };
   } catch (error) {
     toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
+    throw { status: error.response?.status, message: error.response?.data?.message || error.message };
   }
 }
 
@@ -161,27 +161,11 @@ export async function bulkPromoteStudents(payload) {
  */
 export async function bulkImportStudents(students) {
   try {
-    const response = await api.post(STUDENT_URLS.BULK_IMPORT, { students });
-    const { count, total, errors = [] } = response.data || {};
-    if (errors.length > 0) {
-      toast.warning(
-        `Imported ${count}/${total} students. ${errors.length} row(s) failed.`
-      );
-    } else {
-      toast.success(
-        response.data?.message || `Successfully imported ${count} students!`
-      );
-    }
-    return response;
+    return await api.post(STUDENT_URLS.BULK_IMPORT, { students });
   } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
+    throw { status: error.response?.status, message: error.response?.data?.message || error.message };
   }
 }
-
-/**
- * Clean up any corrupted student records caused by previous failed imports.
- */
 
 /**
  * Export student list as CSV blob.

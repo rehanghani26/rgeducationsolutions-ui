@@ -16,6 +16,7 @@ import {
   YEAR_OPTIONS,
 } from "../../constants";
 import { formatCurrency, formatDate } from "../../utils";
+import { isLegacyStudent, studentDocumentUrl } from "../../utils/studentForm.js";
 import {
   User,
   CalendarCheck,
@@ -1209,6 +1210,18 @@ const StudentDetail = () => {
                           : "—"}
                       </p>
                     </div>
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Legacy Student</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white">
+                        {isLegacyStudent(student.isLegacyStudent) ? "Yes" : "No"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Joining Date</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white">
+                        {student.joiningDate ? format(new Date(student.joiningDate), "dd MMM yyyy") : "—"}
+                      </p>
+                    </div>
                     <div className="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
                         Student Category
@@ -2104,6 +2117,24 @@ const StudentDetail = () => {
                 </div>
               </div>
 
+              {student.documents?.some((document) => studentDocumentUrl(document.url)) && (
+                <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/80">
+                  <h4 className="text-sm font-bold">Additional documents</h4>
+                  <ul className="space-y-2 text-sm">
+                    {student.documents.map((document, index) => {
+                      const url = studentDocumentUrl(document.url);
+                      return url && (
+                        <li key={document._id || index}>
+                          <a href={url} target="_blank" rel="noreferrer" className="break-words font-semibold text-orange-700 underline dark:text-orange-300">
+                            {document.name || "Open document"}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              )}
+
               {/* 3. Interactive Embedded PDF Document Viewer */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
@@ -2198,6 +2229,10 @@ const StudentDetail = () => {
                     </h4>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Name</span>
+                      <p className="font-extrabold text-slate-900 dark:text-white break-words">{student.fatherName || "—"}</p>
+                    </div>
                     <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 space-y-1">
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Occupation</span>
                       <p className="font-extrabold text-slate-900 dark:text-white truncate">
