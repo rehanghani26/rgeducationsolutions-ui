@@ -1,5 +1,6 @@
 import React from "react";
 import { Award } from "lucide-react";
+import { Input, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const AcademicSettings = ({ settings = {}, handleChange }) => {
   return (
@@ -24,7 +25,7 @@ const AcademicSettings = ({ settings = {}, handleChange }) => {
               Minimum aggregate percentage required for a student to pass an examination.
             </p>
             <div className="relative">
-              <input
+              <Input
                 type="number"
                 name="defaultPassingPercentage"
                 value={settings?.defaultPassingPercentage ?? ""}
@@ -47,7 +48,7 @@ const AcademicSettings = ({ settings = {}, handleChange }) => {
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
               Maximum GPA scale used for report card grade point averages (e.g. 4.0 or 10.0).
             </p>
-            <input
+            <Input
               type="number"
               name="gradePointScale"
               value={settings?.gradePointScale ?? ""}
@@ -62,13 +63,13 @@ const AcademicSettings = ({ settings = {}, handleChange }) => {
         </div>
 
         <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-850/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-          <input
-            type="checkbox"
+          <SwitchInput
+            size="sm"
             name="enableGradeDistribution"
             checked={Boolean(settings?.enableGradeDistribution)}
             onChange={handleChange}
             id="enableGradeDistribution"
-            className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+            className="shrink-0"
           />
           <label htmlFor="enableGradeDistribution" className="cursor-pointer select-none">
             <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">

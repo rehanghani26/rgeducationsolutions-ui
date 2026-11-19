@@ -92,6 +92,7 @@ import {
 } from "../certificates/services/documentService.js";
 import { getTemplateById } from "../certificates/templates/registry.js";
 import { getVerificationUrl } from "../certificates/utils/qrUtils.js";
+import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -2396,7 +2397,7 @@ const StudentDetail = () => {
                         <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                           Select Date
                         </label>
-                        <input
+                        <Input
                           type="date"
                           value={attSpecificDate}
                           onChange={(e) => setAttSpecificDate(e.target.value)}
@@ -2412,7 +2413,7 @@ const StudentDetail = () => {
                           <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                             Start Date
                           </label>
-                          <input
+                          <Input
                             type="date"
                             value={attStartDate}
                             onChange={(e) => setAttStartDate(e.target.value)}
@@ -2423,7 +2424,7 @@ const StudentDetail = () => {
                           <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                             End Date
                           </label>
-                          <input
+                          <Input
                             type="date"
                             value={attEndDate}
                             onChange={(e) => setAttEndDate(e.target.value)}
@@ -2440,7 +2441,7 @@ const StudentDetail = () => {
                           <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                             Month
                           </label>
-                          <select
+                          <SelectInput
                             value={attMonth}
                             onChange={(e) => setAttMonth(e.target.value)}
                             className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -2451,13 +2452,13 @@ const StudentDetail = () => {
                                 {m.label}
                               </option>
                             ))}
-                          </select>
+                          </SelectInput>
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                             Year
                           </label>
-                          <select
+                          <SelectInput
                             value={attYear}
                             onChange={(e) => setAttYear(e.target.value)}
                             className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -2467,7 +2468,7 @@ const StudentDetail = () => {
                                 {y}
                               </option>
                             ))}
-                          </select>
+                          </SelectInput>
                         </div>
                       </>
                     )}
@@ -2477,7 +2478,7 @@ const StudentDetail = () => {
                       <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                         Attendance Status
                       </label>
-                      <select
+                      <SelectInput
                         value={attStatusFilter}
                         onChange={(e) => setAttStatusFilter(e.target.value)}
                         className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -2487,7 +2488,7 @@ const StudentDetail = () => {
                         <option value="absent">Absent Only</option>
                         <option value="late">Late Only</option>
                         <option value="half day">Half Day Only</option>
-                      </select>
+                      </SelectInput>
                     </div>
                   </div>
                 </div>

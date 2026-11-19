@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Input, SelectInput } from './FormControls.jsx';
 
 /**
  * FilterBar — Combined search + filter dropdown component.
@@ -78,7 +79,7 @@ const FilterBar = ({
           size={15}
           className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
         />
-        <input
+        <Input
           type="text"
           placeholder={placeholder}
           value={search}
@@ -90,20 +91,16 @@ const FilterBar = ({
       {/* Inline Select Filters */}
       {filters.map((filter) => (
         <div key={filter.key} className="relative">
-          <select
+          <SelectInput
+            aria-label={filter.label || filter.placeholder || filter.key}
             value={filter.value}
+            options={filter.options || []}
+            placeholder={filter.placeholder}
+            showPlaceholder={Boolean(filter.placeholder)}
+            emptyMessage=""
             onChange={(e) => filter.onChange(e.target.value)}
             className="appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 pr-8 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            {filter.placeholder && (
-              <option value="">{filter.placeholder}</option>
-            )}
-            {filter.options?.map((opt) => (
-              <option key={opt.value ?? opt} value={opt.value ?? opt}>
-                {opt.label ?? opt}
-              </option>
-            ))}
-          </select>
+          />
           <ChevronDown
             size={13}
             className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"

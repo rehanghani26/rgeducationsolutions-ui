@@ -8,6 +8,7 @@ import { ROUTES } from '../../routes/routes.js';
 import { bulkImportStudents, cleanCorruptedStudents } from '../../services/studentService.js';
 import { downloadStudentTemplate, readStudentImport, studentImportHeaders } from '../../utils/studentImport.js';
 import './studentRegistration.css';
+import { Input } from '../../components/ui/FormControls.jsx';
 
 const panel = 'min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5 dark:border-slate-700 dark:bg-slate-900';
 const muted = 'text-sm text-slate-600 dark:text-slate-300';
@@ -181,7 +182,7 @@ export default function StudentBulkImport() {
             onDragOver={(event) => { event.preventDefault(); if (!busy) setDragging(true); }}
             onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }}
             onDrop={(event) => { event.preventDefault(); setDragging(false); chooseFile(event.dataTransfer.files[0]); }}>
-            <input className="sr-only student-file-input" id="student-import-file" aria-describedby="student-import-file-hint"
+            <Input className="sr-only student-file-input" id="student-import-file" aria-describedby="student-import-file-hint"
               type="file" accept=".csv,.xlsx,.xls,.txt" disabled={busy} onChange={(event) => {
                 chooseFile(event.target.files[0]);
                 event.target.value = '';

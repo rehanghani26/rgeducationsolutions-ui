@@ -6,14 +6,16 @@ import { DataTable, Empty, ErrorMessage, Metric, Pagination, Pending, SearchFiel
 import { useDebouncedSearch, useProcurementAccess, useProcurementResource } from '../../hooks/useProcurement.js';
 import { getAcademicSessions } from '../../services/budgetService.js';
 import { getInventoryItems, getInventorySummary, getInventoryTransactions, getPurchases, inventoryAttachmentUrl } from '../../services/inventoryService.js';
-import { INVENTORY_CATEGORIES } from '../../constants/inventoryOptions.js';
+import { INVENTORY_ITEM_CATEGORIES } from '../../constants/inventoryOptions.js';
 import { ROUTES } from '../../routes/routes.js';
 import { formatCurrency } from '../../utils';
-import { MOVEMENT_LABELS, recordId, STOCK_LABELS } from '../../utils/procurement.js';
+import { optionsFromRecord } from '../../utils/formOptions.js';
+import { MOVEMENT_LABELS, recordId, sessionOptions, STOCK_LABELS } from '../../utils/procurement.js';
 import PurchaseBillModal from '../vendors/PurchaseBillModal.jsx';
 import PurchaseReceipt from '../vendors/PurchaseReceipt.jsx';
 import StockAdjustmentModal from './StockAdjustmentModal.jsx';
 import { movementColumns, purchaseColumns } from './inventoryTableColumns.jsx';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const tabs = [['catalog', 'Stock catalog', Boxes], ['purchases', 'Purchases', ReceiptText], ['ledger', 'Movements', ArrowDownUp]];
 const searches = { catalog: 'Search items, SKUs, or barcodes', purchases: 'Search invoices or vendors', ledger: 'Search movements or references' };
@@ -121,23 +123,17 @@ export default function InventoryList() {
     <section className="proc-panel proc-pad proc-stack" aria-label={tabs.find(([key]) => key === tab)[1]}>
       <div className="proc-toolbar">
         <SearchField label={searches[tab]} value={keyword} onChange={(value) => { setKeyword(value); setPage(1); }} />
-        {tab === 'catalog' && <select className="proc-input" aria-label="Item category" value={category} onChange={(event) => { setCategory(event.target.value); setPage(1); }}>
-          <option value="">All categories</option>
-          {[...INVENTORY_CATEGORIES, 'Books', 'Computers', 'Uniforms', 'Electronics'].map((entry) => <option key={entry}>{entry}</option>)}
-        </select>}
-        {tab === 'purchases' && <select className="proc-input" aria-label="Purchase session" value={sessionId} onChange={(event) => {
+        {tab === 'catalog' && <SelectInput className="proc-input" aria-label="Item category" value={category}
+          options={INVENTORY_ITEM_CATEGORIES} placeholder="All categories" onChange={(event) => { setCategory(event.target.value); setPage(1); }} />}
+        {tab === 'purchases' && <SelectInput className="proc-input" aria-label="Purchase session" value={sessionId}
+          options={sessionOptions(sessions.data || [])} placeholder="All sessions" emptyMessage="" onChange={(event) => {
           const session = event.target.value;
           setPage(1);
           setParams({ tab, ...(session ? { session } : {}) });
-        }}>
-          <option value="">All sessions</option>
-          {(sessions.data || []).map((session) => <option key={recordId(session)} value={recordId(session)}>{session.sessionName}</option>)}
-        </select>}
-        <select className="proc-input" aria-label={tab === 'ledger' ? 'Movement type' : 'Status'} value={filter} onChange={(event) => { setFilter(event.target.value); setPage(1); }}>
-          <option value="">All {tab === 'ledger' ? 'movements' : 'statuses'}</option>
-          {Object.entries(tab === 'catalog' ? STOCK_LABELS : tab === 'ledger' ? MOVEMENT_LABELS : { Paid: 'Paid', Partial: 'Partial', Unpaid: 'Unpaid' }).map(([key, label]) =>
-            <option value={key} key={key}>{label}</option>)}
-        </select>
+        }} />}
+        <SelectInput className="proc-input" aria-label={tab === 'ledger' ? 'Movement type' : 'Status'} value={filter}
+          options={tab === 'catalog' ? optionsFromRecord(STOCK_LABELS) : tab === 'ledger' ? optionsFromRecord(MOVEMENT_LABELS) : ['Paid', 'Partial', 'Unpaid']}
+          placeholder={tab === 'ledger' ? 'All movements' : 'All statuses'} onChange={(event) => { setFilter(event.target.value); setPage(1); }} />
       </div>
       {tab === 'purchases' && <ErrorMessage error={sessions.error} onRetry={sessions.refresh} />}
       {rows.loading && <Pending label={tab === 'catalog' ? 'Loading stock' : tab === 'purchases' ? 'Loading purchases' : 'Loading movements'} />}

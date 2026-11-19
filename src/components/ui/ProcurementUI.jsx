@@ -1,6 +1,7 @@
 import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
 import { apiMessage, recordId } from '../../utils/procurement.js';
 import './procurement.css';
+import { Input } from './FormControls.jsx';
 
 export function Field({ label, hint, wide, children }) {
   return <label className={'proc-field' + (wide ? ' proc-wide' : '')}>
@@ -45,7 +46,7 @@ export function Pending({ label = 'Loading records' }) {
 export function SearchField({ value, onChange, label }) {
   return <label className="proc-search">
     <Search size={15} aria-hidden="true" />
-    <input className="proc-input" type="search" value={value} aria-label={label} placeholder={label} onChange={(event) => onChange(event.target.value)} />
+    <Input className="proc-input" type="search" value={value} aria-label={label} placeholder={label} onChange={(event) => onChange(event.target.value)} />
   </label>;
 }
 

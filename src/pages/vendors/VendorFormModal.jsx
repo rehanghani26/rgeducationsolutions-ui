@@ -3,7 +3,8 @@ import { Building2, CreditCard, MapPin } from 'lucide-react';
 import Modal from '../../components/ui/Modal.jsx';
 import { ErrorMessage, Field } from '../../components/ui/ProcurementUI.jsx';
 import { createVendor, updateVendor } from '../../services/vendorService.js';
-import { PAYMENT_TERMS, recordId, VENDOR_CATEGORIES, VENDOR_STATUSES } from '../../utils/procurement.js';
+import { PAYMENT_TERMS, recordId, VENDOR_CATEGORIES, VENDOR_STATUS_OPTIONS } from '../../utils/procurement.js';
+import { Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const contactFields = [
   ['contactPerson', 'Contact person'], ['phone', 'Phone', 'tel'], ['altPhone', 'Alternate phone', 'tel'],
@@ -52,33 +53,33 @@ export default function VendorFormModal({ vendor, onClose, onSaved }) {
       <section className="proc-form-section">
         <div className="proc-heading"><span className="proc-icon"><Building2 size={17} /></span><h2>Vendor profile</h2></div>
         <div className="proc-fields proc-fields-3">
-          <Field label="Vendor name"><input value={form.name} onChange={field('name')} required /></Field>
-          <Field label="Vendor code"><input value={form.vendorCode} onChange={field('vendorCode')} placeholder="Auto-generated" /></Field>
-          <Field label="Category"><select value={form.category} onChange={field('category')}>{VENDOR_CATEGORIES.map((name) => <option key={name}>{name}</option>)}</select></Field>
-          <Field label="Status"><select value={form.status} onChange={field('status')}>{VENDOR_STATUSES.map((status) => <option key={status} value={status}>{status[0].toUpperCase() + status.slice(1)}</option>)}</select></Field>
-          <Field label="Payment terms"><select value={form.paymentTerms} onChange={field('paymentTerms')}>{PAYMENT_TERMS.map((term) => <option key={term}>{term}</option>)}</select></Field>
-          <Field label="Lead time (days)"><input type="number" min="0" max="365" step="1" value={form.leadTimeDays ?? ''} onChange={field('leadTimeDays')} /></Field>
+          <Field label="Vendor name"><Input value={form.name} onChange={field('name')} required /></Field>
+          <Field label="Vendor code"><Input value={form.vendorCode} onChange={field('vendorCode')} placeholder="Auto-generated" /></Field>
+          <Field label="Category"><SelectInput value={form.category} onChange={field('category')} options={VENDOR_CATEGORIES} showPlaceholder={false} /></Field>
+          <Field label="Status"><SelectInput value={form.status} onChange={field('status')} options={VENDOR_STATUS_OPTIONS} showPlaceholder={false} /></Field>
+          <Field label="Payment terms"><SelectInput value={form.paymentTerms} onChange={field('paymentTerms')} options={PAYMENT_TERMS} showPlaceholder={false} /></Field>
+          <Field label="Lead time (days)"><Input type="number" min="0" max="365" step="1" value={form.leadTimeDays ?? ''} onChange={field('leadTimeDays')} /></Field>
         </div>
       </section>
       <section className="proc-form-section">
         <div className="proc-heading"><span className="proc-icon"><MapPin size={17} /></span><h2>Contacts and address</h2></div>
         <div className="proc-fields proc-fields-3">
-          {contactFields.map(([key, label, type]) => <Field label={label} key={key}><input type={type || 'text'} value={form[key] || ''} onChange={field(key)} /></Field>)}
-          <Field label="Address" wide><textarea rows={2} value={form.address || ''} onChange={field('address')} /></Field>
+          {contactFields.map(([key, label, type]) => <Field label={label} key={key}><Input type={type || 'text'} value={form[key] || ''} onChange={field(key)} /></Field>)}
+          <Field label="Address" wide><TextareaInput rows={2} value={form.address || ''} onChange={field('address')} /></Field>
           {['City', 'State', 'Pincode'].map((label) => {
             const key = label.toLowerCase();
-            return <Field label={label} key={key}><input value={form[key] || ''} onChange={field(key)} /></Field>;
+            return <Field label={label} key={key}><Input value={form[key] || ''} onChange={field(key)} /></Field>;
           })}
         </div>
       </section>
       <section className="proc-form-section">
         <div className="proc-heading"><span className="proc-icon"><CreditCard size={17} /></span><h2>Tax and payment details</h2></div>
         <div className="proc-fields proc-fields-3">
-          {registrationFields.map(([key, label]) => <Field label={label} key={key}><input value={form[key] || ''} onChange={field(key)} autoCapitalize="characters" /></Field>)}
-          <Field label="Rating (1–5)"><input type="number" min="1" max="5" step="0.1" value={form.rating} onChange={field('rating')} /></Field>
-          {bankFields.map(([key, label]) => <Field label={label} key={key}><input value={form.bankDetails[key] || ''}
+          {registrationFields.map(([key, label]) => <Field label={label} key={key}><Input value={form[key] || ''} onChange={field(key)} autoCapitalize="characters" /></Field>)}
+          <Field label="Rating (1–5)"><Input type="number" min="1" max="5" step="0.1" value={form.rating} onChange={field('rating')} /></Field>
+          {bankFields.map(([key, label]) => <Field label={label} key={key}><Input value={form.bankDetails[key] || ''}
             onChange={(event) => setForm((current) => ({ ...current, bankDetails: { ...current.bankDetails, [key]: event.target.value } }))} /></Field>)}
-          <Field label="Notes" wide><textarea rows={2} value={form.notes || ''} onChange={field('notes')} /></Field>
+          <Field label="Notes" wide><TextareaInput rows={2} value={form.notes || ''} onChange={field('notes')} /></Field>
         </div>
       </section>
       <ErrorMessage error={error} />

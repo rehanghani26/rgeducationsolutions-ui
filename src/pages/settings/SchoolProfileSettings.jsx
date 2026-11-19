@@ -18,6 +18,7 @@ import api from "../../services/api.js";
 import CompanyLogoUpload from "./CompanyLogoUpload";
 import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
 import { getUserFromStorage } from "../../config/access.jsx";
+import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
 
 const SchoolProfileSettings = ({ settings, handleChange }) => {
   const { updateBranding } = useSchoolBranding();
@@ -350,7 +351,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               School Name <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="text"
               name="schoolName"
               value={settings.schoolName || ""}
@@ -364,7 +365,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               School Code
             </label>
-            <input
+            <Input
               type="text"
               name="schoolCode"
               value={settings.schoolCode || ""}
@@ -378,7 +379,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Registration Number
             </label>
-            <input
+            <Input
               type="text"
               name="registrationNumber"
               value={settings.registrationNumber || ""}
@@ -392,7 +393,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Affiliation Number
             </label>
-            <input
+            <Input
               type="text"
               name="affiliationNumber"
               value={settings.affiliationNumber || ""}
@@ -406,7 +407,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               School Type
             </label>
-            <select
+            <SelectInput
               name="schoolType"
               value={settings.schoolType || ""}
               onChange={handleChange}
@@ -418,14 +419,14 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
               <option value="senior">Senior Secondary</option>
               <option value="college">College</option>
               <option value="university">University</option>
-            </select>
+            </SelectInput>
           </div>
 
           <div>
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Established Year
             </label>
-            <input
+            <Input
               type="number"
               name="establishedYear"
               value={settings.establishedYear || ""}
@@ -450,7 +451,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Email Address <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="email"
               name="contactEmail"
               value={settings.contactEmail || ""}
@@ -464,7 +465,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Phone Number <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="tel"
               name="schoolPhone"
               value={settings.schoolPhone || ""}
@@ -478,7 +479,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Alternate Phone
             </label>
-            <input
+            <Input
               type="tel"
               name="alternatePhone"
               value={settings.alternatePhone || ""}
@@ -492,7 +493,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Website URL
             </label>
-            <input
+            <Input
               type="url"
               name="websiteUrl"
               value={settings.websiteUrl || ""}
@@ -514,7 +515,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
           <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
             Address Line 1 <span className="text-rose-500 font-bold">*</span>
           </label>
-          <input
+          <Input
             type="text"
             name="addressLine1"
             value={settings.addressLine1 || ""}
@@ -528,7 +529,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
           <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
             Address Line 2
           </label>
-          <input
+          <Input
             type="text"
             name="addressLine2"
             value={settings.addressLine2 || ""}
@@ -543,7 +544,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               City <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="text"
               name="city"
               value={settings.city || ""}
@@ -557,7 +558,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               State/Province <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="text"
               name="state"
               value={settings.state || ""}
@@ -571,7 +572,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Country <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="text"
               name="country"
               value={settings.country || ""}
@@ -585,7 +586,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Postal Code <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
+            <Input
               type="text"
               name="postalCode"
               value={settings.postalCode || ""}
@@ -613,7 +614,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               School Motto
             </label>
-            <input
+            <Input
               type="text"
               name="schoolMotto"
               value={settings.schoolMotto || ""}
@@ -627,7 +628,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             <label className="block font-semibold text-slate-600 dark:text-slate-300 mb-2 text-xs">
               Principal Name
             </label>
-            <input
+            <Input
               type="text"
               name="principalName"
               value={settings.principalName || ""}
@@ -649,7 +650,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             onDrop={(e) => handleDrop(e, "logo")}
             className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition"
           >
-            <input
+            <Input
               type="file"
               id="logoInput"
               accept="image/*"
@@ -724,7 +725,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
             onDrop={(e) => handleDrop(e, "banner")}
             className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition"
           >
-            <input
+            <Input
               type="file"
               id="bannerInput"
               accept="image/*"

@@ -29,6 +29,7 @@ import { CLASS_OPTIONS } from '../../constants';
 import { formatCurrency, formatDate } from '../../utils';
 import Modal from '../../components/ui/Modal.jsx';
 import Loader from '../../components/ui/Loader.jsx';
+import { CheckboxInput, Input, SelectInput, SwitchInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Academic Progress Stepper — shared 3-step indicator rendered at the top of
@@ -803,7 +804,7 @@ const SessionManagementSettings = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
           <div>
             <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Class:</label>
-            <select
+            <SelectInput
               value={selectedClass}
               onChange={(e) => {
                 setSelectedClass(e.target.value);
@@ -817,12 +818,12 @@ const SessionManagementSettings = () => {
                   {cls.label}
                 </option>
               ))}
-            </select>
+            </SelectInput>
           </div>
 
           <div>
             <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Target Academic Session:</label>
-            <select
+            <SelectInput
               value={targetSession}
               onChange={(e) => setTargetSession(e.target.value)}
               className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
@@ -832,14 +833,14 @@ const SessionManagementSettings = () => {
                   Session {s.sessionName} {s.isCurrent ? '(Active)' : ''}
                 </option>
               ))}
-            </select>
+            </SelectInput>
           </div>
 
           <div>
             <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Search Student:</label>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-3 text-slate-400" />
-              <input
+              <Input
                 type="text"
                 placeholder="Search name or roll no..."
                 value={searchTerm}
@@ -880,8 +881,7 @@ const SessionManagementSettings = () => {
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-400 uppercase font-bold text-[10px] border-b border-slate-200 dark:border-slate-700">
                 <th className="py-3 px-4 w-10">
-                  <input
-                    type="checkbox"
+                  <CheckboxInput
                     checked={filteredStudents.length > 0 && selectedStudentIds.length === filteredStudents.length}
                     onChange={toggleSelectAll}
                     className="rounded text-indigo-600 focus:ring-indigo-500"
@@ -910,8 +910,7 @@ const SessionManagementSettings = () => {
                   return (
                     <tr key={sId} className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 ${isSelected ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''}`}>
                       <td className="py-3 px-4">
-                        <input
-                          type="checkbox"
+                        <CheckboxInput
                           checked={isSelected}
                           onChange={() => toggleStudentSelect(sId)}
                           className="rounded text-indigo-600 focus:ring-indigo-500"
@@ -983,7 +982,7 @@ const SessionManagementSettings = () => {
             <form onSubmit={handleCreateSession} className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Session Name (e.g. 2026-2027):</label>
-                <input
+                <Input
                   type="text"
                   placeholder="2026-2027"
                   value={newSessionName}
@@ -996,7 +995,7 @@ const SessionManagementSettings = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Start Date:</label>
-                  <input
+                  <Input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
@@ -1006,7 +1005,7 @@ const SessionManagementSettings = () => {
                 </div>
                 <div>
                   <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">End Date:</label>
-                  <input
+                  <Input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
@@ -1017,12 +1016,12 @@ const SessionManagementSettings = () => {
               </div>
 
               <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
+                <SwitchInput
+                  size="sm"
                   id="isCurrentCheck"
                   checked={isCurrent}
                   onChange={(e) => setIsCurrent(e.target.checked)}
-                  className="rounded text-indigo-600"
+                  className="shrink-0"
                 />
                 <label htmlFor="isCurrentCheck" className="font-extrabold text-slate-800 dark:text-slate-200">
                   Set as Active Current Session
@@ -1031,7 +1030,7 @@ const SessionManagementSettings = () => {
 
               <div>
                 <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Notes / Description:</label>
-                <textarea
+                <TextareaInput
                   rows={2}
                   placeholder="Optional session details..."
                   value={notes}
@@ -1080,7 +1079,7 @@ const SessionManagementSettings = () => {
               <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">
                 Session Name (e.g. 2026-2027):
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="2026-2027"
                 value={editForm.sessionName}
@@ -1093,7 +1092,7 @@ const SessionManagementSettings = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Start Date:</label>
-                <input
+                <Input
                   type="date"
                   value={editForm.startDate}
                   onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
@@ -1103,7 +1102,7 @@ const SessionManagementSettings = () => {
               </div>
               <div>
                 <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">End Date:</label>
-                <input
+                <Input
                   type="date"
                   value={editForm.endDate}
                   onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
@@ -1115,7 +1114,7 @@ const SessionManagementSettings = () => {
 
             <div>
               <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Session Status:</label>
-              <select
+              <SelectInput
                 value={editForm.status}
                 onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                 className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
@@ -1123,16 +1122,16 @@ const SessionManagementSettings = () => {
                 <option value="active">Active</option>
                 <option value="upcoming">Upcoming</option>
                 <option value="completed">Completed</option>
-              </select>
+              </SelectInput>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
+              <SwitchInput
+                size="sm"
                 id="editIsCurrentCheck"
                 checked={editForm.isCurrent}
                 onChange={(e) => setEditForm({ ...editForm, isCurrent: e.target.checked })}
-                className="rounded text-indigo-600"
+                className="shrink-0"
               />
               <label htmlFor="editIsCurrentCheck" className="font-extrabold text-slate-800 dark:text-slate-200 cursor-pointer">
                 Mark as Active Current Session
@@ -1141,7 +1140,7 @@ const SessionManagementSettings = () => {
 
             <div>
               <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Notes / Description:</label>
-              <textarea
+              <TextareaInput
                 rows={2}
                 placeholder="Optional session details..."
                 value={editForm.notes}

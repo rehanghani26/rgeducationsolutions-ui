@@ -73,13 +73,6 @@ select.student-control {
     text-sm dark:border-slate-700 dark:bg-slate-800/60 sm:px-3;
 }
 .student-toggle small, .student-upload small { @apply mt-0.5 block text-sm leading-snug text-slate-600 dark:text-slate-400; }
-.student-toggle input {
-  @apply relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-slate-500 transition-colors checked:bg-orange-700;
-}
-.student-toggle input::before {
-  @apply absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform content-[''];
-}
-.student-toggle input:checked::before { @apply translate-x-5; }
 
 .student-record {
   @apply min-w-0 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-800/50;
@@ -122,7 +115,7 @@ select.student-control {
   @apply inline-flex min-h-8 items-center gap-1 rounded text-sm font-semibold text-orange-800 hover:underline dark:text-orange-300;
 }
 .student-remove { @apply text-rose-700 dark:text-rose-300; }
-.student-button:focus-visible, .student-link:focus-visible, .student-step:focus-visible, .student-toggle input:focus-visible {
+.student-button:focus-visible, .student-link:focus-visible, .student-step:focus-visible {
   @apply outline outline-2 outline-offset-2 outline-orange-600;
 }
 .student-draft-banner {

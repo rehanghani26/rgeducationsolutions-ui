@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Megaphone, AlertCircle, CheckCircle } from "lucide-react";
 import erpService from "../../services/erpService.js";
+import { Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const NoticeSettings = () => {
   const [notices, setNotices] = useState([]);
@@ -89,7 +90,7 @@ const NoticeSettings = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-400 mb-1 uppercase text-[10px]">Notice Title</label>
-              <input
+              <Input
                 required
                 type="text"
                 placeholder="e.g. School Annual Day Celebration"
@@ -101,7 +102,7 @@ const NoticeSettings = () => {
             <div>
               <label className="block font-bold text-slate-400 mb-1 uppercase text-[10px]">Category & Icon</label>
               <div className="grid grid-cols-2 gap-2">
-                <select
+                <SelectInput
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
@@ -111,8 +112,8 @@ const NoticeSettings = () => {
                   <option value="Event">🎉 Event</option>
                   <option value="Transport">🚌 Transport</option>
                   <option value="Urgent">⚠️ Urgent</option>
-                </select>
-                <select
+                </SelectInput>
+                <SelectInput
                   value={form.priority}
                   onChange={(e) => setForm({ ...form, priority: e.target.value })}
                   className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
@@ -120,14 +121,14 @@ const NoticeSettings = () => {
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
                   <option value="high">High Priority</option>
-                </select>
+                </SelectInput>
               </div>
             </div>
           </div>
 
           <div>
             <label className="block font-bold text-slate-400 mb-1 uppercase text-[10px]">Notice Announcement Content</label>
-            <textarea
+            <TextareaInput
               required
               rows={3}
               placeholder="Provide detailed description of the notice..."

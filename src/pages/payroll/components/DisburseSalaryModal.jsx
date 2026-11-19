@@ -22,11 +22,13 @@ import Loader from '../../../components/ui/Loader.jsx';
 import {
   formatCurrency,
   MONTH_NAMES as MONTH_OPTIONS,
-  YEAR_OPTIONS,
-  PAYMENT_METHODS,
+  SALARY_PAYMENT_OPTIONS,
   calculateNetPay,
   safeNumber,
 } from '../payrollUtils.js';
+import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
+
+import PayrollPeriodSelect from './PayrollPeriodSelect.jsx';
 
 const DisburseSalaryModal = ({
   isOpen,
@@ -247,30 +249,7 @@ const DisburseSalaryModal = ({
               </div>
 
               {/* Month & Year Dropdowns */}
-              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-2xs">
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
-                >
-                  {MONTH_OPTIONS.map((m) => (
-                    <option key={m} value={m} className="dark:bg-slate-800">
-                      {m}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer border-l border-slate-200 dark:border-slate-700 pl-1.5"
-                >
-                  {YEAR_OPTIONS.map((y) => (
-                    <option key={y} value={y} className="dark:bg-slate-800">
-                      {y}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <PayrollPeriodSelect month={selectedMonth} year={selectedYear} onMonthChange={setSelectedMonth} onYearChange={setSelectedYear} />
             </div>
           </div>
 
@@ -320,7 +299,7 @@ const DisburseSalaryModal = ({
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                     ₹
                   </span>
-                  <input
+                  <Input
                     type="number"
                     min="0"
                     placeholder="0"
@@ -345,7 +324,7 @@ const DisburseSalaryModal = ({
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                     ₹
                   </span>
-                  <input
+                  <Input
                     type="number"
                     min="0"
                     placeholder="0"
@@ -414,7 +393,7 @@ const DisburseSalaryModal = ({
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Present Days (Adjustable)
                 </label>
-                <input
+                <Input
                   type="number"
                   min="0"
                   max={att.totalDaysInMonth || 31}
@@ -429,7 +408,7 @@ const DisburseSalaryModal = ({
                   Loss of Pay (LOP / Unpaid Days)
                 </label>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="number"
                     min="0"
                     step="0.5"
@@ -482,25 +461,24 @@ const DisburseSalaryModal = ({
           {/* Payment Method Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+              <label htmlFor="salary-payment-channel" className="block text-xs font-bold text-slate-800 dark:text-slate-200">
                 Payment Channel
               </label>
-              <select
+              <SelectInput
+                id="salary-payment-channel"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
+                options={SALARY_PAYMENT_OPTIONS}
+                showPlaceholder={false}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-              >
-                <option value="Bank Transfer">Bank Transfer (NEFT/RTGS/IMPS)</option>
-                <option value="Cheque">Bank Cheque</option>
-                <option value="Cash">Cash Handover</option>
-              </select>
+              />
             </div>
 
             <div className="space-y-1">
               <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
                 Transaction / Cheque Reference
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="e.g. UTR-9832749823 or CHQ-00128"
                 value={transactionReference}
@@ -514,7 +492,7 @@ const DisburseSalaryModal = ({
             <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
               Disbursement Remarks
             </label>
-            <input
+            <Input
               type="text"
               placeholder="e.g. Regular monthly payout with leave adjustment, festival bonus, etc."
               value={remarks}

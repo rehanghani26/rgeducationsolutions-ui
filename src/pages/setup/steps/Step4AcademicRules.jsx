@@ -3,6 +3,7 @@ import { GraduationCap, CheckCircle2, ArrowRight, Loader2, Sparkles, Percent, Bo
 import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
+import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function Step4AcademicRules({ onComplete, onNext }) {
   const [loading, setLoading] = useState(false);
@@ -90,7 +91,7 @@ export default function Step4AcademicRules({ onComplete, onNext }) {
           </label>
           <div className="relative">
             <Percent className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
+            <Input
               type="number"
               min="20"
               max="100"
@@ -107,7 +108,7 @@ export default function Step4AcademicRules({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Grading Point Scale
           </label>
-          <select
+          <SelectInput
             value={form.gradePointScale}
             onChange={(e) => setForm({ ...form, gradePointScale: e.target.value })}
             className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
@@ -116,7 +117,7 @@ export default function Step4AcademicRules({ onComplete, onNext }) {
             <option value="4.0">4.0 GPA Scale (US / International Standard)</option>
             <option value="percentage">Pure Percentage Only (No GPA)</option>
             <option value="letter">Letter Grades (A+, A, B, C, D, F)</option>
-          </select>
+          </SelectInput>
         </div>
 
         <div>
@@ -125,7 +126,7 @@ export default function Step4AcademicRules({ onComplete, onNext }) {
           </label>
           <div className="relative">
             <Percent className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
+            <Input
               type="number"
               min="50"
               max="100"
@@ -141,7 +142,7 @@ export default function Step4AcademicRules({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Annual Evaluation Framework
           </label>
-          <select
+          <SelectInput
             value={form.examTermsCount}
             onChange={(e) => setForm({ ...form, examTermsCount: e.target.value })}
             className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
@@ -149,7 +150,7 @@ export default function Step4AcademicRules({ onComplete, onNext }) {
             <option value="2">2 Terms (Term 1 Mid-Year & Term 2 Final)</option>
             <option value="3">3 Terms (Quarterly, Half-Yearly, Annual)</option>
             <option value="4">4 Quarters (Periodic Assessments Q1–Q4)</option>
-          </select>
+          </SelectInput>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { Field } from '../../components/ui/ProcurementUI.jsx';
 import { ADDITIONAL_ATTACHMENT_ACCEPT } from '../../constants/inventoryOptions.js';
 import { inventoryAttachmentUrl } from '../../services/inventoryService.js';
 import { MAX_ITEM_DOCUMENTS } from '../../utils/inventoryDraft.js';
+import { Input } from '../../components/ui/FormControls.jsx';
 
 export default function InventoryDocuments({ attachments, files, onFilesChange, onRemoveAttachment }) {
   const total = attachments.length + files.length;
@@ -30,7 +31,7 @@ export default function InventoryDocuments({ attachments, files, onFilesChange, 
         </li>)}
       </ul>}
       {total < MAX_ITEM_DOCUMENTS && <Field label="Attach documents" hint={'Up to ' + (MAX_ITEM_DOCUMENTS - total) + ' more files'}>
-        <input type="file" multiple accept={ADDITIONAL_ATTACHMENT_ACCEPT} onChange={(event) => {
+        <Input type="file" multiple accept={ADDITIONAL_ATTACHMENT_ACCEPT} onChange={(event) => {
           const selected = Array.from(event.target.files).slice(0, MAX_ITEM_DOCUMENTS - total);
           onFilesChange([...files, ...selected]);
           event.target.value = '';

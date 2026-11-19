@@ -13,6 +13,7 @@ import InventoryItemEditor from './InventoryItemEditor.jsx';
 import InventoryPresetCatalog from './InventoryPresetCatalog.jsx';
 import InventorySelection, { InventoryMobileSelection } from './InventorySelection.jsx';
 import './inventoryEditor.css';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 function InventoryPageHeader({ editing, item, actions }) {
   return <PageHeader title={editing ? 'Edit inventory item' : 'Add inventory items'}
@@ -164,9 +165,8 @@ function CatalogWorkspace({ item }) {
           {reviewing && active && <fieldset className="inventory-workspace__fields" disabled={saving}><div className="inventory-workspace__review">
             {!editing && rows.length > 1 && <div className="proc-panel inventory-workspace__switch">
               <Field label="Editing item">
-                <select value={active.key} onChange={(event) => openItem(event.target.value)}>
-                  {rows.map((row) => <option value={row.key} key={row.key}>{row.values.name || 'Custom item'}</option>)}
-                </select>
+                <SelectInput value={active.key} options={rows.map((row) => ({ value: row.key, label: row.values.name || 'Custom item' }))}
+                  showPlaceholder={false} onChange={(event) => openItem(event.target.value)} />
               </Field>
             </div>}
             {item?.legacyBundle && <p className="proc-message proc-warn">The original bundle contents are available in the item history.</p>}

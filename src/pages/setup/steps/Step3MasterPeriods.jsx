@@ -3,6 +3,7 @@ import { Clock, CheckCircle2, ArrowRight, Loader2, Sparkles, Plus, Trash2, ListO
 import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
+import { CheckboxInput, Input } from '../../../components/ui/FormControls.jsx';
 
 const STANDARD_8_PERIODS = [
   { periodNumber: 1, name: 'Period 1', startTime: '08:00', endTime: '08:45', isBreak: false },
@@ -167,7 +168,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Bell Schedule Name <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="text"
             value={scheduleName}
             onChange={(e) => setScheduleName(e.target.value)}
@@ -180,7 +181,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             School Gate Opening Time
           </label>
-          <input
+          <Input
             type="time"
             value={schoolStartTime}
             onChange={(e) => setSchoolStartTime(e.target.value)}
@@ -192,7 +193,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             School Gate Dispersal Time
           </label>
-          <input
+          <Input
             type="time"
             value={schoolEndTime}
             onChange={(e) => setSchoolEndTime(e.target.value)}
@@ -233,7 +234,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
                 <tr key={idx} className={p.isBreak ? 'bg-amber-50/40 dark:bg-amber-950/20' : 'bg-white dark:bg-slate-900'}>
                   <td className="p-2 text-center font-bold text-slate-500">{idx + 1}</td>
                   <td className="p-2">
-                    <input
+                    <Input
                       type="text"
                       value={p.name}
                       onChange={(e) => handlePeriodChange(idx, 'name', e.target.value)}
@@ -241,7 +242,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
                     />
                   </td>
                   <td className="p-2">
-                    <input
+                    <Input
                       type="time"
                       value={p.startTime}
                       onChange={(e) => handlePeriodChange(idx, 'startTime', e.target.value)}
@@ -249,7 +250,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
                     />
                   </td>
                   <td className="p-2">
-                    <input
+                    <Input
                       type="time"
                       value={p.endTime}
                       onChange={(e) => handlePeriodChange(idx, 'endTime', e.target.value)}
@@ -257,7 +258,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
                     />
                   </td>
                   <td className="p-2 text-center">
-                    <input
+                    <CheckboxInput
                       type="checkbox"
                       checked={!!p.isBreak}
                       onChange={(e) => handlePeriodChange(idx, 'isBreak', e.target.checked)}

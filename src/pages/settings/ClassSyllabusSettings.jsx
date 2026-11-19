@@ -22,6 +22,7 @@ import {
   saveClassSyllabus,
   resetClassSyllabus,
 } from "../../services/syllabusService.js";
+import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
 
 const ClassSyllabusSettings = () => {
   const navigate = useNavigate();
@@ -257,7 +258,7 @@ const ClassSyllabusSettings = () => {
             />
             Select Class:
           </label>
-          <select
+          <SelectInput
             value={selectedClassId}
             onChange={(e) => handleClassChange(e.target.value)}
             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -267,7 +268,7 @@ const ClassSyllabusSettings = () => {
                 {cls.name} {cls.isPassout ? "(Passout)" : ""}
               </option>
             ))}
-          </select>
+          </SelectInput>
         </div>
 
         {/* Quick Summary Badges */}
@@ -387,7 +388,7 @@ const ClassSyllabusSettings = () => {
                       {idx + 1}
                     </td>
                     <td className="py-2.5 px-3">
-                      <input
+                      <Input
                         type="text"
                         value={sub.subjectName}
                         onChange={(e) =>
@@ -402,7 +403,7 @@ const ClassSyllabusSettings = () => {
                       />
                     </td>
                     <td className="py-2.5 px-3">
-                      <input
+                      <Input
                         type="text"
                         value={sub.subjectCode}
                         onChange={(e) =>
@@ -417,7 +418,7 @@ const ClassSyllabusSettings = () => {
                       />
                     </td>
                     <td className="py-2.5 px-3">
-                      <input
+                      <Input
                         type="text"
                         value={sub.bookName}
                         onChange={(e) =>
@@ -428,7 +429,7 @@ const ClassSyllabusSettings = () => {
                       />
                     </td>
                     <td className="py-2.5 px-3">
-                      <input
+                      <Input
                         type="text"
                         value={sub.publisher}
                         onChange={(e) =>
@@ -439,7 +440,7 @@ const ClassSyllabusSettings = () => {
                       />
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      <input
+                      <Input
                         type="number"
                         min="1"
                         max="500"
@@ -451,7 +452,7 @@ const ClassSyllabusSettings = () => {
                       />
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      <input
+                      <Input
                         type="number"
                         min="0"
                         max="500"

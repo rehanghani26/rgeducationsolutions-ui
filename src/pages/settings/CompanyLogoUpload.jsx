@@ -3,6 +3,7 @@ import { ImagePlus, Loader2, Trash2, UploadCloud, X } from "lucide-react";
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
+import { Input } from '../../components/ui/FormControls.jsx';
 
 const allowedTypes = ["image/jpeg", "image/png", "image/svg+xml", "image/webp"];
 const maxFileSize = 5 * 1024 * 1024;
@@ -178,7 +179,7 @@ const CompanyLogoUpload = ({ companyLogo, onLogoChange }) => {
         <label className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold cursor-pointer">
           <UploadCloud size={15} />
           Choose Logo
-          <input
+          <Input
             type="file"
             accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp"
             onChange={handleFileInput}

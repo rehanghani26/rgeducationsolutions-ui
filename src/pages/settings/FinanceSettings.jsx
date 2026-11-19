@@ -1,5 +1,6 @@
 import React from "react";
 import { DollarSign } from "lucide-react";
+import { Input, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const FinanceSettings = ({ settings = {}, handleChange }) => {
   return (
@@ -23,7 +24,7 @@ const FinanceSettings = ({ settings = {}, handleChange }) => {
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
               Symbol displayed on invoices, fee receipts, and financial ledgers.
             </p>
-            <input
+            <Input
               type="text"
               name="currencySymbol"
               value={settings?.currencySymbol ?? ""}
@@ -41,7 +42,7 @@ const FinanceSettings = ({ settings = {}, handleChange }) => {
               Percentage surcharge applied automatically on overdue fee invoices.
             </p>
             <div className="relative max-w-xs">
-              <input
+              <Input
                 type="number"
                 name="lateFeesPercentage"
                 value={settings?.lateFeesPercentage ?? ""}
@@ -59,13 +60,13 @@ const FinanceSettings = ({ settings = {}, handleChange }) => {
         </div>
 
         <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-          <input
-            type="checkbox"
+          <SwitchInput
+            size="sm"
             name="enableInstallmentPayment"
             checked={Boolean(settings?.enableInstallmentPayment)}
             onChange={handleChange}
             id="enableInstallmentPayment"
-            className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+            className="shrink-0"
           />
           <label htmlFor="enableInstallmentPayment" className="cursor-pointer select-none">
             <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -79,13 +80,13 @@ const FinanceSettings = ({ settings = {}, handleChange }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-            <input
-              type="checkbox"
+            <SwitchInput
+              size="sm"
               name="enableAutoReminder"
               checked={Boolean(settings?.enableAutoReminder)}
               onChange={handleChange}
               id="enableAutoReminder"
-              className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+              className="shrink-0"
             />
             <label htmlFor="enableAutoReminder" className="cursor-pointer select-none">
               <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -105,7 +106,7 @@ const FinanceSettings = ({ settings = {}, handleChange }) => {
               Days prior to invoice due date when the first reminder is sent.
             </p>
             <div className="relative">
-              <input
+              <Input
                 type="number"
                 name="reminderDaysBefore"
                 value={settings?.reminderDaysBefore ?? ""}

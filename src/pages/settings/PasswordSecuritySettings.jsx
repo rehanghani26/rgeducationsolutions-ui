@@ -42,6 +42,7 @@ import {
 import { getStudents } from '../../services/studentService.js';
 import { getUserFromStorage } from '../../config/access.jsx';
 import Modal from '../../components/ui/Modal.jsx';
+import { Input, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 export default function PasswordSecuritySettings() {
   const authUserFromStore = useSelector((state) => state.auth?.user);
@@ -694,7 +695,7 @@ export default function PasswordSecuritySettings() {
             <div className="flex items-center gap-2 flex-wrap">
               <div className="relative min-w-[240px]">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
+                <Input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -910,7 +911,7 @@ export default function PasswordSecuritySettings() {
               ) : (
                 <div className="relative">
                   <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
+                  <Input
                     type="text"
                     value={studentSearchQuery}
                     onChange={(e) => handleSearchStudents(e.target.value)}
@@ -952,7 +953,7 @@ export default function PasswordSecuritySettings() {
                 Assign New Password <span className="text-rose-400">*</span>
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showPwd.direct ? 'text' : 'password'}
                   value={directReset.newPassword}
                   onChange={(e) => setDirectReset((prev) => ({ ...prev, newPassword: e.target.value }))}
@@ -975,7 +976,7 @@ export default function PasswordSecuritySettings() {
               <label className="text-xs font-bold text-slate-300 block">
                 Administrative Notes & Audit Remarks
               </label>
-              <textarea
+              <TextareaInput
                 value={directReset.adminNotes}
                 onChange={(e) => setDirectReset((prev) => ({ ...prev, adminNotes: e.target.value }))}
                 rows={2}
@@ -1025,7 +1026,7 @@ export default function PasswordSecuritySettings() {
                 Desired New Password <span className="text-rose-400">*</span>
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showPwd.new ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -1065,7 +1066,7 @@ export default function PasswordSecuritySettings() {
                 Confirm New Password <span className="text-rose-400">*</span>
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showPwd.confirm ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -1091,7 +1092,7 @@ export default function PasswordSecuritySettings() {
               <label className="text-xs font-bold text-slate-300 block">
                 Notes & Reason for Change <span className="text-rose-400">*</span>
               </label>
-              <textarea
+              <TextareaInput
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
@@ -1166,7 +1167,7 @@ export default function PasswordSecuritySettings() {
                 <label className="text-[11px] font-bold text-slate-300 block">
                   Admin Remarks / Decision Notes to Student
                 </label>
-                <textarea
+                <TextareaInput
                   value={reviewModal.adminNotes}
                   onChange={(e) => setReviewModal((prev) => ({ ...prev, adminNotes: e.target.value }))}
                   rows={2}

@@ -44,6 +44,7 @@ import {
   formatDate,
   isStaffSalarySetup,
 } from "./payrollUtils.js";
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const StaffPayrollDetail = () => {
   const { id } = useParams();
@@ -743,7 +744,7 @@ const StaffPayrollDetail = () => {
               <span className="text-xs font-bold text-slate-400">
                 Filter Year:
               </span>
-              <select
+              <SelectInput
                 value={selectedSessionFilter}
                 onChange={(e) => setSelectedSessionFilter(e.target.value)}
                 className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
@@ -754,7 +755,7 @@ const StaffPayrollDetail = () => {
                     Year {yr}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
           </div>
 

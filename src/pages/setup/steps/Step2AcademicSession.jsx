@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
 import { dateOnly } from '../../../utils';
+import { Input } from '../../../components/ui/FormControls.jsx';
 
 export default function Step2AcademicSession({ onComplete, onNext }) {
   const [loading, setLoading] = useState(false);
@@ -188,7 +189,7 @@ export default function Step2AcademicSession({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Session Name / Label <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="text"
             name="sessionName"
             value={form.sessionName}
@@ -203,7 +204,7 @@ export default function Step2AcademicSession({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Start Date <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="date"
             name="startDate"
             value={form.startDate}
@@ -217,7 +218,7 @@ export default function Step2AcademicSession({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             End Date <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="date"
             name="endDate"
             value={form.endDate}
@@ -231,7 +232,7 @@ export default function Step2AcademicSession({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Administrative Notes
           </label>
-          <input
+          <Input
             type="text"
             name="notes"
             value={form.notes}

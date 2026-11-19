@@ -28,6 +28,7 @@ import {
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import { formatDate, formatDateTime } from "../../utils";
+import { CheckboxInput, Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const PORTAL_URL = "http://localhost:5173";
 
@@ -724,7 +725,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   School Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.schoolName}
                   onChange={(e) =>
@@ -738,7 +739,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Tagline (One Short Line) *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.tagline}
                   onChange={(e) => handleFieldChange("tagline", e.target.value)}
@@ -751,7 +752,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Affiliation / Accreditation Note
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.affiliation}
                   onChange={(e) =>
@@ -765,7 +766,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Affiliation Code (Shown in Footer)
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.affiliationCode || "SCH-2026-CBSE-9912"}
                   onChange={(e) =>
@@ -779,7 +780,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Admission Ribbon Badge (Top Banner)
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.admissionBadge}
                   onChange={(e) =>
@@ -800,7 +801,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Big Hero Background Image URL *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.heroImage}
                   onChange={(e) =>
@@ -828,7 +829,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Hero Paragraph / Subtitle
                 </label>
-                <textarea
+                <TextareaInput
                   rows={3}
                   value={portal.heroSubtitle}
                   onChange={(e) =>
@@ -855,7 +856,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[10px] font-extrabold text-slate-400 uppercase">
                     Counter {idx + 1}
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={metric.value}
                     onChange={(e) =>
@@ -864,7 +865,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                     placeholder="e.g. 1,500+"
                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-black text-indigo-600 focus:ring-2 focus:ring-indigo-500"
                   />
-                  <input
+                  <Input
                     type="text"
                     value={metric.label}
                     onChange={(e) =>
@@ -915,7 +916,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                       Notice Title / Announcement
                     </label>
-                    <input
+                    <Input
                       type="text"
                       value={notice.title}
                       onChange={(e) =>
@@ -929,7 +930,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                       <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                         Category Tag
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={notice.tag}
                         onChange={(e) =>
@@ -943,7 +944,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                       <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                         Date Display
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={notice.date}
                         onChange={(e) =>
@@ -958,8 +959,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
 
                 <div className="flex items-center gap-3 self-end md:self-center">
                   <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                    <input
-                      type="checkbox"
+                    <CheckboxInput
                       checked={notice.urgent}
                       onChange={(e) =>
                         handleNoticeChange(idx, "urgent", e.target.checked)
@@ -1003,7 +1003,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                 Section Heading
               </label>
-              <input
+              <Input
                 type="text"
                 value={portal.aboutTitle}
                 onChange={(e) =>
@@ -1018,7 +1018,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                 About Description (Exact Short Paragraph) *
               </label>
-              <textarea
+              <TextareaInput
                 rows={3}
                 value={portal.aboutDescription}
                 onChange={(e) =>
@@ -1042,7 +1042,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                     Principal Name
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={portal.principalName}
                     onChange={(e) =>
@@ -1055,7 +1055,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                     Role Title
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={portal.principalRole || "Principal & Head of School"}
                     onChange={(e) =>
@@ -1070,7 +1070,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Principal Photo URL
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.principalImage || ""}
                   onChange={(e) =>
@@ -1084,7 +1084,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Director's Quotation / Welcome Note
                 </label>
-                <textarea
+                <TextareaInput
                   rows={4}
                   value={portal.principalMessage}
                   onChange={(e) =>
@@ -1148,7 +1148,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <input
+                  <Input
                     type="text"
                     value={wing.title}
                     onChange={(e) =>
@@ -1165,7 +1165,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                     Grade Span &amp; Age
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={wing.grades}
                     onChange={(e) =>
@@ -1179,7 +1179,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                     Wing Pedagogical Overview
                   </label>
-                  <textarea
+                  <TextareaInput
                     rows={2}
                     value={wing.description}
                     onChange={(e) =>
@@ -1245,7 +1245,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                     Facility Title *
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={fac.title}
                     onChange={(e) =>
@@ -1259,7 +1259,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                     Badge Label *
                   </label>
-                  <input
+                  <Input
                     type="text"
                     value={fac.badge}
                     onChange={(e) =>
@@ -1274,7 +1274,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
                     Description *
                   </label>
-                  <textarea
+                  <TextareaInput
                     rows={3}
                     value={fac.description}
                     onChange={(e) =>
@@ -1392,7 +1392,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   </span>
                 </div>
 
-                <input
+                <Input
                   type="text"
                   value={item.title}
                   onChange={(e) =>
@@ -1402,7 +1402,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white"
                 />
 
-                <input
+                <Input
                   type="text"
                   value={item.img}
                   onChange={(e) =>
@@ -1413,7 +1413,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 />
 
                 <div className="flex items-center justify-between pt-1">
-                  <select
+                  <SelectInput
                     value={item.category}
                     onChange={(e) =>
                       handleGalleryChange(idx, "category", e.target.value)
@@ -1424,7 +1424,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                     <option value="academics">Academics</option>
                     <option value="sports">Sports</option>
                     <option value="cultural">Cultural</option>
-                  </select>
+                  </SelectInput>
 
                   <button
                     type="button"
@@ -1471,14 +1471,14 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-2"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <input
+                  <Input
                     type="text"
                     value={faq.q}
                     onChange={(e) => handleFaqChange(idx, "q", e.target.value)}
                     placeholder="Question Title"
                     className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 dark:text-white"
                   />
-                  <input
+                  <Input
                     type="text"
                     value={faq.tag || "General"}
                     onChange={(e) =>
@@ -1495,7 +1495,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                     <Trash2 size={15} />
                   </button>
                 </div>
-                <textarea
+                <TextareaInput
                   rows={2}
                   value={faq.a}
                   onChange={(e) => handleFaqChange(idx, "a", e.target.value)}
@@ -1524,7 +1524,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   School Physical Address *
                 </label>
-                <textarea
+                <TextareaInput
                   rows={2}
                   value={portal.contact.address}
                   onChange={(e) =>
@@ -1538,7 +1538,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Admissions Phone Number *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.contact.phone}
                   onChange={(e) => handleContactChange("phone", e.target.value)}
@@ -1550,7 +1550,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   Admissions Email *
                 </label>
-                <input
+                <Input
                   type="email"
                   value={portal.contact.email}
                   onChange={(e) => handleContactChange("email", e.target.value)}
@@ -1569,7 +1569,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                   School Timing Schedule *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={portal.contact.timing}
                   onChange={(e) =>
@@ -1677,7 +1677,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <select
+                      <SelectInput
                         value={inq.status || "new"}
                         onChange={(e) =>
                           handleUpdateInquiryStatus(inq._id, e.target.value)
@@ -1690,7 +1690,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
                           Mark Enrolled / Admitted
                         </option>
                         <option value="closed">Mark Closed</option>
-                      </select>
+                      </SelectInput>
                       <button
                         type="button"
                         onClick={() => handleDeleteInquiry(inq._id)}

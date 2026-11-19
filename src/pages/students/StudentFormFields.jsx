@@ -2,36 +2,25 @@ import { useState } from 'react';
 import { Check, FileText, Image, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
 import {
   ADMISSION_TYPE_OPTIONS, BLOOD_GROUP_STRINGS, ENROLLMENT_STATUS_OPTIONS, GENDER_STRINGS,
-  GUARDIAN_RELATION_OPTIONS, HOUSE_OPTIONS, MEDIUM_OF_INSTRUCTION_OPTIONS,
+  GUARDIAN_RELATION_OPTIONS, HOUSE_OPTIONS, LOGIN_RESTRICTION_OPTIONS, MEDIUM_OF_INSTRUCTION_OPTIONS,
   PREVIOUS_BOARD_OPTIONS, SPECIAL_EDUCATION_NEEDS_OPTIONS, STUDENT_CATEGORY_OPTIONS, STUDENT_TYPE_OPTIONS,
 } from '../../constants';
 import api from '../../services/api.js';
 import { sendStudentEmailOtp, uploadStudentFile, verifyStudentEmailOtp } from '../../services/studentService.js';
 import { generateStudentPassword, normalizeEmail } from '../../utils/studentForm.js';
+import { Input, SelectInput, SwitchInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const control = 'student-control';
 
 export function Field({ label, name, value, onChange, error, required, options, type = 'text', wide, ...props }) {
   const settings = {
-    id: name, name, value: value ?? '', onChange: (event) => onChange(event.target.value),
-    required, 'aria-invalid': Boolean(error), 'aria-describedby': error ? `${name}-error` : undefined,
-    className: control, ...props,
+    id: name, name, label, value: value ?? '', onChange: (event) => onChange(event.target.value),
+    required, errorMessage: error, errorClassName: 'student-error',
+    className: wide ? 'student-field student-wide' : 'student-field', ...props,
   };
-  return (
-    <div className={wide ? 'student-field student-wide' : 'student-field'}>
-      <label htmlFor={name}>{label}{required && <span aria-hidden="true"> *</span>}</label>
-      {options ? (
-        <select {...settings}>
-          {!options.some((option) => option.value === '' || option === '') && <option value="">Select {label.toLowerCase()}</option>}
-          {value && !options.some((option) => (option.value ?? option) === value) && <option value={value}>{value}</option>}
-          {options.map((option) => (
-            <option key={option.value ?? option} value={option.value ?? option}>{option.label ?? option}</option>
-          ))}
-        </select>
-      ) : type === 'textarea' ? <textarea {...settings} rows={2} /> : <input {...settings} type={type} />}
-      {error && <p id={`${name}-error`} className="student-error">{error}</p>}
-    </div>
-  );
+  if (options) return <SelectInput {...settings} options={options} selectClassName={control} preserveValue emptyMessage="" />;
+  if (type === 'textarea') return <TextareaInput {...settings} textareaClassName={control} rows={2} />;
+  return <Input {...settings} type={type} inputClassName={control} />;
 }
 
 function Group({ title, children }) {
@@ -44,12 +33,8 @@ function Group({ title, children }) {
 }
 
 function Toggle({ label, description, name, checked, onChange }) {
-  return (
-    <label className="student-toggle student-wide">
-      <span><strong>{label}</strong>{description && <small>{description}</small>}</span>
-      <input type="checkbox" name={name} role="switch" checked={checked} onChange={(event) => onChange(event.target.checked)} />
-    </label>
-  );
+  return <SwitchInput className="student-toggle student-wide" name={name} label={label} description={description}
+    checked={checked} onChange={(event) => onChange(event.target.checked)} />;
 }
 
 const profileFields = [
@@ -89,10 +74,6 @@ const documentFields = [['name', 'Document name'], ['url', 'Document link', { ty
 const statuses = [
   { value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' },
   { value: 'Passout', label: 'Passout' }, { value: 'graduated', label: 'Graduated' },
-];
-const restrictions = [
-  { value: 'none', label: 'None' }, { value: 'school-network', label: 'School network' },
-  { value: 'office-hours', label: 'Office hours' },
 ];
 
 function RecordList({ title, singular, name, rows, fields, onChange, errors = {} }) {
@@ -170,7 +151,7 @@ function UploadField({ type, name, value, error, required, onUpload, onRemove, o
         <div><strong>{label}{required && <span className="student-error"> *</span>}</strong><small>{value ? 'Uploaded' : hint}</small></div>
       </div>
       <div className="student-upload-actions">
-        <input className="sr-only student-file-input" id={inputId} name={name} type="file" accept={accept}
+        <Input className="sr-only student-file-input" id={inputId} name={name} type="file" accept={accept}
           onChange={upload} disabled={uploading} aria-invalid={Boolean(error || uploadError)}
           aria-describedby={error || uploadError ? `${inputId}-error` : undefined} />
         <label htmlFor={inputId} className="student-button student-secondary">
@@ -343,7 +324,7 @@ export default function StudentFormFields({ step, form, patch, errors, editing, 
       <Group title="Account settings">
         {field('status', 'Account status', { options: statuses })}
         {field('accountExpiryDate', 'Account expiry date', { type: 'date' })}
-        {field('loginRestriction', 'Login restriction', { options: restrictions })}
+        {field('loginRestriction', 'Login restriction', { options: LOGIN_RESTRICTION_OPTIONS })}
         {toggle('forcePasswordChange', 'Require password change at next sign-in')}
         {toggle('twoFactorEnabled', 'Two-factor authentication')}
       </Group>

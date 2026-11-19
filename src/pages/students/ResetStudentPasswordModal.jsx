@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import Modal from "../../components/ui/Modal.jsx";
 import Button from "../../components/ui/Button.jsx";
 import { resetStudentPassword } from "../../services/studentService.js";
+import { CheckboxInput, Input } from '../../components/ui/FormControls.jsx';
 
 const generateSecurePassword = () => {
   const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -236,7 +237,7 @@ export const ResetStudentPasswordModal = ({
               </div>
 
               <div className="relative">
-                <input
+                <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -269,8 +270,7 @@ export const ResetStudentPasswordModal = ({
             {/* Options */}
             <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2.5">
               <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-700 dark:text-slate-300 select-none">
-                <input
-                  type="checkbox"
+                <CheckboxInput
                   checked={forcePasswordChange}
                   onChange={(e) => setForcePasswordChange(e.target.checked)}
                   className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"

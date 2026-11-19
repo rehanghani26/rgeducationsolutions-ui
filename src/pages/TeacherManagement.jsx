@@ -14,59 +14,21 @@ import Loader from '../components/ui/Loader.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import DataTable from '../components/ui/DataTable.jsx';
+import { CheckboxInput, Input, SelectInput, TextareaInput } from '../components/ui/FormControls.jsx';
 
-const permissionOptions = [
-  ['dashboard', 'Dashboard Access'],
-  ['student-management', 'Student Management'],
-  ['attendance', 'Attendance Management'],
-  ['exam', 'Exam Management'],
-  ['marks', 'Marks Entry'],
-  ['homework', 'Homework Management'],
-  ['timetable', 'Timetable Access'],
-  ['leave', 'Leave Management'],
-  ['fee', 'Fee Management'],
-  ['library', 'Library Access'],
-  ['inventory', 'Inventory Access'],
-  ['reports', 'Reports Access'],
-  ['communication', 'Communication Access'],
-];
+import { blankTeacherForm, payloadFromForm, permissionOptions, randomPassword, teacherDraftFromRecord } from '../utils/teacherForm.js';
 
 const blankForm = {
-  firstName: '',
-  lastName: '',
-  gender: 'Male',
-  dob: '',
-  phone: '',
-  alternatePhone: '',
-  email: '',
-  address: '',
-  joiningDate: new Date().toISOString().slice(0, 10),
-  designation: '',
-  department: '',
-  qualification: '',
-  experience: '',
-  salary: '',
-  classesAssignedText: '',
-  sectionsAssignedText: '',
-  subjectsAssignedText: '',
-  isClassTeacher: false,
-  role: 'teacher',
+  ...blankTeacherForm,
+  designation: '', department: '', qualification: '', experience: '',
+  classesAssignedText: '', sectionsAssignedText: '', subjectsAssignedText: '',
   permissions: ['dashboard', 'attendance', 'exam', 'marks', 'homework', 'timetable', 'leave', 'communication'],
-  status: 'active',
-  accountExpiryDate: '',
-  loginRestriction: 'none',
-  twoFactorEnabled: false,
-  forcePasswordChange: true,
-  password: '',
-  confirmPassword: '',
   generateRandomPassword: false,
 };
 
 const inputCls = 'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase';
 
-const splitList = (value) => value.split(',').map((item) => item.trim()).filter(Boolean);
-const randomPassword = () => `Tch@${Math.random().toString(36).slice(2, 8)}${Math.floor(100 + Math.random() * 900)}`;
 
 const TeacherManagement = () => {
   const [search, setSearch] = useState('');
@@ -111,56 +73,13 @@ const TeacherManagement = () => {
 
   const openEdit = (teacher) => {
     setEditing(teacher);
-    setForm({
-      ...blankForm,
-      ...teacher,
-      dob: teacher.dob?.slice?.(0, 10) || '',
-      joiningDate: teacher.joiningDate?.slice?.(0, 10) || '',
-      accountExpiryDate: teacher.accountExpiryDate?.slice?.(0, 10) || '',
-      classesAssignedText: (teacher.classesAssigned || teacher.assignedClasses || []).join(', '),
-      sectionsAssignedText: (teacher.sectionsAssigned || teacher.assignedSections || []).join(', '),
-      subjectsAssignedText: (teacher.subjectsAssigned || teacher.assignedSubjects || []).join(', '),
-      permissions: teacher.permissions?.length ? teacher.permissions : blankForm.permissions,
-      password: '',
-      confirmPassword: '',
-    });
+    setForm(teacherDraftFromRecord(teacher, blankForm));
     setShowForm(true);
   };
 
-  const payloadFromForm = () => ({
-    firstName: form.firstName.trim(),
-    lastName: form.lastName.trim(),
-    gender: form.gender,
-    dob: form.dob || undefined,
-    phone: form.phone.trim(),
-    alternatePhone: form.alternatePhone.trim(),
-    email: form.email.trim(),
-    address: form.address.trim(),
-    joiningDate: form.joiningDate || undefined,
-    designation: form.designation.trim(),
-    department: form.department.trim(),
-    qualification: form.qualification.trim(),
-    experience: form.experience.trim(),
-    salary: Number(form.salary) || 0,
-    classesAssigned: splitList(form.classesAssignedText),
-    sectionsAssigned: splitList(form.sectionsAssignedText),
-    subjectsAssigned: splitList(form.subjectsAssignedText),
-    isClassTeacher: form.isClassTeacher,
-    role: form.role,
-    permissions: form.permissions,
-    status: form.status,
-    accountExpiryDate: form.accountExpiryDate || undefined,
-    loginRestriction: form.loginRestriction,
-    twoFactorEnabled: form.twoFactorEnabled,
-    forcePasswordChange: form.forcePasswordChange,
-    password: form.password,
-    confirmPassword: form.confirmPassword || form.password,
-    generateRandomPassword: form.generateRandomPassword,
-  });
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    const payload = payloadFromForm();
+    const payload = { ...payloadFromForm(form), generateRandomPassword: form.generateRandomPassword };
 
     const action = editing
       ? updateTeacher({ id: editing.id || editing._id, data: payload })
@@ -275,7 +194,7 @@ const TeacherManagement = () => {
 
       <div className="relative max-w-md">
         <svg className="absolute left-3.5 top-3 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-        <input
+        <Input
           type="text"
           placeholder="Search by name, employee ID, email, department..."
           value={search}
@@ -310,42 +229,42 @@ const TeacherManagement = () => {
               <section className="space-y-3">
                 <h4 className="font-bold text-sm">Personal Information</h4>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={labelCls}>First Name</label><input required className={inputCls} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></div>
-                  <div><label className={labelCls}>Last Name</label><input required className={inputCls} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></div>
+                  <div><label className={labelCls}>First Name</label><Input required className={inputCls} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></div>
+                  <div><label className={labelCls}>Last Name</label><Input required className={inputCls} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Gender</label><select className={inputCls} value={form.gender} onChange={(e) => updateField('gender', e.target.value)}><option>Male</option><option>Female</option><option>Other</option></select></div>
-                  <div><label className={labelCls}>Date of Birth</label><input type="date" className={inputCls} value={form.dob} onChange={(e) => updateField('dob', e.target.value)} /></div>
+                  <div><label className={labelCls}>Gender</label><SelectInput className={inputCls} value={form.gender} onChange={(e) => updateField('gender', e.target.value)}><option>Male</option><option>Female</option><option>Other</option></SelectInput></div>
+                  <div><label className={labelCls}>Date of Birth</label><Input type="date" className={inputCls} value={form.dob} onChange={(e) => updateField('dob', e.target.value)} /></div>
                 </div>
-                <div><label className={labelCls}>Phone Number</label><input required className={inputCls} value={form.phone} onChange={(e) => updateField('phone', e.target.value)} /></div>
-                <div><label className={labelCls}>Alternate Phone</label><input className={inputCls} value={form.alternatePhone} onChange={(e) => updateField('alternatePhone', e.target.value)} /></div>
-                <div><label className={labelCls}>Email Address</label><input required type="email" className={inputCls} value={form.email} onChange={(e) => updateField('email', e.target.value)} /></div>
-                <div><label className={labelCls}>Address</label><textarea className={inputCls} value={form.address} onChange={(e) => updateField('address', e.target.value)} /></div>
+                <div><label className={labelCls}>Phone Number</label><Input required className={inputCls} value={form.phone} onChange={(e) => updateField('phone', e.target.value)} /></div>
+                <div><label className={labelCls}>Alternate Phone</label><Input className={inputCls} value={form.alternatePhone} onChange={(e) => updateField('alternatePhone', e.target.value)} /></div>
+                <div><label className={labelCls}>Email Address</label><Input required type="email" className={inputCls} value={form.email} onChange={(e) => updateField('email', e.target.value)} /></div>
+                <div><label className={labelCls}>Address</label><TextareaInput className={inputCls} value={form.address} onChange={(e) => updateField('address', e.target.value)} /></div>
               </section>
 
               <section className="space-y-3">
                 <h4 className="font-bold text-sm">Professional &amp; Academic</h4>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Joining Date</label><input type="date" className={inputCls} value={form.joiningDate} onChange={(e) => updateField('joiningDate', e.target.value)} /></div>
-                  <div><label className={labelCls}>Salary</label><input type="number" className={inputCls} value={form.salary} onChange={(e) => updateField('salary', e.target.value)} /></div>
+                  <div><label className={labelCls}>Joining Date</label><Input type="date" className={inputCls} value={form.joiningDate} onChange={(e) => updateField('joiningDate', e.target.value)} /></div>
+                  <div><label className={labelCls}>Salary</label><Input type="number" className={inputCls} value={form.salary} onChange={(e) => updateField('salary', e.target.value)} /></div>
                 </div>
-                <div><label className={labelCls}>Designation</label><input required className={inputCls} value={form.designation} onChange={(e) => updateField('designation', e.target.value)} /></div>
-                <div><label className={labelCls}>Department</label><input className={inputCls} value={form.department} onChange={(e) => updateField('department', e.target.value)} /></div>
-                <div><label className={labelCls}>Qualification</label><input className={inputCls} value={form.qualification} onChange={(e) => updateField('qualification', e.target.value)} /></div>
-                <div><label className={labelCls}>Experience</label><input className={inputCls} value={form.experience} onChange={(e) => updateField('experience', e.target.value)} /></div>
-                <div><label className={labelCls}>Classes Assigned</label><input className={inputCls} placeholder="Class 9, Class 10" value={form.classesAssignedText} onChange={(e) => updateField('classesAssignedText', e.target.value)} /></div>
-                <div><label className={labelCls}>Sections Assigned</label><input className={inputCls} placeholder="A, B" value={form.sectionsAssignedText} onChange={(e) => updateField('sectionsAssignedText', e.target.value)} /></div>
-                <div><label className={labelCls}>Subjects Assigned</label><input className={inputCls} placeholder="Math, Science" value={form.subjectsAssignedText} onChange={(e) => updateField('subjectsAssignedText', e.target.value)} /></div>
-                <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.isClassTeacher} onChange={(e) => updateField('isClassTeacher', e.target.checked)} /> Class Teacher</label>
+                <div><label className={labelCls}>Designation</label><Input required className={inputCls} value={form.designation} onChange={(e) => updateField('designation', e.target.value)} /></div>
+                <div><label className={labelCls}>Department</label><Input className={inputCls} value={form.department} onChange={(e) => updateField('department', e.target.value)} /></div>
+                <div><label className={labelCls}>Qualification</label><Input className={inputCls} value={form.qualification} onChange={(e) => updateField('qualification', e.target.value)} /></div>
+                <div><label className={labelCls}>Experience</label><Input className={inputCls} value={form.experience} onChange={(e) => updateField('experience', e.target.value)} /></div>
+                <div><label className={labelCls}>Classes Assigned</label><Input className={inputCls} placeholder="Class 9, Class 10" value={form.classesAssignedText} onChange={(e) => updateField('classesAssignedText', e.target.value)} /></div>
+                <div><label className={labelCls}>Sections Assigned</label><Input className={inputCls} placeholder="A, B" value={form.sectionsAssignedText} onChange={(e) => updateField('sectionsAssignedText', e.target.value)} /></div>
+                <div><label className={labelCls}>Subjects Assigned</label><Input className={inputCls} placeholder="Math, Science" value={form.subjectsAssignedText} onChange={(e) => updateField('subjectsAssignedText', e.target.value)} /></div>
+                <label className="flex items-center gap-2 text-xs font-bold"><CheckboxInput checked={form.isClassTeacher} onChange={(e) => updateField('isClassTeacher', e.target.checked)} /> Class Teacher</label>
               </section>
 
               <section className="space-y-3">
                 <h4 className="font-bold text-sm">Login, Role &amp; Permissions</h4>
-                <div><label className={labelCls}>Role Selection</label><select className={inputCls} value={form.role} onChange={(e) => updateField('role', e.target.value)}><option value="teacher">Teacher</option><option value="head-teacher">Head Teacher</option><option value="hod">HOD</option><option value="coordinator">Coordinator</option></select></div>
+                <div><label className={labelCls}>Role Selection</label><SelectInput className={inputCls} value={form.role} onChange={(e) => updateField('role', e.target.value)}><option value="teacher">Teacher</option><option value="head-teacher">Head Teacher</option><option value="hod">HOD</option><option value="coordinator">Coordinator</option></SelectInput></div>
                 {!editing && (
                   <>
                     <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
-                      <div><label className={labelCls}>Password</label><input required type="text" className={inputCls} value={form.password} onChange={(e) => updateField('password', e.target.value)} /></div>
+                      <div><label className={labelCls}>Password</label><Input required type="text" className={inputCls} value={form.password} onChange={(e) => updateField('password', e.target.value)} /></div>
                       <Button
                         type="button"
                         variant="ghost"
@@ -355,24 +274,24 @@ const TeacherManagement = () => {
                         className="p-2 bg-slate-100 dark:bg-slate-800 !rounded-lg"
                       />
                     </div>
-                    <div><label className={labelCls}>Confirm Password</label><input required type="text" className={inputCls} value={form.confirmPassword} onChange={(e) => updateField('confirmPassword', e.target.value)} /></div>
+                    <div><label className={labelCls}>Confirm Password</label><Input required type="text" className={inputCls} value={form.confirmPassword} onChange={(e) => updateField('confirmPassword', e.target.value)} /></div>
                   </>
                 )}
                 <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto rounded-lg border border-slate-100 dark:border-slate-800 p-3">
                   {permissionOptions.map(([value, label]) => (
                     <label key={value} className="flex items-center gap-2 text-[11px] font-semibold">
-                      <input type="checkbox" checked={form.permissions.includes(value)} onChange={() => togglePermission(value)} />
+                      <CheckboxInput checked={form.permissions.includes(value)} onChange={() => togglePermission(value)} />
                       {label}
                     </label>
                   ))}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Status</label><select className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
-                  <div><label className={labelCls}>Expiry Date</label><input type="date" className={inputCls} value={form.accountExpiryDate} onChange={(e) => updateField('accountExpiryDate', e.target.value)} /></div>
+                  <div><label className={labelCls}>Status</label><SelectInput className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}><option value="active">Active</option><option value="inactive">Inactive</option></SelectInput></div>
+                  <div><label className={labelCls}>Expiry Date</label><Input type="date" className={inputCls} value={form.accountExpiryDate} onChange={(e) => updateField('accountExpiryDate', e.target.value)} /></div>
                 </div>
-                <div><label className={labelCls}>Login Restriction</label><select className={inputCls} value={form.loginRestriction} onChange={(e) => updateField('loginRestriction', e.target.value)}><option value="none">None</option><option value="school-network">School Network</option><option value="office-hours">Office Hours</option></select></div>
-                <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.forcePasswordChange} onChange={(e) => updateField('forcePasswordChange', e.target.checked)} /> Force Password Change on First Login</label>
-                <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.twoFactorEnabled} onChange={(e) => updateField('twoFactorEnabled', e.target.checked)} /> Two Factor Authentication</label>
+                <div><label className={labelCls}>Login Restriction</label><SelectInput className={inputCls} value={form.loginRestriction} onChange={(e) => updateField('loginRestriction', e.target.value)}><option value="none">None</option><option value="school-network">School Network</option><option value="office-hours">Office Hours</option></SelectInput></div>
+                <label className="flex items-center gap-2 text-xs font-bold"><CheckboxInput checked={form.forcePasswordChange} onChange={(e) => updateField('forcePasswordChange', e.target.checked)} /> Force Password Change on First Login</label>
+                <label className="flex items-center gap-2 text-xs font-bold"><CheckboxInput checked={form.twoFactorEnabled} onChange={(e) => updateField('twoFactorEnabled', e.target.checked)} /> Two Factor Authentication</label>
               </section>
             </div>
 

@@ -1,3 +1,4 @@
+import { CheckboxInput } from './FormControls.jsx';
 const PermissionMatrix = ({ permissions = [], options = [], readOnly = false, onChange }) => (
   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
     {options.map(([value, label]) => (
@@ -9,8 +10,7 @@ const PermissionMatrix = ({ permissions = [], options = [], readOnly = false, on
             : 'border-slate-100 dark:border-slate-800 text-slate-500'
         }`}
       >
-        <input
-          type="checkbox"
+        <CheckboxInput
           checked={permissions.includes(value)}
           disabled={readOnly}
           onChange={() => !readOnly && onChange?.(value)}

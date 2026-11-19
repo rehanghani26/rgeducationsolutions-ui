@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { formatDate, formatTime } from "../../utils";
+import { CheckboxInput, Input, SelectInput } from '../../components/ui/FormControls.jsx';
 
 // ─── Period type display metadata ────────────────────────────────────────────
 const PERIOD_META = {
@@ -989,7 +990,7 @@ const ClassTimetableSettings = () => {
         <div className="flex items-center gap-3 flex-wrap">
           <Filter size={16} className="text-indigo-500" />
           <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Class:</label>
-          <select
+          <SelectInput
             value={selectedClass}
             onChange={(e) => { setSelectedClass(e.target.value); setIsDirty(false); setIsEditMode(false); }}
             className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
@@ -997,9 +998,9 @@ const ClassTimetableSettings = () => {
             {CLASS_OPTIONS.filter((c) => !c.isPassout).map((cls) => (
               <option key={cls.id} value={cls.name}>{cls.name}</option>
             ))}
-          </select>
+          </SelectInput>
           <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Section:</label>
-          <select
+          <SelectInput
             value={selectedSection}
             onChange={(e) => { setSelectedSection(e.target.value); setIsDirty(false); setIsEditMode(false); }}
             className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
@@ -1007,7 +1008,7 @@ const ClassTimetableSettings = () => {
             {SECTION_OPTIONS.map((sec) => (
               <option key={sec.id} value={sec.name}>{sec.name}</option>
             ))}
-          </select>
+          </SelectInput>
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
             📋 {classSectionKey}
           </span>
@@ -1347,7 +1348,7 @@ const ClassTimetableSettings = () => {
                                       <span>{period.startTime} – {period.endTime}</span>
                                       <span className="font-bold text-indigo-500">#{pIdx + 1}</span>
                                     </div>
-                                    <select
+                                    <SelectInput
                                       value={alloc.subject || ""}
                                       onChange={(e) => handleCellChange(d.id, pIdx, "subject", e.target.value)}
                                       className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-2 py-1 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1369,7 +1370,7 @@ const ClassTimetableSettings = () => {
                                           ))}
                                         </optgroup>
                                       )}
-                                    </select>
+                                    </SelectInput>
 
                                     {bookDisplay && (
                                       <div
@@ -1381,7 +1382,7 @@ const ClassTimetableSettings = () => {
                                       </div>
                                     )}
 
-                                    <select
+                                    <SelectInput
                                       value={alloc.teacherId || ""}
                                       onChange={(e) => handleCellTeacherChange(d.id, pIdx, e.target.value)}
                                       className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg px-2 py-1 text-[10px] font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1390,7 +1391,7 @@ const ClassTimetableSettings = () => {
                                       {teachersList.map((t) => (
                                         <option key={t._id || t.id} value={t._id || t.id}>{t.name} ({t.employeeId || "EMP"})</option>
                                       ))}
-                                    </select>
+                                    </SelectInput>
 
                                     <div className="flex items-center justify-between text-[10px] pt-1 text-slate-500">
                                       <span className="font-mono flex items-center gap-0.5">
@@ -1541,7 +1542,7 @@ const ClassTimetableSettings = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <User size={16} className="text-indigo-500" />
-                  <select
+                  <SelectInput
                     value={selectedTeacherFilter}
                     onChange={(e) => setSelectedTeacherFilter(e.target.value)}
                     className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[240px]"
@@ -1552,7 +1553,7 @@ const ClassTimetableSettings = () => {
                         {t.name} ({t.employeeId || "EMP"}) {t.designation ? `- ${t.designation}` : ""}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
               </div>
 
@@ -1657,7 +1658,7 @@ const ClassTimetableSettings = () => {
               {/* Teacher */}
               <div>
                 <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 block">Assigned Teacher</label>
-                <select
+                <SelectInput
                   value={slotForm.teacherId}
                   onChange={(e) => {
                     const id = e.target.value;
@@ -1672,7 +1673,7 @@ const ClassTimetableSettings = () => {
                       {t.name} ({t.employeeId || "EMP"}) {t.designation ? `- ${t.designation}` : ""}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               {/* Subject */}
@@ -1688,7 +1689,7 @@ const ClassTimetableSettings = () => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <select
+                  <SelectInput
                     value={slotForm.subject || ""}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -1721,7 +1722,7 @@ const ClassTimetableSettings = () => {
                         ))}
                       </optgroup>
                     )}
-                  </select>
+                  </SelectInput>
 
                   {/* Prescribed book preview banner */}
                   {(slotForm.bookName || getBookForSubject(slotForm.subject)) && (
@@ -1746,7 +1747,7 @@ const ClassTimetableSettings = () => {
                     </div>
                   )}
 
-                  <input
+                  <Input
                     type="text"
                     placeholder="Or type custom subject (e.g. Robotics, Debate)"
                     value={slotForm.subject}
@@ -1770,7 +1771,7 @@ const ClassTimetableSettings = () => {
               {/* Room */}
               <div>
                 <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 block">Room Number</label>
-                <input
+                <Input
                   type="text"
                   placeholder="e.g. Room 301 or Physics Lab"
                   value={slotForm.roomNo}
@@ -1781,8 +1782,7 @@ const ClassTimetableSettings = () => {
 
               {/* Apply all days */}
               <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 cursor-pointer">
-                <input
-                  type="checkbox"
+                <CheckboxInput
                   checked={Boolean(slotForm.applyToAllDays)}
                   onChange={(e) => setSlotForm((prev) => ({ ...prev, applyToAllDays: e.target.checked }))}
                   className="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"

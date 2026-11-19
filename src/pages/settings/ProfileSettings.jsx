@@ -40,6 +40,7 @@ import {
   Save,
 } from "lucide-react";
 import api from "../../services/api.js";
+import { Input } from '../../components/ui/FormControls.jsx';
 
 // Helper to resolve absolute or relative image URLs
 const resolveImageUrl = (url) => {
@@ -530,7 +531,7 @@ const ProfileSettings = () => {
   return (
     <div className="space-y-4">
       {/* Hidden file input for file uploading directly to S3 like StudentForm.jsx */}
-      <input
+      <Input
         type="file"
         ref={fileInputRef}
         onChange={handlePhotoSelect}
@@ -802,7 +803,7 @@ const ProfileSettings = () => {
 
                 {showUrlField && (
                   <div className="mt-2 space-y-1.5">
-                    <input
+                    <Input
                       type="url"
                       value={formData.avatar}
                       onChange={(e) => {
@@ -841,7 +842,7 @@ const ProfileSettings = () => {
                   Current Password
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     type={showPwd.current ? "text" : "password"}
                     autoComplete="current-password"
                     value={formData.currentPassword}
@@ -865,7 +866,7 @@ const ProfileSettings = () => {
                   New Password
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     type={showPwd.new ? "text" : "password"}
                     autoComplete="new-password"
                     value={formData.newPassword}
@@ -906,7 +907,7 @@ const ProfileSettings = () => {
                   Confirm New Password
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     type={showPwd.confirm ? "text" : "password"}
                     autoComplete="new-password"
                     value={formData.confirmPassword}

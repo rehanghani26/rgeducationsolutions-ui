@@ -1,5 +1,6 @@
 import React from "react";
 import { UserCheck } from "lucide-react";
+import { Input, SelectInput, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const PolicySettings = ({ settings = {}, handleChange }) => {
   return (
@@ -24,7 +25,7 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
             Threshold required for students to be eligible for final examinations.
           </p>
           <div className="relative max-w-xs">
-            <input
+            <Input
               type="number"
               name="attendanceRequirement"
               value={settings?.attendanceRequirement ?? ""}
@@ -43,13 +44,13 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
         {/* Timesheet Settings */}
         <div className="space-y-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
           <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
+            <SwitchInput
+              size="sm"
               name="enableTimesheet"
               checked={Boolean(settings?.enableTimesheet)}
               onChange={handleChange}
               id="enableTimesheet"
-              className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+              className="shrink-0"
             />
             <label htmlFor="enableTimesheet" className="cursor-pointer select-none">
               <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -66,7 +67,7 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
               <label className="block font-semibold text-xs text-slate-800 dark:text-slate-200 mb-1">
                 Timesheet Approval Cycle
               </label>
-              <select
+              <SelectInput
                 name="timesheetFrequency"
                 value={settings?.timesheetFrequency ?? ""}
                 onChange={handleChange}
@@ -76,14 +77,14 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
-              </select>
+              </SelectInput>
             </div>
 
             <div>
               <label className="block font-semibold text-xs text-slate-800 dark:text-slate-200 mb-1">
                 Overtime Hourly Multiplier
               </label>
-              <input
+              <Input
                 type="number"
                 name="overtimeMultiplier"
                 value={settings?.overtimeMultiplier ?? ""}
@@ -100,13 +101,13 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
         {/* Leave Policy Settings */}
         <div className="space-y-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
           <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
+            <SwitchInput
+              size="sm"
               name="enableLeavePolicy"
               checked={Boolean(settings?.enableLeavePolicy)}
               onChange={handleChange}
               id="enableLeavePolicy"
-              className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+              className="shrink-0"
             />
             <label htmlFor="enableLeavePolicy" className="cursor-pointer select-none">
               <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -123,7 +124,7 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
               <label className="block font-semibold text-xs text-slate-800 dark:text-slate-200 mb-1">
                 Annual Paid Leave Days
               </label>
-              <input
+              <Input
                 type="number"
                 name="annualLeaveDays"
                 value={settings?.annualLeaveDays ?? ""}
@@ -138,7 +139,7 @@ const PolicySettings = ({ settings = {}, handleChange }) => {
               <label className="block font-semibold text-xs text-slate-800 dark:text-slate-200 mb-1">
                 Annual Sick / Medical Leave Days
               </label>
-              <input
+              <Input
                 type="number"
                 name="sickLeaveDays"
                 value={settings?.sickLeaveDays ?? ""}

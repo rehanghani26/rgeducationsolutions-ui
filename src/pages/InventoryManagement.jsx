@@ -9,6 +9,7 @@ import {
 import api from '../services/api.js';
 import Modal from '../components/ui/Modal.jsx';
 import { formatCurrency } from '../utils';
+import { Input } from '../components/ui/FormControls.jsx';
 
 const InventoryManagement = () => {
   const [search, setSearch] = useState('');
@@ -133,7 +134,7 @@ const InventoryManagement = () => {
             <div className="max-w-md mb-6">
               <div className="relative">
                 <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
-                <input
+                <Input
                   type="text"
                   placeholder="Search by product name or SKU code..."
                   value={search}
@@ -279,7 +280,7 @@ const InventoryManagement = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Adjustment Quantity</label>
-                <input
+                <Input
                   type="number"
                   required
                   placeholder="e.g. 15"

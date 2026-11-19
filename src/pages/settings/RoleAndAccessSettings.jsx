@@ -56,6 +56,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx';
 import Toggle from '../../components/ui/Toggle.jsx';
 import { setCustomRolePermissions, getUserRole } from '../../config/access.jsx';
 import { ROLES } from '../../constants/roles.js';
+import { Input } from '../../components/ui/FormControls.jsx';
 
 // Module Icon Registry
 const MODULE_ICON_MAP = {
@@ -841,7 +842,7 @@ const RoleAndAccessSettings = () => {
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <div className="relative min-w-[240px] flex-1 sm:flex-initial">
             <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
+            <Input
               type="text"
               placeholder="Search module or button..."
               value={searchQuery}
@@ -963,6 +964,7 @@ const RoleAndAccessSettings = () => {
                       {isModuleEnabled ? 'Enabled' : 'Disabled'}
                     </span>
                     <Toggle
+                      aria-label={module.name + ' access'}
                       checked={isModuleEnabled}
                       disabled={!isEditing || isLockedMaster}
                       onChange={(checked) => handleToggleModuleAccess(module.id, checked)}
@@ -1038,6 +1040,7 @@ const RoleAndAccessSettings = () => {
                               </div>
 
                               <Toggle
+                                aria-label={btn.label}
                                 checked={isBtnAllowed}
                                 disabled={!isEditing || isLockedMaster}
                                 onChange={(checked) => handleToggleActionButton(btn.id, checked)}
@@ -1072,6 +1075,7 @@ const RoleAndAccessSettings = () => {
                             <span className="text-[10px] text-slate-400">Personal leave requests</span>
                           </div>
                           <Toggle
+                            aria-label="Apply for personal leave"
                             checked={Boolean(wf.canApplyLeaveSelf)}
                             disabled={!isEditing || isLockedMaster}
                             onChange={(val) => handleToggleWorkflow('canApplyLeaveSelf', val)}
@@ -1086,6 +1090,7 @@ const RoleAndAccessSettings = () => {
                             <span className="text-[10px] text-slate-400">File for students or staff</span>
                           </div>
                           <Toggle
+                            aria-label="Apply for leave on behalf of others"
                             checked={Boolean(wf.canApplyLeaveOnBehalf)}
                             disabled={!isEditing || isLockedMaster}
                             onChange={(val) => handleToggleWorkflow('canApplyLeaveOnBehalf', val)}
@@ -1100,6 +1105,7 @@ const RoleAndAccessSettings = () => {
                             <span className="text-[10px] text-slate-400">Sync with attendance</span>
                           </div>
                           <Toggle
+                            aria-label="Approve leave requests"
                             checked={Boolean(wf.canApproveLeaves)}
                             disabled={!isEditing || isLockedMaster}
                             onChange={(val) => handleToggleWorkflow('canApproveLeaves', val)}
@@ -1158,6 +1164,7 @@ const RoleAndAccessSettings = () => {
                             <span className="text-[10px] text-slate-400">See expenditure progress & balances</span>
                           </div>
                           <Toggle
+                            aria-label="View budget"
                             checked={Boolean(wf.canViewBudget)}
                             disabled={!isEditing || isLockedMaster}
                             onChange={(val) => handleToggleWorkflow('canViewBudget', val)}
@@ -1172,6 +1179,7 @@ const RoleAndAccessSettings = () => {
                             <span className="text-[10px] text-slate-400">Inject funds or adjust categories</span>
                           </div>
                           <Toggle
+                            aria-label="Revise budget"
                             checked={Boolean(wf.canReviseBudget)}
                             disabled={!isEditing || isLockedMaster}
                             onChange={(val) => handleToggleWorkflow('canReviseBudget', val)}

@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import api from "../../services/api.js";
 import { TIMETABLE_TEMPLATES } from "../timetable/timetableUtils.js";
+import { Input, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 // Period types configuration
 const PERIOD_TYPES = [
@@ -337,7 +338,7 @@ const PeriodSlotRow = ({
 
         {/* Timing Inputs and Title */}
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
-          <input
+          <Input
             type="text"
             value={period.customLabel || ""}
             placeholder="Period label (e.g. Period 1)..."
@@ -348,7 +349,7 @@ const PeriodSlotRow = ({
           <div className="flex items-center gap-2">
             <div>
               <span className="block text-[9px] uppercase font-bold text-slate-400 mb-0.5">Start</span>
-              <input
+              <Input
                 type="time"
                 value={period.startTime || ""}
                 min={schoolStart || undefined}
@@ -362,7 +363,7 @@ const PeriodSlotRow = ({
 
             <div>
               <span className="block text-[9px] uppercase font-bold text-slate-400 mb-0.5">End</span>
-              <input
+              <Input
                 type="time"
                 value={period.endTime || ""}
                 min={period.startTime || schoolStart || undefined}
@@ -1028,7 +1029,7 @@ const ScheduleBuilder = ({ scheduleType, savedData, onSaved }) => {
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 block">
               Schedule Title
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -1189,7 +1190,7 @@ const ScheduleBuilder = ({ scheduleType, savedData, onSaved }) => {
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Sunrise size={14} className="text-amber-500" /> School Opening Bell ({currentDaySchedule.dayLabel})
               </label>
-              <input
+              <Input
                 type="time"
                 value={currentDaySchedule.schoolStartTime || "07:00"}
                 onChange={(e) => updateDayField(selectedDayKey, "schoolStartTime", e.target.value)}
@@ -1201,7 +1202,7 @@ const ScheduleBuilder = ({ scheduleType, savedData, onSaved }) => {
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                 <Sunset size={14} className="text-rose-500" /> School Closing Bell ({currentDaySchedule.dayLabel})
               </label>
-              <input
+              <Input
                 type="time"
                 value={currentDaySchedule.schoolEndTime || "14:00"}
                 onChange={(e) => updateDayField(selectedDayKey, "schoolEndTime", e.target.value)}
@@ -1214,11 +1215,11 @@ const ScheduleBuilder = ({ scheduleType, savedData, onSaved }) => {
                 Day Schedule Type
               </label>
               <label className="flex items-center gap-2.5 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer">
-                <input
-                  type="checkbox"
+                <SwitchInput
+                  size="sm"
                   checked={Boolean(currentDaySchedule.isHalfDay)}
                   onChange={(e) => updateDayField(selectedDayKey, "isHalfDay", e.target.checked)}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                  className="shrink-0"
                 />
                 <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
                   Mark as Half-Day Schedule

@@ -4,6 +4,7 @@ import { Empty, SearchField } from '../../components/ui/ProcurementUI.jsx';
 import { INVENTORY_CATEGORIES, SCHOOL_PRODUCT_CATALOG, SCHOOL_PRODUCT_PHOTOS } from '../../constants/inventoryOptions.js';
 import { formatCurrency } from '../../utils/formatters.js';
 import InventoryProductPhoto from './InventoryProductPhoto.jsx';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const pageSize = 12;
 const categories = INVENTORY_CATEGORIES.filter((category) => SCHOOL_PRODUCT_CATALOG.some((item) => item.category === category));
@@ -19,6 +20,12 @@ const sorts = {
   'price-asc': (a, b) => a.unitPrice - b.unitPrice,
   'price-desc': (a, b) => b.unitPrice - a.unitPrice,
 };
+const sortOptions = [
+  { value: 'suggested', label: 'Featured first' },
+  { value: 'name', label: 'Name A–Z' },
+  { value: 'price-asc', label: 'Lowest unit cost' },
+  { value: 'price-desc', label: 'Highest unit cost' },
+];
 
 function PresetCard({ item, added, full, priority, onAdd, onEdit }) {
   return <article className="inventory-preset-card">
@@ -65,16 +72,10 @@ export default function InventoryPresetCatalog({ selections, full, onAdd, onEdit
       </div>
       <div className="inventory-catalog__controls">
         <SearchField label="Search name, SKU, or category" value={search} onChange={update(setSearch)} />
-        <select className="proc-input inventory-catalog__category" aria-label="Filter by category" value={category} onChange={(event) => update(setCategory)(event.target.value)}>
-          <option value="">All categories</option>
-          {categories.map((name) => <option key={name}>{name}</option>)}
-        </select>
-        <select className="proc-input" aria-label="Sort presets" value={sort} onChange={(event) => update(setSort)(event.target.value)}>
-          <option value="suggested">Featured first</option>
-          <option value="name">Name A–Z</option>
-          <option value="price-asc">Lowest unit cost</option>
-          <option value="price-desc">Highest unit cost</option>
-        </select>
+        <SelectInput className="proc-input inventory-catalog__category" aria-label="Filter by category" value={category}
+          options={categories} placeholder="All categories" onChange={(event) => update(setCategory)(event.target.value)} />
+        <SelectInput className="proc-input" aria-label="Sort presets" value={sort} options={sortOptions} showPlaceholder={false}
+          onChange={(event) => update(setSort)(event.target.value)} />
       </div>
       <div className="inventory-catalog__categories" aria-label="Filter presets by category" role="group">
         {['', ...categories].map((name) => <button type="button" key={name} aria-pressed={category === name} onClick={() => update(setCategory)(name)}>

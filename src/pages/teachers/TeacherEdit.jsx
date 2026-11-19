@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import Loader from '../../components/ui/Loader.jsx';
-import TeacherForm, { blankTeacherForm, payloadFromForm } from './TeacherForm.jsx';
+import TeacherForm from './TeacherForm.jsx';
+import { blankTeacherForm, payloadFromForm, teacherDraftFromRecord } from '../../utils/teacherForm.js';
 import { getTeacherById, updateTeacher } from '../../services';
 
 const TeacherEdit = () => {
@@ -37,15 +38,7 @@ const TeacherEdit = () => {
   }, [teacherId]);
 
   useEffect(() => {
-    if (teacher) {
-      setForm({
-        ...blankTeacherForm,
-        ...teacher,
-        dob: teacher.dob?.slice?.(0, 10) || '',
-        joiningDate: teacher.joiningDate?.slice?.(0, 10) || '',
-        permissions: teacher.permissions?.length ? teacher.permissions : blankTeacherForm.permissions,
-      });
-    }
+    if (teacher) setForm(teacherDraftFromRecord(teacher));
   }, [teacher]);
 
   const handleSubmit = async (e) => {

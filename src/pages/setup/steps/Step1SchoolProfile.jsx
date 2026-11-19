@@ -3,6 +3,7 @@ import { Building2, Mail, Phone, MapPin, Globe, Award, Sparkles, Check, ArrowRig
 import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
+import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function Step1SchoolProfile({ onComplete, onNext }) {
   const [loading, setLoading] = useState(false);
@@ -119,7 +120,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           </label>
           <div className="relative">
             <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
+            <Input
               type="text"
               name="schoolName"
               value={form.schoolName}
@@ -137,7 +138,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           </label>
           <div className="relative">
             <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
+            <Input
               type="email"
               name="contactEmail"
               value={form.contactEmail}
@@ -155,7 +156,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           </label>
           <div className="relative">
             <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
+            <Input
               type="text"
               name="schoolPhone"
               value={form.schoolPhone}
@@ -173,7 +174,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           </label>
           <div className="relative">
             <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
+            <Input
               type="text"
               name="addressLine1"
               value={form.addressLine1}
@@ -189,7 +190,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             City <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="text"
             name="city"
             value={form.city}
@@ -204,7 +205,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             State / Province <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="text"
             name="state"
             value={form.state}
@@ -219,7 +220,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Country <span className="text-rose-500">*</span>
           </label>
-          <input
+          <Input
             type="text"
             name="country"
             value={form.country}
@@ -234,7 +235,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Postal / PIN Code
           </label>
-          <input
+          <Input
             type="text"
             name="postalCode"
             value={form.postalCode}
@@ -248,7 +249,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Education Board / Affiliation
           </label>
-          <select
+          <SelectInput
             name="board"
             value={form.board}
             onChange={handleChange}
@@ -259,14 +260,14 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
             <option value="State Board">State Secondary Board</option>
             <option value="IB">International Baccalaureate (IB)</option>
             <option value="Cambridge">Cambridge IGCSE</option>
-          </select>
+          </SelectInput>
         </div>
 
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             Affiliation / Registration No.
           </label>
-          <input
+          <Input
             type="text"
             name="affiliationNumber"
             value={form.affiliationNumber}
@@ -280,7 +281,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
             School Motto / Vision Line
           </label>
-          <input
+          <Input
             type="text"
             name="motto"
             value={form.motto}

@@ -1,5 +1,6 @@
 import React from "react";
 import { GraduationCap } from "lucide-react";
+import { Input, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const StudentSettings = ({ settings = {}, handleChange }) => {
   return (
@@ -16,13 +17,13 @@ const StudentSettings = ({ settings = {}, handleChange }) => {
 
       <div className="space-y-4">
         <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-          <input
-            type="checkbox"
+          <SwitchInput
+            size="sm"
             name="autoGenerateAdmissionNumber"
             checked={Boolean(settings?.autoGenerateAdmissionNumber)}
             onChange={handleChange}
             id="autoAdmission"
-            className="w-4 h-4 mt-0.5 rounded text-orange-500 focus:ring-orange-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+            className="shrink-0"
           />
           <label htmlFor="autoAdmission" className="cursor-pointer select-none">
             <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -42,7 +43,7 @@ const StudentSettings = ({ settings = {}, handleChange }) => {
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
               Prefix prepended to student roll / admission numbers.
             </p>
-            <input
+            <Input
               type="text"
               name="admissionNumberPrefix"
               value={settings?.admissionNumberPrefix ?? ""}
@@ -59,7 +60,7 @@ const StudentSettings = ({ settings = {}, handleChange }) => {
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
               Initial password assigned to newly enrolled students for student portal login.
             </p>
-            <input
+            <Input
               type="text"
               name="defaultStudentPassword"
               value={settings?.defaultStudentPassword ?? ""}
@@ -77,7 +78,7 @@ const StudentSettings = ({ settings = {}, handleChange }) => {
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
             Section capacity threshold.
           </p>
-          <input
+          <Input
             type="number"
             name="maxStudentsPerSection"
             value={settings?.maxStudentsPerSection ?? ""}

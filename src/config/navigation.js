@@ -35,7 +35,6 @@ import {
   User,
   KeyRound,
   School,
-  Wallet,
 } from 'lucide-react';
 
 import { ROUTES }                                   from '../routes/routes.js';
@@ -178,13 +177,6 @@ export const NAV_SECTIONS = [
         icon:       ClipboardList,
         roles:      FINANCE_ROLES,
         permission: 'fees',
-      },
-      {
-        name:       'Budget Allocation',
-        path:       ROUTES.BUDGET,
-        icon:       Wallet,
-        roles:      [ROLES.SUPER_ADMIN, ROLES.SCHOOL_ADMIN, ROLES.PRINCIPAL, ROLES.ACCOUNTANT],
-        permission: 'budget',
       },
       {
         name:       'Inventory',

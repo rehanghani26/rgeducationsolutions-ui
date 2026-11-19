@@ -1,6 +1,7 @@
 import { ArrowRight, Pencil, Save, ShoppingBasket, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters.js';
 import InventoryProductPhoto from './InventoryProductPhoto.jsx';
+import { Input } from '../../components/ui/FormControls.jsx';
 
 const nameFor = (row) => row.values.name || 'Custom item';
 
@@ -37,7 +38,7 @@ export default function InventorySelection({ rows, activeKey, reviewing, editing
             {!editing && <div className="inventory-selection__controls">
               <label>
                 <span>Opening qty</span>
-                <input className="proc-input" type="number" min="0" step="0.001" value={row.values.quantity} disabled={saving}
+                <Input className="proc-input" type="number" min="0" step="0.001" value={row.values.quantity} disabled={saving}
                   aria-label={'Opening quantity for ' + nameFor(row)} onChange={(event) => onQuantity(row.key, event.target.value)} />
               </label>
               <button type="button" className="proc-btn proc-btn-sm" aria-label={'Edit ' + nameFor(row)} disabled={saving} onClick={() => onSelect(row.key)}>

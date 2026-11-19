@@ -1,5 +1,6 @@
 import React from "react";
 import { Database } from "lucide-react";
+import { SelectInput, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const BackupSettings = ({ settings = {}, handleChange }) => {
   return (
@@ -16,13 +17,13 @@ const BackupSettings = ({ settings = {}, handleChange }) => {
 
       <div className="space-y-4">
         <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-          <input
-            type="checkbox"
+          <SwitchInput
+            size="sm"
             name="autoBackupEnabled"
             checked={Boolean(settings?.autoBackupEnabled)}
             onChange={handleChange}
             id="autoBackupEnabled"
-            className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+            className="shrink-0"
           />
           <label htmlFor="autoBackupEnabled" className="cursor-pointer select-none">
             <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -41,7 +42,7 @@ const BackupSettings = ({ settings = {}, handleChange }) => {
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
             Schedule on which database snapshots will be generated.
           </p>
-          <select
+          <SelectInput
             name="backupFrequency"
             value={settings?.backupFrequency ?? ""}
             onChange={handleChange}
@@ -51,7 +52,7 @@ const BackupSettings = ({ settings = {}, handleChange }) => {
             <option value="daily">Daily Automated Snapshot</option>
             <option value="weekly">Weekly Snapshot Cycle</option>
             <option value="monthly">Monthly Snapshot Cycle</option>
-          </select>
+          </SelectInput>
         </div>
       </div>
     </div>

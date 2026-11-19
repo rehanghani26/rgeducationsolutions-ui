@@ -7,9 +7,10 @@ import { useDebouncedSearch, useProcurementAccess, useProcurementResource } from
 import { getVendors } from '../../services/vendorService.js';
 import { ROUTES } from '../../routes/routes.js';
 import { formatCurrency } from '../../utils';
-import { recordId, VENDOR_CATEGORIES, VENDOR_STATUSES } from '../../utils/procurement.js';
+import { recordId, VENDOR_CATEGORIES, VENDOR_STATUS_OPTIONS } from '../../utils/procurement.js';
 import VendorFormModal from './VendorFormModal.jsx';
 import PurchaseBillModal from './PurchaseBillModal.jsx';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const columns = [
   { key: 'name', label: 'Vendor', full: true, render: (vendor) => <>
@@ -67,14 +68,10 @@ export default function VendorManagement() {
     <section className="proc-panel proc-pad proc-stack" aria-label="Vendor directory">
       <div className="proc-toolbar">
         <SearchField label="Search vendors, contacts, or GSTIN" value={keyword} onChange={(value) => { setKeyword(value); setPage(1); }} />
-        <select className="proc-input" aria-label="Vendor category" value={category} onChange={(event) => { setCategory(event.target.value); setPage(1); }}>
-          <option value="">All categories</option>
-          {VENDOR_CATEGORIES.map((value) => <option key={value}>{value}</option>)}
-        </select>
-        <select className="proc-input" aria-label="Vendor status" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}>
-          <option value="">All statuses</option>
-          {VENDOR_STATUSES.map((value) => <option key={value} value={value}>{value[0].toUpperCase() + value.slice(1)}</option>)}
-        </select>
+        <SelectInput className="proc-input" aria-label="Vendor category" value={category} options={VENDOR_CATEGORIES} placeholder="All categories"
+          onChange={(event) => { setCategory(event.target.value); setPage(1); }} />
+        <SelectInput className="proc-input" aria-label="Vendor status" value={status} options={VENDOR_STATUS_OPTIONS} placeholder="All statuses"
+          onChange={(event) => { setStatus(event.target.value); setPage(1); }} />
       </div>
       {list.loading && <Pending label="Loading vendors" />}
       <ErrorMessage error={list.error} onRetry={list.refresh} />

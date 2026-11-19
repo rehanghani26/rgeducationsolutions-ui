@@ -1,5 +1,6 @@
 import React from "react";
 import { Shield } from "lucide-react";
+import { Input, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const SecuritySettings = ({ settings = {}, handleChange }) => {
   return (
@@ -18,13 +19,13 @@ const SecuritySettings = ({ settings = {}, handleChange }) => {
         {/* Core Security Toggles */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-            <input
-              type="checkbox"
+            <SwitchInput
+              size="sm"
               name="enableDataEncryption"
               checked={Boolean(settings?.enableDataEncryption)}
               onChange={handleChange}
               id="enableDataEncryption"
-              className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+              className="shrink-0"
             />
             <label htmlFor="enableDataEncryption" className="cursor-pointer select-none">
               <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -37,13 +38,13 @@ const SecuritySettings = ({ settings = {}, handleChange }) => {
           </div>
 
           <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-            <input
-              type="checkbox"
+            <SwitchInput
+              size="sm"
               name="enableAuditLog"
               checked={Boolean(settings?.enableAuditLog)}
               onChange={handleChange}
               id="enableAuditLog"
-              className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+              className="shrink-0"
             />
             <label htmlFor="enableAuditLog" className="cursor-pointer select-none">
               <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -58,13 +59,13 @@ const SecuritySettings = ({ settings = {}, handleChange }) => {
 
         {/* 2FA Toggle */}
         <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-          <input
-            type="checkbox"
+          <SwitchInput
+            size="sm"
             name="enableTwoFactor"
             checked={Boolean(settings?.enableTwoFactor)}
             onChange={handleChange}
             id="enableTwoFactor"
-            className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+            className="shrink-0"
           />
           <label htmlFor="enableTwoFactor" className="cursor-pointer select-none">
             <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -86,7 +87,7 @@ const SecuritySettings = ({ settings = {}, handleChange }) => {
               Automatically log out users after period of inactivity.
             </p>
             <div className="relative">
-              <input
+              <Input
                 type="number"
                 name="sessionTimeout"
                 value={settings?.sessionTimeout ?? ""}
@@ -110,7 +111,7 @@ const SecuritySettings = ({ settings = {}, handleChange }) => {
               Require staff to rotate account passwords periodically.
             </p>
             <div className="relative">
-              <input
+              <Input
                 type="number"
                 name="passwordExpiry"
                 value={settings?.passwordExpiry ?? ""}

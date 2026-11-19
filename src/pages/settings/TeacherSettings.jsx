@@ -1,5 +1,6 @@
 import React from "react";
 import { Users } from "lucide-react";
+import { Input, SwitchInput } from '../../components/ui/FormControls.jsx';
 
 const TeacherSettings = ({ settings = {}, handleChange }) => {
   return (
@@ -16,13 +17,13 @@ const TeacherSettings = ({ settings = {}, handleChange }) => {
 
       <div className="space-y-4">
         <div className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-          <input
-            type="checkbox"
+          <SwitchInput
+            size="sm"
             name="autoGenerateTeacherID"
             checked={Boolean(settings?.autoGenerateTeacherID)}
             onChange={handleChange}
             id="autoTeacherID"
-            className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+            className="shrink-0"
           />
           <label htmlFor="autoTeacherID" className="cursor-pointer select-none">
             <strong className="text-xs font-bold text-slate-900 dark:text-slate-100">
@@ -42,7 +43,7 @@ const TeacherSettings = ({ settings = {}, handleChange }) => {
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
               Prefix prepended to generated IDs.
             </p>
-            <input
+            <Input
               type="text"
               name="teacherIDPrefix"
               value={settings?.teacherIDPrefix ?? ""}
@@ -59,7 +60,7 @@ const TeacherSettings = ({ settings = {}, handleChange }) => {
             <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
               Maximum teachers assignable to a single class section.
             </p>
-            <input
+            <Input
               type="number"
               name="maxTeachersPerClass"
               value={settings?.maxTeachersPerClass ?? ""}

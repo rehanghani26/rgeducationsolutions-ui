@@ -43,9 +43,11 @@ import BatchDisburseModal from "./components/BatchDisburseModal.jsx";
 import {
   formatCurrency,
   MONTH_NAMES as MONTH_OPTIONS,
-  YEAR_OPTIONS,
   isStaffSalarySetup,
 } from "./payrollUtils.js";
+import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
+
+import PayrollPeriodSelect from './components/PayrollPeriodSelect.jsx';
 
 const PayrollManagement = () => {
   const navigate = useNavigate();
@@ -347,31 +349,7 @@ const PayrollManagement = () => {
         actions={
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {/* Month & Year Selectors */}
-            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-2xs">
-              <Calendar size={14} className="text-indigo-500" />
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
-              >
-                {MONTH_OPTIONS.map((m) => (
-                  <option key={m} value={m} className="dark:bg-slate-800">
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer border-l border-slate-200 dark:border-slate-700 pl-1.5"
-              >
-                {[2024, 2025, 2026, 2027].map((y) => (
-                  <option key={y} value={y} className="dark:bg-slate-800">
-                    {y}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <PayrollPeriodSelect month={selectedMonth} year={selectedYear} onMonthChange={setSelectedMonth} onYearChange={setSelectedYear} years={[2024, 2025, 2026, 2027]} />
 
             <Button
               variant="outline"
@@ -500,7 +478,7 @@ const PayrollManagement = () => {
                 size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
-              <input
+              <Input
                 type="text"
                 placeholder="Search staff name or ID..."
                 value={searchQuery}
@@ -511,7 +489,7 @@ const PayrollManagement = () => {
 
             <div className="flex items-center gap-2">
               {/* Role Filter */}
-              <select
+              <SelectInput
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="flex-1 sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
@@ -525,10 +503,10 @@ const PayrollManagement = () => {
                 <option value="accountant">Accountant</option>
                 <option value="librarian">Librarian</option>
                 <option value="peon">Peon / Support</option>
-              </select>
+              </SelectInput>
 
               {/* Status Filter */}
-              <select
+              <SelectInput
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="flex-1 sm:w-auto bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
@@ -536,7 +514,7 @@ const PayrollManagement = () => {
                 <option value="">All Statuses</option>
                 <option value="paid">Paid</option>
                 <option value="pending">Pending</option>
-              </select>
+              </SelectInput>
             </div>
           </div>
         </div>

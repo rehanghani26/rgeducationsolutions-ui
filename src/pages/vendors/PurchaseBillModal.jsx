@@ -9,8 +9,9 @@ import { createPurchaseBill, getInventoryItems } from '../../services/inventoryS
 import { getVendors } from '../../services/vendorService.js';
 import { formatCurrency } from '../../utils';
 import {
-  clientKey, CREDIT_METHOD, defaultSession, invoiceDueDate, PAYMENT_METHODS, purchaseTotals, recordId, roundMoney, todayInput,
+  clientKey, CREDIT_METHOD, defaultSession, invoiceDueDate, PAYMENT_METHODS, purchaseTotals, recordId, roundMoney, sessionOptions, todayInput,
 } from '../../utils/procurement.js';
+import { Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const blankLine = () => ({ key: clientKey(), item: null, quantity: '1', unitCost: '', gstRate: '0' });
 const loadItems = async (search) => (await getInventoryItems({ search, limit: 15, sort: 'name', available: true })).data.inventory;
@@ -77,19 +78,18 @@ export default function PurchaseBillModal({ vendor: fixedVendor, session: initia
             {fixedVendor ? <div><span className="proc-label">Vendor</span><strong>{fixedVendor.name}</strong></div> :
               <ProcurementPicker label="Vendor" selected={vendor} onSelect={setVendor} getOptions={loadVendors} placeholder="Search active vendors" />}
             <div className="proc-fields">
-              <Field label="Supplier invoice number"><input required value={form.supplierBillNumber} onChange={field('supplierBillNumber')} maxLength={100} /></Field>
-              <Field label="Purchase order number"><input value={form.poNumber} onChange={field('poNumber')} /></Field>
-              <Field label="Invoice date"><input required type="date" value={form.billDate} onChange={field('billDate')} /></Field>
-              <Field label="Received date"><input required type="date" value={form.receivedDate} onChange={field('receivedDate')} /></Field>
-              <Field label="Expected delivery date"><input type="date" value={form.expectedDeliveryDate} onChange={field('expectedDeliveryDate')} /></Field>
-              <Field label="Payment due date"><input type="date" min={form.billDate} value={dueDate} onChange={field('dueDate')} /></Field>
+              <Field label="Supplier invoice number"><Input required value={form.supplierBillNumber} onChange={field('supplierBillNumber')} maxLength={100} /></Field>
+              <Field label="Purchase order number"><Input value={form.poNumber} onChange={field('poNumber')} /></Field>
+              <Field label="Invoice date"><Input required type="date" value={form.billDate} onChange={field('billDate')} /></Field>
+              <Field label="Received date"><Input required type="date" value={form.receivedDate} onChange={field('receivedDate')} /></Field>
+              <Field label="Expected delivery date"><Input type="date" value={form.expectedDeliveryDate} onChange={field('expectedDeliveryDate')} /></Field>
+              <Field label="Payment due date"><Input type="date" min={form.billDate} value={dueDate} onChange={field('dueDate')} /></Field>
               <Field label="Academic session">
-                <select value={sessionId} onChange={(event) => setSelectedSession(event.target.value)} disabled={sessions.loading}>
-                  <option value="" disabled={Boolean(defaultSession(sessionList))}>{sessions.loading ? 'Loading sessions…' : 'No active session'}</option>
-                  {sessionList.map((session) => <option key={recordId(session)} value={recordId(session)}>{session.sessionName}{session.isCurrent ? ' (current)' : ''}</option>)}
-                </select>
+                <SelectInput value={sessionId} onChange={(event) => setSelectedSession(event.target.value)} disabled={sessions.loading}
+                  options={sessionOptions(sessionList, true)} placeholder={sessions.loading ? 'Loading sessions…' : 'No active session'}
+                  placeholderDisabled={Boolean(defaultSession(sessionList))} emptyMessage="" />
               </Field>
-              <Field label="Invoice document link" wide><input type="url" value={form.invoiceAttachmentUrl} onChange={field('invoiceAttachmentUrl')} placeholder="https://" /></Field>
+              <Field label="Invoice document link" wide><Input type="url" value={form.invoiceAttachmentUrl} onChange={field('invoiceAttachmentUrl')} placeholder="https://" /></Field>
             </div>
             <ErrorMessage error={sessions.error} onRetry={sessions.refresh} />
           </section>
@@ -104,9 +104,9 @@ export default function PurchaseBillModal({ vendor: fixedVendor, session: initia
               <ProcurementPicker label="Inventory item" selected={line.item} getOptions={loadItems} placeholder="Search by name, SKU, or barcode"
                 onSelect={(item) => updateLine(line.key, { item, unitCost: item.unitCost ?? item.price ?? 0, gstRate: item.gstRate ?? 0 })} />
               <div className="proc-fields proc-fields-3">
-                <Field label={line.item?.unit ? 'Quantity (' + line.item.unit + ')' : 'Quantity'}><input type="number" min="0.001" step="0.001" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} required /></Field>
-                <Field label="Unit cost"><input type="number" min="0" step="0.01" value={line.unitCost} onChange={(event) => updateLine(line.key, { unitCost: event.target.value })} required /></Field>
-                <Field label="GST %"><input type="number" min="0" max="100" step="0.01" value={line.gstRate} onChange={(event) => updateLine(line.key, { gstRate: event.target.value })} /></Field>
+                <Field label={line.item?.unit ? 'Quantity (' + line.item.unit + ')' : 'Quantity'}><Input type="number" min="0.001" step="0.001" value={line.quantity} onChange={(event) => updateLine(line.key, { quantity: event.target.value })} required /></Field>
+                <Field label="Unit cost"><Input type="number" min="0" step="0.01" value={line.unitCost} onChange={(event) => updateLine(line.key, { unitCost: event.target.value })} required /></Field>
+                <Field label="GST %"><Input type="number" min="0" max="100" step="0.01" value={line.gstRate} onChange={(event) => updateLine(line.key, { gstRate: event.target.value })} /></Field>
               </div>
             </div>)}
           </section>
@@ -117,15 +117,14 @@ export default function PurchaseBillModal({ vendor: fixedVendor, session: initia
             <div className="proc-fields">
               {[
                 ['shippingCharges', 'Shipping'], ['otherCharges', 'Other charges'], ['discountAmount', 'Invoice discount'], ['taxAmount', 'Override invoice tax'],
-              ].map(([key, label]) => <Field label={label} key={key}><input type="number" min="0" step="0.01" placeholder={key === 'taxAmount' ? 'Use item GST' : '0'} value={form[key]} onChange={field(key)} /></Field>)}
-              <Field label="Payment method" wide><select value={form.paymentType} onChange={field('paymentType')}>
-                {[CREDIT_METHOD, ...PAYMENT_METHODS].map((method) => <option key={method}>{method}</option>)}
-              </select></Field>
+              ].map(([key, label]) => <Field label={label} key={key}><Input type="number" min="0" step="0.01" placeholder={key === 'taxAmount' ? 'Use item GST' : '0'} value={form[key]} onChange={field(key)} /></Field>)}
+              <Field label="Payment method" wide><SelectInput value={form.paymentType} onChange={field('paymentType')}
+                options={[CREDIT_METHOD, ...PAYMENT_METHODS]} showPlaceholder={false} /></Field>
               {!credit && <>
-                <Field label="Amount already paid" hint="Leave blank for the full invoice amount."><input type="number" min="0" step="0.01" value={form.amountPaid} onChange={field('amountPaid')} /></Field>
-                <Field label="Payment reference"><input value={form.transactionReference} onChange={field('transactionReference')} /></Field>
+                <Field label="Amount already paid" hint="Leave blank for the full invoice amount."><Input type="number" min="0" step="0.01" value={form.amountPaid} onChange={field('amountPaid')} /></Field>
+                <Field label="Payment reference"><Input value={form.transactionReference} onChange={field('transactionReference')} /></Field>
               </>}
-              <Field label="Notes" wide><textarea rows={2} value={form.notes} onChange={field('notes')} /></Field>
+              <Field label="Notes" wide><TextareaInput rows={2} value={form.notes} onChange={field('notes')} /></Field>
             </div>
           </section>
           <section className="proc-panel proc-pad proc-stack">

@@ -52,6 +52,7 @@ const InfoGrid = ({ items }) => (
 import { useSelector } from "react-redux";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
+import { CheckboxInput, Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const TeacherDetail = () => {
   const { teacherId } = useParams();
@@ -834,7 +835,7 @@ const TeacherDetail = () => {
             <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
               Reviewer Remarks / Decision Note *
             </label>
-            <textarea
+            <TextareaInput
               required
               rows={3}
               value={reviewRemarks}
@@ -881,7 +882,7 @@ const TeacherDetail = () => {
             <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
               Leave Category *
             </label>
-            <select
+            <SelectInput
               required
               value={leaveForm.category}
               onChange={(e) => setLeaveForm({ ...leaveForm, category: e.target.value })}
@@ -894,7 +895,7 @@ const TeacherDetail = () => {
               <option value="Family / Personal Event">Family / Personal Event</option>
               <option value="Maternity / Paternity">Maternity / Paternity</option>
               <option value="Other">Other</option>
-            </select>
+            </SelectInput>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -902,7 +903,7 @@ const TeacherDetail = () => {
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                 Start Date *
               </label>
-              <input
+              <Input
                 type="date"
                 required
                 value={leaveForm.startDate}
@@ -921,7 +922,7 @@ const TeacherDetail = () => {
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                 End Date *
               </label>
-              <input
+              <Input
                 type="date"
                 required
                 min={leaveForm.startDate}
@@ -935,8 +936,7 @@ const TeacherDetail = () => {
           {/* Half Day Check */}
           <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl space-y-2">
             <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-800 dark:text-slate-200">
-              <input
-                type="checkbox"
+              <CheckboxInput
                 checked={leaveForm.isHalfDay}
                 onChange={(e) => setLeaveForm({ ...leaveForm, isHalfDay: e.target.checked })}
                 className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
@@ -946,7 +946,7 @@ const TeacherDetail = () => {
             {leaveForm.isHalfDay && (
               <div className="flex items-center gap-4 pt-1">
                 <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300">
-                  <input
+                  <Input
                     type="radio"
                     name="halfDaySession"
                     value="first-half"
@@ -956,7 +956,7 @@ const TeacherDetail = () => {
                   <span>First Half</span>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300">
-                  <input
+                  <Input
                     type="radio"
                     name="halfDaySession"
                     value="second-half"
@@ -973,7 +973,7 @@ const TeacherDetail = () => {
             <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
               Reason *
             </label>
-            <textarea
+            <TextareaInput
               required
               rows={3}
               value={leaveForm.reason}

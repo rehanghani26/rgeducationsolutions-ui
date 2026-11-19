@@ -14,6 +14,8 @@ export { default as FilterBar }         from './ui/FilterBar.jsx';
 export { default as FormInput }         from './ui/FormInput.jsx';
 export { default as FormSelect }        from './ui/FormSelect.jsx';
 export { default as FormTextarea }      from './ui/FormTextarea.jsx';
+export { CheckboxInput, Input, SelectInput, SwitchInput, TextareaInput } from './ui/FormControls.jsx';
+export { default as MultiSelect }       from './ui/MultiSelect.jsx';
 export { default as Loader }            from './ui/Loader.jsx';
 export { default as Modal }             from './ui/Modal.jsx';
 export { default as PageHeader }        from './ui/PageHeader.jsx';

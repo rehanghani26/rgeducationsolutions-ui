@@ -7,8 +7,10 @@ import { DataTable, Empty, ErrorMessage, Field, Metric, Pending, Status } from '
 import { useProcurementAccess, useProcurementResource } from '../../hooks/useProcurement.js';
 import { getAcademicSessions, getSessionBudget, reviseBudget, saveBudget } from '../../services/budgetService.js';
 import { formatCurrency, formatDate } from '../../utils';
-import { dateInput, defaultSession, recordId, roundMoney } from '../../utils/procurement.js';
+import { optionsFromRecord } from '../../utils/formOptions.js';
+import { dateInput, defaultSession, recordId, roundMoney, sessionOptions } from '../../utils/procurement.js';
 import { ROUTES } from '../../routes/routes.js';
+import { Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 const buckets = [
   { key: 'salary', label: 'Staff salaries', budget: 'salaryBudget', spent: 'salarySpent' },
@@ -47,10 +49,10 @@ function AllocationForm({ budget, onSave, onCancel, saving, error }) {
     </div>
     <div className="proc-fields">
       <Field label="Approved total" hint="Leave blank to use the sum of the categories.">
-        <input type="number" min="0" step="0.01" value={form.totalBudget} onChange={set('totalBudget')} />
+        <Input type="number" min="0" step="0.01" value={form.totalBudget} onChange={set('totalBudget')} />
       </Field>
       {buckets.map(({ key, budget: field, label }) => <Field key={key} label={label}>
-        <input type="number" min="0" step="0.01" value={form[field]} onChange={set(field)} required />
+        <Input type="number" min="0" step="0.01" value={form[field]} onChange={set(field)} required />
       </Field>)}
     </div>
     <dl className="proc-amounts">
@@ -60,11 +62,11 @@ function AllocationForm({ budget, onSave, onCancel, saving, error }) {
     <div className="proc-form-section">
       <h3 className="proc-title">Approval details</h3>
       <div className="proc-fields proc-fields-3">
-        <Field label="Budget owner"><input value={form.budgetOwner} onChange={set('budgetOwner')} /></Field>
-        <Field label="Approval reference"><input value={form.approvalReference} onChange={set('approvalReference')} /></Field>
-        <Field label="Approval date"><input type="date" value={form.approvedDate} onChange={set('approvedDate')} /></Field>
-        <Field label="Notes" wide><textarea rows={2} value={form.notes} onChange={set('notes')} /></Field>
-        {budget && <Field label="Reason for this change" wide><input value={form.revisionReason} onChange={set('revisionReason')} /></Field>}
+        <Field label="Budget owner"><Input value={form.budgetOwner} onChange={set('budgetOwner')} /></Field>
+        <Field label="Approval reference"><Input value={form.approvalReference} onChange={set('approvalReference')} /></Field>
+        <Field label="Approval date"><Input type="date" value={form.approvedDate} onChange={set('approvedDate')} /></Field>
+        <Field label="Notes" wide><TextareaInput rows={2} value={form.notes} onChange={set('notes')} /></Field>
+        {budget && <Field label="Reason for this change" wide><Input value={form.revisionReason} onChange={set('revisionReason')} /></Field>}
       </div>
     </div>
     <ErrorMessage error={error} />
@@ -86,12 +88,11 @@ function RevisionForm({ onSave, onCancel, saving, error }) {
     </div>
     <div className="proc-fields">
       <Field label="Category">
-        <select value={category} onChange={(event) => setCategory(event.target.value)}>
-          {Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-        </select>
+        <SelectInput value={category} options={optionsFromRecord(categoryLabels)} showPlaceholder={false}
+          onChange={(event) => setCategory(event.target.value)} />
       </Field>
-      <Field label="Additional amount"><input type="number" value={additionalAmount} onChange={(event) => setAmount(event.target.value)} min="0.01" step="0.01" required /></Field>
-      <Field label="Reason for the increase" wide><textarea value={reason} onChange={(event) => setReason(event.target.value)} rows={2} required /></Field>
+      <Field label="Additional amount"><Input type="number" value={additionalAmount} onChange={(event) => setAmount(event.target.value)} min="0.01" step="0.01" required /></Field>
+      <Field label="Reason for the increase" wide><TextareaInput value={reason} onChange={(event) => setReason(event.target.value)} rows={2} required /></Field>
     </div>
     <ErrorMessage error={error} />
     <div className="proc-form-footer">
@@ -182,12 +183,10 @@ export default function BudgetAllocationSettings() {
       {!sessions.loading && !sessions.error && !session && <div className="proc-panel"><Empty icon={CalendarDays} title="No academic sessions" description="Create an academic session to allocate its budget." /></div>}
       {session && <div className="proc-panel proc-pad proc-toolbar justify-between">
         <Field label="Academic session">
-          <select value={sessionId} disabled={saving} onChange={(event) => {
+          <SelectInput value={sessionId} disabled={saving} options={sessionOptions(list, true)} showPlaceholder={false} onChange={(event) => {
             closeForm();
             setParams({ session: event.target.value }, { replace: true });
-          }}>
-            {list.map((entry) => <option key={recordId(entry)} value={recordId(entry)}>{entry.sessionName}{entry.isCurrent ? ' (current)' : ''}</option>)}
-          </select>
+          }} />
         </Field>
         {canAllocate && mode === 'view' && !current.loading && !current.error && budget?.status !== 'closed' &&
           <div className="proc-actions">

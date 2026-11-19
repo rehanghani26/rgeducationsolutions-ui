@@ -12,6 +12,7 @@ import {
 } from '../store/slices/erpSlice.js';
 import { CLASS_OPTIONS, SECTION_OPTIONS } from '../constants/academicOptions.js';
 import Modal from '../components/ui/Modal.jsx';
+import { CheckboxInput, Input, SelectInput, TextareaInput } from '../components/ui/FormControls.jsx';
 
 const permissionOptions = [
   ['dashboard', 'Dashboard Access'],
@@ -208,7 +209,7 @@ const StudentManagement = () => {
         <div className="xl:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
           <div className="relative mb-6">
             <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
-            <input
+            <Input
               type="text"
               placeholder="Search students by name, admission number, email, roll..."
               value={search}
@@ -307,17 +308,17 @@ const StudentManagement = () => {
               <section className="space-y-3">
                 <h4 className="font-bold">Personal Information</h4>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={labelCls}>First Name</label><input required className={inputCls} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></div>
-                  <div><label className={labelCls}>Last Name</label><input required className={inputCls} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></div>
+                  <div><label className={labelCls}>First Name</label><Input required className={inputCls} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></div>
+                  <div><label className={labelCls}>Last Name</label><Input required className={inputCls} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></div>
                 </div>
-                <div><label className={labelCls}>Email</label><input type="email" className={inputCls} value={form.email} onChange={(e) => updateField('email', e.target.value)} /></div>
+                <div><label className={labelCls}>Email</label><Input type="email" className={inputCls} value={form.email} onChange={(e) => updateField('email', e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={labelCls}>Gender</label><select className={inputCls} value={form.gender} onChange={(e) => updateField('gender', e.target.value)}><option>Male</option><option>Female</option><option>Other</option></select></div>
-                  <div><label className={labelCls}>Date of Birth</label><input type="date" className={inputCls} value={form.dob} onChange={(e) => updateField('dob', e.target.value)} /></div>
+                  <div><label className={labelCls}>Gender</label><SelectInput className={inputCls} value={form.gender} onChange={(e) => updateField('gender', e.target.value)}><option>Male</option><option>Female</option><option>Other</option></SelectInput></div>
+                  <div><label className={labelCls}>Date of Birth</label><Input type="date" className={inputCls} value={form.dob} onChange={(e) => updateField('dob', e.target.value)} /></div>
                 </div>
-                <div><label className={labelCls}>Phone Number</label><input required className={inputCls} value={form.contactNumber} onChange={(e) => updateField('contactNumber', e.target.value)} /></div>
-                <div><label className={labelCls}>Alternate Phone</label><input className={inputCls} value={form.alternatePhone} onChange={(e) => updateField('alternatePhone', e.target.value)} /></div>
-                <div><label className={labelCls}>Address</label><textarea className={inputCls} value={form.address} onChange={(e) => updateField('address', e.target.value)} /></div>
+                <div><label className={labelCls}>Phone Number</label><Input required className={inputCls} value={form.contactNumber} onChange={(e) => updateField('contactNumber', e.target.value)} /></div>
+                <div><label className={labelCls}>Alternate Phone</label><Input className={inputCls} value={form.alternatePhone} onChange={(e) => updateField('alternatePhone', e.target.value)} /></div>
+                <div><label className={labelCls}>Address</label><TextareaInput className={inputCls} value={form.address} onChange={(e) => updateField('address', e.target.value)} /></div>
               </section>
 
               <section className="space-y-3">
@@ -331,7 +332,7 @@ const StudentManagement = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelCls}>Class Assigned</label>
-                    <select
+                    <SelectInput
                       className={inputCls}
                       value={form.classId}
                       onChange={(e) => updateField('classId', e.target.value)}
@@ -340,11 +341,11 @@ const StudentManagement = () => {
                       {CLASS_OPTIONS.map((c) => (
                         <option key={c.id} value={c.name}>{c.name}</option>
                       ))}
-                    </select>
+                    </SelectInput>
                   </div>
                   <div>
                     <label className={labelCls}>Section Assigned</label>
-                    <select
+                    <SelectInput
                       className={inputCls}
                       value={form.sectionId}
                       onChange={(e) => updateField('sectionId', e.target.value)}
@@ -353,14 +354,14 @@ const StudentManagement = () => {
                       {SECTION_OPTIONS.map((s) => (
                         <option key={s.id} value={s.name}>{s.name}</option>
                       ))}
-                    </select>
+                    </SelectInput>
                   </div>
                 </div>
-                <div><label className={labelCls}>Blood Group</label><input className={inputCls} value={form.bloodGroup} onChange={(e) => updateField('bloodGroup', e.target.value)} /></div>
-                <div><label className={labelCls}>Parent / Guardian</label><input required className={inputCls} value={form.parentName} onChange={(e) => updateField('parentName', e.target.value)} /></div>
-                <div><label className={labelCls}>Parent Contact</label><input required className={inputCls} value={form.parentContact} onChange={(e) => updateField('parentContact', e.target.value)} /></div>
-                <div><label className={labelCls}>Parent Email</label><input type="email" className={inputCls} value={form.parentEmail} onChange={(e) => updateField('parentEmail', e.target.value)} /></div>
-                <div><label className={labelCls}>Aadhaar Number</label><input className={inputCls} value={form.aadhaarNumber} onChange={(e) => updateField('aadhaarNumber', e.target.value)} /></div>
+                <div><label className={labelCls}>Blood Group</label><Input className={inputCls} value={form.bloodGroup} onChange={(e) => updateField('bloodGroup', e.target.value)} /></div>
+                <div><label className={labelCls}>Parent / Guardian</label><Input required className={inputCls} value={form.parentName} onChange={(e) => updateField('parentName', e.target.value)} /></div>
+                <div><label className={labelCls}>Parent Contact</label><Input required className={inputCls} value={form.parentContact} onChange={(e) => updateField('parentContact', e.target.value)} /></div>
+                <div><label className={labelCls}>Parent Email</label><Input type="email" className={inputCls} value={form.parentEmail} onChange={(e) => updateField('parentEmail', e.target.value)} /></div>
+                <div><label className={labelCls}>Aadhaar Number</label><Input className={inputCls} value={form.aadhaarNumber} onChange={(e) => updateField('aadhaarNumber', e.target.value)} /></div>
               </section>
 
               {editing && (
@@ -369,18 +370,18 @@ const StudentManagement = () => {
                   <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-100 dark:border-slate-800 p-3">
                     {permissionOptions.map(([value, label]) => (
                       <label key={value} className="flex items-center gap-2 text-[11px] font-semibold">
-                        <input type="checkbox" checked={form.permissions.includes(value)} onChange={() => togglePermission(value)} />
+                        <CheckboxInput checked={form.permissions.includes(value)} onChange={() => togglePermission(value)} />
                         {label}
                       </label>
                     ))}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><label className={labelCls}>Status</label><select className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
-                    <div><label className={labelCls}>Expiry Date</label><input type="date" className={inputCls} value={form.accountExpiryDate} onChange={(e) => updateField('accountExpiryDate', e.target.value)} /></div>
+                    <div><label className={labelCls}>Status</label><SelectInput className={inputCls} value={form.status} onChange={(e) => updateField('status', e.target.value)}><option value="active">Active</option><option value="inactive">Inactive</option></SelectInput></div>
+                    <div><label className={labelCls}>Expiry Date</label><Input type="date" className={inputCls} value={form.accountExpiryDate} onChange={(e) => updateField('accountExpiryDate', e.target.value)} /></div>
                   </div>
-                  <div><label className={labelCls}>Login Restriction</label><select className={inputCls} value={form.loginRestriction} onChange={(e) => updateField('loginRestriction', e.target.value)}><option value="none">None</option><option value="school-network">School Network</option><option value="office-hours">Office Hours</option></select></div>
-                  <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.forcePasswordChange} onChange={(e) => updateField('forcePasswordChange', e.target.checked)} /> Force Password Change on First Login</label>
-                  <label className="flex items-center gap-2 text-xs font-bold"><input type="checkbox" checked={form.twoFactorEnabled} onChange={(e) => updateField('twoFactorEnabled', e.target.checked)} /> Two Factor Authentication</label>
+                  <div><label className={labelCls}>Login Restriction</label><SelectInput className={inputCls} value={form.loginRestriction} onChange={(e) => updateField('loginRestriction', e.target.value)}><option value="none">None</option><option value="school-network">School Network</option><option value="office-hours">Office Hours</option></SelectInput></div>
+                  <label className="flex items-center gap-2 text-xs font-bold"><CheckboxInput checked={form.forcePasswordChange} onChange={(e) => updateField('forcePasswordChange', e.target.checked)} /> Force Password Change on First Login</label>
+                  <label className="flex items-center gap-2 text-xs font-bold"><CheckboxInput checked={form.twoFactorEnabled} onChange={(e) => updateField('twoFactorEnabled', e.target.checked)} /> Two Factor Authentication</label>
                 </section>
               )}
             </div>

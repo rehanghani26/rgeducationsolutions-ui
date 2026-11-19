@@ -28,6 +28,7 @@ import { useSelector } from "react-redux";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
 import { formatCurrency } from "../../utils";
+import { Input } from '../../components/ui/FormControls.jsx';
 
 const TeacherList = () => {
   const navigate = useNavigate();
@@ -628,7 +629,7 @@ const TeacherList = () => {
                 </p>
               </div>
 
-              <input
+              <Input
                 type="file"
                 accept=".csv,.xlsx,.xls,.txt"
                 onChange={handleFileUpload}

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api.js';
 import { formatTime } from '../../utils';
+import { Input } from '../../components/ui/FormControls.jsx';
 
 const QUICK_PROMPTS = [
   '🧙 Check setup status and tell me what to do next',
@@ -215,7 +216,7 @@ export default function SetupWizardAI({ onStepCompleted, onStatusRefresh, status
           }}
           className="flex items-center gap-2"
         >
-          <input
+          <Input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}

@@ -3,6 +3,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import { ErrorMessage, Field } from '../../components/ui/ProcurementUI.jsx';
 import { adjustStock } from '../../services/inventoryService.js';
 import { clientKey, recordId } from '../../utils/procurement.js';
+import { Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 
 export default function StockAdjustmentModal({ item, onClose, onSaved }) {
   const [form, setForm] = useState(() => ({ type: item.status === 'discontinued' ? 'out' : 'in', quantity: '', reason: '', notes: '', requestId: clientKey() }));
@@ -31,15 +32,15 @@ export default function StockAdjustmentModal({ item, onClose, onSaved }) {
     <form className="proc-form" onSubmit={submit}>
       <p className="proc-hint">Use adjustments to correct a physical stock count.</p>
       <div className="proc-fields">
-        <Field label="Direction"><select value={form.type} onChange={field('type')}>
+        <Field label="Direction"><SelectInput value={form.type} onChange={field('type')}>
           {item.status !== 'discontinued' && <option value="in">Add stock</option>}
           <option value="out">Remove stock</option>
-        </select></Field>
+        </SelectInput></Field>
         <Field label={'Quantity (' + item.unit + ')'}>
-          <input type="number" required min="0.001" max={form.type === 'out' ? previous : undefined} step="0.001" value={form.quantity} onChange={field('quantity')} />
+          <Input type="number" required min="0.001" max={form.type === 'out' ? previous : undefined} step="0.001" value={form.quantity} onChange={field('quantity')} />
         </Field>
-        <Field label="Reason" wide><input value={form.reason} onChange={field('reason')} required placeholder="Stock count, breakage, or transfer" /></Field>
-        <Field label="Notes" wide><textarea value={form.notes} onChange={field('notes')} rows={2} /></Field>
+        <Field label="Reason" wide><Input value={form.reason} onChange={field('reason')} required placeholder="Stock count, breakage, or transfer" /></Field>
+        <Field label="Notes" wide><TextareaInput value={form.notes} onChange={field('notes')} rows={2} /></Field>
       </div>
       <dl className="proc-amounts">
         <div><dt>Current stock</dt><dd>{previous} {item.unit}</dd></div>

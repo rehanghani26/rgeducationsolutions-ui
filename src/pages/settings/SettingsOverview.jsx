@@ -38,6 +38,7 @@ import {
   backupSVG,
   profileSVG,
 } from "./settingIcons";
+import { Input } from '../../components/ui/FormControls.jsx';
 
 // Helper to resolve absolute or relative image URLs
 const resolveImageUrl = (url) => {
@@ -580,7 +581,7 @@ const SettingsOverview = () => {
             size={16}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

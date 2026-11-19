@@ -15,6 +15,12 @@ export const GENDER_OPTIONS = [
 
 export const BLOOD_GROUP_STRINGS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
+export const LOGIN_RESTRICTION_OPTIONS = [
+  { value: 'none', label: 'None' },
+  { value: 'school-network', label: 'School network' },
+  { value: 'office-hours', label: 'Office hours' },
+];
+
 export const BLOOD_GROUP_OPTIONS = BLOOD_GROUP_STRINGS.map((bg) => ({
   value: bg,
   label: bg,
@@ -133,6 +139,7 @@ export default {
   GENDER_STRINGS,
   GENDER_OPTIONS,
   BLOOD_GROUP_STRINGS,
+  LOGIN_RESTRICTION_OPTIONS,
   BLOOD_GROUP_OPTIONS,
   RELIGION_OPTIONS,
   SOCIAL_CATEGORY_OPTIONS,

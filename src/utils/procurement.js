@@ -1,8 +1,11 @@
+import { optionsFromValues } from './formOptions.js';
+
 export const recordId = (record) => record?._id || record?.id || '';
 export const apiMessage = (error) => error.response?.data?.message || error.message || 'Please try again.';
 export const invoiceNumber = (bill) => bill.supplierBillNumber || bill.billNumber;
 export const VENDOR_CATEGORIES = ['Stationery', 'Lab Equipment', 'IT Hardware', 'Sports', 'Uniforms', 'Medical', 'Furniture', 'General'];
 export const VENDOR_STATUSES = ['active', 'inactive', 'blacklisted'];
+export const VENDOR_STATUS_OPTIONS = optionsFromValues(VENDOR_STATUSES, (status) => status[0].toUpperCase() + status.slice(1));
 export const PAYMENT_TERMS = ['Immediate', 'Net 15', 'Net 30', 'Net 60', 'Advance'];
 export const PAYMENT_METHODS = ['Bank Transfer', 'UPI', 'Cash', 'Cheque'];
 export const CREDIT_METHOD = 'Credit / On Account';
@@ -46,6 +49,11 @@ export const dateInput = (value) => value ? String(value).slice(0, 10) : '';
 export function defaultSession(sessions) {
   return sessions.find((session) => session.isCurrent) || sessions.find((session) => session.status === 'active');
 }
+
+export const sessionOptions = (sessions, showCurrent = false) => sessions.map((session) => ({
+  value: recordId(session),
+  label: session.sessionName + (showCurrent && session.isCurrent ? ' (current)' : ''),
+}));
 
 export function invoiceDueDate(dateStr, terms) {
   if (!dateStr) return '';

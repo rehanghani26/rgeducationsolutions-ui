@@ -18,6 +18,7 @@ export const INVENTORY_CATEGORIES = [
 ];
 
 export const INVENTORY_CATEGORY_FILTER_OPTIONS = ['All', ...INVENTORY_CATEGORIES];
+export const INVENTORY_ITEM_CATEGORIES = [...INVENTORY_CATEGORIES, 'Books', 'Computers', 'Uniforms', 'Electronics'];
 
 export const INVENTORY_UNIT_OPTIONS = [
   { value: 'pcs', label: 'Pieces (pcs)' },

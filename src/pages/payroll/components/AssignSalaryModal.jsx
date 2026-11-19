@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import api from '../../../services/api.js';
 import Modal from '../../../components/ui/Modal.jsx';
 import { CurrencyInput } from '../../../components/ui/CurrencyInput.jsx';
-import { formatCurrency } from '../payrollUtils.js';
+import { formatCurrency, SALARY_PAYMENT_OPTIONS } from '../payrollUtils.js';
+import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
   const [formData, setFormData] = useState({
@@ -213,26 +214,25 @@ const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="salary-payment-mode" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Payment Mode
               </label>
-              <select
+              <SelectInput
+                id="salary-payment-mode"
                 name="paymentMode"
                 value={formData.paymentMode}
                 onChange={handleChange}
+                options={SALARY_PAYMENT_OPTIONS}
+                showPlaceholder={false}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="Bank Transfer">Bank Transfer (NEFT/RTGS)</option>
-                <option value="Cheque">Bank Cheque</option>
-                <option value="Cash">Cash Disbursal</option>
-              </select>
+              />
             </div>
 
             <div>
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Bank Name
               </label>
-              <input
+              <Input
                 type="text"
                 name="bankName"
                 placeholder="e.g. State Bank of India"
@@ -246,7 +246,7 @@ const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Account Number
               </label>
-              <input
+              <Input
                 type="text"
                 name="accountNumber"
                 placeholder="Account number"
@@ -260,7 +260,7 @@ const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 IFSC Code
               </label>
-              <input
+              <Input
                 type="text"
                 name="ifscCode"
                 placeholder="e.g. SBIN0001234"

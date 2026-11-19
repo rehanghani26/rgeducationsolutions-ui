@@ -22,12 +22,14 @@ import Table from '../../../components/Table/Table.jsx';
 import Loader from '../../../components/ui/Loader.jsx';
 import {
   MONTH_NAMES,
-  YEAR_OPTIONS,
   PAYMENT_METHODS,
   formatCurrency,
   safeNumber,
   calculateNetPay,
 } from '../payrollUtils.js';
+import { CheckboxInput, Input, SelectInput } from '../../../components/ui/FormControls.jsx';
+
+import PayrollPeriodSelect from './PayrollPeriodSelect.jsx';
 
 const BatchDisburseModal = ({
   open,
@@ -220,8 +222,7 @@ const BatchDisburseModal = ({
     {
       headData: (
         <div className="flex items-center justify-center">
-          <input
-            type="checkbox"
+          <CheckboxInput
             checked={allSelected}
             onChange={(e) => handleToggleSelectAll(e.target.checked)}
             className="rounded text-indigo-600 focus:ring-0 cursor-pointer w-4 h-4"
@@ -231,8 +232,7 @@ const BatchDisburseModal = ({
       ),
       bodyData: (item) => (
         <div className="flex items-center justify-center">
-          <input
-            type="checkbox"
+          <CheckboxInput
             checked={Boolean(item.selected)}
             onChange={() => handleToggleItem(item._id)}
             className="rounded text-indigo-600 focus:ring-0 cursor-pointer w-4 h-4"
@@ -282,7 +282,7 @@ const BatchDisburseModal = ({
       bodyData: (item) => (
         <div className="flex items-center justify-center gap-1">
           <span className="text-emerald-500 font-bold text-xs">+₹</span>
-          <input
+          <Input
             type="number"
             min="0"
             step="100"
@@ -300,7 +300,7 @@ const BatchDisburseModal = ({
       bodyData: (item) => (
         <div className="flex items-center justify-center gap-1">
           <span className="text-rose-500 font-bold text-xs">-₹</span>
-          <input
+          <Input
             type="number"
             min="0"
             step="100"
@@ -442,38 +442,20 @@ const BatchDisburseModal = ({
             <div className="flex items-center gap-1.5">
               <Calendar size={14} className="text-indigo-500" />
               <span className="font-bold text-slate-600 dark:text-slate-300">Billing Cycle:</span>
-              <select
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
-              >
-                {MONTH_NAMES.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
-              >
-                {[2024, 2025, 2026, 2027, 2028].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+              <PayrollPeriodSelect month={month} year={year} onMonthChange={setMonth} onYearChange={setYear} inline years={[2024, 2025, 2026, 2027, 2028]} />
             </div>
 
             <div className="flex items-center gap-1.5 sm:border-l sm:border-slate-200 sm:dark:border-slate-700 sm:pl-3">
               <CreditCard size={14} className="text-emerald-500" />
               <span className="font-bold text-slate-600 dark:text-slate-300">Payment:</span>
-              <select
+              <SelectInput
+                aria-label="Payment method"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
+                options={PAYMENT_METHODS}
+                showPlaceholder={false}
                 className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
-              >
-                {PAYMENT_METHODS.map((pm) => (
-                  <option key={pm} value={pm}>{pm}</option>
-                ))}
-              </select>
+              />
             </div>
           </div>
 
@@ -481,7 +463,7 @@ const BatchDisburseModal = ({
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-slate-500">Apply to All:</span>
             <div className="flex items-center gap-1">
-              <input
+              <Input
                 type="number"
                 min="0"
                 placeholder="+ Bonus"
@@ -500,7 +482,7 @@ const BatchDisburseModal = ({
             </div>
 
             <div className="flex items-center gap-1">
-              <input
+              <Input
                 type="number"
                 min="0"
                 placeholder="- Deduct"
@@ -549,7 +531,7 @@ const BatchDisburseModal = ({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2 text-xs w-full sm:w-auto">
             <FileText size={14} className="text-slate-400 shrink-0" />
-            <input
+            <Input
               type="text"
               placeholder="Batch remarks / transaction note..."
               value={remarks}

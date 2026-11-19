@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Empty, ErrorMessage, Field, Pending } from './ProcurementUI.jsx';
 import { useProcurementResource } from '../../hooks/useProcurement.js';
 import { recordId } from '../../utils/procurement.js';
+import { Input } from './FormControls.jsx';
 
 export default function ProcurementPicker({ label, selected, onSelect, getOptions, placeholder, allowClear = false }) {
   const [open, setOpen] = useState(false);
@@ -33,7 +34,7 @@ export default function ProcurementPicker({ label, selected, onSelect, getOption
       </div>
     </div>
     {open && <>
-      <Field label={placeholder}><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} autoFocus /></Field>
+      <Field label={placeholder}><Input type="search" value={search} onChange={(event) => setSearch(event.target.value)} autoFocus /></Field>
       <div className="proc-picker-results">
         {(options.loading || search.trim() !== query) && <Pending label="Searching" />}
         <ErrorMessage error={options.error} onRetry={options.refresh} />

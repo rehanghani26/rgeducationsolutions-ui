@@ -20,6 +20,11 @@ import {
 export const MONTH_NAMES = CENTRAL_MONTH_NAMES;
 export const YEAR_OPTIONS = CENTRAL_YEAR_OPTIONS;
 export const PAYMENT_METHODS = CENTRAL_PAYMENT_METHODS;
+export const SALARY_PAYMENT_OPTIONS = [
+  { value: 'Bank Transfer', label: 'Bank transfer' },
+  { value: 'Cheque', label: 'Bank cheque' },
+  { value: 'Cash', label: 'Cash' },
+];
 export const ALL_STAFF_ROLES = STAFF_ROLES;
 
 export const formatCurrency = centralFormatCurrency;
