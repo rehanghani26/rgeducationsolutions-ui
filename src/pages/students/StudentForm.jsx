@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useEffect, useRef, useState } from 'react';
 import { Bookmark, ClipboardCheck, FileText, GraduationCap, KeyRound, UserRound, UsersRound } from 'lucide-react';
 import { CLASS_OPTIONS, SECTION_OPTIONS } from '../../constants/academicOptions.js';
@@ -58,6 +59,7 @@ export default function StudentForm({
   form, setForm, editing = false, onSubmit, onCancel, onSaveDraft, submitting, submitError,
   onClearError, stepIndex, setStepIndex, busy, setBusy,
 }) {
+  const { classOptions, selected } = useAcademicSession();
   const [rooms, setRooms] = useState([]);
   const [errors, setErrors] = useState({});
   const formRef = useRef(null);
@@ -86,7 +88,7 @@ export default function StudentForm({
     });
   }, [stepIndex, errors]);
 
-  const classes = extendOptions(CLASS_OPTIONS, rooms.map((room) => ({
+  const classes = selected?.classIds?.length ? options(classOptions) : extendOptions(CLASS_OPTIONS, rooms.map((room) => ({
     id: room.classId || room.id || room._id, name: room.className || room.name,
   })));
   const matchingRooms = rooms.filter((room) => (

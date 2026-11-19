@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { format } from "date-fns";
@@ -16,13 +17,10 @@ import {
   getMyAttendance,
   getStudents,
 } from "../../services";
-import {
-  CLASS_OPTIONS,
-  SECTION_OPTIONS,
+import { SECTION_OPTIONS,
   MONTH_OPTIONS_WITH_ALL as MONTH_OPTIONS,
   YEAR_OPTIONS_WITH_ALL as YEAR_OPTIONS,
-  ROLES,
-} from "../../constants";
+  ROLES } from "../../constants";
 import { getActiveLeavesOnDate } from "../../services/leaveService.js";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import {
@@ -49,6 +47,7 @@ import {
 } from "lucide-react";
 
 const AttendanceManagement = () => {
+  const { classOptions } = useAcademicSession();
   const authUser = useSelector((state) => state.auth?.user);
   const user = authUser ||
     getUserFromStorage() || { name: "Administrator", role: "super-admin" };
@@ -231,7 +230,7 @@ const AttendanceManagement = () => {
   // Filter options and derived lists (imported from central constants)
   const availableClasses = useMemo(() => {
     const fromApi = availableFilterOptions.classes || [];
-    const fromConstants = CLASS_OPTIONS.map((c) => c.name);
+    const fromConstants = classOptions.map((c) => c.name);
     return Array.from(new Set([...fromApi, ...fromConstants])).sort();
   }, [availableFilterOptions.classes]);
 
@@ -1252,7 +1251,7 @@ const AttendanceManagement = () => {
                       className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="">-- Select Class --</option>
-                      {CLASS_OPTIONS.map((cls) => (
+                      {classOptions.map((cls) => (
                         <option key={cls.id || cls.name} value={cls.name}>
                           {cls.name}
                         </option>

@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -42,10 +43,7 @@ import {
   getStudentCredentials,
   exportStudentsCsv,
 } from "../../services";
-import {
-  CLASS_OPTIONS,
-  SECTION_OPTIONS,
-} from "../../constants/academicOptions.js";
+import { SECTION_OPTIONS } from "../../constants/academicOptions.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 
@@ -331,6 +329,7 @@ const StudentRowActions = ({
 };
 
 const StudentList = () => {
+  const { classOptions } = useAcademicSession();
   const navigate = useNavigate();
   const authUser = useSelector((state) => state.auth?.user);
   const user = authUser || getUserFromStorage() || { role: "super-admin" };
@@ -935,7 +934,7 @@ const StudentList = () => {
               },
               options: [
                 { value: "", label: "All Classes" },
-                ...CLASS_OPTIONS.map((c) => ({ value: c.name, label: c.name })),
+                ...classOptions.map((c) => ({ value: c.name, label: c.name })),
               ],
             },
             {

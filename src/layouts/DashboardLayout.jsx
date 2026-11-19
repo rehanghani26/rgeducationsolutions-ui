@@ -37,10 +37,10 @@ import { ROUTES } from "../routes/routes.js";
 import { ROLES, ADMIN_ROLES } from "../constants/roles.js";
 import rgLogo from "../assets/logo/RGLOGO.png";
 import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
-import api from "../services/api.js";
-import MandatorySchoolProfileModal, {
-  checkIsSchoolProfileIncomplete,
-} from "../components/modals/MandatorySchoolProfileModal.jsx";
+import MandatorySchoolProfileModal from "../components/modals/MandatorySchoolProfileModal.jsx";
+import {
+  AcademicSessionProvider, AcademicSessionSelector, useAcademicSession,
+} from "../context/AcademicSessionContext.jsx";
 import SetupWizardModal from "../pages/setup/SetupWizardModal.jsx";
 import useSetupWizard from "../hooks/useSetupWizard.js";
 import { roleAccessService } from "../services/roleAccessService.js";
@@ -70,8 +70,6 @@ const DashboardLayout = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activeDashboardTab, setActiveDashboardTab] = useState("home");
   const [collapsedSections, setCollapsedSections] = useState({});
-  const [settingsData, setSettingsData] = useState(null);
-  const [showMandatoryModal, setShowMandatoryModal] = useState(false);
   const [wizardModalOpen, setWizardModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -118,41 +116,18 @@ const DashboardLayout = () => {
     userRole === ROLES.PRINCIPAL;
 
   const wizard = useSetupWizard(canManageSettings);
+  const { sessionId, readOnly, refresh, choose } = useAcademicSession();
+  const academicStep = wizard.steps.find((step) => step.key === "academicSession");
+  const showMandatoryModal = canManageSettings && academicStep?.complete === false;
 
   React.useEffect(() => {
     refreshBranding();
   }, [refreshBranding]);
 
-  // Check mandatory school fields just after login
-  React.useEffect(() => {
-    if (!canManageSettings) return;
-
-    let isMounted = true;
-    api
-      .get("/erp/settings")
-      .then((res) => {
-        if (!isMounted) return;
-        const currentSettings = res.data?.settings || {};
-        setSettingsData(currentSettings);
-        if (checkIsSchoolProfileIncomplete(currentSettings)) {
-          setShowMandatoryModal(true);
-        } else {
-          setShowMandatoryModal(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to check school settings:", err);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [canManageSettings]);
-
-  const handleProfileComplete = (savedSettings) => {
-    setSettingsData(savedSettings);
-    setShowMandatoryModal(false);
-    refreshBranding();
+  const handleAcademicSetupComplete = () => {
+    choose("");
+    refresh().catch(() => {});
+    wizard.refreshStatus();
   };
 
   // Reactive dynamic role permissions from Redux Toolkit store (zero duplicate API calls)
@@ -600,6 +575,7 @@ const DashboardLayout = () => {
 
             {/* RIGHT: Actions */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <AcademicSessionSelector showLegacy={canManageSettings} />
               {/* AI Mode Button */}
               <button
                 type="button"
@@ -793,7 +769,12 @@ const DashboardLayout = () => {
         {/* Main Content Viewport */}
         <main className="flex-1 min-h-0 overflow-y-auto bg-[#FAF7F2] p-2.5 sm:p-4 md:p-5 lg:p-6 text-stone-900 dark:bg-[#121214] dark:text-[#FAF7F2]">
           <ErrorBoundary compact>
-            <Outlet context={{ activeDashboardTab, setActiveDashboardTab }} />
+            {readOnly && (
+              <p className="border-b border-slate-200 px-4 py-2 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                Viewing records in a read-only academic session
+              </p>
+            )}
+            <Outlet key={sessionId} context={{ activeDashboardTab, setActiveDashboardTab }} />
           </ErrorBoundary>
         </main>
       </div>
@@ -812,12 +793,13 @@ const DashboardLayout = () => {
       {showMandatoryModal && (
         <MandatorySchoolProfileModal
           isOpen={showMandatoryModal}
-          initialSettings={settingsData || {}}
-          onComplete={handleProfileComplete}
+          onComplete={handleAcademicSetupComplete}
         />
       )}
     </div>
   );
 };
 
-export default DashboardLayout;
+export default function DashboardWithAcademicSession() {
+  return <AcademicSessionProvider><DashboardLayout /></AcademicSessionProvider>;
+}

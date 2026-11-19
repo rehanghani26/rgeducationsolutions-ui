@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -20,12 +21,12 @@ import {
 } from '../../services/classService.js';
 import { getTeachers } from '../../services/teacherService.js';
 import { getStudents } from '../../services/studentService.js';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../../constants/academicOptions.js';
+import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 
 const ClassList = () => {
+  const { classOptions, sessionId: selectedSessionId, choose: setSelectedSessionId, readOnly } = useAcademicSession();
   // State
   const [sessions, setSessions] = useState([]);
-  const [selectedSessionId, setSelectedSessionId] = useState('');
   const [classRooms, setClassRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -79,7 +80,6 @@ const ClassList = () => {
       if (list.length > 0) {
         const active = list.find((s) => s.isCurrent) || list[0];
         const activeId = active._id || active.id;
-        setSelectedSessionId((prev) => prev || activeId);
         setCreateForm((f) => ({ ...f, sessionId: f.sessionId || activeId }));
       }
     } catch (err) {
@@ -333,7 +333,7 @@ const ClassList = () => {
                 <School size={16} />
               </span>
               <h3 className="text-sm sm:text-base font-bold tracking-tight text-white">
-                Academic Session: {activeSessionObj?.name || 'Active Session'}
+                Academic Session: {activeSessionObj?.sessionName || 'Active Session'}
               </h3>
               {activeSessionObj?.isCurrent && (
                 <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
@@ -445,7 +445,7 @@ const ClassList = () => {
               No ClassRooms in this Session
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
-              Create your first session-scoped classroom (e.g. Class 10 - Section A for {activeSessionObj?.name || 'this session'}) to assign a class teacher, timetable, and enroll students.
+              Create your first session-scoped classroom (e.g. Class 10 - Section A for {activeSessionObj?.sessionName || 'this session'}) to assign a class teacher, timetable, and enroll students.
             </p>
           </div>
           <button
@@ -745,7 +745,7 @@ const ClassList = () => {
                 >
                   {sessions.map((s) => (
                     <option key={s._id || s.id} value={s._id || s.id}>
-                      {s.name} {s.isCurrent ? '★ (Current Session)' : ''}
+                      {s.sessionName} {s.isCurrent ? '★ (Current Session)' : ''}
                     </option>
                   ))}
                 </select>
@@ -761,7 +761,7 @@ const ClassList = () => {
                     value={createForm.className}
                     onChange={(e) => {
                       const val = e.target.value;
-                      const opt = CLASS_OPTIONS.find((c) => c.name === val);
+                      const opt = classOptions.find((c) => c.name === val);
                       setCreateForm({
                         ...createForm,
                         className: val,
@@ -770,7 +770,7 @@ const ClassList = () => {
                     }}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   >
-                    {CLASS_OPTIONS.map((c) => (
+                    {classOptions.map((c) => (
                       <option key={c.id} value={c.name}>
                         {c.name} ({c.code})
                       </option>

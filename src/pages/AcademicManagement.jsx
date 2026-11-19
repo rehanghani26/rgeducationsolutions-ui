@@ -1,3 +1,5 @@
+import api from '../services/api.js';
+import { useAcademicSession } from '../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect } from "react";
 import {
   BookOpen,
@@ -25,7 +27,6 @@ import erpService from "../services/erpService.js";
 import curriculumService from "../services/curriculumService.js";
 import { getTeachers } from "../services/teacherService.js";
 import {
-  CLASS_OPTIONS,
   SECTION_OPTIONS,
   WORKING_DAY_NAMES,
 } from "../constants";
@@ -49,6 +50,8 @@ const mockAcademics = {
 const DEFAULT_COURSES = [];
 
 const AcademicManagement = () => {
+  const { classOptions, readOnly } = useAcademicSession();
+  const [orderForm, setOrderForm] = useState(null);
   const authUser = useSelector((state) => state.auth?.user);
   const currentUser = authUser || getUserFromStorage();
   const role = (currentUser?.role || "").toLowerCase().replace(/_/g, "-");
@@ -154,7 +157,7 @@ const AcademicManagement = () => {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      erpService.getClasses().catch(() => null),
+      api.get('/erp/class-master').catch(() => null),
       erpService.getSections().catch(() => null),
       erpService.getSubjects().catch(() => null),
       curriculumService.getAll().catch(() => null),
@@ -247,6 +250,20 @@ const AcademicManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+
+  const saveClassOrder = async (event) => {
+    event.preventDefault();
+    setError('');
+    try {
+      await api.patch('/erp/class-master/' + orderForm.id + '/order', { sortOrder: orderForm.value });
+      const { data } = await api.get('/erp/class-master');
+      setClassesList(data.classes || []);
+      setOrderForm(null);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Unable to update the class order.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -258,13 +275,15 @@ const AcademicManagement = () => {
         const payload = {
           name: formData.name,
           code: formData.code,
+          sortOrder: formData.sortOrder ?? "",
           room: formData.room,
           capacity: Number(formData.capacity) || 40,
           classTeacher: formData.classTeacher,
         };
         const res = await erpService.createClass(payload);
         const newClass = res?.data?.class || payload;
-        setClassesList((prev) => [newClass, ...prev]);
+        const catalog = await api.get('/erp/class-master');
+        setClassesList(catalog.data.classes || [newClass]);
         setSuccessMsg("Class level created successfully!");
       } else if (activeTab === "sections") {
         const payload = {
@@ -332,8 +351,8 @@ const AcademicManagement = () => {
         className:
           currentUser?.classTeacherOf ||
           currentUser?.className ||
-          classesList[0]?.name ||
-          "Class 10",
+          classOptions[0]?.name ||
+          "",
         sectionName: currentUser?.sectionName || "Section A",
         name: "",
         code: "",
@@ -863,6 +882,7 @@ const AcademicManagement = () => {
                     <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
                       <th className="pb-3">Class Level Name</th>
                       <th className="pb-3">Registry Code</th>
+                      <th className="pb-3">Class Order</th>
                       <th className="pb-3">Allocated Lecture Room</th>
                       <th className="pb-3">Total Students / Capacity</th>
                       <th className="pb-3">Class Teacher</th>
@@ -880,6 +900,14 @@ const AcademicManagement = () => {
                         </td>
                         <td className="py-4 font-semibold text-indigo-500 dark:text-indigo-400">
                           {cls.code}
+                        </td>
+                        <td className="py-4">
+                          {isPrivileged && !readOnly && !cls.virtual
+                            ? <button className="font-semibold text-indigo-600" onClick={() => {
+                              setError('');
+                              setOrderForm({ id: cls.id, name: cls.name, value: cls.sortOrder ?? '' });
+                            }}>{cls.sortOrder ?? 'Set order'}</button>
+                            : cls.sortOrder ?? '—'}
                         </td>
                         <td className="py-4 text-slate-500 font-medium">
                           {cls.room || "Room N/A"}
@@ -1124,7 +1152,7 @@ const AcademicManagement = () => {
                             className="bg-transparent font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
                           >
                             <option value="All">All Classes</option>
-                            {classesList.map((c) => (
+                            {classOptions.map((c) => (
                               <option
                                 key={c.id || c._id || c.name}
                                 value={c.name}
@@ -1514,6 +1542,19 @@ const AcademicManagement = () => {
         )}
       </div>
 
+
+      <Modal open={Boolean(orderForm)} onClose={() => setOrderForm(null)} title="Set class order" size="sm">
+        {orderForm && <form className="space-y-3" onSubmit={saveClassOrder}>
+          <label className="block text-sm">{orderForm.name}
+            <input type="number" min="0" step="1" required value={orderForm.value}
+              onChange={(event) => setOrderForm({ ...orderForm, value: event.target.value })}
+              className="mt-1 block w-full rounded-lg border p-2 dark:bg-slate-800" />
+          </label>
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          <button type="submit" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Save order</button>
+        </form>}
+      </Modal>
+
       {/* Base Creation Modal */}
       <Modal
         open={isModalOpen}
@@ -1571,6 +1612,11 @@ const AcademicManagement = () => {
                   />
                 </div>
 
+<label className="block">
+                  <span className="font-bold">Class order</span>
+                  <input type="number" min="0" step="1" name="sortOrder" value={formData.sortOrder ?? ""}
+                    onChange={handleInputChange} className="mt-1 w-full rounded-lg border p-2 dark:bg-slate-800" />
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
@@ -1864,7 +1910,7 @@ const AcademicManagement = () => {
                   onChange={handleCurriculumInputChange}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  {classesList.map((c) => (
+                  {classOptions.map((c) => (
                     <option key={c.id || c._id || c.name} value={c.name}>
                       {c.name}
                     </option>

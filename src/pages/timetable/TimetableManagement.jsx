@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
@@ -33,11 +34,8 @@ import PageHeader from "../../components/ui/PageHeader.jsx";
 import Button from "../../components/ui/Button.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import api from "../../services/api.js";
-import {
-  CLASS_OPTIONS,
-  WEEKDAYS as DEFAULT_DAYS,
-  DAY_NAMES_LOWER,
-} from "../../constants";
+import { WEEKDAYS as DEFAULT_DAYS,
+  DAY_NAMES_LOWER } from "../../constants";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 
 // Category meta definitions matching Master Period settings
@@ -135,6 +133,7 @@ const getCurrentDayId = () => {
 };
 
 const TimetableManagement = () => {
+  const { classOptions } = useAcademicSession();
   // Auth User & Role Permissions
   const authUser = useSelector((state) => state.auth?.user);
   const currentUser = useMemo(
@@ -164,7 +163,7 @@ const TimetableManagement = () => {
       currentUser?.enrolledClass ||
       "Class 10";
     const namePart = String(rawCls).split(" - ")[0].trim();
-    const match = CLASS_OPTIONS.find(
+    const match = classOptions.find(
       (c) =>
         c.name.toLowerCase() === namePart.toLowerCase() ||
         c.id.toLowerCase() === namePart.toLowerCase()
@@ -176,6 +175,12 @@ const TimetableManagement = () => {
   const [selectedClass, setSelectedClass] = useState(() =>
     isStudent ? studentEnrolledClass : "Class 10"
   );
+  useEffect(() => {
+    if (classOptions.length && !classOptions.some((grade) => grade.name === selectedClass)) {
+      setSelectedClass(classOptions[0].name);
+    }
+  }, [classOptions, selectedClass]);
+
   const [selectedDay, setSelectedDay] = useState(getCurrentDayId);
   const [scheduleType, setScheduleType] = useState("regular");
   const [viewMode, setViewMode] = useState("weekly"); // Default to Whole-Week Interactive Grid!
@@ -401,13 +406,13 @@ const TimetableManagement = () => {
   }, [masterSchedule, selectedDay, allocations]);
 
   const selectedClassOption = useMemo(() => {
-    const found = CLASS_OPTIONS.find(
+    const found = classOptions.find(
       (cls) => cls.name === selectedClass || cls.id === selectedClass
     );
     return (
       found ||
-      CLASS_OPTIONS.find((cls) => cls.name === "Class 10") ||
-      CLASS_OPTIONS[0]
+      classOptions.find((cls) => cls.name === "Class 10") ||
+      classOptions[0]
     );
   }, [selectedClass]);
 
@@ -969,7 +974,7 @@ const TimetableManagement = () => {
                 : "border-slate-200 dark:border-slate-700"
             }`}
           >
-            {CLASS_OPTIONS.map((cls) => (
+            {classOptions.map((cls) => (
               <option key={cls.id} value={cls.name}>
                 {cls.name}{" "}
                 {isStudent && cls.name === selectedClass

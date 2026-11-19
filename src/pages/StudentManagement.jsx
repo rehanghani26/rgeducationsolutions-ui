@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../context/AcademicSessionContext.jsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../routes/routes.js';
@@ -10,7 +11,7 @@ import {
   resetStudentPassword,
   updateStudent,
 } from '../store/slices/erpSlice.js';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../constants/academicOptions.js';
+import { SECTION_OPTIONS } from '../constants/academicOptions.js';
 import Modal from '../components/ui/Modal.jsx';
 import { CheckboxInput, Input, SelectInput, TextareaInput } from '../components/ui/FormControls.jsx';
 
@@ -58,6 +59,7 @@ const labelCls = 'block text-[11px] font-bold text-slate-500 dark:text-slate-400
 const randomPassword = () => `Std@${Math.random().toString(36).slice(2, 8)}${Math.floor(100 + Math.random() * 900)}`;
 
 const StudentManagement = () => {
+  const { classOptions } = useAcademicSession();
   const [search, setSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -338,7 +340,7 @@ const StudentManagement = () => {
                       onChange={(e) => updateField('classId', e.target.value)}
                     >
                       <option value="">Select Class</option>
-                      {CLASS_OPTIONS.map((c) => (
+                      {classOptions.map((c) => (
                         <option key={c.id} value={c.name}>{c.name}</option>
                       ))}
                     </SelectInput>

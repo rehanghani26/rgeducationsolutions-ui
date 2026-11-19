@@ -1,10 +1,11 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { Save, Wand2 } from 'lucide-react';
 import Button from '../../components/ui/Button.jsx';
 import { Input, SelectInput, SwitchInput, TextareaInput } from '../../components/ui/FormControls.jsx';
 import MultiSelect from '../../components/ui/MultiSelect.jsx';
 import PermissionMatrix from '../../components/ui/PermissionMatrix.jsx';
 import { getDefaultRolePermissions } from '../../config/access.jsx';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../../constants/academicOptions.js';
+import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 import { COMMON_STATUS_OPTIONS, GENDER_OPTIONS, LOGIN_RESTRICTION_OPTIONS } from '../../constants/commonOptions.js';
 import { DEPARTMENT_OPTIONS, DESIGNATION_OPTIONS, EXPERIENCE_OPTIONS, QUALIFICATION_OPTIONS, SUBJECT_OPTIONS, TEACHER_ROLE_OPTIONS } from '../../constants/teacherOptions.js';
 import { splitSelections } from '../../utils/formOptions.js';
@@ -12,7 +13,6 @@ import { permissionOptions, randomPassword } from '../../utils/teacherForm.js';
 
 export { blankTeacherForm, payloadFromForm, permissionOptions, randomPassword } from '../../utils/teacherForm.js';
 
-const classNames = CLASS_OPTIONS.map(({ name }) => name);
 const sectionNames = SECTION_OPTIONS.map(({ name }) => name);
 
 function TeacherSection({ title, children }) {
@@ -23,6 +23,8 @@ function TeacherSection({ title, children }) {
 }
 
 export default function TeacherForm({ form, onChange, editing = false, onSubmit, onCancel, submitting, hideButtons = false }) {
+  const { classOptions } = useAcademicSession();
+  const classNames = classOptions.map(({ name }) => name);
   const update = (name, value) => onChange({ ...form, [name]: value });
   const field = (name) => ({ name, value: form[name] ?? '', onChange: (event) => update(name, event.target.value) });
   const picks = (name) => ({

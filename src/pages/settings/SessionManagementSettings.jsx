@@ -25,7 +25,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import api from '../../services/api.js';
-import { CLASS_OPTIONS } from '../../constants';
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { formatCurrency, formatDate } from '../../utils';
 import Modal from '../../components/ui/Modal.jsx';
 import Loader from '../../components/ui/Loader.jsx';
@@ -127,6 +127,10 @@ const AcademicScheduleStepper = ({ activeSession, onNavigate }) => {
 
 const SessionManagementSettings = () => {
   const navigate = useNavigate();
+  const { classOptions, refresh: refreshSessionChoices } = useAcademicSession();
+  const [rollover, setRollover] = useState(null);
+  const [classMaster, setClassMaster] = useState([]);
+  const [preview, setPreview] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -213,7 +217,7 @@ const SessionManagementSettings = () => {
         api.get('/sessions').catch(() => null),
         api.get('/students').catch(() => null),
         api.get('/students/promotion-status').catch(() => null),
-        api.get('/budget').catch(() => null),
+        api.get('/budget', { params: { allSessions: true } }).catch(() => null),
       ]);
 
       const sessList =
@@ -222,7 +226,7 @@ const SessionManagementSettings = () => {
         (Array.isArray(sessRes?.data?.data) ? sessRes.data.data : (Array.isArray(sessRes?.data) ? sessRes.data : []));
       setSessions(sessList);
 
-      const activeSess = sessList.find((s) => s.isCurrent) || sessList[0];
+      const activeSess = sessList.find((s) => s.isCurrent);
       if (activeSess) setTargetSession(activeSess.sessionName);
 
       const budgetList =
@@ -257,6 +261,8 @@ const SessionManagementSettings = () => {
 
   useEffect(() => {
     fetchInitialData();
+    api.get('/sessions/rollover-settings').then(({ data }) => setRollover(data.data)).catch(() => {});
+    api.get('/erp/class-master').then(({ data }) => setClassMaster((data.classes || []).filter((grade) => Number.isFinite(grade.sortOrder)))).catch(() => {});
   }, []);
 
   const handleOpenEditModal = (sess) => {
@@ -269,6 +275,8 @@ const SessionManagementSettings = () => {
       isCurrent: !!sess.isCurrent,
       status: sess.status || (sess.isCurrent ? 'active' : 'upcoming'),
       notes: sess.notes || '',
+      startClassId: sess.startClassId || '',
+      endClassId: sess.endClassId || '',
     });
     setShowEditModal(true);
   };
@@ -288,6 +296,7 @@ const SessionManagementSettings = () => {
         safeToast('success', `Academic Session "${editForm.sessionName}" updated successfully!`);
         setShowEditModal(false);
         setEditingSession(null);
+        refreshSessionChoices().catch(() => {});
         fetchInitialData();
       }
     } catch (err) {
@@ -311,6 +320,7 @@ const SessionManagementSettings = () => {
       const res = await api.delete(`/sessions/${sess._id || sess.id}`);
       if (res.data?.success) {
         safeToast('success', `Session "${sess.sessionName}" deleted successfully!`);
+        refreshSessionChoices().catch(() => {});
         fetchInitialData();
       }
     } catch (err) {
@@ -319,7 +329,7 @@ const SessionManagementSettings = () => {
   };
 
   const activeSession = useMemo(
-    () => sessions.find((s) => s.isCurrent) || sessions[0],
+    () => sessions.find((s) => s.isCurrent),
     [sessions]
   );
 
@@ -371,6 +381,7 @@ const SessionManagementSettings = () => {
         setIsCurrent(false);
         setNotes('');
         setShowAddModal(false);
+        refreshSessionChoices().catch(() => {});
         fetchInitialData();
       }
     } catch (err) {
@@ -384,6 +395,7 @@ const SessionManagementSettings = () => {
       const res = await api.patch(`/sessions/${id}/activate`);
       if (res.data?.success) {
         safeToast('success', `Academic Session "${name}" is now active!`);
+        refreshSessionChoices().catch(() => {});
         fetchInitialData();
       }
     } catch (err) {
@@ -392,27 +404,46 @@ const SessionManagementSettings = () => {
   };
 
   // Handle Whole-School Bulk Upgrade
+
+  const openUpgrade = async () => {
+    if (!activeSession) return;
+    setShowUpgradeModal(true);
+    setPreview(null);
+    try {
+      const { data } = await api.get('/sessions/' + (activeSession._id || activeSession.id) + '/rollover/preview');
+      setPreview(data.data);
+    } catch (error) {
+      setPreview({ message: error.response?.data?.message || 'The rollover preview could not be loaded.' });
+    }
+  };
+
   const handleWholeSchoolUpgrade = async () => {
+    if (!activeSession || !preview?.version) return;
     setSubmittingUpgrade(true);
     try {
-      const res = await runWithProgress('⚡ Upgrading Whole School Session...', () =>
-        api.post('/students/promote', {
-          mode: 'whole_school',
-          action: 'promote',
-          targetSession: targetSession || activeSession?.sessionName || '2026-2027',
-        })
-      );
-      if (res.data?.success) {
-        safeToast('success', `⚡ Whole School Session Upgrade Complete! ${res.data.updatedCount} students promoted!`);
-        setShowUpgradeModal(false);
-        localStorage.setItem('lastPromotionTimestamp', String(Date.now()));
-        setCanRollback(true);
-        fetchInitialData();
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || 'Bulk promotion failed');
+      const { data } = await api.post('/sessions/' + (activeSession._id || activeSession.id) + '/rollover', { planVersion: preview.version });
+      safeToast('success', data.data.status === 'completed'
+        ? data.data.promotedCount + ' promoted, ' + data.data.passoutCount + ' Passout.'
+        : 'Approval recorded. The upgrade will run at the scheduled cutoff.');
+      setShowUpgradeModal(false);
+      await refreshSessionChoices();
+      fetchInitialData();
+    } catch (error) {
+      safeToast('error', error.response?.data?.message || 'The session upgrade could not be completed.');
+      await openUpgrade();
     } finally {
       setSubmittingUpgrade(false);
+    }
+  };
+
+  const saveRollover = async (event) => {
+    event.preventDefault();
+    try {
+      const { data } = await api.put('/sessions/rollover-settings', rollover);
+      setRollover(data.data);
+      safeToast('success', data.message);
+    } catch (error) {
+      safeToast('error', error.response?.data?.message || 'Rollover settings could not be saved.');
     }
   };
 
@@ -450,6 +481,7 @@ const SessionManagementSettings = () => {
           localStorage.removeItem('lastPromotionTimestamp');
           setCanRollback(false);
         }
+        refreshSessionChoices().catch(() => {});
         fetchInitialData();
       }
     } catch (err) {
@@ -469,7 +501,8 @@ const SessionManagementSettings = () => {
           safeToast('success', `⏪ Successfully rolled back promotion for ${res.data.revertedCount} student(s) back to previous state!`);
           localStorage.removeItem('lastPromotionTimestamp');
           setCanRollback(false);
-          fetchInitialData();
+          refreshSessionChoices().catch(() => {});
+        fetchInitialData();
         } else {
           safeToast('info', 'No student promotions found within the last 24 hours to rollback.');
           localStorage.removeItem('lastPromotionTimestamp');
@@ -504,6 +537,29 @@ const SessionManagementSettings = () => {
       />
 
       {/* ── SESSION ACTIVATED COMPLETION BANNER ── */}
+
+      {rollover && (
+        <form onSubmit={saveRollover} className="space-y-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+          <h3 className="text-sm font-semibold">Rollover schedule</h3>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Input label="School timezone" required value={rollover.timeZone}
+              onChange={(event) => setRollover({ ...rollover, timeZone: event.target.value })} />
+            <Input label="Preparation time on final day" type="time" required value={rollover.prepareTime}
+              onChange={(event) => setRollover({ ...rollover, prepareTime: event.target.value })} />
+            <Input label="Upgrade time on next session’s first day" type="time" required value={rollover.cutoffTime}
+              onChange={(event) => setRollover({ ...rollover, cutoffTime: event.target.value })} />
+          </div>
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" checked={rollover.autoPromote}
+              onChange={(event) => setRollover({ ...rollover, autoPromote: event.target.checked })} />
+            Enable automatic whole-school promotion
+          </label>
+          <button type="submit" className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white">
+            Save rollover schedule
+          </button>
+        </form>
+      )}
+
       {activeSession && (
         <div className="bg-gradient-to-r from-emerald-900/70 via-slate-900 to-slate-900 rounded-2xl p-5 border border-emerald-500/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-start gap-3">
@@ -558,7 +614,7 @@ const SessionManagementSettings = () => {
               <Plus size={16} /> New Session
             </button>
 
-            {canRollback && (
+            {canRollback && !activeSession?.setupConfirmedAt && (
               <button
                 onClick={handleRollbackPromotion}
                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-900/80 hover:bg-purple-800 text-purple-200 font-extrabold text-xs border border-purple-500/50 shadow-lg transition-all animate-pulse"
@@ -569,7 +625,8 @@ const SessionManagementSettings = () => {
             )}
 
             <button
-              onClick={() => setShowUpgradeModal(true)}
+              onClick={openUpgrade}
+              disabled={!activeSession}
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-black text-xs text-slate-950 shadow-xl transition-all"
             >
               ⚡ Upgrade Whole School Session
@@ -813,7 +870,7 @@ const SessionManagementSettings = () => {
               className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
             >
               <option value="All Classes">All Classes (Entire School)</option>
-              {CLASS_OPTIONS.map((cls) => (
+              {classOptions.map((cls) => (
                 <option key={cls.value} value={cls.label}>
                   {cls.label}
                 </option>
@@ -1112,30 +1169,14 @@ const SessionManagementSettings = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Session Status:</label>
-              <SelectInput
-                value={editForm.status}
-                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
-              >
-                <option value="active">Active</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="completed">Completed</option>
-              </SelectInput>
-            </div>
 
-            <div className="flex items-center gap-2 pt-1">
-              <SwitchInput
-                size="sm"
-                id="editIsCurrentCheck"
-                checked={editForm.isCurrent}
-                onChange={(e) => setEditForm({ ...editForm, isCurrent: e.target.checked })}
-                className="shrink-0"
-              />
-              <label htmlFor="editIsCurrentCheck" className="font-extrabold text-slate-800 dark:text-slate-200 cursor-pointer">
-                Mark as Active Current Session
-              </label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SelectInput label="Starting Class" value={editForm.startClassId || ''}
+                options={classMaster.map((grade) => ({ value: grade.id, label: grade.name }))}
+                onChange={(e) => setEditForm({ ...editForm, startClassId: e.target.value })} />
+              <SelectInput label="Ending Class" value={editForm.endClassId || ''}
+                options={classMaster.map((grade) => ({ value: grade.id, label: grade.name }))}
+                onChange={(e) => setEditForm({ ...editForm, endClassId: e.target.value })} />
             </div>
 
             <div>
@@ -1193,16 +1234,26 @@ const SessionManagementSettings = () => {
       >
         <div className="space-y-6">
 
-            <div className="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
-              <p className="font-extrabold flex items-center gap-1.5">
-                <AlertTriangle size={16} className="text-amber-600" /> Progression Rules:
+
+          {!preview && <p role="status" className="text-sm">Loading the upgrade preview…</p>}
+          {preview?.message && <p className="text-sm">{preview.message}</p>}
+          {preview?.execution?.error && <p role="alert" className="text-sm text-red-600">{preview.execution.error}</p>}
+          {preview?.target && preview.version && (
+            <div className="space-y-3">
+              <p className="text-sm font-semibold">{preview.source.sessionName} → {preview.target.sessionName}</p>
+              <p className="text-xs">
+                {preview.rows.filter((row) => row.action === 'promoted').length} promoted · {preview.rows.filter((row) => row.action === 'passout').length} Passout
               </p>
-              <ul className="list-disc list-inside space-y-1 pl-1 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                <li>Every student will be automatically promoted to the next logical class level (e.g. Class 1 → Class 2, Class 9 → Class 10).</li>
-                <li><strong>Class 12 Students:</strong> Will pass out and be marked with <span className="font-black text-purple-600 dark:text-purple-300">🎓 Passout</span> status tag!</li>
-                <li>Target Academic Session: <strong>{targetSession || activeSession?.sessionName}</strong>.</li>
+              <ul className="max-h-56 divide-y overflow-auto text-sm">
+                {preview.rows.map((row) => (
+                  <li key={row.studentId} className="py-2">{row.name} · {row.fromClass} → {row.toClass}</li>
+                ))}
               </ul>
+              {preview.issues.length > 0 && <ul role="alert" className="space-y-1 text-xs text-red-600 dark:text-red-400">
+                {preview.issues.map((issue) => <li key={issue.studentId}>{issue.name} · {issue.reason}</li>)}
+              </ul>}
             </div>
+          )}
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
@@ -1214,11 +1265,11 @@ const SessionManagementSettings = () => {
               </button>
               <button
                 type="button"
-                disabled={submittingUpgrade || isPromoting}
+                disabled={submittingUpgrade || !preview?.version || Boolean(preview?.issues?.length)}
                 onClick={handleWholeSchoolUpgrade}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-xl transition-all"
               >
-                {submittingUpgrade || isPromoting ? 'Promoting All Students...' : '⚡ Upgrade Whole School Now'}
+                {submittingUpgrade ? 'Saving…' : preview?.due ? 'Upgrade Whole School' : 'Approve Scheduled Upgrade'}
               </button>
             </div>
         </div>

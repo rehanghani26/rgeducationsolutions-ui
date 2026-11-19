@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useRef, useState } from 'react';
 import { CheckCircle2, Download, FileSpreadsheet, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -82,6 +83,7 @@ function ImportPreview({ students, issues, importing, onSubmit }) {
 }
 
 export default function StudentBulkImport() {
+  const { classOptions } = useAcademicSession();
   const role = useSelector((state) => getUserRole(state.auth?.user));
   const [fileName, setFileName] = useState('');
   const [preview, setPreview] = useState(null);
@@ -105,7 +107,7 @@ export default function StudentBulkImport() {
     setResult(null);
     setFileError('');
     try {
-      setPreview(await readStudentImport(file));
+      setPreview(await readStudentImport(file, classOptions));
     } catch (error) {
       setFileError(error.message || 'Could not read this spreadsheet.');
     } finally {

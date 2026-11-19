@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -13,14 +14,14 @@ import teacherService from "../../services/teacherService.js";
 import syllabusService from "../../services/syllabusService.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
-import { CLASS_OPTIONS, SECTION_OPTIONS, CLASS_SECTION_COMBINED_OPTIONS } from "../../constants/academicOptions.js";
+import { SECTION_OPTIONS } from "../../constants/academicOptions.js";
 
 const blankSubject = { subjectName: '', subjectCode: '', bookName: '', maxMarks: 100, passMarks: 35, examDate: '', room: '' };
 
 const blankExam = {
   name: '', term: '', date: '', status: 'upcoming',
   session: `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`,
-  selectedClasses: [],   // array of CLASS_SECTION_COMBINED_OPTIONS items
+  selectedClasses: [],   // array of combinedClassOptions items
   supervisorId: '',      // teacher _id
   supervisorName: '',    // teacher name (display)
   venue: '', description: '',
@@ -28,6 +29,7 @@ const blankExam = {
 };
 
 const ExamList = () => {
+  const { combinedClassOptions } = useAcademicSession();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -213,12 +215,15 @@ const ExamList = () => {
     e.preventDefault();
     setSubmitting(true);
     const classNames = form.selectedClasses.map((c) => c.value);
-    const classIds   = form.selectedClasses.map((c) => c.key);
+    const classIds = [...new Set(form.selectedClasses.map((c) => c.classId))];
     const payload = {
       ...form,
       classes:    classNames,
       classNames: classNames,
       classIds:   classIds,
+      classTargets: form.selectedClasses.map(({ classId, className, sectionId, sectionName }) => ({
+        classId, className, sectionId, sectionName,
+      })),
       supervisor: form.supervisorName || form.supervisor || '',
       supervisorId: form.supervisorId || '',
       subjectSchedule: (form.subjectSchedule || []).filter((s) => s.subjectName),
@@ -422,7 +427,7 @@ const ExamList = () => {
                     </div>
                     {/* Options */}
                     <div className="max-h-48 overflow-y-auto">
-                      {CLASS_SECTION_COMBINED_OPTIONS
+                      {combinedClassOptions
                         .filter((opt) => opt.label.toLowerCase().includes(classSearch.toLowerCase()))
                         .map((opt) => {
                           const isSelected = form.selectedClasses.some((c) => c.key === opt.key);

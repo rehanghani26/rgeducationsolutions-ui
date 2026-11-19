@@ -85,6 +85,18 @@ const SelectField = ({ label, value, onChange, options, placeholder = 'Select...
 );
 
 // ─── View: Enter Results (Admin/Teacher) ──────────────────────────────────────
+function examClassOptions(exam) {
+  if (exam?.classTargets?.length) {
+    return exam.classTargets.map((row) => ({
+      value: row.sectionId ? row.classId + '_' + row.sectionId : row.classId,
+      label: [row.className, row.sectionName].filter(Boolean).join(' - '),
+    }));
+  }
+  return exam?.classIds?.length
+    ? exam.classIds.map((id, index) => ({ value: id, label: exam.classNames?.[index] || id }))
+    : exam?.classes?.map((name) => ({ value: name, label: name })) || [];
+}
+
 const EnterResultsView = ({ exams, loading }) => {
   const [selectedExamId, setSelectedExamId] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -95,9 +107,7 @@ const EnterResultsView = ({ exams, loading }) => {
   const [saving, setSaving] = useState(false);
 
   const selectedExam = exams.find((e) => (e._id || e.id) === selectedExamId);
-  const classOptions = selectedExam?.classIds?.length
-    ? selectedExam.classIds.map((id, i) => ({ value: id, label: selectedExam.classNames?.[i] || id }))
-    : selectedExam?.classes?.map((c) => ({ value: c, label: c })) || [];
+  const classOptions = examClassOptions(selectedExam);
 
   const subjects = selectedExam?.subjectSchedule?.length
     ? selectedExam.subjectSchedule
@@ -299,9 +309,7 @@ const ClassResultsView = ({ exams, role }) => {
   const pdfRef = useRef(null);
 
   const selectedExam = exams.find((e) => (e._id || e.id) === selectedExamId);
-  const classOptions = selectedExam?.classIds?.length
-    ? selectedExam.classIds.map((id, i) => ({ value: id, label: selectedExam.classNames?.[i] || id }))
-    : selectedExam?.classes?.map((c) => ({ value: c, label: c })) || [];
+  const classOptions = examClassOptions(selectedExam);
 
   const fetchClassResults = useCallback(() => {
     if (!selectedExamId || !selectedClassId) { setClassData(null); return; }

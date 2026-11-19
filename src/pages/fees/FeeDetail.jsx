@@ -97,7 +97,7 @@ const FeeDetail = () => {
                   ['Invoice No.', fee?.invoiceNo || fee?.id || '—'],
                   ['Student Name', fee?.studentName || student?.name || '—'],
                   ['Admission Number', fee?.admissionNumber || student?.admissionNumber || '—'],
-                  ['Class & Section', `${fee?.class || student?.class || '—'} ${fee?.section ? `(${fee.section})` : ''}`],
+                  ['Class & Section', `${fee?.className || fee?.class || student?.class || '—'} ${fee?.section ? `(${fee.section})` : ''}`],
                   ['Fee Plan / Term', fee?.feeType || fee?.term || 'Academic Session 2026-27'],
                   ['Due Date', fee?.dueDate ? format(new Date(fee.dueDate), 'dd MMM yyyy') : '—'],
                   ['Last Paid Date', fee?.paymentDate ? format(new Date(fee.paymentDate), 'dd MMM yyyy') : '—'],

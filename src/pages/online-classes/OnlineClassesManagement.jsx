@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import {
@@ -89,6 +90,7 @@ const platformIcon = (platform) => {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const OnlineClassesManagement = () => {
+  const { classOptions } = useAcademicSession();
   const authUser = useSelector((s) => s.auth?.user);
   const currentUser = authUser || getUserFromStorage();
   const role = (currentUser?.role || "").toLowerCase().replace(/_/g, "-");
@@ -590,13 +592,11 @@ const OnlineClassesManagement = () => {
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
                   Class Name *
                 </label>
-                <input
-                  required
-                  value={form.className}
-                  onChange={(e) => setField("className", e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="e.g. Class 10"
-                />
+                <select required value={form.className} onChange={(e) => setField('className', e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800">
+                  <option value="">Choose a class</option>
+                  {classOptions.map((grade) => <option key={grade.id} value={grade.name}>{grade.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">

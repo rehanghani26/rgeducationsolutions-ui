@@ -198,9 +198,9 @@ function normalizeBoolean(input, key) {
 }
 
 function normalizePlacement(value, options, prefix, fallback) {
-  const name = asText(value) || fallback.name;
-  const match = options.find((option) => [option.id, option.name, option.name.replace(prefix, '')]
-    .some((candidate) => candidate.toLowerCase() === name.toLowerCase()));
+  const name = asText(value) || fallback?.name || '';
+  const match = options.find((option) => [option.id, option.name, option.name.replace(prefix, ''), option.code, ...(option.aliases || [])]
+    .some((candidate) => String(candidate || '').toLowerCase() === name.toLowerCase()));
   return match || { id: name, name };
 }
 
@@ -219,7 +219,7 @@ function normalizeList(input, key) {
   }
 }
 
-function normalizeStudentRow(raw, date1904) {
+function normalizeStudentRow(raw, date1904, classes) {
   const [givenName, ...familyNames] = asText(raw.name).split(/\s+/);
   const firstName = asText(raw.firstName) || givenName;
   const lastName = asText(raw.lastName) || (raw.firstName ? '' : familyNames.join(' '));
@@ -258,7 +258,10 @@ function normalizeStudentRow(raw, date1904) {
   if (values.loginRestriction && !['none', 'school-network', 'office-hours'].includes(values.loginRestriction)) {
     throw new Error('Login restriction must be none, school-network, or office-hours.');
   }
-  const cls = normalizePlacement(values.classId, CLASS_OPTIONS, 'Class ', CLASS_OPTIONS.find((item) => item.id === 'cls-1'));
+  const cls = normalizePlacement(values.classId, classes, 'Class ', classes.find((item) => item.name === 'Class 1') || classes[0]);
+  if (!classes.some((grade) => String(grade.id) === String(cls.id))) {
+    throw new Error('Choose a class offered by this session.');
+  }
   const section = normalizePlacement(values.sectionId, SECTION_OPTIONS, 'Section ', SECTION_OPTIONS[0]);
   return {
     ...values,
@@ -274,7 +277,7 @@ function normalizeStudentRow(raw, date1904) {
   };
 }
 
-export async function readStudentImport(file) {
+export async function readStudentImport(file, classes = CLASS_OPTIONS.filter((item) => !item.isPassout)) {
   let rows;
   let date1904 = false;
   if (/\.(xlsx|xls)$/i.test(file.name)) {
@@ -311,7 +314,7 @@ export async function readStudentImport(file) {
       keys.forEach((key, index) => {
         if (key && asText(cells[index]) && !asText(raw[key])) raw[key] = cells[index];
       });
-      const student = normalizeStudentRow(raw, date1904);
+      const student = normalizeStudentRow(raw, date1904, classes);
       if (student.email && emails.has(student.email)) throw new Error('This student email already appears in the file.');
       if (student.email) emails.add(student.email);
       students.push({ number, student });

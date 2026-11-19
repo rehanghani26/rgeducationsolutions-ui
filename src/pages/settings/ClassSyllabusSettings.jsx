@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,7 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { CLASS_OPTIONS } from "../../constants/academicOptions.js";
+
 import {
   getSyllabusByClass,
   saveClassSyllabus,
@@ -25,10 +26,10 @@ import {
 import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
 
 const ClassSyllabusSettings = () => {
+  const { classOptions } = useAcademicSession();
   const navigate = useNavigate();
-  const [selectedClassId, setSelectedClassId] = useState(
-    CLASS_OPTIONS[3]?.id || "cls-1"
-  ); // Class 1 default
+  const [classChoice, setSelectedClassId] = useState('');
+  const selectedClassId = classOptions.find((grade) => grade.id === classChoice)?.id || classOptions[0]?.id || '';
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -41,7 +42,7 @@ const ClassSyllabusSettings = () => {
   });
 
   const activeClassObj =
-    CLASS_OPTIONS.find((c) => c.id === selectedClassId) || CLASS_OPTIONS[3];
+    classOptions.find((c) => c.id === selectedClassId) || classOptions[0];
 
   const fetchSyllabus = async (classId) => {
     setLoading(true);
@@ -65,12 +66,12 @@ const ClassSyllabusSettings = () => {
   };
 
   useEffect(() => {
-    fetchSyllabus(selectedClassId);
+    if (selectedClassId) fetchSyllabus(selectedClassId);
   }, [selectedClassId]);
 
   const handleClassChange = (newClassId) => {
     setSelectedClassId(newClassId);
-    const cls = CLASS_OPTIONS.find((c) => c.id === newClassId);
+    const cls = classOptions.find((c) => c.id === newClassId);
     if (cls) {
       setSyllabusData((prev) => ({ ...prev, className: cls.name }));
     }
@@ -263,7 +264,7 @@ const ClassSyllabusSettings = () => {
             onChange={(e) => handleClassChange(e.target.value)}
             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-100 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           >
-            {CLASS_OPTIONS.map((cls) => (
+            {classOptions.map((cls) => (
               <option key={cls.id} value={cls.id}>
                 {cls.name} {cls.isPassout ? "(Passout)" : ""}
               </option>

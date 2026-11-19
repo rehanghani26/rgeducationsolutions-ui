@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,12 +10,9 @@ import {
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import { getSyllabusByClass } from "../../services/syllabusService.js";
-import {
-  CLASS_OPTIONS,
-  SECTION_OPTIONS,
+import { SECTION_OPTIONS,
   WEEKDAYS as DEFAULT_DAYS,
-  DAY_NAMES_LOWER,
-} from "../../constants";
+  DAY_NAMES_LOWER } from "../../constants";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { useSelector } from "react-redux";
 import DataTable from "../../components/ui/DataTable.jsx";
@@ -50,6 +48,7 @@ const getCurrentDayId = () => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ClassTimetableSettings = () => {
+  const { classOptions } = useAcademicSession();
   const navigate    = useNavigate();
   const authUser    = useSelector((state) => state.auth?.user);
   const currentUser = useMemo(() => authUser || getUserFromStorage() || {}, [authUser]);
@@ -61,6 +60,12 @@ const ClassTimetableSettings = () => {
 
   // ─── Selector state ──────────────────────────────────────────────────────
   const [selectedClass,   setSelectedClass]   = useState("Class 10");
+  useEffect(() => {
+    if (classOptions.length && !classOptions.some((grade) => grade.name === selectedClass)) {
+      setSelectedClass(classOptions[0].name);
+    }
+  }, [classOptions, selectedClass]);
+
   const [selectedSection, setSelectedSection] = useState("Section A");
   const [viewMode,        setViewMode]        = useState("weekly");
   const [selectedDay,     setSelectedDay]     = useState(getCurrentDayId);
@@ -153,7 +158,7 @@ const ClassTimetableSettings = () => {
       if (!selectedClass) return;
       setSyllabusLoading(true);
       try {
-        const clsObj = CLASS_OPTIONS.find(
+        const clsObj = classOptions.find(
           (c) => c.name === selectedClass || c.value === selectedClass || c.id === selectedClass
         );
         const queryId = clsObj?.id || selectedClass;
@@ -467,7 +472,7 @@ const ClassTimetableSettings = () => {
       });
       const payload = {
         classSectionKey,
-        classId: CLASS_OPTIONS.find((c) => c.name === selectedClass)?.id || "",
+        classId: classOptions.find((c) => c.name === selectedClass)?.id || "",
         sectionId: SECTION_OPTIONS.find((s) => s.name === selectedSection)?.id || "",
         className: selectedClass,
         sectionName: selectedSection,
@@ -995,7 +1000,7 @@ const ClassTimetableSettings = () => {
             onChange={(e) => { setSelectedClass(e.target.value); setIsDirty(false); setIsEditMode(false); }}
             className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
           >
-            {CLASS_OPTIONS.filter((c) => !c.isPassout).map((cls) => (
+            {classOptions.filter((c) => !c.isPassout).map((cls) => (
               <option key={cls.id} value={cls.name}>{cls.name}</option>
             ))}
           </SelectInput>

@@ -113,7 +113,7 @@ const FeeList = () => {
       render: (row) => (
         <div>
           <p className="font-extrabold">{row.studentName}</p>
-          <p className="text-slate-400">{row.class || "Grade 10-A"}</p>
+          <p className="text-slate-400">{row.className || row.class || "—"}</p>
         </div>
       ),
     },

@@ -1,3 +1,4 @@
+import { useAcademicSession } from '../context/AcademicSessionContext.jsx';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,7 +47,7 @@ import {
 } from '../services/leaveService.js';
 import { getStudents } from '../services/studentService.js';
 import { userService } from '../services/userService.js';
-import { CLASS_OPTIONS, SECTION_OPTIONS, LEAVE_STATUS_OPTIONS, LEAVE_TYPE_OPTIONS } from '../constants';
+import { SECTION_OPTIONS, LEAVE_STATUS_OPTIONS, LEAVE_TYPE_OPTIONS } from '../constants';
 import { formatDate } from '../utils';
 import { getUserFromStorage, getUserRole } from '../config/access.jsx';
 import { ROLES } from '../constants/roles.js';
@@ -63,6 +64,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 const LeaveManagement = () => {
+  const { classOptions } = useAcademicSession();
   const authUser = useSelector((state) => state.auth?.user);
   const user = authUser || getUserFromStorage() || { name: 'User', role: 'super-admin' };
   const userRole = getUserRole(user);
@@ -573,7 +575,7 @@ const LeaveManagement = () => {
                   className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
                 >
                   <option value="">All Classes</option>
-                  {CLASS_OPTIONS.map((c) => (
+                  {classOptions.map((c) => (
                     <option key={c.id} value={c.name}>
                       {c.name}
                     </option>

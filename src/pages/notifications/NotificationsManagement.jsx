@@ -1,54 +1,37 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Bell, Send, Mail, MessageSquare, Plus, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import api from '../../services/api.js';
 import PageHeader from '../../components/ui/PageHeader.jsx';
-import Button from '../../components/ui/Button.jsx';
-import { mockNotifications } from '../../data/mockData.js';
+import { formatDate } from '../../utils/formatters.js';
 
-const NotificationsManagement = () => {
+export default function NotificationsManagement() {
+  const [items, setItems] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let mounted = true;
+    api.get('/erp/notifications').then(({ data }) => {
+      if (mounted) setItems(data.notifications || []);
+    }).catch(() => {
+      if (mounted) setError('Unable to load notifications.');
+    });
+    return () => { mounted = false; };
+  }, []);
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pb-8">
-      <PageHeader
-        title="Broadcast Notifications & Communications"
-        subtitle="Send instant SMS, Email, and App push notifications to parents, teachers, and students"
-        breadcrumbs={[{ label: 'Communication' }, { label: 'Notifications' }]}
-        actions={<Button icon={<Send size={16} />}>Send Announcement</Button>}
-      />
-
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <h3 className="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200">Sent Announcements & Delivery History</h3>
-        </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {mockNotifications && mockNotifications.length > 0 ? (
-            mockNotifications.map((notif) => (
-              <div key={notif.id} className="p-3.5 sm:p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-all space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
-                    <Bell size={16} className="text-indigo-500" /> {notif.title}
-                  </h4>
-                  <span className="text-xs text-slate-400 font-medium">{notif.sentAt}</span>
-                </div>
-                <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-3 pt-1">
-                  <div className="flex items-center gap-3">
-                    <span>Target Audience: <strong className="text-slate-700 dark:text-slate-300">{notif.recipientGroup}</strong></span>
-                    <span>Channel: <strong className="text-slate-700 dark:text-slate-300">{notif.channel}</strong></span>
-                  </div>
-                  <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2.5 py-1 rounded-md">
-                    <CheckCircle2 size={13} /> {notif.status}
-                  </span>
-                </div>
+    <section className="space-y-4">
+      <PageHeader title="Notifications" />
+      {error ? <p role="alert">{error}</p>
+        : items === null ? <p role="status">Loading notifications…</p>
+        : items.length === 0 ? <p className="text-sm text-slate-500">No notifications for this session.</p>
+        : <ul className="divide-y rounded-xl border dark:border-slate-700">
+          {items.map((item) => (
+            <li key={item._id || item.id} className="space-y-1 p-4">
+              <div className="flex flex-wrap justify-between gap-2">
+                <p className="text-sm font-semibold">{item.title}</p>
+                <span className="text-xs text-slate-500">{formatDate(item.date || item.createdAt)}</span>
               </div>
-            ))
-          ) : (
-            <div className="p-6 sm:p-8 text-center text-xs text-slate-400">
-              No broadcast notifications found (N/A)
-            </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
+              <p className="text-sm">{item.message}</p>
+            </li>
+          ))}
+        </ul>}
+    </section>
   );
-};
-
-export default NotificationsManagement;
+}

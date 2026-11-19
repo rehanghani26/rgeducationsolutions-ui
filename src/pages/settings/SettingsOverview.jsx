@@ -313,7 +313,6 @@ const SettingsOverview = () => {
         const session =
           res?.data?.session ||
           (res?.data?.sessions || []).find((s) => s.isCurrent) ||
-          (res?.data?.sessions || [])[0] ||
           null;
         setActiveSession(session);
       } catch (_) {
@@ -327,7 +326,7 @@ const SettingsOverview = () => {
   }, [isStudent]);
 
   // Derive step completion from active session metadata
-  const step1Done = !!activeSession;
+  const step1Done = Boolean(activeSession?.setupConfirmedAt && activeSession?.classIds?.length);
   const step2Done = !!activeSession?.hasMasterSchedule;
   const step3Done = (activeSession?.timetableCount || 0) > 0;
 

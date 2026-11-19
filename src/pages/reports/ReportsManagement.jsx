@@ -1,74 +1,42 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, PieChart as PieChartIcon, FileSpreadsheet, Download, Award, ShieldCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import api from '../../services/api.js';
 import PageHeader from '../../components/ui/PageHeader.jsx';
-import Button from '../../components/ui/Button.jsx';
-import { mockReports } from '../../data/mockData.js';
+import { formatCurrency } from '../../utils/formatters.js';
 
-const ReportsManagement = () => {
+export default function ReportsManagement() {
+  const [rows, setRows] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let mounted = true;
+    api.get('/erp/reports/academic').then(({ data }) => {
+      if (mounted) setRows(data.data?.classes || []);
+    }).catch((cause) => { if (mounted) setError(cause.response?.data?.message || 'Unable to load reports.'); });
+    return () => { mounted = false; };
+  }, []);
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pb-8">
-      <PageHeader
-        title="Reports & ERP Analytics"
-        subtitle="Institutional performance metrics, financial growth summaries, and academic analytics"
-        breadcrumbs={[{ label: 'Analytics' }, { label: 'Reports' }]}
-        actions={<Button icon={<Download size={16} />}>Export Full ERP Audit PDF</Button>}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3 sm:space-y-4">
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <BarChart3 className="text-indigo-500" size={20} />
-            <div>
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Attendance Summary</h3>
-              <p className="text-xs text-slate-400">{mockReports.attendanceOverview}</p>
-            </div>
-          </div>
-          <div className="p-3 sm:p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold">
-            ✨ Monthly Student Attendance Metric: N/A
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3 sm:space-y-4">
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <TrendingUp className="text-emerald-500" size={20} />
-            <div>
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Finance & Fee Collection</h3>
-              <p className="text-xs text-slate-400">{mockReports.feeCollectionOverview}</p>
-            </div>
-          </div>
-          <div className="p-3 sm:p-3.5 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-800 dark:text-indigo-300 text-xs sm:text-sm font-semibold">
-            💳 Total Fee Collection Metric: N/A
-          </div>
-        </div>
-      </div>
-
-      {/* Top Performers Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3.5 sm:p-4 space-y-3 sm:space-y-4">
-        <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
-          <Award className="text-amber-500" size={18} /> Academic Honor Roll & Top Performers
-        </h3>
-        {mockReports.topPerformers?.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5">
-            {mockReports.topPerformers.map((st, i) => (
-              <div key={st.name} className="bg-slate-50 dark:bg-slate-800 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-amber-600">Rank #{i + 1}</span>
-                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{st.name}</h4>
-                  <p className="text-xs text-slate-400">{st.grade}</p>
-                </div>
-                <span className="text-base sm:text-lg font-bold text-emerald-600">{st.score}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-6 sm:py-8 text-center text-xs text-slate-400">
-            No academic honor roll records available (N/A)
-          </div>
-        )}
-      </div>
-    </motion.div>
+    <section className="space-y-4">
+      <PageHeader title="Class-wise Academic Reports" />
+      {error ? <p role="alert">{error}</p>
+        : rows === null ? <p role="status">Loading reports…</p>
+        : rows.length === 0 ? <p className="text-sm text-slate-500">No class reports for this session.</p>
+        : <div className="overflow-x-auto rounded-xl border dark:border-slate-700">
+          <table className="w-full text-left text-sm">
+            <thead><tr className="bg-slate-100 dark:bg-slate-800">
+              {['Class', 'Students', 'Passout', 'Attendance', 'Fees paid', 'Passed results'].map((label) =>
+                <th className="p-3" key={label}>{label}</th>)}
+            </tr></thead>
+            <tbody>{rows.map((row) =>
+              <tr className="border-t dark:border-slate-700" key={row.classId}>
+                <th className="p-3 font-semibold">{row.className}</th>
+                <td className="p-3">{row.students}</td>
+                <td className="p-3">{row.passout}</td>
+                <td className="p-3">{row.attendanceTotal ? Math.round(100 * row.present / row.attendanceTotal) + '%' : '—'}</td>
+                <td className="p-3">{formatCurrency(row.amountPaid)}</td>
+                <td className="p-3">{row.passed} / {row.graded}</td>
+              </tr>
+            )}</tbody>
+          </table>
+        </div>}
+    </section>
   );
-};
-
-export default ReportsManagement;
+}
