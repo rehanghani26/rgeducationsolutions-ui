@@ -768,6 +768,17 @@ const RAW_SCHOOL_CATALOG = [
     gstRate: 28,
   },
   {
+    id: 'it-smart-board',
+    name: 'Interactive Smart Board (65-inch)',
+    skuPrefix: 'IT-BOARD',
+    category: 'Computers & IT',
+    subcategory: 'Smart Classroom',
+    unit: 'pcs',
+    description: 'Classroom touchscreen display for presentations and interactive lessons.',
+    unitPrice: 65000,
+    gstRate: 18,
+  },
+  {
     id: 'it-08',
     name: 'Interactive Smart Board Stylus Pen (Pack of 2)',
     skuPrefix: 'IT-STY',

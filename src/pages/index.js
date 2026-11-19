@@ -21,7 +21,6 @@ export { default as Signup }                from './Signup.jsx';
 export { default as Dashboard }             from './Dashboard.jsx';
 export { default as AcademicManagement }    from './AcademicManagement.jsx';
 export { default as FeesManagement }        from './FeesManagement.jsx';
-export { default as InventoryManagement }   from './InventoryManagement.jsx';
 export { default as LeaveManagement }       from './LeaveManagement.jsx';
 export { default as Settings, settingPageRoutes, MyProfileSettingRoute as ProfileSettings, MyProfileSettingRoute } from './Settings.jsx';
 export { default as StudentManagement }     from './StudentManagement.jsx';

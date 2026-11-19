@@ -11,9 +11,8 @@ import SessionBootstrap from "./components/SessionBootstrap.jsx";
 import { ThemeProvider, useTheme } from "./theme/ThemeContext.jsx";
 import { SchoolBrandingProvider } from "./context/SchoolBrandingContext.jsx";
 import { ErrorBoundary, ServerMaintenance } from "./components/index.js";
+import { API_BASE_URL, API_HEALTH_URL } from "./services/api.js";
 import "./index.css";
-
-const BACKEND_URL = "http://localhost:5000";
 
 const AppBootstrap = () => {
   const { theme } = useTheme();
@@ -32,8 +31,8 @@ const AppBootstrap = () => {
 
   const handleRetry = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/health`, { cache: "no-store" }).catch(
-        async () => fetch(`${BACKEND_URL}/api/v1/company/profile`, { cache: "no-store" })
+      const res = await fetch(API_HEALTH_URL, { cache: "no-store" }).catch(
+        async () => fetch(`${API_BASE_URL}/company/profile`, { cache: "no-store" })
       );
       if (res && res.status >= 200 && res.status < 400) {
         setIsServerDown(false);

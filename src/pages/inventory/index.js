@@ -7,3 +7,4 @@
 export { default as InventoryList }   from './InventoryList.jsx';
 export { default as InventoryDetail } from './InventoryDetail.jsx';
 export { default as InventoryEdit }   from './InventoryEdit.jsx';
+export { default as InventoryPurchase } from './InventoryPurchase.jsx';

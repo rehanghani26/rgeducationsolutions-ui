@@ -1,4 +1,4 @@
-import { clientKey, DEFAULT_ITEM, recordId, roundMoney } from './procurement.js';
+import { clientKey, dateInput, DEFAULT_ITEM, recordId, roundMoney } from './procurement.js';
 
 export const MAX_CATALOG_ITEMS = 100;
 export const MAX_ITEM_DOCUMENTS = 10;
@@ -17,6 +17,7 @@ export function makeInventoryDraft(item, presetId) {
       ...Object.fromEntries(supplied.map((field) => [field, item[field]])),
       discontinued: item?.status === 'discontinued',
       unitCost: item?.unitCost ?? item?.price ?? 0,
+      actualPurchaseDate: dateInput(item?.actualPurchaseDate),
       vendorId: recordId(vendor) || item?.vendorId || null,
     },
   };

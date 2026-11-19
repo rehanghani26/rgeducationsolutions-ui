@@ -16,9 +16,9 @@ import './inventoryEditor.css';
 import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 function InventoryPageHeader({ editing, item, actions }) {
-  return <PageHeader title={editing ? 'Edit inventory item' : 'Add inventory items'}
-    subtitle={editing ? item?.name : 'Browse school supplies or create a custom item for your inventory.'}
-    breadcrumbs={[{ label: 'Inventory', to: ROUTES.INVENTORY.LIST }, { label: editing ? 'Edit item' : 'Add items' }]}
+  return <PageHeader title={editing ? 'Edit inventory item' : 'Add stock'}
+    subtitle={editing ? item?.name : 'Record items your school already has and enter their opening quantities.'}
+    breadcrumbs={[{ label: 'Inventory', to: ROUTES.INVENTORY.LIST }, { label: editing ? 'Edit item' : 'Add stock' }]}
     actions={actions} />;
 }
 
@@ -128,7 +128,7 @@ function CatalogWorkspace({ item }) {
         setAttachments(additionalAttachments);
         setFiles([]);
       }
-      const items = rows.map(({ values }) => ({ ...values, additionalAttachments }));
+      const items = rows.map(({ values, presetId }) => ({ ...values, ...(presetId ? { catalogId: presetId } : {}), additionalAttachments }));
       if (editing) {
         const changes = items[0];
         delete changes.quantity;

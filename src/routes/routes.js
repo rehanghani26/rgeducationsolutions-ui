@@ -48,7 +48,8 @@ export const ROUTES = {
   // ── Inventory ────────────────────────────────────────────────────────────
   INVENTORY: {
     LIST:         '/inventory',
-    CREATE:       '/inventory/new',
+    BUY:          '/inventory/new',
+    ADD_STOCK:    '/inventory/stock/new',
     DETAIL_PARAM: '/inventory/:id',
     EDIT_PARAM:   '/inventory/:id/edit',
     detail: (id = ':id') => `/inventory/${id}`,

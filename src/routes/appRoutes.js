@@ -21,6 +21,7 @@ import {
   InventoryList,
   InventoryDetail,
   InventoryEdit,
+  InventoryPurchase,
   VendorManagement,
   VendorDetail,
   ClassList,
@@ -89,7 +90,8 @@ const appRoutes = [
 
   // Inventory
   { path: ROUTES.INVENTORY.LIST, element: InventoryList, name: 'inventory-list', module: 'inventory', allowedRoles: INVENTORY_ROLES },
-  { path: ROUTES.INVENTORY.CREATE, element: InventoryEdit, name: 'inventory-create', module: 'inventory', allowedRoles: INVENTORY_ROLES },
+  { path: ROUTES.INVENTORY.BUY, element: InventoryPurchase, name: 'inventory-buy', module: 'inventory', allowedRoles: INVENTORY_ROLES },
+  { path: ROUTES.INVENTORY.ADD_STOCK, element: InventoryEdit, name: 'inventory-add-stock', module: 'inventory', allowedRoles: INVENTORY_ROLES },
   { path: ROUTES.INVENTORY.DETAIL_PARAM, element: InventoryDetail, name: 'inventory-detail', module: 'inventory', allowedRoles: INVENTORY_ROLES },
   { path: ROUTES.INVENTORY.EDIT_PARAM, element: InventoryEdit, name: 'inventory-edit', module: 'inventory', allowedRoles: INVENTORY_ROLES },
 

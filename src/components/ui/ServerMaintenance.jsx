@@ -18,8 +18,7 @@ import {
 import { useTheme } from "../../theme/ThemeContext.jsx";
 import axios from "axios";
 import rgLogo from "../../assets/logo/RGLOGO.png";
-
-const BACKEND_URL = "http://localhost:5000";
+import { API_BASE_URL, API_HEALTH_URL } from "../../services/api.js";
 
 // ── Animated gear SVG ──────────────────────────────────────────
 function GearIcon({ size = 24, className = "", style = {} }) {
@@ -91,9 +90,9 @@ export default function ServerMaintenance({ errorInfo = null, onRetry = null }) 
       }
 
       const res = await axios
-        .get(`${BACKEND_URL}/api/health`, { timeout: 4000 })
+        .get(API_HEALTH_URL, { timeout: 4000 })
         .catch(async () =>
-          axios.get(`${BACKEND_URL}/api/v1/company/profile`, { timeout: 4000 })
+          axios.get(`${API_BASE_URL}/company/profile`, { timeout: 4000 })
         );
 
       if (res?.status >= 200 && res?.status < 400) {

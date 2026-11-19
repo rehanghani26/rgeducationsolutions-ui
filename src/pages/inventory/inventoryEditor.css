@@ -18,6 +18,12 @@
 .inventory-workspace__fields { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
 .inventory-workspace__review { display: grid; gap: 12px; }
 .inventory-workspace__switch { display: none; }
+.inventory-buy__steps { margin: 0 0 12px; }
+.inventory-buy__steps button:disabled { opacity: .55; cursor: not-allowed; }
+.inventory-buy__stock-picker { margin-bottom: 12px; }
+.inventory-buy__sidebar { position: sticky; top: 0; min-width: 0; }
+.inventory-buy__checkout .inventory-selection__list { max-height: 200px; }
+.inventory-buy__checkout .inventory-selection__list li { overflow-wrap: anywhere; }
 
 .inventory-catalog { container: inventory-presets / inline-size; display: grid; min-width: 0; gap: 13px; }
 .inventory-catalog__toolbar { display: grid; gap: 10px; padding: 13px; }
@@ -215,6 +221,8 @@
 
 @media (max-width: 900px) {
   .inventory-workspace__layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .inventory-buy__sidebar { position: static; grid-row: 1; }
+  .inventory-buy__checkout { display: none; }
   .inventory-workspace--selected { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
   .inventory-workspace__switch { display: block; padding: 10px; }
   .inventory-selection { position: static; }
@@ -264,7 +272,10 @@
   .inventory-item-editor__photo { width: 56px; height: 51px; }
   .inventory-workspace__review input,
   .inventory-workspace__review select,
-  .inventory-workspace__review textarea { scroll-margin-block: 75px; }
+  .inventory-workspace__review textarea,
+  .inventory-buy input,
+  .inventory-buy select,
+  .inventory-buy textarea { scroll-margin-block: 75px; }
   .inventory-selection__controls input { min-height: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {

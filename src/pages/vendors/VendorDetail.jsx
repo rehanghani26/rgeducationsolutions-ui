@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Archive, BarChart3, Boxes, Building2, CreditCard, Pencil, ReceiptText, Wallet } from 'lucide-react';
+import { Archive, BarChart3, Boxes, Building2, CreditCard, Pencil, ReceiptText, ShoppingCart, Wallet } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { DataTable, Empty, ErrorMessage, Metric, Pagination, Pending, Status } from '../../components/ui/ProcurementUI.jsx';
@@ -11,7 +11,6 @@ import { formatCurrency, formatDate } from '../../utils';
 import { invoiceNumber, recordId, STOCK_LABELS } from '../../utils/procurement.js';
 import VendorFormModal from './VendorFormModal.jsx';
 import VendorPaymentModal from './VendorPaymentModal.jsx';
-import PurchaseBillModal from './PurchaseBillModal.jsx';
 import PurchaseReceipt from './PurchaseReceipt.jsx';
 
 const tabs = [['bills', 'Invoices', ReceiptText], ['profile', 'Profile', Building2], ['products', 'Items supplied', Boxes], ['payments', 'Payments', CreditCard]];
@@ -136,7 +135,7 @@ export default function VendorDetail() {
         {canArchive && vendor.status !== 'inactive' && <button type="button" className="proc-btn" onClick={() => open('archive')}><Archive size={14} /> Archive</button>}
         {canManageStock && <button type="button" className="proc-btn" onClick={() => open('edit')}><Pencil size={14} /> Edit vendor</button>}
         {canPay && <button type="button" className="proc-btn" onClick={() => open('payment')}><CreditCard size={15} /> Record payment</button>}
-        {canManageStock && (!vendor.status || vendor.status === 'active') && <button type="button" className="proc-btn proc-primary" onClick={() => open('purchase')}><ReceiptText size={15} /> Receive purchase</button>}
+        {canManageStock && (!vendor.status || vendor.status === 'active') && <Link className="proc-btn proc-primary" to={ROUTES.INVENTORY.BUY + '?vendor=' + encodeURIComponent(recordId(vendor))}><ShoppingCart size={15} /> Buy from vendor</Link>}
       </>}
     />
     {resource.loading && <Pending label="Loading vendor" />}
@@ -171,7 +170,6 @@ export default function VendorDetail() {
       </section>}
     </>}
     {dialog?.kind === 'edit' && <VendorFormModal vendor={vendor} onClose={() => setDialog(null)} onSaved={complete} />}
-    {dialog?.kind === 'purchase' && <PurchaseBillModal vendor={vendor} onClose={() => setDialog(null)} onSaved={() => { setTab('bills'); complete(); }} />}
     {dialog?.kind === 'payment' && <VendorPaymentModal vendor={vendor} bills={bills} bill={dialog.bill} onClose={() => setDialog(null)} onSaved={complete} />}
     {dialog?.kind === 'receipt' && <PurchaseReceipt bill={dialog.bill} onClose={() => setDialog(null)} />}
     {dialog?.kind === 'archive' && <Modal open title="Deactivate vendor" onClose={working ? undefined : () => setDialog(null)} size="sm" className="proc-modal">

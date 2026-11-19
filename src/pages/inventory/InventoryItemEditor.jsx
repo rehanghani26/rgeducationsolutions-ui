@@ -41,7 +41,12 @@ export default function InventoryItemEditor({ row, editing, issue, onChange }) {
       <Field label="Unit cost"><Input {...input('unitCost')} type="number" min="0" step="0.01" required /></Field>
       {!editing && <Field label="Opening quantity"><Input {...input('quantity')} type="number" min="0" step="0.001" required /></Field>}
       <Field label="Stock location"><Input {...input('location')} /></Field>
+      <Field label="Original purchase date"><Input {...input('actualPurchaseDate')} type="date" /></Field>
       <Field label="Default GST %"><Input {...input('gstRate')} type="number" min="0" max="100" step="0.01" /></Field>
+      <div className="proc-wide">
+        <ProcurementPicker label="Preferred vendor" selected={row.vendor} getOptions={loadVendors} allowClear
+          placeholder="Search active vendors" onSelect={(vendor) => onChange(row.key, { vendorId: recordId(vendor) || null }, vendor)} />
+      </div>
     </div>
     <details className="inventory-item-editor__section">
       <summary>Product details <ChevronDown size={16} aria-hidden="true" /></summary>
@@ -54,16 +59,12 @@ export default function InventoryItemEditor({ row, editing, issue, onChange }) {
       </div>
     </details>
     <details className="inventory-item-editor__section">
-      <summary>Stock rules and vendor <ChevronDown size={16} aria-hidden="true" /></summary>
+      <summary>Stock rules <ChevronDown size={16} aria-hidden="true" /></summary>
       <div className="proc-fields proc-fields-3">
         {inventoryNumbers.map(([key, label]) => <Field label={label} key={key}>
           <Input {...input(key)} type="number" min="0" step="0.001" required />
         </Field>)}
         <Field label="Bin or shelf"><Input {...input('storageBin')} /></Field>
-        <div className="proc-wide">
-          <ProcurementPicker label="Preferred vendor" selected={row.vendor} getOptions={loadVendors} allowClear
-            placeholder="Search active vendors" onSelect={(vendor) => onChange(row.key, { vendorId: recordId(vendor) || null }, vendor)} />
-        </div>
         {editing && <SwitchInput className="proc-wide" label="Discontinued" checked={values.discontinued}
           onChange={(event) => onChange(row.key, { discontinued: event.target.checked })} />}
       </div>

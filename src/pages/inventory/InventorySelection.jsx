@@ -9,7 +9,7 @@ function SelectionButton({ reviewing, editing, saving, count, onReview }) {
   if (!reviewing) return <button type="button" className="proc-btn proc-primary" onClick={onReview} disabled={!count}>
     Review items <ArrowRight size={15} aria-hidden="true" />
   </button>;
-  const action = editing ? 'Save item' : count === 1 ? 'Create item' : 'Create ' + count + ' items';
+  const action = editing ? 'Save item' : count === 1 ? 'Save stock' : 'Save ' + count + ' stock items';
   return <button type="submit" className="proc-btn proc-primary" disabled={saving || !count}>
     <Save size={15} aria-hidden="true" /> {saving ? 'Saving…' : action}
   </button>;

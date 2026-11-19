@@ -49,14 +49,6 @@ export async function uploadInventoryFiles(files = []) {
   return data.data?.files || [];
 }
 
-export async function createMaterialIssuance(data) {
-  return adjustStock({ ...data, type: 'out' });
-}
-
-export async function getIssuances() {
-  return { data: { issuances: [] } };
-}
-
 export default {
   getAll: getInventoryItems,
   getById: getInventoryById,
@@ -73,6 +65,4 @@ export default {
   getVendors,
   createPurchaseBill,
   getPurchases,
-  createMaterialIssuance,
-  getIssuances,
 };

@@ -27,7 +27,7 @@ const sortOptions = [
   { value: 'price-desc', label: 'Highest unit cost' },
 ];
 
-function PresetCard({ item, added, full, priority, onAdd, onEdit }) {
+function PresetCard({ item, added, full, priority, actionLabel, onAdd, onEdit }) {
   return <article className="inventory-preset-card">
     <InventoryProductPhoto value={item.imageUrl} priority={priority} className="inventory-preset-card__photo" />
     <div className="inventory-preset-card__body">
@@ -41,16 +41,16 @@ function PresetCard({ item, added, full, priority, onAdd, onEdit }) {
         className={'proc-btn inventory-preset-card__action' + (added ? ' inventory-preset-card__action--added' : '')}
         type="button"
         disabled={full && !added}
-        aria-label={(added ? 'Edit selected ' : 'Add ') + item.name}
+        aria-label={(added ? 'Edit selected' : actionLabel) + ' ' + item.name}
         onClick={added ? onEdit : onAdd}
       >
-        {added ? <><Check aria-hidden="true" /> Added · Edit</> : <><Plus aria-hidden="true" /> Add item</>}
+        {added ? <><Check aria-hidden="true" /> Selected · Edit</> : <><Plus aria-hidden="true" /> {actionLabel}</>}
       </button>
     </div>
   </article>;
 }
 
-export default function InventoryPresetCatalog({ selections, full, onAdd, onEdit }) {
+export default function InventoryPresetCatalog({ selections, full, onAdd, onEdit, actionLabel = 'Add item' }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [sort, setSort] = useState('suggested');
@@ -86,7 +86,7 @@ export default function InventoryPresetCatalog({ selections, full, onAdd, onEdit
     {matches.length ? <div className="inventory-catalog__grid">
       {matches.slice(0, limit).map((item, index) => {
         const selectedKey = selections.get(item.id);
-        return <PresetCard key={item.id} item={item} added={Boolean(selectedKey)} full={full} priority={index < 4}
+        return <PresetCard key={item.id} item={item} added={Boolean(selectedKey)} full={full} priority={index < 4} actionLabel={actionLabel}
           onAdd={() => onAdd(item)} onEdit={() => onEdit(selectedKey)} />;
       })}
     </div> : <div className="proc-panel">

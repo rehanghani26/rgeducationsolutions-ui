@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowDownUp, Boxes, Building2, CircleDollarSign, Package, PackageX, Plus, ReceiptText, Wallet } from 'lucide-react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { AlertTriangle, ArrowDownUp, Boxes, Building2, CircleDollarSign, Package, PackageX, Plus, ReceiptText, ShoppingCart, Wallet } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import { DataTable, Empty, ErrorMessage, Metric, Pagination, Pending, SearchField, Status } from '../../components/ui/ProcurementUI.jsx';
 import { useDebouncedSearch, useProcurementAccess, useProcurementResource } from '../../hooks/useProcurement.js';
@@ -11,13 +11,12 @@ import { ROUTES } from '../../routes/routes.js';
 import { formatCurrency } from '../../utils';
 import { optionsFromRecord } from '../../utils/formOptions.js';
 import { MOVEMENT_LABELS, recordId, sessionOptions, STOCK_LABELS } from '../../utils/procurement.js';
-import PurchaseBillModal from '../vendors/PurchaseBillModal.jsx';
 import PurchaseReceipt from '../vendors/PurchaseReceipt.jsx';
 import StockAdjustmentModal from './StockAdjustmentModal.jsx';
 import { movementColumns, purchaseColumns } from './inventoryTableColumns.jsx';
 import { SelectInput } from '../../components/ui/FormControls.jsx';
 
-const tabs = [['catalog', 'Stock catalog', Boxes], ['purchases', 'Purchases', ReceiptText], ['ledger', 'Movements', ArrowDownUp]];
+const tabs = [['catalog', 'Stocks', Boxes], ['purchases', 'Purchases', ReceiptText], ['ledger', 'Movements', ArrowDownUp]];
 const searches = { catalog: 'Search items, SKUs, or barcodes', purchases: 'Search invoices or vendors', ledger: 'Search movements or references' };
 const listReaders = { catalog: getInventoryItems, purchases: getPurchases, ledger: getInventoryTransactions };
 const listKeys = { catalog: 'inventory', purchases: 'purchases', ledger: 'transactions' };
@@ -40,6 +39,8 @@ function BudgetStrip({ summary, canReadBudget }) {
 
 export default function InventoryList() {
   const { canManageStock, canReadBudget } = useProcurementAccess();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const tab = tabs.some(([key]) => key === params.get('tab')) ? params.get('tab') : 'catalog';
   const sessionId = params.get('session') || '';
@@ -48,6 +49,7 @@ export default function InventoryList() {
   const [filter, setFilter] = useState('');
   const [page, setPage] = useState(1);
   const [dialog, setDialog] = useState(null);
+  const recordedPurchase = location.state?.recordedPurchase;
   const search = useDebouncedSearch(keyword);
   const sessions = useProcurementResource(getAcademicSessions, tab === 'purchases');
 
@@ -67,10 +69,14 @@ export default function InventoryList() {
     setParams(key === 'catalog' ? {} : { tab: key, ...(key === 'purchases' && sessionId ? { session: sessionId } : {}) });
   }
 
-  function saved(toPurchases = false) {
+  function closeDialog() {
     setDialog(null);
+    if (recordedPurchase) navigate(location.pathname + location.search, { replace: true, state: null });
+  }
+
+  function saved() {
+    closeDialog();
     setPage(1);
-    if (toPurchases) changeTab('purchases');
     rows.refresh();
     summary.refresh();
   }
@@ -89,6 +95,7 @@ export default function InventoryList() {
     { key: 'stock', label: 'Stock', render: (item) => <><strong>{item.quantity} {item.unit}</strong><small>Min {item.minStockLevel ?? 0}</small></> },
     { key: 'stockValue', label: 'Stock value', render: (item) => formatCurrency(item.stockValue) },
     { key: 'location', label: 'Location', render: (item) => <>{item.location || '—'}<small>{item.storageBin}</small></> },
+    { key: 'vendor', label: 'Preferred vendor', render: (item) => item.vendorId?.name || '—' },
     { key: 'status', label: 'Status', render: (item) => <Status value={item.status} label={STOCK_LABELS[item.status]} /> },
     ...(canManageStock ? [{ key: 'adjust', label: 'Actions', render: (item) => (item.status !== 'discontinued' || item.quantity > 0) &&
       <button className="proc-btn proc-btn-sm" type="button" onClick={() => setDialog({ kind: 'adjust', item })}>Adjust stock</button> }] : []),
@@ -98,18 +105,15 @@ export default function InventoryList() {
   const data = summary.data;
 
   return <main className="proc-page">
-    <PageHeader title="Inventory" subtitle="Track catalog items, vendor receipts, and stock movements."
+    <PageHeader title="Inventory" subtitle="Buy supplies, manage stock on hand, and track stock movements."
       actions={<>
         <Link className="proc-btn" to={ROUTES.VENDORS.LIST}><Building2 size={15} /> Vendors</Link>
-        {canManageStock && <>
-          <button type="button" className="proc-btn" onClick={() => setDialog({ kind: 'purchase' })}><ReceiptText size={15} /> Receive purchase</button>
-          <Link className="proc-btn proc-primary" to={ROUTES.INVENTORY.CREATE}><Plus size={16} /> Add items</Link>
-        </>}
+        {canManageStock && <Link className="proc-btn proc-primary" to={ROUTES.INVENTORY.BUY + (sessionId ? '?session=' + encodeURIComponent(sessionId) : '')}><ShoppingCart size={16} /> Buy items</Link>}
       </>}
     />
     {data && <>
       <div className="proc-metrics">
-        <Metric icon={Boxes} label="Catalog items" value={data.totalItems} note={data.discontinuedCount ? data.discontinuedCount + ' discontinued' : undefined} />
+        <Metric icon={Boxes} label="Stock items" value={data.totalItems} note={data.discontinuedCount ? data.discontinuedCount + ' discontinued' : undefined} />
         <Metric icon={CircleDollarSign} label="Stock value" value={formatCurrency(data.totalStockValue)} />
         <Metric icon={AlertTriangle} label="Low stock" value={data.lowStockCount} tone={data.lowStockCount ? 'warn' : undefined} />
         <Metric icon={PackageX} label="Out of stock" value={data.outOfStockCount} tone={data.outOfStockCount ? 'danger' : undefined} />
@@ -134,6 +138,7 @@ export default function InventoryList() {
         <SelectInput className="proc-input" aria-label={tab === 'ledger' ? 'Movement type' : 'Status'} value={filter}
           options={tab === 'catalog' ? optionsFromRecord(STOCK_LABELS) : tab === 'ledger' ? optionsFromRecord(MOVEMENT_LABELS) : ['Paid', 'Partial', 'Unpaid']}
           placeholder={tab === 'ledger' ? 'All movements' : 'All statuses'} onChange={(event) => { setFilter(event.target.value); setPage(1); }} />
+        {tab === 'catalog' && canManageStock && <Link className="proc-btn" to={ROUTES.INVENTORY.ADD_STOCK}><Plus size={16} /> Add stock</Link>}
       </div>
       {tab === 'purchases' && <ErrorMessage error={sessions.error} onRetry={sessions.refresh} />}
       {rows.loading && <Pending label={tab === 'catalog' ? 'Loading stock' : tab === 'purchases' ? 'Loading purchases' : 'Loading movements'} />}
@@ -144,8 +149,7 @@ export default function InventoryList() {
         <Pagination pagination={rows.data.pagination} onPage={setPage} />
       </>}
     </section>
-    {dialog?.kind === 'purchase' && <PurchaseBillModal session={sessionId} onClose={() => setDialog(null)} onSaved={() => saved(true)} />}
-    {dialog?.kind === 'adjust' && <StockAdjustmentModal item={dialog.item} onClose={() => setDialog(null)} onSaved={() => saved()} />}
-    {dialog?.kind === 'receipt' && <PurchaseReceipt bill={dialog.bill} onClose={() => setDialog(null)} />}
+    {dialog?.kind === 'adjust' && <StockAdjustmentModal item={dialog.item} onClose={closeDialog} onSaved={saved} />}
+    {(dialog?.kind === 'receipt' || recordedPurchase) && <PurchaseReceipt bill={dialog?.bill || recordedPurchase} onClose={closeDialog} />}
   </main>;
 }

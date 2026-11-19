@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, CheckCircle2, CircleDollarSign, Package, Plus, ReceiptText, Wallet } from 'lucide-react';
+import { Building2, CheckCircle2, CircleDollarSign, Package, Plus, ShoppingCart, Wallet } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import { DataTable, Empty, ErrorMessage, Metric, Pagination, Pending, SearchField, Status } from '../../components/ui/ProcurementUI.jsx';
 import { useDebouncedSearch, useProcurementAccess, useProcurementResource } from '../../hooks/useProcurement.js';
@@ -9,7 +9,6 @@ import { ROUTES } from '../../routes/routes.js';
 import { formatCurrency } from '../../utils';
 import { recordId, VENDOR_CATEGORIES, VENDOR_STATUS_OPTIONS } from '../../utils/procurement.js';
 import VendorFormModal from './VendorFormModal.jsx';
-import PurchaseBillModal from './PurchaseBillModal.jsx';
 import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const columns = [
@@ -53,7 +52,7 @@ export default function VendorManagement() {
       actions={<>
         <Link to={ROUTES.INVENTORY.LIST} className="proc-btn"><Package size={15} /> Inventory</Link>
         {canManageStock && <>
-          <button type="button" className="proc-btn" onClick={() => setDialog('purchase')}><ReceiptText size={15} /> Receive purchase</button>
+          <Link className="proc-btn" to={ROUTES.INVENTORY.BUY}><ShoppingCart size={15} /> Buy items</Link>
           <button type="button" className="proc-btn proc-primary" onClick={() => setDialog('vendor')}><Plus size={16} /> Add vendor</button>
         </>}
       </>}
@@ -81,6 +80,5 @@ export default function VendorManagement() {
       </>}
     </section>
     {dialog === 'vendor' && <VendorFormModal onClose={() => setDialog(null)} onSaved={complete} />}
-    {dialog === 'purchase' && <PurchaseBillModal onClose={() => setDialog(null)} onSaved={complete} />}
   </div>;
 }
