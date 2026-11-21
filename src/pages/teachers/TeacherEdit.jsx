@@ -6,6 +6,7 @@ import Loader from '../../components/ui/Loader.jsx';
 import TeacherForm from './TeacherForm.jsx';
 import { blankTeacherForm, payloadFromForm, teacherDraftFromRecord } from '../../utils/teacherForm.js';
 import { getTeacherById, updateTeacher } from '../../services';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 const TeacherEdit = () => {
   const { teacherId } = useParams();
@@ -28,7 +29,7 @@ const TeacherEdit = () => {
           toast.error("Teacher record not found");
         }
       } catch (err) {
-        toast.error("Failed to load teacher record from server");
+        notifyApiError(err, "Failed to load teacher record from server");
         setTeacher(null);
       } finally {
         setLoading(false);

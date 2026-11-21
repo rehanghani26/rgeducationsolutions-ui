@@ -45,6 +45,7 @@ import {
   isStaffSalarySetup,
 } from "./payrollUtils.js";
 import { SelectInput } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const StaffPayrollDetail = () => {
   const { id } = useParams();
@@ -91,11 +92,11 @@ const StaffPayrollDetail = () => {
       if (res.data?.success) {
         setData(res.data.data || res.data);
       } else {
-        toast.error("Could not load staff payroll details");
+        notifyApiError(res.data, "Could not load staff payroll details");
       }
     } catch (err) {
       console.error("Failed to load staff payroll details:", err);
-      toast.error(err.response?.data?.message || "Error loading staff details");
+      notifyApiError(err, "Error loading staff details");
     } finally {
       setLoading(false);
     }

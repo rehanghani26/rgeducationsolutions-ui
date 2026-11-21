@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
 import { Input } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const allowedTypes = ["image/jpeg", "image/png", "image/svg+xml", "image/webp"];
 const maxFileSize = 5 * 1024 * 1024;
@@ -95,7 +96,7 @@ const CompanyLogoUpload = ({ companyLogo, onLogoChange }) => {
       setPreviewUrl(uploadedLogo);
       toast.success(res.data.message || "Company logo uploaded successfully.");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to upload company logo.");
+      notifyApiError(err, "Failed to upload company logo.");
     } finally {
       setUploading(false);
       setProgress(0);
@@ -112,7 +113,7 @@ const CompanyLogoUpload = ({ companyLogo, onLogoChange }) => {
       setPreviewUrl("");
       toast.success(res.data.message || "Company logo removed successfully.");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to remove company logo.");
+      notifyApiError(err, "Failed to remove company logo.");
     } finally {
       setRemoving(false);
     }

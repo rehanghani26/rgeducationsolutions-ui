@@ -12,14 +12,10 @@ import {
   shadow,
   text,
   button,
-  badge,
-  input,
-  COLOR,
 } from "../theme/color.js";
 import {
   LogOut,
   ChevronLeft,
-  ChevronRight,
   ChevronDown,
   Menu,
   X,
@@ -28,22 +24,17 @@ import {
   Bell,
   Maximize2,
   Minimize2,
-  Calendar,
   ChevronRight as ChevronRightIcon,
   Settings,
   User,
 } from "lucide-react";
 import { ROUTES } from "../routes/routes.js";
-import { ROLES, ADMIN_ROLES } from "../constants/roles.js";
+import { ROLES } from "../constants/roles.js";
 import rgLogo from "../assets/logo/RGLOGO.png";
 import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
-import MandatorySchoolProfileModal from "../components/modals/MandatorySchoolProfileModal.jsx";
 import {
   AcademicSessionProvider, AcademicSessionSelector, useAcademicSession,
 } from "../context/AcademicSessionContext.jsx";
-import SetupWizardModal from "../pages/setup/SetupWizardModal.jsx";
-import useSetupWizard from "../hooks/useSetupWizard.js";
-import { roleAccessService } from "../services/roleAccessService.js";
 
 const resolveUserImageUrl = (userObj) => {
   const raw =
@@ -70,7 +61,6 @@ const DashboardLayout = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activeDashboardTab, setActiveDashboardTab] = useState("home");
   const [collapsedSections, setCollapsedSections] = useState({});
-  const [wizardModalOpen, setWizardModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [avatarImgError, setAvatarImgError] = useState(false);
@@ -115,20 +105,11 @@ const DashboardLayout = () => {
     userRole === "admin" ||
     userRole === ROLES.PRINCIPAL;
 
-  const wizard = useSetupWizard(canManageSettings);
-  const { sessionId, readOnly, refresh, choose } = useAcademicSession();
-  const academicStep = wizard.steps.find((step) => step.key === "academicSession");
-  const showMandatoryModal = canManageSettings && academicStep?.complete === false;
+  const { sessionId, readOnly } = useAcademicSession();
 
   React.useEffect(() => {
     refreshBranding();
   }, [refreshBranding]);
-
-  const handleAcademicSetupComplete = () => {
-    choose("");
-    refresh().catch(() => {});
-    wizard.refreshStatus();
-  };
 
   // Reactive dynamic role permissions from Redux Toolkit store (zero duplicate API calls)
   const roleAccessState = useSelector((state) => state.roleAccess || {});
@@ -779,23 +760,6 @@ const DashboardLayout = () => {
         </main>
       </div>
 
-      {/* ── Setup Wizard Modal ── */}
-      <SetupWizardModal
-        isOpen={wizardModalOpen}
-        onClose={() => setWizardModalOpen(false)}
-        onComplete={() => {
-          setWizardModalOpen(false);
-          wizard.refreshStatus();
-        }}
-      />
-
-      {/* ── Mandatory School Profile Modal ── */}
-      {showMandatoryModal && (
-        <MandatorySchoolProfileModal
-          isOpen={showMandatoryModal}
-          onComplete={handleAcademicSetupComplete}
-        />
-      )}
     </div>
   );
 };

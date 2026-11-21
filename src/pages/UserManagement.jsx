@@ -33,13 +33,14 @@ import {
   Building,
   ArrowRight
 } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { userService } from '../services/userService.js';
 import Loader from '../components/ui/Loader.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { ROUTES } from '../routes/routes.js';
+import { notifyApiError } from '../services/apiErrors.js';
 
 // Role Badge & Color Mapping (Excludes students and parents)
 const ROLE_CONFIG = {
@@ -187,7 +188,7 @@ const UserManagement = () => {
         setUsers(staffOnly);
       } else if (usersResult.status === 'rejected') {
         console.error('Failed to load users:', usersResult.reason);
-        toast.error(usersResult.reason?.response?.data?.message || 'Failed to load users');
+        notifyApiError(usersResult.reason, 'Failed to load users');
       }
 
       if (rolesResult.status === 'fulfilled' && rolesResult.value) {
@@ -201,7 +202,7 @@ const UserManagement = () => {
       }
     } catch (err) {
       console.error('Failed to load user management data:', err);
-      toast.error(err.response?.data?.message || 'Failed to load users');
+      notifyApiError(err, 'Failed to load users');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -309,7 +310,7 @@ const UserManagement = () => {
         loadData(true);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create user');
+      notifyApiError(err, 'Failed to create user');
     } finally {
       setFormSubmitting(false);
     }
@@ -352,7 +353,7 @@ const UserManagement = () => {
       setSelectedUser(null);
       loadData(true);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update credentials');
+      notifyApiError(err, 'Failed to update credentials');
     } finally {
       setFormSubmitting(false);
     }
@@ -369,7 +370,7 @@ const UserManagement = () => {
         loadData(true);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status');
+      notifyApiError(err, 'Failed to update status');
     }
   };
 
@@ -384,7 +385,7 @@ const UserManagement = () => {
         loadData(true);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete user');
+      notifyApiError(err, 'Failed to delete user');
     }
   };
 

@@ -1,41 +1,62 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import api, { setAcademicSessionId } from '../services/api.js';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../constants/academicOptions.js';
+import { SECTION_OPTIONS } from '../constants/academicOptions.js';
 
 const AcademicSessionContext = createContext(null);
 const idOf = (session) => session?._id || session?.id || '';
 
 export function AcademicSessionProvider({ children }) {
-  const [sessions, setSessions] = useState([]);
+  const [sessionList, setSessionList] = useState({ sessions: [], loading: true, error: null });
   const [choice, setChoice] = useState('');
-  const [loadedClasses, setLoadedClasses] = useState(null);
+  const [schoolClasses, setSchoolClasses] = useState({ classRange: null, classes: [], loading: true, error: null });
+  const sessionRequest = useRef(0);
+  const classRequest = useRef(0);
+  const { sessions, loading: sessionsLoading, error: sessionsError } = sessionList;
   const active = sessions.find((session) => session.isCurrent);
   const selected = choice === 'legacy' ? null : sessions.find((session) => idOf(session) === choice) || active;
   const sessionId = choice === 'legacy' ? choice : idOf(selected);
 
   const refresh = useCallback(async () => {
-    const { data } = await api.get('/sessions');
-    setSessions(data.sessions || []);
+    const request = ++sessionRequest.current;
+    setSessionList((current) => current.error ? { ...current, loading: true, error: null } : current);
+    try {
+      const { data } = await api.get('/sessions');
+      const rows = data?.data?.sessions ?? data?.sessions;
+      if (data?.success === false || !Array.isArray(rows)) {
+        throw new Error(data?.message || 'Academic sessions could not be loaded.');
+      }
+      if (request === sessionRequest.current) setSessionList({ sessions: rows, loading: false, error: null });
+    } catch (error) {
+      if (request === sessionRequest.current) setSessionList((current) => ({ ...current, loading: false, error }));
+      throw error;
+    }
+  }, []);
+
+  const refreshSchoolClasses = useCallback(async () => {
+    const request = ++classRequest.current;
+    try {
+      const { data } = await api.get('/erp/school-class-range');
+      const { classRange = null, classes = [] } = data.data || {};
+      if (request === classRequest.current) setSchoolClasses({ classRange, classes, loading: false, error: null });
+    } catch (error) {
+      if (request === classRequest.current) setSchoolClasses((current) => ({ ...current, loading: false, error }));
+    }
   }, []);
 
   useEffect(() => {
     refresh().catch(() => {});
-    const timer = window.setInterval(() => refresh().catch(() => {}), 60_000);
+    refreshSchoolClasses();
+    const timer = window.setInterval(() => {
+      refresh().catch(() => {});
+      refreshSchoolClasses();
+    }, 60_000);
     return () => {
+      sessionRequest.current += 1;
+      classRequest.current += 1;
       window.clearInterval(timer);
       setAcademicSessionId('');
     };
-  }, [refresh]);
-
-  useEffect(() => {
-    let mounted = true;
-    if (selected?.classIds?.length) {
-      api.get('/sessions/' + idOf(selected) + '/classes').then(({ data }) => {
-        if (mounted) setLoadedClasses({ sessionId, rows: data.classes || [] });
-      }).catch(() => { if (mounted) setLoadedClasses({ sessionId, rows: [] }); });
-    }
-    return () => { mounted = false; };
-  }, [selected, sessionId]);
+  }, [refresh, refreshSchoolClasses]);
 
   const choose = useCallback((id) => {
     // Set the request scope before any children fetch for the new selection.
@@ -43,12 +64,8 @@ export function AcademicSessionProvider({ children }) {
     setChoice(id);
   }, []);
 
-  const classOptions = useMemo(() => {
-    if (choice === 'legacy') return [];
-    if (!selected?.classIds?.length) return CLASS_OPTIONS.filter((grade) => !grade.isPassout);
-    if (loadedClasses?.sessionId !== sessionId) return [];
-    return loadedClasses.rows.map(({ id, name, aliases, code }) => ({ id, name, label: name, value: name, aliases, code }));
-  }, [choice, loadedClasses, selected, sessionId]);
+  const classOptions = useMemo(() => schoolClasses.classes.map(({ id, name, aliases, code }) =>
+    ({ id, name, label: name, value: name, aliases, code })), [schoolClasses.classes]);
 
   const combinedClassOptions = useMemo(() => classOptions.flatMap((grade) =>
     SECTION_OPTIONS.map((section) => {
@@ -62,7 +79,8 @@ export function AcademicSessionProvider({ children }) {
   ), [classOptions]);
 
   return <AcademicSessionContext.Provider value={{
-    sessions, active, selected, sessionId, choice, choose, refresh, classOptions, combinedClassOptions,
+    sessions, sessionsLoading, sessionsError, active, selected, sessionId, choice, choose, refresh,
+    classOptions, combinedClassOptions, schoolClasses, refreshSchoolClasses,
     readOnly: choice === 'legacy' || Boolean(selected && !selected.isCurrent),
   }}>{children}</AcademicSessionContext.Provider>;
 }

@@ -2,7 +2,7 @@
  * @file examService.js
  * @description Examinations module API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default examService export for backward compatibility.
  */
 
@@ -19,26 +19,16 @@ const buildQuery = (params = {}) => {
 };
 
 export async function getExams(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${EXAM_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const queryStr = buildQuery(params);
+  const url = `${EXAM_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getExamById(id) {
-  try {
-    const url = EXAM_URLS.BY_ID(id);
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = EXAM_URLS.BY_ID(id);
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getExamActivity(id) {
@@ -53,36 +43,21 @@ export async function getExamActivity(id) {
 }
 
 export async function createExam(data) {
-  try {
-    const response = await api.post(EXAM_URLS.BASE, data);
-    toast.success('Exam scheduled successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(EXAM_URLS.BASE, data);
+  toast.success('Exam scheduled successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function updateExam(id, data) {
-  try {
-    const response = await api.put(EXAM_URLS.BY_ID(id), data);
-    toast.success('Exam details updated successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.put(EXAM_URLS.BY_ID(id), data);
+  toast.success('Exam details updated successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function deleteExam(id) {
-  try {
-    const response = await api.delete(EXAM_URLS.BY_ID(id));
-    toast.success('Exam deleted successfully');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.delete(EXAM_URLS.BY_ID(id));
+  toast.success('Exam deleted successfully');
+  return response.data;
 }
 
 const examService = {

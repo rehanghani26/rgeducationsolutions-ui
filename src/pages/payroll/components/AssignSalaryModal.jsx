@@ -6,6 +6,7 @@ import Modal from '../../../components/ui/Modal.jsx';
 import { CurrencyInput } from '../../../components/ui/CurrencyInput.jsx';
 import { formatCurrency, SALARY_PAYMENT_OPTIONS } from '../payrollUtils.js';
 import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../../services/apiErrors.js';
 
 const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
   const [formData, setFormData] = useState({
@@ -89,7 +90,7 @@ const AssignSalaryModal = ({ isOpen, onClose, staff, onSalaryAssigned }) => {
       }
     } catch (err) {
       console.error('Error assigning salary:', err);
-      toast.error(err.response?.data?.message || 'Failed to update salary');
+      notifyApiError(err, 'Failed to update salary');
     } finally {
       setSaving(false);
     }

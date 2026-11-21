@@ -19,41 +19,24 @@ export async function getAllSyllabus() {
 }
 
 // Fetch syllabus for a specific class (auto-returns default template if not yet configured)
-export async function getSyllabusByClass(classId) {
+export async function getSyllabusByClass(classId, signal) {
   if (!classId) return null;
-  try {
-    const { data } = await api.get(SYLLABUS_URLS.BY_CLASS(classId));
-    return data?.syllabus || null;
-  } catch (err) {
-    console.error(`Failed to load syllabus for class ${classId}:`, err);
-    throw err;
-  }
+  const { data } = await api.get(SYLLABUS_URLS.BY_CLASS(classId), { signal });
+  return data.data?.syllabus ?? data.syllabus ?? null;
 }
 
 // Save or update class syllabus
 export async function saveClassSyllabus(classId, payload) {
-  try {
-    const { data } = await api.put(SYLLABUS_URLS.BY_CLASS(classId), payload);
-    toast.success(data?.message || "Class syllabus updated successfully");
-    return data;
-  } catch (err) {
-    const msg = err.response?.data?.message || "Failed to update class syllabus";
-    toast.error(msg);
-    throw err;
-  }
+  const { data } = await api.put(SYLLABUS_URLS.BY_CLASS(classId), payload);
+  toast.success(data?.message || "Class syllabus updated successfully");
+  return data;
 }
 
 // Reset class syllabus to recommended national standard
 export async function resetClassSyllabus(classId) {
-  try {
-    const { data } = await api.post(SYLLABUS_URLS.RESET(classId));
-    toast.success(data?.message || "Curriculum reset to standard defaults");
-    return data?.syllabus;
-  } catch (err) {
-    const msg = err.response?.data?.message || "Failed to reset class syllabus";
-    toast.error(msg);
-    throw err;
-  }
+  const { data } = await api.post(SYLLABUS_URLS.RESET(classId));
+  toast.success(data?.message || "Curriculum reset to standard defaults");
+  return data?.syllabus;
 }
 
 export default {

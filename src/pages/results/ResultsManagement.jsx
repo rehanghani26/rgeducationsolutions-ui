@@ -39,6 +39,7 @@ import examService from '../../services/examService.js';
 import resultService from '../../services/resultService.js';
 import { getStudents } from '../../services/studentService.js';
 import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const useAuth = () => {
@@ -426,7 +427,7 @@ const ClassResultsView = ({ exams, role }) => {
       toast.success('Bulk PDF downloaded successfully!');
     } catch (err) {
       console.error('Bulk PDF error:', err);
-      toast.error('Bulk PDF generation failed.');
+      notifyApiError(err, 'Bulk PDF generation failed.');
     } finally {
       if (pdfRef.current) pdfRef.current.style.display = 'none';
       setDownloadingAll(false);

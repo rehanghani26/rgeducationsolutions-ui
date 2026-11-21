@@ -48,6 +48,7 @@ import {
 import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
 
 import PayrollPeriodSelect from './components/PayrollPeriodSelect.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const PayrollManagement = () => {
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ const PayrollManagement = () => {
       }
     } catch (err) {
       console.error("Failed to load payroll staff:", err);
-      toast.error("Unable to fetch staff payroll list");
+      notifyApiError(err, "Unable to fetch staff payroll list");
     } finally {
       setLoading(false);
     }

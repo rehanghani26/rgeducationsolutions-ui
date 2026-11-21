@@ -29,6 +29,7 @@ import {
 import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
 
 import PayrollPeriodSelect from './PayrollPeriodSelect.jsx';
+import { notifyApiError } from '../../../services/apiErrors.js';
 
 const DisburseSalaryModal = ({
   isOpen,
@@ -157,7 +158,7 @@ const DisburseSalaryModal = ({
       if (data?.isOverBudget) {
         setOverBudgetInfo(data);
       } else {
-        toast.error(data?.message || 'Failed to disburse salary');
+        notifyApiError(err, data?.message || 'Failed to disburse salary');
       }
     } finally {
       setProcessing(false);

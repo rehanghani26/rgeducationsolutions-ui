@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../routes/routes.js';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
+import { notifyApiError } from '../services/apiErrors.js';
 import { Edit3, Eye, FolderDown, GraduationCap, KeyRound, Plus, Save, Search, Trash2, UserX, Wand2, X } from 'lucide-react';
 import {
   fetchStudents,
@@ -148,7 +149,7 @@ const StudentManagement = () => {
 
     dispatch(action).then((res) => {
       if (res.meta.requestStatus !== 'fulfilled') {
-        toast.error(res.payload || 'Unable to save student');
+        notifyApiError(res.payload, 'Unable to save student');
         return;
       }
 
@@ -166,7 +167,7 @@ const StudentManagement = () => {
           toast.success('Student record removed');
           if (selectedStudent && (selectedStudent.id === id || selectedStudent._id === id)) setSelectedStudent(null);
         } else {
-          toast.error(res.payload || 'Failed to remove student');
+          notifyApiError(res.payload, 'Failed to remove student');
         }
       });
     }
@@ -175,7 +176,7 @@ const StudentManagement = () => {
   const handleDeactivate = (student) => {
     dispatch(updateStudent({ id: student.id || student._id, data: { status: 'inactive' } })).then((res) => {
       if (res.meta.requestStatus === 'fulfilled') toast.success('Student deactivated');
-      else toast.error(res.payload || 'Unable to deactivate student');
+      else notifyApiError(res.payload, 'Unable to deactivate student');
     });
   };
 
@@ -186,7 +187,7 @@ const StudentManagement = () => {
       data: { password, forcePasswordChange: true },
     })).then((res) => {
       if (res.meta.requestStatus === 'fulfilled') toast.success(`Temporary password: ${res.payload.temporaryPassword}`);
-      else toast.error(res.payload || 'Password reset failed');
+      else notifyApiError(res.payload, 'Password reset failed');
     });
   };
 

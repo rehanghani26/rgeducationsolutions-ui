@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import api from "../../services/api.js";
 import { Input } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 // Helper to resolve absolute or relative image URLs
 const resolveImageUrl = (url) => {
@@ -365,11 +366,11 @@ const ProfileSettings = () => {
         setAvatarError(false);
         toast.success("Photo uploaded to AWS S3 & stored in imagesRef! Click 'Save Profile' to finalize.");
       } else {
-        toast.error(res.data?.message || "Failed to upload photo to S3");
+        notifyApiError(res.data, "Failed to upload photo to S3");
       }
     } catch (err) {
       console.error("S3 photo upload error:", err);
-      toast.error(err.response?.data?.message || "Failed to upload photo to S3");
+      notifyApiError(err, "Failed to upload photo to S3");
     } finally {
       setUploadingS3(false);
     }
@@ -461,7 +462,7 @@ const ProfileSettings = () => {
       }));
     } catch (err) {
       console.error("Save profile error:", err);
-      toast.error(err.response?.data?.message || "Failed to save profile changes");
+      notifyApiError(err, "Failed to save profile changes");
     } finally {
       setSavingChanges(false);
     }
@@ -474,7 +475,7 @@ const ProfileSettings = () => {
       const res = await api.post("/profile/reset-password-request");
       toast.success(res.data?.message || "Password reset instructions sent to your email!");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to dispatch reset email");
+      notifyApiError(err, "Failed to dispatch reset email");
     } finally {
       setResetting(false);
     }

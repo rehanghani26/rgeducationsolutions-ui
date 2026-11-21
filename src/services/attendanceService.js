@@ -2,7 +2,7 @@
  * @file attendanceService.js
  * @description Attendance module API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default attendanceService export for backward compatibility.
  */
 
@@ -19,26 +19,16 @@ const buildQuery = (params = {}) => {
 };
 
 export async function getAttendanceRecords(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${ATTENDANCE_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const queryStr = buildQuery(params);
+  const url = `${ATTENDANCE_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getAttendanceById(id) {
-  try {
-    const url = `${ATTENDANCE_URLS.BASE}/${id}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = `${ATTENDANCE_URLS.BASE}/${id}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getStudentAttendance(studentId, params = {}) {
@@ -68,14 +58,9 @@ export async function getAttendanceStats(params = {}) {
 }
 
 export async function createAttendance(data) {
-  try {
-    const response = await api.post(ATTENDANCE_URLS.BASE, data);
-    toast.success('Attendance recorded successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(ATTENDANCE_URLS.BASE, data);
+  toast.success('Attendance recorded successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function getMyAttendance() {

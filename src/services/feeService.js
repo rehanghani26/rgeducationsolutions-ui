@@ -2,7 +2,7 @@
  * @file feeService.js
  * @description Finance / Fees module API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default feeService export for backward compatibility.
  */
 
@@ -19,26 +19,16 @@ const buildQuery = (params = {}) => {
 };
 
 export async function getFees(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${FEE_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const queryStr = buildQuery(params);
+  const url = `${FEE_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getFeeById(id) {
-  try {
-    const url = FEE_URLS.BY_ID(id);
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = FEE_URLS.BY_ID(id);
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getFeeActivity(id) {
@@ -53,58 +43,33 @@ export async function getFeeActivity(id) {
 }
 
 export async function updateFee(id, data) {
-  try {
-    const response = await api.put(FEE_URLS.BY_ID(id), data);
-    toast.success('Fee record updated successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.put(FEE_URLS.BY_ID(id), data);
+  toast.success('Fee record updated successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function collectFee(data) {
-  try {
-    const response = await api.post(FEE_URLS.COLLECT, data);
-    toast.success('Fee collected successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(FEE_URLS.COLLECT, data);
+  toast.success('Fee collected successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function exportFeesCsv() {
-  try {
-    const response = await api.get(FEE_URLS.EXPORT, { responseType: 'blob' });
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.get(FEE_URLS.EXPORT, { responseType: 'blob' });
+  return response.data;
 }
 
 export async function getExpenses(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${EXPENSE_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const queryStr = buildQuery(params);
+  const url = `${EXPENSE_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function createExpense(data) {
-  try {
-    const response = await api.post(EXPENSE_URLS.BASE, data);
-    toast.success('Expense recorded successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(EXPENSE_URLS.BASE, data);
+  toast.success('Expense recorded successfully');
+  return { status: response.status, data: response.data };
 }
 
 const feeService = {

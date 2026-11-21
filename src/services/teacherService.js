@@ -2,7 +2,7 @@
  * @file teacherService.js
  * @description Teacher module API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default teacherService export for backward compatibility.
  */
 
@@ -22,16 +22,11 @@ const buildQuery = (params = {}) => {
  * Fetch paginated teacher list.
  * @param {object} params
  */
-export async function getTeachers(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${TEACHER_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+export async function getTeachers(params = {}, signal) {
+  const queryStr = buildQuery(params);
+  const url = `${TEACHER_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
+  const response = await api.get(url, { signal });
+  return response.data;
 }
 
 /**
@@ -39,14 +34,9 @@ export async function getTeachers(params = {}) {
  * @param {string} id
  */
 export async function getTeacherById(id) {
-  try {
-    const url = TEACHER_URLS.BY_ID(id);
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = TEACHER_URLS.BY_ID(id);
+  const response = await api.get(url);
+  return response.data;
 }
 
 /**
@@ -69,14 +59,9 @@ export async function getTeacherActivity(id) {
  * @param {string} id
  */
 export async function getTeacherCredentials(id) {
-  try {
-    const url = `${TEACHER_URLS.BY_ID(id)}/credentials`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = `${TEACHER_URLS.BY_ID(id)}/credentials`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 /**
@@ -84,14 +69,9 @@ export async function getTeacherCredentials(id) {
  * @param {object} data
  */
 export async function createTeacher(data) {
-  try {
-    const response = await api.post(TEACHER_URLS.BASE, data);
-    toast.success('Teacher account created successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(TEACHER_URLS.BASE, data);
+  toast.success('Teacher account created successfully');
+  return { status: response.status, data: response.data };
 }
 
 /**
@@ -100,14 +80,9 @@ export async function createTeacher(data) {
  * @param {object} data
  */
 export async function updateTeacher(id, data) {
-  try {
-    const response = await api.put(TEACHER_URLS.BY_ID(id), data);
-    toast.success('Teacher updated successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.put(TEACHER_URLS.BY_ID(id), data);
+  toast.success('Teacher updated successfully');
+  return { status: response.status, data: response.data };
 }
 
 /**
@@ -115,14 +90,9 @@ export async function updateTeacher(id, data) {
  * @param {string} id
  */
 export async function deleteTeacher(id) {
-  try {
-    const response = await api.delete(TEACHER_URLS.BY_ID(id));
-    toast.success('Teacher deleted successfully');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.delete(TEACHER_URLS.BY_ID(id));
+  toast.success('Teacher deleted successfully');
+  return response.data;
 }
 
 /**
@@ -130,14 +100,9 @@ export async function deleteTeacher(id) {
  * @param {string[]} ids
  */
 export async function bulkDeleteTeachers(ids) {
-  try {
-    const response = await api.post(TEACHER_URLS.BULK_DELETE, { ids });
-    toast.success('Selected teachers deleted successfully');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(TEACHER_URLS.BULK_DELETE, { ids });
+  toast.success('Selected teachers deleted successfully');
+  return response.data;
 }
 
 /**
@@ -146,14 +111,9 @@ export async function bulkDeleteTeachers(ids) {
  * @param {object} data
  */
 export async function resetTeacherPassword(id, data) {
-  try {
-    const response = await api.patch(TEACHER_URLS.RESET_PASSWORD(id), data);
-    toast.success('Password updated successfully');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.patch(TEACHER_URLS.RESET_PASSWORD(id), data);
+  toast.success('Password updated successfully');
+  return response.data;
 }
 
 /**
@@ -161,27 +121,17 @@ export async function resetTeacherPassword(id, data) {
  * @param {Array<object>} teachers
  */
 export async function bulkImportTeachers(teachers) {
-  try {
-    const response = await api.post(`${TEACHER_URLS.BASE}/bulk-import`, { teachers });
-    toast.success(response.data?.message || 'Teachers imported successfully');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(`${TEACHER_URLS.BASE}/bulk-import`, { teachers });
+  toast.success(response.data?.message || 'Teachers imported successfully');
+  return response.data;
 }
 
 /**
  * Export teachers as CSV blob.
  */
 export async function exportTeachersCsv() {
-  try {
-    const response = await api.get(TEACHER_URLS.EXPORT_CSV, { responseType: 'blob' });
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.get(TEACHER_URLS.EXPORT_CSV, { responseType: 'blob' });
+  return response.data;
 }
 
 const teacherService = {

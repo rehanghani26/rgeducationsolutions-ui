@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
 import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../../services/apiErrors.js';
 
 export default function Step1SchoolProfile({ onComplete, onNext }) {
   const [loading, setLoading] = useState(false);
@@ -81,7 +82,7 @@ export default function Step1SchoolProfile({ onComplete, onNext }) {
       if (onComplete) await onComplete('schoolProfile');
       if (onNext) onNext();
     } catch (err) {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to save school profile');
+      notifyApiError(err, 'Failed to save school profile');
     } finally {
       setLoading(false);
     }

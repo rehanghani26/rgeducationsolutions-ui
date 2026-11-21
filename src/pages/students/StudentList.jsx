@@ -2,6 +2,7 @@ import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { notifyApiError } from "../../services/apiErrors.js";
 import {
   Plus,
   FolderDown,
@@ -692,8 +693,8 @@ const StudentList = () => {
       const data = await exportStudentsCsv();
       downloadStudentFile(data, "Students_" + new Date().toISOString().slice(0, 10) + ".csv");
       toast.success("Student directory exported to CSV");
-    } catch {
-      toast.error("Export failed");
+    } catch (error) {
+      notifyApiError(error, "Export failed");
     }
   };
 

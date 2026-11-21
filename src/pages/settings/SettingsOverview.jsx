@@ -17,6 +17,7 @@ import { updateUserProfile } from "../../store/slices/authSlice.js";
 import { getUserFromStorage } from "../../config/access.jsx";
 import { getStudents, getStudentById } from "../../services/studentService.js";
 import useSetupWizard from "../../hooks/useSetupWizard.js";
+import { useAcademicSession } from "../../context/AcademicSessionContext.jsx";
 import SetupWizardModal from "../setup/SetupWizardModal.jsx";
 import SettingsCard from "./SettingsCard";
 import {
@@ -326,7 +327,8 @@ const SettingsOverview = () => {
   }, [isStudent]);
 
   // Derive step completion from active session metadata
-  const step1Done = Boolean(activeSession?.setupConfirmedAt && activeSession?.classIds?.length);
+  const { schoolClasses } = useAcademicSession();
+  const step1Done = Boolean(activeSession && schoolClasses.classRange);
   const step2Done = !!activeSession?.hasMasterSchedule;
   const step3Done = (activeSession?.timetableCount || 0) > 0;
 

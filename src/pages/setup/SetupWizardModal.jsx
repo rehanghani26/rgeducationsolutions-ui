@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Building2,
   Calendar,
@@ -10,18 +10,16 @@ import {
   ArrowRight,
   ArrowLeft,
   PartyPopper,
-  ShieldCheck,
   Bot,
 } from 'lucide-react';
 import useSetupWizard from '../../hooks/useSetupWizard.js';
 import Step1SchoolProfile from './steps/Step1SchoolProfile.jsx';
-import Step2AcademicSession from './steps/Step2AcademicSession.jsx';
 import SetupWizardAI from './SetupWizardAI.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 
 const STEPS_META = [
-  { id: 1, key: 'schoolProfile', title: 'School Profile', icon: Building2, color: 'text-indigo-500' },
-  { id: 2, key: 'academicSession', title: 'Academic Session', icon: Calendar, color: 'text-emerald-500' },
+  { id: 1, key: 'schoolProfile', title: 'School Profile', icon: Building2 },
+  { id: 2, key: 'academicSession', title: 'Academic Session', icon: Calendar },
 ];
 
 export default function SetupWizardModal({ isOpen, onClose, onComplete, initialMode = 'manual' }) {
@@ -74,8 +72,10 @@ export default function SetupWizardModal({ isOpen, onClose, onComplete, initialM
   const handleNextStep = () => {
     if (activeStep < STEPS_META.length) {
       setActiveStep((prev) => prev + 1);
-    } else {
+    } else if (completedCount === STEPS_META.length) {
       setShowCelebration(true);
+    } else {
+      onClose?.();
     }
   };
 
@@ -229,7 +229,7 @@ export default function SetupWizardModal({ isOpen, onClose, onComplete, initialM
                 Initial 2-Step Setup Completed! 🎉
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-                Your school profile and active academic calendar are locked in.
+                Your school profile and current academic session are configured.
                 Next priority configurations like <strong>Bell Schedule (Priority 3)</strong>, <strong>Class Timetables (Priority 4)</strong>, <strong>Academic Rules (Priority 5)</strong>, and <strong>Finance Policies (Priority 6)</strong> are all directly accessible in the Settings tabs.
               </p>
               <div className="pt-4 flex items-center justify-center gap-3">
@@ -269,13 +269,18 @@ export default function SetupWizardModal({ isOpen, onClose, onComplete, initialM
                 />
               )}
               {activeStep === 2 && (
-                <Step2AcademicSession
-                  onComplete={handleStepComplete}
-                  onNext={() => {
-                    handleStepComplete('academicSession');
-                    setShowCelebration(true);
-                  }}
-                />
+                <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold">Academic Session & Curriculum</h3>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    {isStepCompleteByKey("academicSession")
+                      ? "Your current academic session is configured."
+                      : "Set the current session dates and class range in Academic Session settings."}
+                  </p>
+                  <Link to="/settings/session"
+                    className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300">
+                    Open Academic Session settings <ArrowRight size={15} />
+                  </Link>
+                </div>
               )}
 
               {/* Navigation Back & Skip */}
@@ -295,7 +300,7 @@ export default function SetupWizardModal({ isOpen, onClose, onComplete, initialM
                     onClick={handleNextStep}
                     className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 font-bold cursor-pointer"
                   >
-                    {activeStep === 1 ? 'Skip to Step 2 →' : 'Finish Setup →'}
+                    {activeStep === 1 ? 'Next' : completedCount === STEPS_META.length ? 'Finish Setup' : 'Close'}
                   </button>
                   <button
                     type="button"

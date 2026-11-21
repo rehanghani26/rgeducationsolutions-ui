@@ -29,6 +29,7 @@ import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import { formatDate, formatDateTime } from "../../utils";
 import { CheckboxInput, Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const PORTAL_URL = "http://localhost:5173";
 
@@ -581,7 +582,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
         });
         toast.success("Public School Portal settings saved successfully!");
       } catch (innerErr) {
-        toast.error("Failed to save portal settings.");
+        notifyApiError(innerErr, "Failed to save portal settings.");
       }
     } finally {
       setSaving(false);
@@ -598,7 +599,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
       );
       toast.success(`Inquiry marked as ${newStatus.toUpperCase()}`);
     } catch (err) {
-      toast.error("Failed to update inquiry status");
+      notifyApiError(err, "Failed to update inquiry status");
     }
   };
 
@@ -610,7 +611,7 @@ const PortalManagementSettings = ({ settings, handleChange }) => {
       setInquiries((prev) => prev.filter((inq) => inq._id !== id));
       toast.success("Inquiry deleted successfully");
     } catch (err) {
-      toast.error("Failed to delete inquiry");
+      notifyApiError(err, "Failed to delete inquiry");
     }
   };
 

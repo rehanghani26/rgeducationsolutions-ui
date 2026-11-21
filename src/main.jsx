@@ -12,6 +12,7 @@ import { ThemeProvider, useTheme } from "./theme/ThemeContext.jsx";
 import { SchoolBrandingProvider } from "./context/SchoolBrandingContext.jsx";
 import { ErrorBoundary, ServerMaintenance } from "./components/index.js";
 import { API_BASE_URL, API_HEALTH_URL } from "./services/api.js";
+import { showPendingApiError } from "./services/apiErrors.js";
 import "./index.css";
 
 const AppBootstrap = () => {
@@ -20,6 +21,7 @@ const AppBootstrap = () => {
   const [serverErrorInfo, setServerErrorInfo] = React.useState(null);
 
   React.useEffect(() => {
+    showPendingApiError();
     const handleOffline = (e) => {
       setIsServerDown(true);
       if (e?.detail) setServerErrorInfo(e.detail);

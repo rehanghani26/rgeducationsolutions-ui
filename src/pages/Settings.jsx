@@ -42,6 +42,7 @@ import {
 import StudentProfileView from "./students/StudentProfileView.jsx";
 import { getUserFromStorage } from "../config/access.jsx";
 import SetupWizardPage from "./setup/SetupWizardPage.jsx";
+import { notifyApiError } from "../services/apiErrors.js";
 
 // Re-export all SVG icons following requested pattern
 export * from "./settings/settingIcons";
@@ -484,7 +485,7 @@ const Settings = () => {
           });
         }
       } catch (err) {
-        toast.error(err.response?.data?.message || "Failed to save settings.");
+        notifyApiError(err, "Failed to save settings.");
       } finally {
         setSaving(false);
       }

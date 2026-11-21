@@ -2,7 +2,7 @@
  * @file onlineClassService.js
  * @description Online Classes module API service.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default onlineClassService export for backward compatibility.
  */
 
@@ -19,25 +19,15 @@ const buildQuery = (params = {}) => {
 };
 
 export async function getOnlineClasses(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${ONLINE_CLASS_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const queryStr = buildQuery(params);
+  const url = `${ONLINE_CLASS_URLS.BASE}${queryStr ? `?${queryStr}` : ''}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 export async function getOnlineClassById(id) {
-  try {
-    const response = await api.get(ONLINE_CLASS_URLS.BY_ID(id));
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.get(ONLINE_CLASS_URLS.BY_ID(id));
+  return response.data;
 }
 
 export async function getOnlineClassActivity(id) {
@@ -51,47 +41,27 @@ export async function getOnlineClassActivity(id) {
 }
 
 export async function createOnlineClass(data) {
-  try {
-    const response = await api.post(ONLINE_CLASS_URLS.BASE, data);
-    toast.success('Online class scheduled successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(ONLINE_CLASS_URLS.BASE, data);
+  toast.success('Online class scheduled successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function updateOnlineClass(id, data) {
-  try {
-    const response = await api.put(ONLINE_CLASS_URLS.BY_ID(id), data);
-    toast.success('Online class updated successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.put(ONLINE_CLASS_URLS.BY_ID(id), data);
+  toast.success('Online class updated successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function deleteOnlineClass(id) {
-  try {
-    const response = await api.delete(ONLINE_CLASS_URLS.BY_ID(id));
-    toast.success('Online class deleted');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.delete(ONLINE_CLASS_URLS.BY_ID(id));
+  toast.success('Online class deleted');
+  return response.data;
 }
 
 export async function joinOnlineClass(id) {
-  try {
-    const response = await api.post(ONLINE_CLASS_URLS.JOIN(id), {});
-    toast.success('Attendance marked. Joining class...');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(ONLINE_CLASS_URLS.JOIN(id), {});
+  toast.success('Attendance marked. Joining class...');
+  return response.data;
 }
 
 const onlineClassService = {

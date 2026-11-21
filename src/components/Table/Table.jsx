@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { memo, useState, Fragment } from "react";
+import { memo, useEffect, useState, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search as SearchIcon, X as XIcon, Inbox } from "lucide-react";
 import Loader from "../ui/Loader.jsx";
@@ -20,8 +20,10 @@ const Table = ({
   className = "",
   tableLayout = [],
   data = [],
+  tableLabel,
   tableHeading = "",
   headingClassName = "text-lg font-semibold mb-2",
+  showToolbar = true,
   tableClassName = "",
   trClassname = "",
   tableHeadClassName = "",
@@ -30,6 +32,7 @@ const Table = ({
   onSearchChange = () => {},
   searchPlaceholder = "",
   openedRow = [],
+  onRowClick,
   Collapse,
   collapseAttribute = "id",
   children,
@@ -47,6 +50,7 @@ const Table = ({
   noRecordImage,
   noRecordImageClassName = "",
   noRecordText = "",
+  noRecordDescription = "Try adjusting your search or filter criteria",
   noRecordTextClassName = "",
   additionalFilters = <></>,
   totalDataLabel = "",
@@ -63,6 +67,30 @@ const Table = ({
   const textClass = isProvider ? "text-[#FFEDD5]" : "text-white";
 
   const [searchItem, setSearchItem] = useState("");
+  const [narrow, setNarrow] = useState(false);
+  const hasCollapse = Boolean(Collapse);
+
+  useEffect(() => {
+    if (!hasCollapse || typeof window.matchMedia !== "function") return;
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const update = () => setNarrow(!desktop.matches);
+    update();
+    desktop.addEventListener("change", update);
+    return () => desktop.removeEventListener("change", update);
+  }, [hasCollapse]);
+
+  const columns = (tableLayout || []).filter(Boolean).map((layout, index) => {
+    let visibleOnMobile;
+    if (layout.showOnMobile !== undefined) visibleOnMobile = Boolean(layout.showOnMobile);
+    else if (layout.hideOnMobile !== undefined) visibleOnMobile = !layout.hideOnMobile;
+    else if (Array.isArray(mobileColumns) && mobileColumns.length) {
+      visibleOnMobile = [layout.key, layout.headData, index].some((value) => mobileColumns.includes(value));
+    } else visibleOnMobile = index < mobileColumnsCount;
+    return { layout, visibleOnMobile };
+  });
+  const detailColumnSpan = Math.max(1, narrow
+    ? columns.filter(({ visibleOnMobile }) => visibleOnMobile).length
+    : columns.length);
 
   function handleSearchChange(e) {
     setSearchItem(e.target.value);
@@ -83,7 +111,7 @@ const Table = ({
       {children}
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between mb-3 gap-3">
+      {showToolbar && <div className="flex flex-wrap items-center justify-between mb-3 gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           {searchPlaceholder && (
             <div className="relative min-w-[240px]">
@@ -139,7 +167,7 @@ const Table = ({
           )}
           {additionalButtons && additionalButtons}
         </div>
-      </div>
+      </div>}
 
       {/* Table wrapper */}
       <div
@@ -152,26 +180,13 @@ const Table = ({
             <Loader size="md" />
           </div>
         ) : (
-          <table className="min-w-full text-center">
+          <table className="min-w-full text-center" aria-label={tableLabel}>
             <thead
               className={`bg-[#000F52] dark:bg-slate-950 border-b-2 border-[#3e8b8250] dark:border-slate-800 ${tableHeadClassName}`}
             >
               <tr>
-                {tableLayout?.filter(Boolean)?.map((layout, index) => {
-                  const isVisibleOnMobile =
-                    layout?.showOnMobile !== undefined
-                      ? Boolean(layout.showOnMobile)
-                      : layout?.hideOnMobile !== undefined
-                        ? !layout.hideOnMobile
-                        : Array.isArray(mobileColumns) &&
-                            mobileColumns.length > 0
-                          ? mobileColumns.includes(layout?.key) ||
-                            mobileColumns.includes(layout?.headData) ||
-                            mobileColumns.includes(index)
-                          : index < mobileColumnsCount;
-                  const mobileClass = isVisibleOnMobile
-                    ? ""
-                    : "hidden md:table-cell";
+                {columns.map(({ layout, visibleOnMobile }, index) => {
+                  const mobileClass = visibleOnMobile ? "" : "hidden md:table-cell";
 
                   return (
                     <th
@@ -188,16 +203,19 @@ const Table = ({
             <tbody className="bg-white dark:bg-slate-900 divide-y divide-[#F0F4F8] dark:divide-slate-800">
               {data?.length > 0 &&
                 data?.map((dataItem, itemIndex) => {
+                  const rowId = dataItem?.[collapseAttribute];
                   const isOpen =
                     openedRow?.includes(dataItem) ||
-                    openedRow?.some(
-                      (row) =>
-                        row?.[collapseAttribute] ===
-                        dataItem?.[collapseAttribute]
-                    );
+                    (rowId != null && openedRow?.some(
+                      (row) => row?.[collapseAttribute] === rowId
+                    ));
+                  const handleClick = onRowClick && ((event) => {
+                    if (event.target.closest?.("a, button, input, label, select, textarea, [role=button]")) return;
+                    onRowClick(dataItem);
+                  });
 
                   return (
-                    <Fragment key={itemIndex}>
+                    <Fragment key={rowId == null ? "index:" + itemIndex : "id:" + rowId}>
                       <motion.tr
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -205,31 +223,16 @@ const Table = ({
                           delay: itemIndex * 0.025,
                           duration: 0.18,
                         }}
-                        className={`group border-b border-[#F0F4F8] dark:border-slate-800 transition-colors duration-150 ease-in-out hover:bg-[#F5F8FF] dark:hover:bg-slate-800/60 cursor-default ${
+                        onClick={handleClick}
+                        data-expanded={isOpen || undefined}
+                        className={`group border-b border-[#F0F4F8] dark:border-slate-800 transition-colors duration-150 ease-in-out hover:bg-[#F5F8FF] dark:hover:bg-slate-800/60 ${onRowClick ? "cursor-pointer" : "cursor-default"} ${
                           isOpen
                             ? "bg-[#F0F5FF] dark:bg-slate-800 border-l-2 border-l-[#0064E0]"
                             : ""
                         } ${trClassname}`}
                       >
-                        {tableLayout
-                          ?.filter(Boolean)
-                          ?.map((layout, layoutIndex) => {
-                            const isVisibleOnMobile =
-                              layout?.showOnMobile !== undefined
-                                ? Boolean(layout.showOnMobile)
-                                : layout?.hideOnMobile !== undefined
-                                  ? !layout.hideOnMobile
-                                  : Array.isArray(mobileColumns) &&
-                                      mobileColumns.length > 0
-                                    ? mobileColumns.includes(layout?.key) ||
-                                      mobileColumns.includes(
-                                        layout?.headData
-                                      ) ||
-                                      mobileColumns.includes(layoutIndex)
-                                    : layoutIndex < mobileColumnsCount;
-                            const mobileClass = isVisibleOnMobile
-                              ? ""
-                              : "hidden md:table-cell";
+                        {columns.map(({ layout, visibleOnMobile }, layoutIndex) => {
+                            const mobileClass = visibleOnMobile ? "" : "hidden md:table-cell";
 
                             // Get the rendered cell value
                             const cellValue = layout?.bodyData(
@@ -261,12 +264,13 @@ const Table = ({
 
                       <AnimatePresence>
                         {isOpen && Collapse && (
-                          <tr>
+                          <tr data-table-detail>
                             <td
-                              colSpan={tableLayout?.filter(Boolean)?.length}
+                              colSpan={detailColumnSpan}
                               className="p-0 border-l-2 border-l-[#0064E0]"
                             >
                               <motion.div
+                                className="overflow-hidden"
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
@@ -306,9 +310,7 @@ const Table = ({
             >
               {noRecordText || "No records found"}
             </p>
-            <p className="text-[#9CA3AF] text-xs mt-1">
-              Try adjusting your search or filter criteria
-            </p>
+            {noRecordDescription && <p className="text-[#9CA3AF] text-xs mt-1">{noRecordDescription}</p>}
           </div>
         )}
       </div>
@@ -333,8 +335,10 @@ Table.propTypes = {
   className: PropTypes.string,
   tableLayout: PropTypes.array,
   data: PropTypes.array,
+  tableLabel: PropTypes.string,
   tableHeading: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   headingClassName: PropTypes.string,
+  showToolbar: PropTypes.bool,
   tableClassName: PropTypes.string,
   trClassname: PropTypes.string,
   border: PropTypes.string,
@@ -344,6 +348,7 @@ Table.propTypes = {
   searchPlaceholder: PropTypes.string,
   onSearchChange: PropTypes.func,
   openedRow: PropTypes.array,
+  onRowClick: PropTypes.func,
   Collapse: PropTypes.func,
   collapseAttribute: PropTypes.string,
   noScrollBar: PropTypes.bool,
@@ -362,6 +367,7 @@ Table.propTypes = {
   noRecordImage: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   noRecordImageClassName: PropTypes.string,
   noRecordText: PropTypes.string,
+  noRecordDescription: PropTypes.string,
   noRecordTextClassName: PropTypes.string,
   totalDataLabel: PropTypes.string,
   totalDataValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

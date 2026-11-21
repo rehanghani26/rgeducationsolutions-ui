@@ -29,6 +29,7 @@ import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
 import { formatCurrency } from "../../utils";
 import { Input } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const TeacherList = () => {
   const navigate = useNavigate();
@@ -338,7 +339,7 @@ const TeacherList = () => {
         setImportedData(parsedRows);
         toast.success(`Successfully parsed ${parsedRows.length} teacher records from ${file.name}`);
       } catch (err) {
-        toast.error("Failed to parse file. Please verify CSV formatting.");
+        notifyApiError(err, "Failed to parse file. Please verify CSV formatting.");
       }
     };
     reader.readAsText(file);

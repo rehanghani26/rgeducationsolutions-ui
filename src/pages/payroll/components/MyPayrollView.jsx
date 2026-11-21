@@ -27,7 +27,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 import api from "../../../services/api.js";
 import Button from "../../../components/ui/Button.jsx";
 import PageHeader from "../../../components/ui/PageHeader.jsx";
@@ -42,6 +41,7 @@ import {
 import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 import PayrollPeriodSelect from './PayrollPeriodSelect.jsx';
+import { notifyApiError } from "../../../services/apiErrors.js";
 
 const MyPayrollView = ({ currentUser }) => {
   const currentD = new Date();
@@ -68,7 +68,7 @@ const MyPayrollView = ({ currentUser }) => {
       }
     } catch (err) {
       console.error("Failed to load personal payroll details:", err);
-      toast.error("Unable to fetch your personal payroll records");
+      notifyApiError(err, "Unable to fetch your personal payroll records");
     } finally {
       setLoading(false);
     }

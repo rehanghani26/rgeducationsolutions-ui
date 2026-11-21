@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, ArrowRight, Loader2, Sparkles, Plus, Trash2, ListOrdered } from 'lucide-react';
 import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
-import api from '../../../services/api.js';
+import { getMasterPeriods } from '../../../services/masterPeriodService.js';
 import { CheckboxInput, Input } from '../../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../../services/apiErrors.js';
 
 const STANDARD_8_PERIODS = [
   { periodNumber: 1, name: 'Period 1', startTime: '08:00', endTime: '08:45', isBreak: false },
@@ -30,17 +31,21 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
   const loadExisting = async () => {
     try {
       setInitialLoading(true);
-      const res = await api.get('/erp/master-periods');
-      const list = res.data?.data || res.data?.periods || [];
+      const list = await getMasterPeriods('regular');
       setExistingPeriods(list);
       if (list.length > 0) {
-        const active = list.find((p) => p.isActive) || list[0];
+        const active = list.find((schedule) => schedule.isDefault);
         if (active) {
-          setScheduleName(active.scheduleName || 'Standard Daily Bell Schedule');
+          setScheduleName(active.name || 'Standard Daily Bell Schedule');
           setSchoolStartTime(active.schoolStartTime || '08:00');
           setSchoolEndTime(active.schoolEndTime || '14:30');
           if (Array.isArray(active.periods) && active.periods.length > 0) {
-            setPeriods(active.periods);
+            setPeriods(active.periods.map((period, index) => ({
+              ...period,
+              periodNumber: index + 1,
+              name: period.customLabel,
+              isBreak: ['recess', 'lunch'].includes(period.type),
+            })));
           }
         }
       }
@@ -103,7 +108,7 @@ export default function Step3MasterPeriods({ onComplete, onNext }) {
       if (onComplete) await onComplete('masterPeriods');
       if (onNext) onNext();
     } catch (err) {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to save master periods');
+      notifyApiError(err, 'Failed to save master periods');
     } finally {
       setLoading(false);
     }

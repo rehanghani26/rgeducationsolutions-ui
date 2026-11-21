@@ -93,6 +93,7 @@ import {
 import { getTemplateById } from "../certificates/templates/registry.js";
 import { getVerificationUrl } from "../certificates/utils/qrUtils.js";
 import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -494,7 +495,7 @@ const StudentDetail = () => {
       setActiveCredentialsModal(creds);
     } catch (err) {
       console.error("Credentials error:", err);
-      toast.error("Failed to load credentials");
+      notifyApiError(err, "Failed to load credentials");
     }
   };
 

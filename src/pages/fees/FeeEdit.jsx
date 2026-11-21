@@ -7,6 +7,7 @@ import Loader from '../../components/ui/Loader.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { CurrencyInput } from '../../components/ui/CurrencyInput.jsx';
 import feeService from '../../services/feeService.js';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 const inputCls = 'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase';
@@ -33,7 +34,7 @@ const FeeEdit = () => {
       })
       .catch((err) => {
         console.error("Failed to load fee record:", err);
-        toast.error("Failed to load fee record from server");
+        notifyApiError(err, "Failed to load fee record from server");
         setFee(null);
       })
       .finally(() => setLoading(false));
@@ -63,7 +64,7 @@ const FeeEdit = () => {
       toast.success('Fee record updated');
       navigate(`/fees/${id}`);
     } catch (err) {
-      toast.error('Update failed');
+      notifyApiError(err, 'Update failed');
     } finally {
       setSubmitting(false);
     }

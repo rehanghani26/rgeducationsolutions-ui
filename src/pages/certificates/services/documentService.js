@@ -17,7 +17,6 @@ export async function getIssuedCertificates(params = {}) {
     return response.data;
   } catch (error) {
     console.error('Error fetching issued certificates:', error);
-    toast.error(error.response?.data?.message || 'Failed to fetch certificates');
     throw error;
   }
 }
@@ -32,7 +31,6 @@ export async function getIssuedCertificateById(id) {
     return response.data;
   } catch (error) {
     console.error('Error fetching certificate by id:', error);
-    toast.error(error.response?.data?.message || 'Failed to fetch certificate details');
     throw error;
   }
 }
@@ -48,7 +46,6 @@ export async function issueCertificate(payload) {
     return response.data;
   } catch (error) {
     console.error('Error issuing certificate:', error);
-    toast.error(error.response?.data?.message || 'Failed to issue certificate');
     throw error;
   }
 }
@@ -64,7 +61,6 @@ export async function bulkIssueCertificates(payload) {
     return response.data;
   } catch (error) {
     console.error('Error in bulk issuing certificates:', error);
-    toast.error(error.response?.data?.message || 'Failed to bulk issue certificates');
     throw error;
   }
 }
@@ -81,7 +77,6 @@ export async function revokeCertificate(id, revocationReason = '') {
     return response.data;
   } catch (error) {
     console.error('Error revoking certificate:', error);
-    toast.error(error.response?.data?.message || 'Failed to revoke certificate');
     throw error;
   }
 }
@@ -124,7 +119,6 @@ export async function createCustomTemplate(data) {
     return response.data;
   } catch (error) {
     console.error('Error creating custom template:', error);
-    toast.error(error.response?.data?.message || 'Failed to save template');
     throw error;
   }
 }
@@ -141,7 +135,6 @@ export async function updateCustomTemplate(id, data) {
     return response.data;
   } catch (error) {
     console.error('Error updating custom template:', error);
-    toast.error(error.response?.data?.message || 'Failed to update template');
     throw error;
   }
 }
@@ -157,7 +150,6 @@ export async function deleteCustomTemplate(id) {
     return response.data;
   } catch (error) {
     console.error('Error deleting custom template:', error);
-    toast.error(error.response?.data?.message || 'Failed to delete template');
     throw error;
   }
 }
@@ -194,7 +186,6 @@ export async function setDefaultTemplate(payload) {
     return response.data;
   } catch (error) {
     console.error('Error setting default template:', error);
-    toast.error(error.response?.data?.message || 'Failed to save default template');
     throw error;
   }
 }

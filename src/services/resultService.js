@@ -71,51 +71,31 @@ export async function getExamStats(examId, params = {}) {
 
 // Bulk upsert results (teacher marks entry)
 export async function bulkUpsertResults(payload) {
-  try {
-    const { data } = await api.post(RESULT_URLS.BULK, payload);
-    toast.success(data.message || 'Results saved successfully');
-    return data;
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to save results');
-    throw err;
-  }
+  const { data } = await api.post(RESULT_URLS.BULK, payload);
+  toast.success(data.message || 'Results saved successfully');
+  return data;
 }
 
 // Publish all results for a class exam
 export async function publishResults(examId, classId, params = {}) {
-  try {
-    const qs = buildQuery(params);
-    const { data } = await api.put(`${RESULT_URLS.PUBLISH(examId, classId)}${qs ? `?${qs}` : ''}`);
-    toast.success(data.message || 'Results published!');
-    return data;
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to publish results');
-    throw err;
-  }
+  const qs = buildQuery(params);
+  const { data } = await api.put(`${RESULT_URLS.PUBLISH(examId, classId)}${qs ? `?${qs}` : ''}`);
+  toast.success(data.message || 'Results published!');
+  return data;
 }
 
 // Update single result
 export async function updateResult(id, payload) {
-  try {
-    const { data } = await api.put(RESULT_URLS.BY_ID(id), payload);
-    toast.success('Result updated');
-    return data;
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to update result');
-    throw err;
-  }
+  const { data } = await api.put(RESULT_URLS.BY_ID(id), payload);
+  toast.success('Result updated');
+  return data;
 }
 
 // Delete result
 export async function deleteResult(id) {
-  try {
-    const { data } = await api.delete(RESULT_URLS.BY_ID(id));
-    toast.success('Result deleted');
-    return data;
-  } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to delete result');
-    throw err;
-  }
+  const { data } = await api.delete(RESULT_URLS.BY_ID(id));
+  toast.success('Result deleted');
+  return data;
 }
 
 const resultService = {

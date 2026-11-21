@@ -1,13 +1,16 @@
 import axios from "axios";
-const DEV_URL = "https://inventorymanagementserver-9tyo.onrender.com";
-const LOCAL_URL = "http://localhost:5000";
+import {
+  normalizeApiError,
+  notifyAfterRedirect,
+  notifyApiError,
+} from "./apiErrors.js";
 
-const baseURL = `${DEV_URL}/api/v1`;
-export const API_BASE_URL = baseURL;
-export const API_HEALTH_URL = `${LOCAL_URL}/api/health`;
+const hostedApi = "https://inventorymanagementserver-9tyo.onrender.com/api/v1";
+export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL?.trim() || hostedApi).replace(/\/+$/, "");
+export const API_HEALTH_URL = API_BASE_URL.replace(/\/api(?:\/v\d+)?$/, "") + "/api/health";
 
 const api = axios.create({
-  baseURL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -80,46 +83,55 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-let isRefreshing = false;
-let failedQueue = [];
+let refreshPromise;
 
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error);
-    else prom.resolve(token);
-  });
-  failedQueue = [];
-};
+function refreshAccessToken() {
+  if (!refreshPromise) {
+    refreshPromise = axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+      .then(({ data }) => {
+        const token = data.accessToken || data.data?.accessToken;
+        if (!token) throw new Error("Unable to renew your session. Please sign in again.");
+        localStorage.setItem("token", token);
+        return token;
+      })
+      .catch(async (error) => {
+        await normalizeApiError(error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        if (window.location.pathname.includes("/login")) notifyApiError(error);
+        else notifyAfterRedirect(error, "/login");
+        throw error;
+      })
+      .finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
+}
 
 api.interceptors.response.use(
   (response) => {
-    // If a request succeeds, we can signal the server is online
+    if (response.data?.success === false) notifyApiError(response.data);
     return response;
   },
   async (error) => {
-    // If request was cancelled prior to hitting the network, do not proceed with error handling
-    if (axios.isCancel(error)) {
-      return Promise.reject(error);
-    }
+    if (axios.isCancel(error)) throw error;
 
     const originalRequest = error.config;
+    const status = error.response?.status;
+    await normalizeApiError(error);
 
     // Detect if server is offline or unreachable (no response, ERR_NETWORK, connection refused, 502/503/504)
     const isServerDown =
       !error.response ||
       error.code === "ERR_NETWORK" ||
-      error.message === "Network Error" ||
-      [502, 503, 504].includes(error.response?.status);
+      [502, 503, 504].includes(status);
 
     if (isServerDown && typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("server:offline", {
           detail: {
             url: originalRequest?.url,
-            status: error.response?.status || 0,
-            message:
-              error.message ||
-              "ERR_CONNECTION_REFUSED - Server is currently offline",
+            status: status || 0,
+            message: error.message,
             timestamp: new Date().toISOString(),
           },
         })
@@ -153,68 +165,24 @@ api.interceptors.response.use(
         typeof window !== "undefined" &&
         !window.location.pathname.includes("/suspended")
       ) {
-        window.location.href = "/suspended";
-      }
-      return Promise.reject(error);
+        notifyAfterRedirect(error, "/suspended");
+      } else notifyApiError(error);
+      throw error;
     }
 
-    if (error.response?.status !== 401 || originalRequest?._retry) {
-      return Promise.reject(error);
-    }
-
-    // Never attempt token refresh if there was no token (user not logged in)
     const rawToken = localStorage.getItem("token");
-    const token =
-      rawToken && rawToken !== "undefined" && rawToken !== "null"
-        ? rawToken
-        : null;
-
-    if (!token) {
-      return Promise.reject(error);
-    }
-
-    if (
-      originalRequest?.url?.includes("/auth/login") ||
-      originalRequest?.url?.includes("/auth/refresh")
-    ) {
-      return Promise.reject(error);
-    }
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then((token) => {
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return api(originalRequest);
-      });
+    const canRefresh = status === 401 && originalRequest && !originalRequest._retry
+      && rawToken && rawToken !== "undefined" && rawToken !== "null"
+      && !originalRequest.url?.includes("/auth/login")
+      && !originalRequest.url?.includes("/auth/refresh");
+    if (!canRefresh) {
+      notifyApiError(error);
+      throw error;
     }
 
     originalRequest._retry = true;
-    isRefreshing = true;
-
-    try {
-      const res = await axios.post(
-        `${baseURL}/auth/refresh`,
-        {},
-        { withCredentials: true }
-      );
-      const newToken = res.data.accessToken;
-      localStorage.setItem("token", newToken);
-      api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-      processQueue(null, newToken);
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
-      return api(originalRequest);
-    } catch (refreshError) {
-      processQueue(refreshError, null);
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
-      }
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
-    }
+    await refreshAccessToken();
+    return api(originalRequest);
   }
 );
 

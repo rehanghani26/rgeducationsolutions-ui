@@ -10,6 +10,7 @@ import { bulkImportStudents, cleanCorruptedStudents } from '../../services/stude
 import { downloadStudentTemplate, readStudentImport, studentImportHeaders } from '../../utils/studentImport.js';
 import './studentRegistration.css';
 import { Input } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 const panel = 'min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5 dark:border-slate-700 dark:bg-slate-900';
 const muted = 'text-sm text-slate-600 dark:text-slate-300';
@@ -141,7 +142,7 @@ export default function StudentBulkImport() {
     try {
       await downloadStudentTemplate(format);
     } catch (error) {
-      toast.error(error.message);
+      notifyApiError(error);
     } finally {
       setTemplateBusy(false);
     }
@@ -154,7 +155,7 @@ export default function StudentBulkImport() {
       await cleanCorruptedStudents();
       toast.success('Corrupted records cleaned.');
     } catch (error) {
-      toast.error(error.message || 'Could not clean corrupted records.');
+      notifyApiError(error, 'Could not clean corrupted records.');
     } finally {
       setCleaning(false);
     }

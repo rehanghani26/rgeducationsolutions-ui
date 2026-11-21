@@ -37,6 +37,7 @@ import api from "../../services/api.js";
 import { WEEKDAYS as DEFAULT_DAYS,
   DAY_NAMES_LOWER } from "../../constants";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
+import { notifyApiError } from '../../services/apiErrors.js';
 
 // Category meta definitions matching Master Period settings
 const PERIOD_META = {
@@ -349,7 +350,7 @@ const TimetableManagement = () => {
       }
     } catch (err) {
       console.error("Fetch options error:", err);
-      toast.error("Failed to load teacher list options.");
+      notifyApiError(err, "Failed to load teacher list options.");
     } finally {
       setLoadingOptions(false);
     }
@@ -628,13 +629,11 @@ const TimetableManagement = () => {
         setIsDirty(false);
         fetchClassTimetable();
       } else {
-        toast.error(res.data?.message || "Failed to save timetable");
+        notifyApiError(res.data, "Failed to save timetable");
       }
     } catch (err) {
       console.error("Save timetable error:", err);
-      toast.error(
-        err.response?.data?.message || "Error saving timetable schedule"
-      );
+      notifyApiError(err, "Error saving timetable schedule");
     } finally {
       setSaving(false);
     }
@@ -661,13 +660,11 @@ const TimetableManagement = () => {
         setIsDirty(false);
         fetchClassTimetable();
       } else {
-        toast.error(res.data?.message || "Failed to delete class timetable");
+        notifyApiError(res.data, "Failed to delete class timetable");
       }
     } catch (err) {
       console.error("Delete timetable error:", err);
-      toast.error(
-        err.response?.data?.message || "Failed to delete class timetable"
-      );
+      notifyApiError(err, "Failed to delete class timetable");
     }
   };
 

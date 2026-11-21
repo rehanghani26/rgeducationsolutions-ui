@@ -45,9 +45,10 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import { notifyApiError } from '../../services/apiErrors.js';
 
 const AttendanceManagement = () => {
-  const { classOptions } = useAcademicSession();
+  const { classOptions, schoolClasses } = useAcademicSession();
   const authUser = useSelector((state) => state.auth?.user);
   const user = authUser ||
     getUserFromStorage() || { name: "Administrator", role: "super-admin" };
@@ -228,11 +229,9 @@ const AttendanceManagement = () => {
   });
 
   // Filter options and derived lists (imported from central constants)
-  const availableClasses = useMemo(() => {
-    const fromApi = availableFilterOptions.classes || [];
-    const fromConstants = classOptions.map((c) => c.name);
-    return Array.from(new Set([...fromApi, ...fromConstants])).sort();
-  }, [availableFilterOptions.classes]);
+  const availableClasses = schoolClasses.classRange
+    ? classOptions.map((grade) => grade.name)
+    : availableFilterOptions.classes || [];
 
   const availableSections = useMemo(() => {
     const fromApi = availableFilterOptions.sections || [];
@@ -428,7 +427,7 @@ const AttendanceManagement = () => {
         })
       );
     } catch (err) {
-      toast.error("Failed to load students. Check your connection.");
+      notifyApiError(err, "Failed to load students. Check your connection.");
       setRoster([]);
     } finally {
       setRosterLoading(false);

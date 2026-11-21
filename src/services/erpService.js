@@ -2,7 +2,7 @@
  * @file erpService.js
  * @description ERP shared data API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default erpService export for backward compatibility.
  */
 
@@ -21,14 +21,9 @@ export async function getClasses() {
 }
 
 export async function createClass(data) {
-  try {
-    const response = await api.post(ERP_URLS.CLASSES, data);
-    toast.success('Class created successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(ERP_URLS.CLASSES, data);
+  toast.success('Class created successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function getSections() {
@@ -42,14 +37,9 @@ export async function getSections() {
 }
 
 export async function createSection(data) {
-  try {
-    const response = await api.post(ERP_URLS.SECTIONS, data);
-    toast.success('Section created successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(ERP_URLS.SECTIONS, data);
+  toast.success('Section created successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function getSubjects() {
@@ -63,14 +53,9 @@ export async function getSubjects() {
 }
 
 export async function createSubject(data) {
-  try {
-    const response = await api.post(ERP_URLS.SUBJECTS, data);
-    toast.success('Subject created successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(ERP_URLS.SUBJECTS, data);
+  toast.success('Subject created successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function getDashboardStats() {
@@ -104,25 +89,15 @@ export async function getNotices() {
 }
 
 export async function createNotice(data) {
-  try {
-    const response = await api.post('/erp/notices', data);
-    toast.success('Notice published successfully');
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post('/erp/notices', data);
+  toast.success('Notice published successfully');
+  return { status: response.status, data: response.data };
 }
 
 export async function deleteNotice(id) {
-  try {
-    const response = await api.delete(`/erp/notices/${id}`);
-    toast.success('Notice removed successfully');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.delete(`/erp/notices/${id}`);
+  toast.success('Notice removed successfully');
+  return response.data;
 }
 
 const erpService = {

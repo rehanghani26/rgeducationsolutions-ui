@@ -37,15 +37,17 @@ import {
   X,
   AlertTriangle
 } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { userService } from '../services/userService.js';
+import { useAcademicSession } from '../context/AcademicSessionContext.jsx';
 import Loader from '../components/ui/Loader.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
 import { ROUTES } from '../routes/routes.js';
 import { formatCurrency, formatDate, formatDateTime } from '../utils';
+import { notifyApiError } from '../services/apiErrors.js';
 
 const ROLE_CONFIG = {
   'super-admin': {
@@ -116,7 +118,6 @@ const PROMOTION_ROLES = [
   { id: 'peon', label: 'Peon / Support Staff', icon: UserCheck, desc: 'Assign as Campus Support Staff & Logistics' },
 ];
 
-const AVAILABLE_CLASSES = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
 const AVAILABLE_SECTIONS = ['Section A', 'Section B', 'Section C', 'Section D'];
 const AVAILABLE_SUBJECTS = ['Mathematics', 'Science', 'English', 'Social Studies', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Hindi', 'History', 'Physical Education'];
 
@@ -124,6 +125,7 @@ const UserDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useSelector((state) => state.auth);
+  const { classOptions, combinedClassOptions } = useAcademicSession();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -185,7 +187,7 @@ const UserDetailPage = () => {
         });
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to load user details');
+      notifyApiError(err, 'Failed to load user details');
       navigate(ROUTES.USER_MANAGEMENT);
     } finally {
       setLoading(false);
@@ -247,7 +249,7 @@ const UserDetailPage = () => {
         fetchUserDetails();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update personal details');
+      notifyApiError(err, 'Failed to update personal details');
     } finally {
       setSaving(false);
     }
@@ -262,7 +264,7 @@ const UserDetailPage = () => {
         fetchUserDetails();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update user role');
+      notifyApiError(err, 'Failed to update user role');
     } finally {
       setSaving(false);
     }
@@ -283,7 +285,7 @@ const UserDetailPage = () => {
         fetchUserDetails();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update academic assignments');
+      notifyApiError(err, 'Failed to update academic assignments');
     } finally {
       setSaving(false);
     }
@@ -298,7 +300,7 @@ const UserDetailPage = () => {
         fetchUserDetails();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status');
+      notifyApiError(err, 'Failed to update status');
     }
   };
 
@@ -322,7 +324,7 @@ const UserDetailPage = () => {
       setNewPassword('');
       fetchUserDetails();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update credentials');
+      notifyApiError(err, 'Failed to update credentials');
     } finally {
       setSaving(false);
     }
@@ -336,7 +338,7 @@ const UserDetailPage = () => {
         navigate(ROUTES.USER_MANAGEMENT);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete user');
+      notifyApiError(err, 'Failed to delete user');
     }
   };
 
@@ -787,13 +789,17 @@ const UserDetailPage = () => {
                     </label>
                     <input
                       type="text"
+                      list="school-class-teacher-assignments"
                       value={academicState.classTeacherOf}
                       onChange={(e) =>
                         setAcademicState({ ...academicState, classTeacherOf: e.target.value })
                       }
-                      placeholder="e.g. Class 10 - Section A"
+                      placeholder="Choose a class and section"
                       className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                     />
+                    <datalist id="school-class-teacher-assignments">
+                      {combinedClassOptions.map((option) => <option key={option.key} value={option.label} />)}
+                    </datalist>
                   </div>
                 )}
               </div>
@@ -804,7 +810,7 @@ const UserDetailPage = () => {
                   Classes / Grades Assigned
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_CLASSES.map((cls) => {
+                  {classOptions.map(({ name: cls }) => {
                     const isSelected = academicState.classesAssigned.includes(cls);
                     return (
                       <button

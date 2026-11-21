@@ -1,1331 +1,302 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { MotionConfig } from 'framer-motion';
+import { AlertCircle, CalendarDays, CalendarClock, ChevronDown, HelpCircle, Plus, Settings2 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import {
-  Calendar,
-  Sparkles,
-  ArrowUpRight,
-  ArrowDownRight,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Plus,
-  Trash2,
-  Edit,
-  ShieldAlert,
-  Users,
-  GraduationCap,
-  Layers,
-  Search,
-  Filter,
-  ChevronRight,
-  ArrowRight,
-  Bell,
-  LayoutGrid,
-  Wallet,
-} from 'lucide-react';
-import api from '../../services/api.js';
+import Table from '../../components/Table/Table.jsx';
+import { ErrorMessage, Pending } from '../../components/ui/ProcurementUI.jsx';
+import { getUserRole } from '../../config/access.jsx';
 import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
-import { formatCurrency, formatDate } from '../../utils';
-import Modal from '../../components/ui/Modal.jsx';
-import Loader from '../../components/ui/Loader.jsx';
-import { CheckboxInput, Input, SelectInput, SwitchInput, TextareaInput } from '../../components/ui/FormControls.jsx';
+import { useProcurementAccess, useProcurementResource } from '../../hooks/useProcurement.js';
+import api from '../../services/api.js';
+import { getAcademicSessions } from '../../services/budgetService.js';
+import { dateInput, recordId } from '../../utils/procurement.js';
+import { getRolloverSettings, RolloverSettingsForm } from './session/RolloverPanels.jsx';
+import SchoolClasses from './session/SchoolClasses.jsx';
+import SessionDetails from './session/SessionDetails.jsx';
+import SessionForm from './session/SessionForm.jsx';
+import SessionTimeline from './session/SessionTimeline.jsx';
+import {
+  formatSessionDate, formatSessionRange, nextSessionFor, scheduleBreak, sessionNeighbors, SESSION_STATUS, sessionStatus,
+} from './session/sessionValues.js';
+import './session/sessionManagement.css';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Academic Progress Stepper — shared 3-step indicator rendered at the top of
-// all three scheduling settings pages (Session, Master Period, Class Timetable).
-// activeStep: 1 | 2 | 3
-// ─────────────────────────────────────────────────────────────────────────────
-const AcademicScheduleStepper = ({ activeSession, onNavigate }) => {
-  const steps = [
+const permissions = ['super-admin', 'school-admin', 'principal', 'admin'];
+const statusOrder = Object.keys(SESSION_STATUS);
+const filters = { all: 'All Sessions', ...SESSION_STATUS };
+
+export default function SessionManagementSettings() {
+  const [list, setList] = useState({ sessions: [], loading: true, error: null });
+  const [request, setRequest] = useState(0);
+  const [filter, setFilter] = useState('all');
+  const [openId, setOpenId] = useState('');
+  const [panel, setPanel] = useState(null);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const { refresh: refreshSessionChoices, schoolClasses } = useAcademicSession();
+  const canManage = useSelector((state) => permissions.includes(getUserRole(state.auth?.user)));
+  const { canReadBudget } = useProcurementAccess();
+  const rollover = useProcurementResource(getRolloverSettings, canManage);
+  const { sessions, loading, error } = list;
+  const activeSession = sessions.find((session) => session.isCurrent);
+  const nextSession = nextSessionFor(activeSession, sessions);
+  const dateIssue = scheduleBreak(sessions, activeSession);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        let schedule = await getAcademicSessions();
+        if (controller.signal.aborted) return;
+        const current = schedule.find((item) => item.isCurrent);
+        if (canManage && current && !sessionNeighbors(schedule, current).following.length) {
+          setList({ sessions: schedule, loading: true, error: null });
+          const { data } = await api.post('/sessions/upcoming', {}, { signal: controller.signal });
+          if (controller.signal.aborted) return;
+          schedule = data.data.sessions;
+          refreshSessionChoices().catch(() => {});
+        }
+        setList({ sessions: schedule, loading: false, error: null });
+      } catch (error) {
+        if (!controller.signal.aborted) setList((previous) => ({ ...previous, loading: false, error }));
+      }
+    }
+    void load();
+    return () => controller.abort();
+  }, [request, canManage, refreshSessionChoices]);
+
+  const rows = useMemo(() => sessions.map((session) => ({
+    ...session,
+    id: recordId(session),
+    group: sessionStatus(session, activeSession),
+  })).sort((left, right) => {
+    const order = statusOrder.indexOf(left.group) - statusOrder.indexOf(right.group);
+    const byDate = dateInput(left.startDate).localeCompare(dateInput(right.startDate));
+    return order || (left.group === 'upcoming' ? byDate : -byDate);
+  }), [sessions, activeSession]);
+  const upcoming = rows.find((row) => row.group === 'upcoming'
+    && (!activeSession || dateInput(row.startDate) >= dateInput(activeSession.startDate)));
+  const formSession = { 'current-dates': activeSession, 'upcoming-dates': upcoming, dates: dateIssue?.session }[panel];
+  const showDateForm = canManage && (panel === 'new' || Boolean(formSession));
+  const visibleRows = filter === 'all' ? rows : rows.filter((row) => row.group === filter);
+  const openedRow = visibleRows.find((row) => row.id === openId);
+  const rolloverMode = rollover.data ? (rollover.data.autoPromote ? 'Automatic' : 'Approval required')
+    : rollover.error ? 'Settings unavailable' : 'Loading settings…';
+
+  function reload() {
+    setList((previous) => ({ ...previous, loading: true, error: null }));
+    setRequest((value) => value + 1);
+  }
+
+  function syncSessions() {
+    reload();
+    refreshSessionChoices().catch(() => {});
+  }
+
+  function selectFilter(key) {
+    setFilter(key);
+    setOpenId('');
+  }
+
+  function toggleRow(row) {
+    if (busy) return;
+    setPanel(null);
+    setOpenId((id) => id === row.id ? '' : row.id);
+  }
+
+  function togglePanel(name) {
+    setOpenId('');
+    setPanel((previous) => previous === name ? null : name);
+  }
+
+  function sessionChanged(saved, shifted = []) {
+    if (saved) {
+      const id = recordId(saved);
+      const changed = [...shifted, saved];
+      const changedIds = new Set(changed.map(recordId));
+      setList((previous) => ({
+        ...previous,
+        sessions: [...previous.sessions.filter((session) => !changedIds.has(recordId(session))), ...changed],
+      }));
+      setOpenId(id);
+      if (filter !== 'all' && filter !== sessionStatus(saved, activeSession)) setFilter('all');
+    }
+    setPanel(null);
+    syncSessions();
+  }
+
+  function sessionDeleted(id, shifted = []) {
+    const affected = new Set([id, ...shifted.map(recordId)]);
+    setList((previous) => ({
+      ...previous, sessions: [...previous.sessions.filter((session) => !affected.has(recordId(session))), ...shifted],
+    }));
+    setOpenId('');
+    syncSessions();
+  }
+
+  function sessionUpgraded(id) {
+    setFilter('all');
+    setOpenId(id);
+    syncSessions();
+  }
+
+  const columns = [
     {
-      num: 1,
-      label: 'Academic Session',
-      sublabel: activeSession
-        ? `✓ ${activeSession.sessionName} (Active)`
-        : 'Not yet configured',
-      done: !!activeSession,
-      path: '/settings/session',
+      key: 'session',
+      headData: 'Session',
+      showOnMobile: true,
+      bodyData: (session) => <div className="min-w-0">
+        <span className="block truncate font-semibold" title={session.sessionName}>{session.sessionName}</span>
+        <span className="mt-0.5 block whitespace-normal text-xs text-[var(--text-secondary)] md:hidden">{formatSessionRange(session)}</span>
+      </div>,
     },
     {
-      num: 2,
-      label: 'Master Bell Schedule',
-      sublabel: activeSession?.hasMasterSchedule
-        ? '✓ Configured'
-        : activeSession
-        ? 'Awaiting configuration'
-        : 'Requires Step 1',
-      done: !!activeSession?.hasMasterSchedule,
-      path: '/settings/master-period',
+      key: 'dates',
+      headData: 'Date Range',
+      showOnMobile: false,
+      bodyData: (session) => <span className="whitespace-normal text-[var(--text-secondary)]">{formatSessionRange(session)}</span>,
     },
     {
-      num: 3,
-      label: 'Class Timetable Builder',
-      sublabel: activeSession?.timetableCount
-        ? `✓ ${activeSession.timetableCount} Class(es) Built`
-        : activeSession?.hasMasterSchedule
-        ? 'Ready to assign'
-        : 'Requires Step 2',
-      done: (activeSession?.timetableCount || 0) > 0,
-      path: '/settings/class-timetable',
+      key: 'status',
+      headData: 'Status',
+      showOnMobile: true,
+      bodyData: (session) => <span className={'proc-status session-status-' + session.group}>{SESSION_STATUS[session.group]}</span>,
+    },
+    {
+      key: 'details',
+      headData: <span className="sr-only">Details</span>,
+      showOnMobile: true,
+      bodyData: (session) => {
+        const expanded = openId === session.id;
+        return <button type="button" className="proc-btn proc-btn-sm session-row-disclosure" disabled={busy}
+          aria-label={`${expanded ? 'Hide' : 'View'} ${session.sessionName} session details`}
+          aria-expanded={expanded} aria-controls={expanded ? 'session-details-' + session.id : undefined}
+          onClick={() => toggleRow(session)}>
+          <span className="hidden md:inline">Details</span><ChevronDown size={15} aria-hidden="true" />
+        </button>;
+      },
     },
   ];
 
   return (
-    <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 sm:p-5 backdrop-blur-sm">
-      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-3">
-        Academic Setup Workflow
-      </p>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-        {steps.map((step, idx) => (
-          <React.Fragment key={step.num}>
-            <button
-              onClick={() => onNavigate(step.path)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group ${
-                step.num === 1
-                  ? 'bg-indigo-600/30 border border-indigo-500/50 ring-1 ring-indigo-500/30'
-                  : step.done
-                  ? 'bg-emerald-900/30 border border-emerald-700/50 hover:bg-emerald-900/50 cursor-pointer'
-                  : 'bg-slate-700/30 border border-slate-600/30 hover:bg-slate-700/50 cursor-pointer'
-              }`}
-            >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                  step.num === 1
-                    ? 'bg-indigo-500 text-white'
-                    : step.done
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-600 text-slate-300'
-                }`}
-              >
-                {step.done && step.num !== 1 ? '✓' : step.num}
-              </div>
-              <div className="min-w-0">
-                <p className={`text-xs font-black leading-tight ${
-                  step.num === 1 ? 'text-indigo-200' : step.done ? 'text-emerald-200' : 'text-slate-300'
-                }`}>
-                  {step.label}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium mt-0.5 truncate max-w-[140px]">
-                  {step.sublabel}
-                </p>
-              </div>
+    <MotionConfig reducedMotion="user">
+      <section className="session-directory" aria-labelledby="academic-session-list">
+        <header className="session-page-header">
+          <div className="session-page-heading">
+            <span className="session-page-icon" aria-hidden="true"><CalendarDays size={23} /></span>
+            <h1 id="academic-session-list">Academic Sessions</h1>
+          </div>
+          <div className="proc-actions">
+            <button type="button" className="proc-btn session-help-button" onClick={() => setHelpOpen((open) => !open)} disabled={busy}
+              aria-expanded={helpOpen} aria-controls={helpOpen ? 'session-guide' : undefined}>
+              <HelpCircle size={16} aria-hidden="true" /> How it works
             </button>
-            {idx < steps.length - 1 && (
-              <ChevronRight
-                size={16}
-                className="text-slate-600 shrink-0 mx-1 sm:block hidden"
-              />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-
-const SessionManagementSettings = () => {
-  const navigate = useNavigate();
-  const { classOptions, refresh: refreshSessionChoices } = useAcademicSession();
-  const [rollover, setRollover] = useState(null);
-  const [classMaster, setClassMaster] = useState([]);
-  const [preview, setPreview] = useState(null);
-  const [sessions, setSessions] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [budgets, setBudgets] = useState([]);
-
-  // New session form state
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newSessionName, setNewSessionName] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [isCurrent, setIsCurrent] = useState(false);
-  const [notes, setNotes] = useState('');
-
-  // Edit session form state
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingSession, setEditingSession] = useState(null);
-  const [editForm, setEditForm] = useState({
-    sessionName: '',
-    startDate: '',
-    endDate: '',
-    isCurrent: false,
-    status: 'active',
-    notes: '',
-  });
-  const [submittingEdit, setSubmittingEdit] = useState(false);
-
-  // Promotion state
-  const [selectedClass, setSelectedClass] = useState('All Classes');
-  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
-  const [targetSession, setTargetSession] = useState('');
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [submittingUpgrade, setSubmittingUpgrade] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [canRollback, setCanRollback] = useState(false);
-
-  // Progress Bar Overlay state
-  const [isPromoting, setIsPromoting] = useState(false);
-  const [progressPercent, setProgressPercent] = useState(0);
-  const [progressStatusText, setProgressStatusText] = useState('');
-  const [promotionTitle, setPromotionTitle] = useState('');
-
-  const runWithProgress = async (title, apiCallFn) => {
-    setIsPromoting(true);
-    setPromotionTitle(title);
-    setProgressPercent(15);
-    setProgressStatusText('Initializing student promotion sequence...');
-
-    const timer = setInterval(() => {
-      setProgressPercent((prev) => {
-        if (prev >= 92) return 92;
-        const step = Math.floor(Math.random() * 12) + 5;
-        const nextVal = Math.min(prev + step, 92);
-        if (nextVal > 30 && nextVal <= 60) {
-          setProgressStatusText('Updating student records & passout marks in DB...');
-        } else if (nextVal > 60 && nextVal <= 85) {
-          setProgressStatusText('Synchronizing academic progression...');
-        } else if (nextVal > 85) {
-          setProgressStatusText('Finalizing database transaction...');
-        }
-        return nextVal;
-      });
-    }, 250);
-
-    try {
-      const res = await apiCallFn();
-      clearInterval(timer);
-      setProgressPercent(100);
-      setProgressStatusText('Completed successfully!');
-      await new Promise((r) => setTimeout(r, 450));
-      return res;
-    } catch (err) {
-      clearInterval(timer);
-      throw err;
-    } finally {
-      clearInterval(timer);
-      setIsPromoting(false);
-    }
-  };
-
-  const fetchInitialData = async () => {
-    setLoading(true);
-    try {
-      const [sessRes, studRes, promoRes, budgetRes] = await Promise.all([
-        api.get('/sessions').catch(() => null),
-        api.get('/students').catch(() => null),
-        api.get('/students/promotion-status').catch(() => null),
-        api.get('/budget', { params: { allSessions: true } }).catch(() => null),
-      ]);
-
-      const sessList =
-        sessRes?.data?.data?.sessions ||
-        sessRes?.data?.sessions ||
-        (Array.isArray(sessRes?.data?.data) ? sessRes.data.data : (Array.isArray(sessRes?.data) ? sessRes.data : []));
-      setSessions(sessList);
-
-      const activeSess = sessList.find((s) => s.isCurrent);
-      if (activeSess) setTargetSession(activeSess.sessionName);
-
-      const budgetList =
-        budgetRes?.data?.data?.budgets ||
-        budgetRes?.data?.budgets ||
-        (Array.isArray(budgetRes?.data?.data) ? budgetRes.data.data : []);
-      setBudgets(budgetList);
-
-      if (studRes?.data?.students || Array.isArray(studRes?.data?.data) || Array.isArray(studRes?.data)) {
-        const list = studRes.data?.data?.students || studRes.data?.students || studRes.data?.data || studRes.data;
-        setStudents(Array.isArray(list) ? list : []);
-      }
-
-      const hasLocalTimestamp = (() => {
-        const ts = localStorage.getItem('lastPromotionTimestamp');
-        if (!ts) return false;
-        const diffHours = (Date.now() - Number(ts)) / (1000 * 60 * 60);
-        return diffHours < 24;
-      })();
-
-      if (promoRes?.data?.canRollback || hasLocalTimestamp) {
-        setCanRollback(true);
-      } else {
-        setCanRollback(false);
-      }
-    } catch (err) {
-      console.error('Error loading session data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchInitialData();
-    api.get('/sessions/rollover-settings').then(({ data }) => setRollover(data.data)).catch(() => {});
-    api.get('/erp/class-master').then(({ data }) => setClassMaster((data.classes || []).filter((grade) => Number.isFinite(grade.sortOrder)))).catch(() => {});
-  }, []);
-
-  const handleOpenEditModal = (sess) => {
-    if (!sess) return;
-    setEditingSession(sess);
-    setEditForm({
-      sessionName: sess.sessionName || '',
-      startDate: sess.startDate ? String(sess.startDate).slice(0, 10) : '',
-      endDate: sess.endDate ? String(sess.endDate).slice(0, 10) : '',
-      isCurrent: !!sess.isCurrent,
-      status: sess.status || (sess.isCurrent ? 'active' : 'upcoming'),
-      notes: sess.notes || '',
-      startClassId: sess.startClassId || '',
-      endClassId: sess.endClassId || '',
-    });
-    setShowEditModal(true);
-  };
-
-  const handleUpdateSession = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (!editingSession) return;
-    if (!editForm.sessionName || !editForm.startDate || !editForm.endDate) {
-      safeToast('error', 'Please enter session name, start date, and end date.');
-      return;
-    }
-
-    setSubmittingEdit(true);
-    try {
-      const res = await api.put(`/sessions/${editingSession._id || editingSession.id}`, editForm);
-      if (res.data?.success) {
-        safeToast('success', `Academic Session "${editForm.sessionName}" updated successfully!`);
-        setShowEditModal(false);
-        setEditingSession(null);
-        refreshSessionChoices().catch(() => {});
-        fetchInitialData();
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || 'Failed to update academic session');
-    } finally {
-      setSubmittingEdit(false);
-    }
-  };
-
-  const handleDeleteSession = async (sess) => {
-    if (!sess) return;
-    if (sess.isCurrent) {
-      safeToast('error', 'Cannot delete the active current session. Please set another session active first.');
-      return;
-    }
-    if (!window.confirm(`Are you sure you want to delete session "${sess.sessionName}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const res = await api.delete(`/sessions/${sess._id || sess.id}`);
-      if (res.data?.success) {
-        safeToast('success', `Session "${sess.sessionName}" deleted successfully!`);
-        refreshSessionChoices().catch(() => {});
-        fetchInitialData();
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || 'Failed to delete session');
-    }
-  };
-
-  const activeSession = useMemo(
-    () => sessions.find((s) => s.isCurrent),
-    [sessions]
-  );
-
-  // Class & search filtered students
-  const filteredStudents = useMemo(() => {
-    if (!students.length) return [];
-    const normalizedSel = (selectedClass || '').split(' - ')[0].trim().toLowerCase();
-    return students.filter((s) => {
-      const clsName = String(s.className || s.class || '').split(' - ')[0].trim().toLowerCase();
-      const matchClass = !selectedClass || selectedClass === 'All Classes' || clsName === normalizedSel;
-      const matchSearch =
-        !searchTerm ||
-        (s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (s.admissionNumber && s.admissionNumber.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchClass && matchSearch;
-    });
-  }, [students, selectedClass, searchTerm]);
-
-  const safeToast = (type, message) => {
-    try {
-      if (toast && typeof toast[type] === 'function') {
-        toast[type](message);
-      }
-    } catch (err) {
-      console.warn('Toast display suppressed:', err);
-    }
-  };
-
-  // Handle Add Session Submit
-  const handleCreateSession = async (e) => {
-    e.preventDefault();
-    if (!newSessionName || !startDate || !endDate) {
-      safeToast('error', 'Please enter session name, start date, and end date.');
-      return;
-    }
-    try {
-      const res = await api.post('/sessions', {
-        sessionName: newSessionName,
-        startDate,
-        endDate,
-        isCurrent,
-        notes,
-      });
-      if (res.data?.success) {
-        safeToast('success', `Academic Session ${newSessionName} created!`);
-        setNewSessionName('');
-        setStartDate('');
-        setEndDate('');
-        setIsCurrent(false);
-        setNotes('');
-        setShowAddModal(false);
-        refreshSessionChoices().catch(() => {});
-        fetchInitialData();
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || 'Failed to create session');
-    }
-  };
-
-  // Handle Activate Session
-  const handleActivateSession = async (id, name) => {
-    try {
-      const res = await api.patch(`/sessions/${id}/activate`);
-      if (res.data?.success) {
-        safeToast('success', `Academic Session "${name}" is now active!`);
-        refreshSessionChoices().catch(() => {});
-        fetchInitialData();
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || 'Failed to activate session');
-    }
-  };
-
-  // Handle Whole-School Bulk Upgrade
-
-  const openUpgrade = async () => {
-    if (!activeSession) return;
-    setShowUpgradeModal(true);
-    setPreview(null);
-    try {
-      const { data } = await api.get('/sessions/' + (activeSession._id || activeSession.id) + '/rollover/preview');
-      setPreview(data.data);
-    } catch (error) {
-      setPreview({ message: error.response?.data?.message || 'The rollover preview could not be loaded.' });
-    }
-  };
-
-  const handleWholeSchoolUpgrade = async () => {
-    if (!activeSession || !preview?.version) return;
-    setSubmittingUpgrade(true);
-    try {
-      const { data } = await api.post('/sessions/' + (activeSession._id || activeSession.id) + '/rollover', { planVersion: preview.version });
-      safeToast('success', data.data.status === 'completed'
-        ? data.data.promotedCount + ' promoted, ' + data.data.passoutCount + ' Passout.'
-        : 'Approval recorded. The upgrade will run at the scheduled cutoff.');
-      setShowUpgradeModal(false);
-      await refreshSessionChoices();
-      fetchInitialData();
-    } catch (error) {
-      safeToast('error', error.response?.data?.message || 'The session upgrade could not be completed.');
-      await openUpgrade();
-    } finally {
-      setSubmittingUpgrade(false);
-    }
-  };
-
-  const saveRollover = async (event) => {
-    event.preventDefault();
-    try {
-      const { data } = await api.put('/sessions/rollover-settings', rollover);
-      setRollover(data.data);
-      safeToast('success', data.message);
-    } catch (error) {
-      safeToast('error', error.response?.data?.message || 'Rollover settings could not be saved.');
-    }
-  };
-
-  // Handle Class-Wise or Individual Student Promote/Demote
-  const handlePromoteDemote = async (action, mode = 'individual') => {
-    const isPromote = action === 'promote';
-    if (mode === 'individual' && selectedStudentIds.length === 0) {
-      safeToast('error', 'Please select at least one student to process.');
-      return;
-    }
-
-    const titleText = `${isPromote ? 'Promoting' : 'Demoting'} ${selectedStudentIds.length} Student(s)...`;
-
-    try {
-      const res = await runWithProgress(titleText, () =>
-        api.post('/students/promote', {
-          mode,
-          action,
-          sourceClass: selectedClass,
-          studentIds: selectedStudentIds,
-          targetSession: targetSession || activeSession?.sessionName || '',
-        })
-      );
-
-      if (res.data?.success) {
-        safeToast(
-          'success',
-          `Successfully ${isPromote ? 'promoted' : 'demoted'} ${res.data.updatedCount} student(s)!`
-        );
-        setSelectedStudentIds([]);
-        if (isPromote) {
-          localStorage.setItem('lastPromotionTimestamp', String(Date.now()));
-          setCanRollback(true);
-        } else {
-          localStorage.removeItem('lastPromotionTimestamp');
-          setCanRollback(false);
-        }
-        refreshSessionChoices().catch(() => {});
-        fetchInitialData();
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || `${action} action failed`);
-    }
-  };
-
-  // Handle Rollback Promotion within 24 Hours
-  const handleRollbackPromotion = async () => {
-    try {
-      const res = await runWithProgress('⏪ Rolling Back Last Promotion (24h Window)...', () =>
-        api.post('/students/rollback-promotion', { maxHours: 24 })
-      );
-
-      if (res.data?.success) {
-        if (res.data.revertedCount > 0) {
-          safeToast('success', `⏪ Successfully rolled back promotion for ${res.data.revertedCount} student(s) back to previous state!`);
-          localStorage.removeItem('lastPromotionTimestamp');
-          setCanRollback(false);
-          refreshSessionChoices().catch(() => {});
-        fetchInitialData();
-        } else {
-          safeToast('info', 'No student promotions found within the last 24 hours to rollback.');
-          localStorage.removeItem('lastPromotionTimestamp');
-          setCanRollback(false);
-        }
-      }
-    } catch (err) {
-      safeToast('error', err.response?.data?.message || 'Rollback failed');
-    }
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedStudentIds.length === filteredStudents.length) {
-      setSelectedStudentIds([]);
-    } else {
-      setSelectedStudentIds(filteredStudents.map((s) => s.id || s._id));
-    }
-  };
-
-  const toggleStudentSelect = (id) => {
-    setSelectedStudentIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  return (
-    <div className="space-y-8 pb-10">
-      {/* ── ACADEMIC SETUP STEPPER ── */}
-      <AcademicScheduleStepper
-        activeSession={activeSession}
-        onNavigate={(path) => navigate(path)}
-      />
-
-      {/* ── SESSION ACTIVATED COMPLETION BANNER ── */}
-
-      {rollover && (
-        <form onSubmit={saveRollover} className="space-y-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-          <h3 className="text-sm font-semibold">Rollover schedule</h3>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Input label="School timezone" required value={rollover.timeZone}
-              onChange={(event) => setRollover({ ...rollover, timeZone: event.target.value })} />
-            <Input label="Preparation time on final day" type="time" required value={rollover.prepareTime}
-              onChange={(event) => setRollover({ ...rollover, prepareTime: event.target.value })} />
-            <Input label="Upgrade time on next session’s first day" type="time" required value={rollover.cutoffTime}
-              onChange={(event) => setRollover({ ...rollover, cutoffTime: event.target.value })} />
-          </div>
-          <label className="flex items-center gap-2 text-xs">
-            <input type="checkbox" checked={rollover.autoPromote}
-              onChange={(event) => setRollover({ ...rollover, autoPromote: event.target.checked })} />
-            Enable automatic whole-school promotion
-          </label>
-          <button type="submit" className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white">
-            Save rollover schedule
-          </button>
-        </form>
-      )}
-
-      {activeSession && (
-        <div className="bg-gradient-to-r from-emerald-900/70 via-slate-900 to-slate-900 rounded-2xl p-5 border border-emerald-500/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
-              <CheckCircle2 size={20} className="text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-sm font-black text-emerald-300">
-                Academic Session <span className="text-white">{activeSession.sessionName}</span> is active!
-              </p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {activeSession.hasMasterSchedule
-                  ? 'Master Bell Schedule is configured. Next: Build class timetables.'
-                  : 'Next Step: Configure the Master Bell Schedule so all classes share the same daily bell rings.'}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate(activeSession.hasMasterSchedule ? '/settings/class-timetable' : '/settings/master-period')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg transition-all shrink-0 whitespace-nowrap"
-          >
-            {activeSession.hasMasterSchedule ? (
-              <><LayoutGrid size={14} /> Open Class Timetable Builder <ArrowRight size={14} /></>
-            ) : (
-              <><Bell size={14} /> Configure Master Bell Schedule <ArrowRight size={14} /></>
-            )}
-          </button>
-        </div>
-      )}
-
-      {/* ── HEADER BANNER ── */}
-      <div className="bg-gradient-to-r from-indigo-900 via-slate-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-indigo-500/20">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-500/30">
-              <Sparkles size={14} className="animate-spin-slow" /> Academic Session Management & Student Upgrade
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Academic Session & Class Promotion Engine
-            </h2>
-            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl">
-              Configure school academic years, define start & end dates, run single-click whole school session upgrades, and promote or demote specific classes and students.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-extrabold text-xs text-white shadow-lg transition-all"
-            >
-              <Plus size={16} /> New Session
-            </button>
-
-            {canRollback && !activeSession?.setupConfirmedAt && (
-              <button
-                onClick={handleRollbackPromotion}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-900/80 hover:bg-purple-800 text-purple-200 font-extrabold text-xs border border-purple-500/50 shadow-lg transition-all animate-pulse"
-                title="Rollback recent promotions performed within the last 24 hours"
-              >
-                ⏪ Undo Upgrade (24h)
+            {canManage && (
+              <button type="button" className="proc-btn proc-primary" onClick={() => togglePanel('new')}
+                disabled={busy || !schoolClasses.classRange || loading || Boolean(error)}
+                aria-expanded={panel === 'new'} aria-controls={panel === 'new' ? 'session-date-form' : undefined}>
+                <Plus size={16} aria-hidden="true" /> New Session
               </button>
             )}
-
-            <button
-              onClick={openUpgrade}
-              disabled={!activeSession}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-black text-xs text-slate-950 shadow-xl transition-all"
-            >
-              ⚡ Upgrade Whole School Session
-            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Current Active Session Badge Bar */}
-        {activeSession && (
-          <div className="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div className="flex items-center gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-              <Clock className="text-indigo-400" size={18} />
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Active Academic Session</p>
-                <p className="font-black text-white text-sm">{activeSession.sessionName}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-              <Calendar className="text-emerald-400" size={18} />
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Session Start & End Date</p>
-                <p className="font-extrabold text-slate-200">
-                  {formatDate(activeSession.startDate, undefined, '—')} — {formatDate(activeSession.endDate, undefined, '—')}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-              <Users className="text-amber-400" size={18} />
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold">Total Enrolled Students</p>
-                <p className="font-black text-white text-sm">{students.length} Active Records</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
-              <div className="flex items-center gap-2.5">
-                <Wallet className="text-orange-400 shrink-0" size={18} />
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase font-bold">Salary Master Budget</p>
-                  <p className="font-black text-white text-sm">
-                    {(() => {
-                      const b = budgets.find((bg) => String(bg.sessionId) === String(activeSession._id || activeSession.id));
-                      return b ? formatCurrency(b.salaryBudget || 0) : 'Not Allocated';
-                    })()}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleOpenEditModal(activeSession)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-[11px] shadow-sm transition-all shrink-0 cursor-pointer"
-                title="Edit Current Active Session"
-              >
-                <Edit size={12} /> Edit Current Session
-              </button>
-            </div>
-          </div>
+        {helpOpen && (
+          <section className="session-guide" id="session-guide" aria-label="How academic sessions work">
+            <p>Each academic session groups the school year’s enrollments, attendance, and results.</p>
+            <p>The next session is created automatically. It starts the day after the current session ends and runs for one year by default. Changing an end date moves upcoming dates while keeping each session’s planned length.</p>
+            <p>Student rollover settings control how students move to the next session. Use New Session to plan additional years.</p>
+          </section>
         )}
-      </div>
 
-      {/* ── SECTION 1: ACADEMIC SESSIONS LIST & CONFIGURATION ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <Calendar size={18} className="text-indigo-600" /> Academic Session Configuration & Dates
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Manage school session timelines. Set start date, end date, and mark active session.
-            </p>
+        <div className="session-overview">
+          <SessionTimeline current={activeSession} upcoming={upcoming} busy={busy} loading={loading}
+            panel={panel} onEdit={canManage ? togglePanel : undefined} />
+          <div className="session-overview-controls">
+            <SchoolClasses canManage={canManage} open={panel === 'classes'} busy={busy} setBusy={setBusy}
+              onOpen={() => togglePanel('classes')} onClose={() => setPanel(null)} />
+            {canManage && (
+              <section className="session-side-card" aria-label="Student Rollover">
+                <div className="session-side-card-row">
+                  <span className="session-side-icon"><CalendarClock size={19} aria-hidden="true" /></span>
+                  <div className="session-side-card-text"><h2>Student Rollover</h2><p>{rolloverMode}</p></div>
+                  <button type="button" className="session-icon-button" onClick={() => togglePanel('automatic')} disabled={busy}
+                    title="Rollover settings" aria-label="Rollover settings"
+                    aria-expanded={panel === 'automatic'} aria-controls={panel === 'automatic' ? 'automatic-rollover-panel' : undefined}>
+                    <Settings2 size={17} aria-hidden="true" />
+                  </button>
+                </div>
+              </section>
+            )}
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          {loading ? (
-            <Loader text="Loading Academic Sessions & Master Budget Allocation..." />
-          ) : sessions.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 space-y-3">
-              <Calendar className="mx-auto text-slate-500" size={32} />
-              <p className="font-bold text-sm text-slate-300">No Academic Sessions Configured</p>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Get started by creating your school's current academic year (e.g. 2026-2027).
-              </p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer"
-              >
-                <Plus size={14} /> Create Academic Session
-              </button>
-            </div>
-          ) : (
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                  <th className="py-3 px-4">Session Name</th>
-                  <th className="py-3 px-4">Start Date</th>
-                  <th className="py-3 px-4">End Date</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Salary Budget & Payroll Integration</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {sessions.map((sess) => {
-                  const sessBudget = budgets.find(
-                    (b) => String(b.sessionId) === String(sess._id || sess.id)
-                  );
-                  return (
-                    <tr key={sess._id || sess.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                      <td className="py-3 px-4 font-black text-slate-900 dark:text-white">
-                        <div className="flex items-center gap-2">
-                          <span>{sess.sessionName}</span>
-                          {sess.isCurrent && (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
-                              ACTIVE CURRENT
-                            </span>
-                          )}
-                        </div>
-                        {sess.notes && (
-                          <p className="text-[10px] text-slate-400 font-normal mt-0.5">{sess.notes}</p>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
-                        {formatDate(sess.startDate, undefined, '—')}
-                      </td>
-                      <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">
-                        {formatDate(sess.endDate, undefined, '—')}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-md font-bold text-[10px] uppercase ${
-                            sess.isCurrent
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                              : sess.status === 'completed'
-                              ? 'bg-slate-100 text-slate-500 border border-slate-200'
-                              : 'bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-slate-800 dark:text-slate-400'
-                          }`}
-                        >
-                          {sess.status || (sess.isCurrent ? 'active' : 'upcoming')}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {sessBudget ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
-                              <span>{formatCurrency(sessBudget.salaryBudget || 0)}</span>
-                              <span className="text-[10px] text-slate-400 font-normal">
-                                ({formatCurrency(sessBudget.salarySpent || 0)} spent)
-                              </span>
-                            </div>
-                            <div className="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-1 overflow-hidden">
-                              <div
-                                className="bg-emerald-500 h-1 rounded-full"
-                                style={{
-                                  width: `${
-                                    sessBudget.salaryBudget
-                                      ? Math.min(
-                                          100,
-                                          Math.round(
-                                            ((sessBudget.salarySpent || 0) / sessBudget.salaryBudget) * 100
-                                          )
-                                        )
-                                      : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => navigate('/settings/budget-allocation')}
-                            className="text-[11px] font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1 cursor-pointer"
-                          >
-                            <Wallet size={12} /> Allocate Master Budget
-                          </button>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="inline-flex items-center gap-2 justify-end">
-                          <button
-                            onClick={() => handleOpenEditModal(sess)}
-                            className="p-1.5 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all font-bold text-[11px] flex items-center gap-1 cursor-pointer"
-                            title="Edit Academic Session"
-                          >
-                            <Edit size={13} />
-                            <span>Edit</span>
-                          </button>
-
-                          {!sess.isCurrent && (
-                            <>
-                              <button
-                                onClick={() => handleActivateSession(sess._id || sess.id, sess.sessionName)}
-                                className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold text-[11px] border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800 transition-all cursor-pointer"
-                              >
-                                Set Active
-                              </button>
-                              <button
-                                onClick={() => handleDeleteSession(sess)}
-                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800 transition-all cursor-pointer"
-                                title="Delete Inactive Session"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
-
-      {/* ── SECTION 2: INDIVIDUAL STUDENT PROMOTION / DEMOTION TOOL ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-          <div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <GraduationCap size={18} className="text-indigo-600" /> Individual Student Progression & Promotion
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Select specific student(s) to promote to the next class level (or mark Passout for Class 12) or demote back.
-            </p>
-          </div>
-        </div>
-
-        {/* Filters and Search Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-          <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filter Class:</label>
-            <SelectInput
-              value={selectedClass}
-              onChange={(e) => {
-                setSelectedClass(e.target.value);
-                setSelectedStudentIds([]);
-              }}
-              className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
-            >
-              <option value="All Classes">All Classes (Entire School)</option>
-              {classOptions.map((cls) => (
-                <option key={cls.value} value={cls.label}>
-                  {cls.label}
-                </option>
-              ))}
-            </SelectInput>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Target Academic Session:</label>
-            <SelectInput
-              value={targetSession}
-              onChange={(e) => setTargetSession(e.target.value)}
-              className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
-            >
-              {sessions.map((s) => (
-                <option key={s._id || s.id} value={s.sessionName}>
-                  Session {s.sessionName} {s.isCurrent ? '(Active)' : ''}
-                </option>
-              ))}
-            </SelectInput>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Search Student:</label>
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-3 text-slate-400" />
-              <Input
-                type="text"
-                placeholder="Search name or roll no..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Selected Actions Bar */}
-        {selectedStudentIds.length > 0 && (
-          <div className="bg-indigo-50 dark:bg-indigo-950/60 p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800 flex items-center justify-between flex-wrap gap-3">
-            <span className="text-xs font-black text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-indigo-600" />
-              {selectedStudentIds.length} Student(s) Selected
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePromoteDemote('promote', 'individual')}
-                className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-xs flex items-center gap-1 transition-all"
-              >
-                <ArrowUpRight size={14} /> Promote Selected
-              </button>
-              <button
-                onClick={() => handlePromoteDemote('demote', 'individual')}
-                className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs shadow-xs flex items-center gap-1 transition-all"
-              >
-                <ArrowDownRight size={14} /> Demote Selected
-              </button>
-            </div>
+        {dateIssue && (
+          <div className="session-date-notice">
+            <p><AlertCircle size={17} aria-hidden="true" /><span><strong>Align session dates.</strong> {dateIssue.session.sessionName} should start on {formatSessionDate(dateIssue.expectedStart)} to follow {dateIssue.previous.sessionName}.</span></p>
+            {canManage && <button type="button" className="proc-btn proc-btn-sm" disabled={busy || loading}
+              aria-expanded={panel === 'dates'} aria-controls={panel === 'dates' ? 'session-date-form' : undefined}
+              onClick={() => togglePanel('dates')}>Review Dates</button>}
           </div>
         )}
 
-        {/* Students Table */}
-        <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-xl">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-400 uppercase font-bold text-[10px] border-b border-slate-200 dark:border-slate-700">
-                <th className="py-3 px-4 w-10">
-                  <CheckboxInput
-                    checked={filteredStudents.length > 0 && selectedStudentIds.length === filteredStudents.length}
-                    onChange={toggleSelectAll}
-                    className="rounded text-indigo-600 focus:ring-indigo-500"
-                  />
-                </th>
-                <th className="py-3 px-4">Student Name</th>
-                <th className="py-3 px-4">Admission No.</th>
-                <th className="py-3 px-4">Current Class</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Individual Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredStudents.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
-                    No students found in {selectedClass}.
-                  </td>
-                </tr>
-              ) : (
-                filteredStudents.map((stud) => {
-                  const sId = stud.id || stud._id;
-                  const isSelected = selectedStudentIds.includes(sId);
-                  const isPassout = stud.status === 'Passout' || stud.className === 'Passout';
-
-                  return (
-                    <tr key={sId} className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 ${isSelected ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''}`}>
-                      <td className="py-3 px-4">
-                        <CheckboxInput
-                          checked={isSelected}
-                          onChange={() => toggleStudentSelect(sId)}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </td>
-                      <td className="py-3 px-4 font-black text-slate-900 dark:text-white">
-                        {stud.name}
-                      </td>
-                      <td className="py-3 px-4 font-mono font-bold text-slate-500">
-                        {stud.admissionNumber || 'ADM-001'}
-                      </td>
-                      <td className="py-3 px-4 font-bold text-indigo-600 dark:text-indigo-400">
-                        {stud.className || stud.class || selectedClass}
-                      </td>
-                      <td className="py-3 px-4">
-                        {isPassout ? (
-                          <span className="px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border border-purple-300">
-                            🎓 PASSOUT
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-0.5 rounded-full font-bold text-[9px] uppercase bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                            ACTIVE
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedStudentIds([sId]);
-                            handlePromoteDemote('promote', 'individual');
-                          }}
-                          className="px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-black text-[10px] border border-emerald-200 transition-all"
-                        >
-                          ⬆️ Promote
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedStudentIds([sId]);
-                            handlePromoteDemote('demote', 'individual');
-                          }}
-                          className="px-2.5 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-[10px] border border-rose-200 transition-all"
-                        >
-                          ⬇️ Demote
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ── MODAL: CREATE ACADEMIC SESSION ── */}
-      <Modal
-        open={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        size="sm"
-        title={
-          <div className="flex items-center gap-2">
-            <Calendar className="text-indigo-600" />
-            <span>Create New Academic Session</span>
+        {canManage && panel === 'automatic' && (
+          <div id="automatic-rollover-panel">
+            {rollover.loading && <Pending label="Loading rollover settings" />}
+            <ErrorMessage error={rollover.error} onRetry={rollover.refresh} />
+            {rollover.data && (
+              <RolloverSettingsForm settings={rollover.data} busy={busy} setBusy={setBusy}
+                onCancel={() => setPanel(null)} onSaved={() => { rollover.refresh(); setPanel(null); }} />
+            )}
           </div>
-        }
-      >
-        <div className="space-y-5">
+        )}
+        {showDateForm && (
+          <div id="session-date-form">
+            <SessionForm key={panel + ':' + recordId(formSession)} session={formSession}
+              sessions={sessions} activeSession={activeSession} busy={busy} setBusy={setBusy} onCancel={() => setPanel(null)}
+              onSaved={(saved, shifted) => {
+                sessionChanged(saved, shifted);
+                toast.success(panel === 'new' ? 'Session created.' : 'Session dates updated.');
+              }} />
+          </div>
+        )}
 
-            <form onSubmit={handleCreateSession} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Session Name (e.g. 2026-2027):</label>
-                <Input
-                  type="text"
-                  placeholder="2026-2027"
-                  value={newSessionName}
-                  onChange={(e) => setNewSessionName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Start Date:</label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">End Date:</label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <SwitchInput
-                  size="sm"
-                  id="isCurrentCheck"
-                  checked={isCurrent}
-                  onChange={(e) => setIsCurrent(e.target.checked)}
-                  className="shrink-0"
-                />
-                <label htmlFor="isCurrentCheck" className="font-extrabold text-slate-800 dark:text-slate-200">
-                  Set as Active Current Session
-                </label>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Notes / Description:</label>
-                <TextareaInput
-                  rows={2}
-                  placeholder="Optional session details..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold cursor-pointer"
-                >
-                  Cancel
+        <ErrorMessage error={error} onRetry={reload} />
+        <section className="session-list-panel proc-panel" aria-labelledby="session-schedule-title">
+          <div className="session-list-header">
+            <h2 id="session-schedule-title">Session Schedule</h2>
+            <div className="session-filters" role="group" aria-label="Filter sessions by status">
+              {Object.entries(filters).map(([key, label]) => (
+                <button type="button" key={key} onClick={() => selectFilter(key)} aria-pressed={filter === key} disabled={busy}>
+                  {label}
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg cursor-pointer"
-                >
-                  Save Academic Session
-                </button>
-              </div>
-            </form>
-        </div>
-      </Modal>
-
-      {/* ── MODAL: EDIT ACADEMIC SESSION ── */}
-      <Modal
-        open={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingSession(null);
-        }}
-        size="sm"
-        title={
-          <div className="flex items-center gap-2">
-            <Edit className="text-indigo-600" size={18} />
-            <span>Edit Academic Session: {editingSession?.sessionName}</span>
-          </div>
-        }
-      >
-        <div className="space-y-5">
-          <form onSubmit={handleUpdateSession} className="space-y-4 text-xs">
-            <div>
-              <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">
-                Session Name (e.g. 2026-2027):
-              </label>
-              <Input
-                type="text"
-                placeholder="2026-2027"
-                value={editForm.sessionName}
-                onChange={(e) => setEditForm({ ...editForm, sessionName: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Start Date:</label>
-                <Input
-                  type="date"
-                  value={editForm.startDate}
-                  onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">End Date:</label>
-                <Input
-                  type="date"
-                  value={editForm.endDate}
-                  onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white"
-                  required
-                />
-              </div>
-            </div>
-
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <SelectInput label="Starting Class" value={editForm.startClassId || ''}
-                options={classMaster.map((grade) => ({ value: grade.id, label: grade.name }))}
-                onChange={(e) => setEditForm({ ...editForm, startClassId: e.target.value })} />
-              <SelectInput label="Ending Class" value={editForm.endClassId || ''}
-                options={classMaster.map((grade) => ({ value: grade.id, label: grade.name }))}
-                onChange={(e) => setEditForm({ ...editForm, endClassId: e.target.value })} />
-            </div>
-
-            <div>
-              <label className="block font-bold text-slate-600 dark:text-slate-300 mb-1">Notes / Description:</label>
-              <TextareaInput
-                rows={2}
-                placeholder="Optional session details..."
-                value={editForm.notes}
-                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium text-slate-900 dark:text-white"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingSession(null);
-                }}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submittingEdit}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg disabled:opacity-50 cursor-pointer"
-              >
-                {submittingEdit ? 'Saving...' : 'Update Academic Session'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-
-      {/* ── MODAL: BULK WHOLE SCHOOL SESSION UPGRADE ── */}
-      <Modal
-        open={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        size="md"
-        title={
-          <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
-            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center font-black text-lg">
-              ⚡
-            </div>
-            <div>
-              <h3 className="text-base font-black text-slate-900 dark:text-white">
-                Confirm Whole School Session Upgrade
-              </h3>
-              <p className="text-xs text-slate-500 font-normal">Bulk promote all students across all classes</p>
+              ))}
             </div>
           </div>
-        }
-      >
-        <div className="space-y-6">
-
-
-          {!preview && <p role="status" className="text-sm">Loading the upgrade preview…</p>}
-          {preview?.message && <p className="text-sm">{preview.message}</p>}
-          {preview?.execution?.error && <p role="alert" className="text-sm text-red-600">{preview.execution.error}</p>}
-          {preview?.target && preview.version && (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold">{preview.source.sessionName} → {preview.target.sessionName}</p>
-              <p className="text-xs">
-                {preview.rows.filter((row) => row.action === 'promoted').length} promoted · {preview.rows.filter((row) => row.action === 'passout').length} Passout
-              </p>
-              <ul className="max-h-56 divide-y overflow-auto text-sm">
-                {preview.rows.map((row) => (
-                  <li key={row.studentId} className="py-2">{row.name} · {row.fromClass} → {row.toClass}</li>
-                ))}
-              </ul>
-              {preview.issues.length > 0 && <ul role="alert" className="space-y-1 text-xs text-red-600 dark:text-red-400">
-                {preview.issues.map((issue) => <li key={issue.studentId}>{issue.name} · {issue.reason}</li>)}
-              </ul>}
-            </div>
-          )}
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowUpgradeModal(false)}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold text-xs"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={submittingUpgrade || !preview?.version || Boolean(preview?.issues?.length)}
-                onClick={handleWholeSchoolUpgrade}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-xl transition-all"
-              >
-                {submittingUpgrade ? 'Saving…' : preview?.due ? 'Upgrade Whole School' : 'Approve Scheduled Upgrade'}
-              </button>
-            </div>
-        </div>
-      </Modal>
-
-      {/* ── DYNAMIC PROMOTION PROGRESS BAR OVERLAY ── */}
-      <Modal
-        open={isPromoting}
-        showCloseButton={false}
-        closeOnOverlayClick={false}
-        closeOnEsc={false}
-        size="sm"
-        noPadding
-        className="border-indigo-500/30"
-      >
-          <div className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-indigo-500/30 shadow-2xl space-y-6 text-white text-center relative overflow-hidden">
-            <div className="absolute -right-12 -top-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="relative z-10 space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center mx-auto text-indigo-400">
-                <Sparkles className="animate-spin text-indigo-400" size={32} />
+          <Table
+            className="session-table"
+            tableLabel="Academic sessions"
+            tableClassName="session-table-frame"
+            tableHeadClassName="session-table-head"
+            trClassname="session-table-row"
+            showToolbar={false}
+            tableLayout={columns}
+            data={visibleRows}
+            onRowClick={busy ? undefined : toggleRow}
+            openedRow={openedRow ? [openedRow] : []}
+            loadingTableContent={loading && !sessions.length}
+            noRecordText={error && !sessions.length ? 'Sessions unavailable' : filter === 'all' ? 'No academic sessions yet' : 'No ' + filters[filter].toLowerCase() + ' sessions'}
+            noRecordDescription={!error && !sessions.length && canManage ? 'Use New Session to set the dates for your first school year.' : ''}
+            Collapse={(session) => (
+              <div id={'session-details-' + session.id}>
+                <SessionDetails session={session} sessions={sessions} activeSession={activeSession} nextSession={nextSession}
+                  canManage={canManage} canReadBudget={canReadBudget} busy={busy} setBusy={setBusy}
+                  onChanged={sessionChanged} onDeleted={sessionDeleted} onUpgraded={sessionUpgraded} />
               </div>
-
-              <div>
-                <h3 className="text-lg font-black text-white tracking-tight">
-                  {promotionTitle || 'Processing Student Promotion...'}
-                </h3>
-                <p className="text-xs text-slate-400 mt-1 font-medium">
-                  Communicating with backend database. Please do not close or refresh.
-                </p>
-              </div>
-
-              {/* Progress Bar Container */}
-              <div className="space-y-2 pt-2">
-                <div className="flex justify-between items-center text-xs font-extrabold text-slate-300">
-                  <span className="text-[11px] text-indigo-300 font-semibold">{progressStatusText}</span>
-                  <span className="text-indigo-400 font-black">{progressPercent}%</span>
-                </div>
-                <div className="w-full h-3.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-400 rounded-full transition-all duration-300 shadow-md"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[10px] text-slate-400 font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                API Query Active & Syncing Database...
-              </div>
-            </div>
-          </div>
-      </Modal>
-    </div>
+            )}
+          />
+        </section>
+      </section>
+    </MotionConfig>
   );
-};
-
-export default SessionManagementSettings;
+}

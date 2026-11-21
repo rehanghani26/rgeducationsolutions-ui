@@ -53,6 +53,7 @@ import { useSelector } from "react-redux";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { ROLES } from "../../constants/roles.js";
 import { CheckboxInput, Input, SelectInput, TextareaInput } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const TeacherDetail = () => {
   const { teacherId } = useParams();
@@ -189,10 +190,10 @@ const TeacherDetail = () => {
         setReviewRemarks("");
         fetchTeacherLeaves();
       } else {
-        toast.error(res?.message || `Failed to ${reviewAction} leave request.`);
+        notifyApiError(res, `Failed to ${reviewAction} leave request.`);
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Error processing leave review.");
+      notifyApiError(err, "Error processing leave review.");
     } finally {
       setReviewSubmitting(false);
     }
@@ -235,10 +236,10 @@ const TeacherDetail = () => {
         });
         fetchTeacherLeaves();
       } else {
-        toast.error(res?.message || "Failed to submit teacher leave.");
+        notifyApiError(res, "Failed to submit teacher leave.");
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Error submitting leave request.");
+      notifyApiError(err, "Error submitting leave request.");
     } finally {
       setApplySubmitting(false);
     }

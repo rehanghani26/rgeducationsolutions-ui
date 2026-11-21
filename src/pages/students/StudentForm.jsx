@@ -1,7 +1,7 @@
 import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import { useEffect, useRef, useState } from 'react';
 import { Bookmark, ClipboardCheck, FileText, GraduationCap, KeyRound, UserRound, UsersRound } from 'lucide-react';
-import { CLASS_OPTIONS, SECTION_OPTIONS } from '../../constants/academicOptions.js';
+import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 import { getClasses } from '../../services/erpService.js';
 import { validateStudentStep } from '../../utils/studentForm.js';
 import StudentFormFields from './StudentFormFields.jsx';
@@ -59,7 +59,7 @@ export default function StudentForm({
   form, setForm, editing = false, onSubmit, onCancel, onSaveDraft, submitting, submitError,
   onClearError, stepIndex, setStepIndex, busy, setBusy,
 }) {
-  const { classOptions, selected } = useAcademicSession();
+  const { classOptions } = useAcademicSession();
   const [rooms, setRooms] = useState([]);
   const [errors, setErrors] = useState({});
   const formRef = useRef(null);
@@ -88,9 +88,7 @@ export default function StudentForm({
     });
   }, [stepIndex, errors]);
 
-  const classes = selected?.classIds?.length ? options(classOptions) : extendOptions(CLASS_OPTIONS, rooms.map((room) => ({
-    id: room.classId || room.id || room._id, name: room.className || room.name,
-  })));
+  const classes = options(classOptions);
   const matchingRooms = rooms.filter((room) => (
     form.classId && (String(room.classId || room.id || room._id) === form.classId
       || (form.className && room.className === form.className))
@@ -162,7 +160,7 @@ export default function StudentForm({
         <div className="student-card-body">
           {isReview ? <Review form={form} onEdit={goTo} /> : (
             <StudentFormFields key={step.id} step={step.id} form={form} patch={patch} errors={errors} editing={editing}
-              classes={retainSelection(classes, form.classId, form.className || form.class)}
+              classes={editing ? retainSelection(classes, form.classId, form.className || form.class) : classes}
               sections={retainSelection(sections, form.sectionId, form.sectionName || form.section)} onBusy={(key, value) => setBusy((current) => ({ ...current, [key]: value }))} />
           )}
         </div>

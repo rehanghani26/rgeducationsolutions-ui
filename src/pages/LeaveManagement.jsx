@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { notifyApiError } from '../services/apiErrors.js';
 import {
   Calendar,
   FileText,
@@ -323,7 +324,7 @@ const LeaveManagement = () => {
       if (res?.success || data?.applicant || data?.summary) {
         setApplicantProfileData(data);
       } else {
-        toast.error('Unable to fetch detailed applicant leave history');
+        notifyApiError(res, 'Unable to fetch detailed applicant leave history');
       }
     } catch (err) {
       console.error('getApplicantLeaveProfile error:', err);

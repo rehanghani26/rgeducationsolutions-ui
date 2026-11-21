@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import setupService from '../../../services/setupService.js';
 import api from '../../../services/api.js';
 import { Input, SelectInput } from '../../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../../services/apiErrors.js';
 
 export default function Step5FinancePolicies({ onComplete, onFinish }) {
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ export default function Step5FinancePolicies({ onComplete, onFinish }) {
       if (onComplete) await onComplete('financePolicies');
       if (onFinish) onFinish();
     } catch (err) {
-      toast.error(err?.response?.data?.message || err?.message || 'Failed to save finance policies');
+      notifyApiError(err, 'Failed to save finance policies');
     } finally {
       setLoading(false);
     }

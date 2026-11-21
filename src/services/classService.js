@@ -27,7 +27,6 @@ export async function getClassRooms(params = {}) {
     return res.data;
   } catch (error) {
     console.error('Error fetching classrooms:', error);
-    toast.error(error.response?.data?.message || 'Failed to fetch classrooms');
     throw error;
   }
 }
@@ -41,7 +40,6 @@ export async function getClassRoomsBySession(sessionId) {
     return res.data;
   } catch (error) {
     console.error('Error fetching classrooms by session:', error);
-    toast.error(error.response?.data?.message || 'Failed to fetch classrooms for session');
     throw error;
   }
 }
@@ -55,7 +53,6 @@ export async function getClassRoomById(id) {
     return res.data;
   } catch (error) {
     console.error('Error fetching classroom detail:', error);
-    toast.error(error.response?.data?.message || 'Failed to fetch classroom');
     throw error;
   }
 }
@@ -70,7 +67,6 @@ export async function createClassRoom(payload) {
     return res.data;
   } catch (error) {
     console.error('Error creating classroom:', error);
-    toast.error(error.response?.data?.message || 'Failed to create classroom');
     throw error;
   }
 }
@@ -85,7 +81,6 @@ export async function updateClassRoom(id, payload) {
     return res.data;
   } catch (error) {
     console.error('Error updating classroom:', error);
-    toast.error(error.response?.data?.message || 'Failed to update classroom');
     throw error;
   }
 }
@@ -100,7 +95,6 @@ export async function deleteClassRoom(id) {
     return res.data;
   } catch (error) {
     console.error('Error deleting classroom:', error);
-    toast.error(error.response?.data?.message || 'Failed to delete classroom');
     throw error;
   }
 }
@@ -118,7 +112,6 @@ export async function assignClassTeacher(classRoomId, { teacherId, notes = '' })
     return res.data;
   } catch (error) {
     console.error('Error assigning class teacher:', error);
-    toast.error(error.response?.data?.message || 'Failed to assign class teacher');
     throw error;
   }
 }
@@ -133,7 +126,6 @@ export async function removeClassTeacher(classRoomId, { reason = '' } = {}) {
     return res.data;
   } catch (error) {
     console.error('Error removing class teacher:', error);
-    toast.error(error.response?.data?.message || 'Failed to remove class teacher');
     throw error;
   }
 }
@@ -177,7 +169,6 @@ export async function enrollStudents(classRoomId, { studentIds, rollNumberMap = 
     return res.data;
   } catch (error) {
     console.error('Error enrolling students:', error);
-    toast.error(error.response?.data?.message || 'Failed to enroll students');
     throw error;
   }
 }
@@ -192,7 +183,6 @@ export async function removeStudentFromClass(classRoomId, studentId) {
     return res.data;
   } catch (error) {
     console.error('Error removing student:', error);
-    toast.error(error.response?.data?.message || 'Failed to remove student');
     throw error;
   }
 }
@@ -220,7 +210,6 @@ export async function assignTimetableToClass(classRoomId, payload) {
     return res.data;
   } catch (error) {
     console.error('Error assigning timetable:', error);
-    toast.error(error.response?.data?.message || 'Failed to assign timetable');
     throw error;
   }
 }
@@ -262,7 +251,6 @@ export async function promoteClassStudents(classRoomId, payload) {
     return res.data;
   } catch (error) {
     console.error('Error promoting students:', error);
-    toast.error(error.response?.data?.message || 'Failed to promote students');
     throw error;
   }
 }

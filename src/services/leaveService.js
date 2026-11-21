@@ -100,47 +100,29 @@ export async function getAllLeaves(params = {}) {
  * Submits a new leave request (self or on-behalf)
  */
 export async function requestLeave(payload) {
-  try {
-    const response = await api.post(LEAVE_URLS.REQUEST, payload);
-    toast.success(response.data?.message || 'Leave request submitted successfully.');
-    return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || error.message || 'Failed to submit leave request.';
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.post(LEAVE_URLS.REQUEST, payload);
+  toast.success(response.data?.message || 'Leave request submitted successfully.');
+  return response.data;
 }
 
 /**
  * Reviews (approves or rejects) a leave request and triggers attendance sync
  */
 export async function reviewLeave(leaveId, { status, reviewRemarks = '' }) {
-  try {
-    const url = LEAVE_URLS.REVIEW(leaveId);
-    const response = await api.patch(url, { status, reviewRemarks });
-    toast.success(response.data?.message || `Leave ${status} successfully.`);
-    return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || error.message || 'Failed to review leave application.';
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const url = LEAVE_URLS.REVIEW(leaveId);
+  const response = await api.patch(url, { status, reviewRemarks });
+  toast.success(response.data?.message || `Leave ${status} successfully.`);
+  return response.data;
 }
 
 /**
  * Cancels a pending leave application
  */
 export async function cancelLeave(leaveId) {
-  try {
-    const url = LEAVE_URLS.BY_ID(leaveId);
-    const response = await api.delete(url);
-    toast.success(response.data?.message || 'Leave request cancelled.');
-    return response.data;
-  } catch (error) {
-    const msg = error.response?.data?.message || error.message || 'Failed to cancel leave application.';
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const url = LEAVE_URLS.BY_ID(leaveId);
+  const response = await api.delete(url);
+  toast.success(response.data?.message || 'Leave request cancelled.');
+  return response.data;
 }
 
 /**

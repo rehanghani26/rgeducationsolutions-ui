@@ -53,6 +53,7 @@ import PageHeader from '../../components/ui/PageHeader.jsx';
 import PdfViewerModal from '../../components/ui/PdfViewerModal.jsx';
 import { getStudentById, getStudents } from '../../services/studentService.js';
 import { getUserFromStorage } from '../../config/access.jsx';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 const resolveImageUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
@@ -204,7 +205,7 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
       }
     } catch (err) {
       console.error('Error fetching student profile:', err);
-      toast.error('Failed to load full student profile');
+      notifyApiError(err, 'Failed to load full student profile');
     } finally {
       setLoading(false);
       setRefreshing(false);

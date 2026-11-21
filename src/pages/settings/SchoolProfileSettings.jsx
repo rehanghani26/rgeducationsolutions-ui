@@ -19,6 +19,7 @@ import CompanyLogoUpload from "./CompanyLogoUpload";
 import { useSchoolBranding } from "../../context/SchoolBrandingContext.jsx";
 import { getUserFromStorage } from "../../config/access.jsx";
 import { Input, SelectInput } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from "../../services/apiErrors.js";
 
 const SchoolProfileSettings = ({ settings, handleChange }) => {
   const { updateBranding } = useSchoolBranding();
@@ -95,9 +96,7 @@ const SchoolProfileSettings = ({ settings, handleChange }) => {
       }
     } catch (error) {
       console.error(error);
-      toast.error(
-        error.response?.data?.message || `Failed to upload ${type}`
-      );
+      notifyApiError(error, `Failed to upload ${type}`);
     } finally {
       if (type === "logo") {
         setLogoUploading(false);

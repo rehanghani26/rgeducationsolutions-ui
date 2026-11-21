@@ -18,7 +18,6 @@ import { Input } from '../../components/ui/FormControls.jsx';
 const QUICK_PROMPTS = [
   '🧙 Check setup status and tell me what to do next',
   '🏫 Setup School: Apex Global Academy, 12 Park Street, Mumbai, Maharashtra, India',
-  '🗓️ Create and activate Academic Session 2026-2027 from April 1 to March 31',
   '⏰ Configure a standard 8-period daily bell schedule from 8 AM to 2:30 PM',
   '💰 Set currency as Indian Rupee (₹) with monthly billing and 7 days grace',
 ];

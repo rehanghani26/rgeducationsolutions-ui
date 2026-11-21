@@ -43,6 +43,7 @@ import { getStudents } from '../../services/studentService.js';
 import { getUserFromStorage } from '../../config/access.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { Input, TextareaInput } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 export default function PasswordSecuritySettings() {
   const authUserFromStore = useSelector((state) => state.auth?.user);
@@ -119,7 +120,7 @@ export default function PasswordSecuritySettings() {
       }
     } catch (err) {
       console.error('Failed to load password change requests:', err);
-      toast.error('Failed to load password change requests');
+      notifyApiError(err, 'Failed to load password change requests');
     } finally {
       setLoading(false);
     }
@@ -218,7 +219,7 @@ export default function PasswordSecuritySettings() {
       fetchRequests();
       setActiveTab('history');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit password change request');
+      notifyApiError(err, 'Failed to submit password change request');
     } finally {
       setSubmitting(false);
     }
@@ -250,7 +251,7 @@ export default function PasswordSecuritySettings() {
       setReviewModal({ isOpen: false, request: null, action: 'approve', adminNotes: '' });
       fetchRequests();
     } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to ${action} request`);
+      notifyApiError(err, `Failed to ${action} request`);
     } finally {
       setReviewingId(null);
     }
@@ -327,7 +328,7 @@ export default function PasswordSecuritySettings() {
       fetchRequests();
       setActiveTab('history');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update user password');
+      notifyApiError(err, 'Failed to update user password');
     } finally {
       setDirectResetSubmitting(false);
     }

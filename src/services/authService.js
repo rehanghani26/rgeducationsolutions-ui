@@ -2,7 +2,7 @@
  * @file authService.js
  * @description Authentication API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default authService export for backward compatibility.
  */
 
@@ -11,37 +11,27 @@ import api from './api.js';
 import { AUTH_URLS } from '../constants/urls.js';
 
 export async function loginUser(credentials) {
-  try {
-    const response = await api.post(AUTH_URLS.LOGIN, credentials);
-    const school = response.data?.school || response.data?.data?.school;
-    if (school) {
-      const sId = school.schoolId || school.collectionName || school._id;
-      if (sId) {
-        localStorage.setItem('rges_school_id', sId);
-        localStorage.setItem('rges_school_collection', sId);
-      }
-      localStorage.setItem('rges_school_info', JSON.stringify(school));
-    } else if (credentials?.collectionName) {
-      localStorage.setItem('rges_school_id', credentials.collectionName.toLowerCase().trim());
-      localStorage.setItem('rges_school_collection', credentials.collectionName.toLowerCase().trim());
+  const response = await api.post(AUTH_URLS.LOGIN, credentials);
+  const school = response.data?.school || response.data?.data?.school;
+  if (school) {
+    const sId = school.schoolId || school.collectionName || school._id;
+    if (sId) {
+      localStorage.setItem('rges_school_id', sId);
+      localStorage.setItem('rges_school_collection', sId);
     }
-    toast.success('Login successful!');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
+    localStorage.setItem('rges_school_info', JSON.stringify(school));
+  } else if (credentials?.collectionName) {
+    localStorage.setItem('rges_school_id', credentials.collectionName.toLowerCase().trim());
+    localStorage.setItem('rges_school_collection', credentials.collectionName.toLowerCase().trim());
   }
+  toast.success('Login successful!');
+  return response.data;
 }
 
 export async function signupUser(signupData) {
-  try {
-    const response = await api.post(AUTH_URLS.SIGNUP, signupData);
-    toast.success('Registration successful! Please login.');
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(AUTH_URLS.SIGNUP, signupData);
+  toast.success('Registration successful! Please login.');
+  return response.data;
 }
 
 export async function logoutUser() {

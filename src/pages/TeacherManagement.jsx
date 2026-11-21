@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
+import { notifyApiError } from '../services/apiErrors.js';
 import { Activity, Edit3, KeyRound, Mail, Plus, Save, Wand2, X } from 'lucide-react';
 import {
   fetchTeachers,
@@ -87,7 +88,7 @@ const TeacherManagement = () => {
 
     dispatch(action).then((res) => {
       if (res.meta.requestStatus !== 'fulfilled') {
-        toast.error(res.payload || 'Unable to save teacher');
+        notifyApiError(res.payload, 'Unable to save teacher');
         return;
       }
 
@@ -102,7 +103,7 @@ const TeacherManagement = () => {
     const teacher = confirmDeactivate;
     dispatch(updateTeacher({ id: teacher.id || teacher._id, data: { status: 'inactive' } })).then((res) => {
       if (res.meta.requestStatus === 'fulfilled') toast.success('Teacher deactivated');
-      else toast.error(res.payload || 'Unable to deactivate teacher');
+      else notifyApiError(res.payload, 'Unable to deactivate teacher');
       setConfirmDeactivate(null);
     });
   };
@@ -115,7 +116,7 @@ const TeacherManagement = () => {
       data: { password, forcePasswordChange: true },
     })).then((res) => {
       if (res.meta.requestStatus === 'fulfilled') toast.success(`Temporary password: ${res.payload.temporaryPassword}`);
-      else toast.error(res.payload || 'Password reset failed');
+      else notifyApiError(res.payload, 'Password reset failed');
       setConfirmResetPwd(null);
     });
   };

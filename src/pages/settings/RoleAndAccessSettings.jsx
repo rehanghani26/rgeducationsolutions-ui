@@ -57,6 +57,7 @@ import Toggle from '../../components/ui/Toggle.jsx';
 import { setCustomRolePermissions, getUserRole } from '../../config/access.jsx';
 import { ROLES } from '../../constants/roles.js';
 import { Input } from '../../components/ui/FormControls.jsx';
+import { notifyApiError } from '../../services/apiErrors.js';
 
 // Module Icon Registry
 const MODULE_ICON_MAP = {
@@ -292,7 +293,7 @@ const RoleAndAccessSettings = () => {
       }
     } catch (err) {
       console.error('Failed to load role permissions:', err);
-      toast.error('Failed to load role permissions from server');
+      notifyApiError(err, 'Failed to load role permissions from server');
     } finally {
       setLoading(false);
     }
@@ -468,7 +469,7 @@ const RoleAndAccessSettings = () => {
       toast.success(`Permissions for role '${currentRoleCfg.label}' saved successfully!`);
     } catch (err) {
       console.error('Failed to update role permissions:', err);
-      toast.error(err.response?.data?.message || 'Failed to update role permissions');
+      notifyApiError(err, 'Failed to update role permissions');
     } finally {
       setSaving(false);
     }
@@ -484,7 +485,7 @@ const RoleAndAccessSettings = () => {
       setIsEditing(false);
       toast.success(`Role '${currentRoleCfg.label}' reset to factory defaults!`);
     } catch (err) {
-      toast.error('Failed to reset role permissions');
+      notifyApiError(err, 'Failed to reset role permissions');
     } finally {
       setSaving(false);
     }

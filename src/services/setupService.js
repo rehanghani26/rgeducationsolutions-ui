@@ -5,6 +5,7 @@
  */
 
 import api from './api.js';
+import { saveMasterPeriod } from './masterPeriodService.js';
 
 export const setupService = {
   /**
@@ -77,47 +78,18 @@ export const setupService = {
   },
 
   /**
-   * Step 2: Create & activate initial Academic Session
-   * @param {object} sessionData
-   */
-  async saveAcademicSession(sessionData) {
-    try {
-      // First try /sessions endpoint, fallback to /erp/academic-sessions if needed
-      const payload = {
-        sessionName: sessionData.sessionName,
-        startDate: sessionData.startDate,
-        endDate: sessionData.endDate,
-        isCurrent: true,
-        notes: sessionData.notes || 'Created via ERP Initial Setup Wizard',
-      };
-      const response = await api.post('/sessions', payload);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating academic session:', error);
-      throw error;
-    }
-  },
-
-  /**
    * Step 3: Create initial Master Period Schedule
    * @param {object} periodData
    */
   async saveMasterPeriods(periodData) {
-    try {
-      const payload = {
-        scheduleName: periodData.scheduleName || 'Regular Bell Schedule',
-        periodType: 'regular',
-        isActive: true,
-        schoolStartTime: periodData.schoolStartTime || '08:00',
-        schoolEndTime: periodData.schoolEndTime || '14:30',
-        periods: periodData.periods || [],
-      };
-      const response = await api.post('/erp/master-periods', payload);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating master periods:', error);
-      throw error;
-    }
+    return saveMasterPeriod({
+      name: periodData.scheduleName || 'Regular Bell Schedule',
+      scheduleType: 'regular',
+      isDefault: true,
+      schoolStartTime: periodData.schoolStartTime || '08:00',
+      schoolEndTime: periodData.schoolEndTime || '14:30',
+      periods: periodData.periods || [],
+    });
   },
 
   /**

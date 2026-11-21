@@ -20,61 +20,33 @@ export const curriculumService = {
   },
 
   create: async (data) => {
-    try {
-      const res = await api.post(BASE_URL, data);
-      toast.success(res.data?.message || 'Curriculum & Course assigned successfully!');
-      return res.data;
-    } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Failed to assign curriculum';
-      toast.error(msg);
-      throw err;
-    }
+    const res = await api.post(BASE_URL, data);
+    toast.success(res.data?.message || 'Curriculum & Course assigned successfully!');
+    return res.data;
   },
 
   update: async (id, data) => {
-    try {
-      const res = await api.put(`${BASE_URL}/${id}`, data);
-      toast.success(res.data?.message || 'Curriculum updated successfully!');
-      return res.data;
-    } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Failed to update curriculum';
-      toast.error(msg);
-      throw err;
-    }
+    const res = await api.put(`${BASE_URL}/${id}`, data);
+    toast.success(res.data?.message || 'Curriculum updated successfully!');
+    return res.data;
   },
 
   delete: async (id) => {
-    try {
-      const res = await api.delete(`${BASE_URL}/${id}`);
-      toast.success(res.data?.message || 'Curriculum course removed successfully!');
-      return res.data;
-    } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Failed to delete curriculum';
-      toast.error(msg);
-      throw err;
-    }
+    const res = await api.delete(`${BASE_URL}/${id}`);
+    toast.success(res.data?.message || 'Curriculum course removed successfully!');
+    return res.data;
   },
 
   addUnit: async (id, unitData) => {
-    try {
-      const res = await api.post(`${BASE_URL}/${id}/units`, unitData);
-      toast.success('Syllabus unit added successfully!');
-      return res.data;
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add unit');
-      throw err;
-    }
+    const res = await api.post(`${BASE_URL}/${id}/units`, unitData);
+    toast.success('Syllabus unit added successfully!');
+    return res.data;
   },
 
   addMaterial: async (id, materialData) => {
-    try {
-      const res = await api.post(`${BASE_URL}/${id}/materials`, materialData);
-      toast.success('Study material added successfully!');
-      return res.data;
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add material');
-      throw err;
-    }
+    const res = await api.post(`${BASE_URL}/${id}/materials`, materialData);
+    toast.success('Study material added successfully!');
+    return res.data;
   },
 };
 

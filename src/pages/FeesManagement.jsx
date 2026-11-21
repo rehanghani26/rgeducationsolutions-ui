@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchFees, fetchExpenses, recordFeePayment, recordExpense } from '../store/slices/erpSlice.js';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
+import { notifyApiError } from '../services/apiErrors.js';
 import {
   Search, Banknote, Landmark, Wallet, Receipt, Plus,
 } from 'lucide-react';
@@ -54,7 +55,7 @@ const FeesManagement = () => {
       setCollectForm({ studentId: '', amount: '', method: 'Online', reference: '' });
       dispatch(fetchFees());
     } else {
-      toast.error(res.payload || 'Failed to collect fee.');
+      notifyApiError(res.payload, 'Failed to collect fee.');
       setConfirmCollect(false);
     }
   };
@@ -76,7 +77,7 @@ const FeesManagement = () => {
       setExpenseForm({ title: '', amount: '', category: 'Utilities', date: '', refInvoice: '' });
       dispatch(fetchExpenses());
     } else {
-      toast.error(res.payload || 'Failed to record expense.');
+      notifyApiError(res.payload, 'Failed to record expense.');
       setConfirmExpense(false);
     }
   };

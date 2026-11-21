@@ -30,6 +30,7 @@ import {
 import { CheckboxInput, Input, SelectInput } from '../../../components/ui/FormControls.jsx';
 
 import PayrollPeriodSelect from './PayrollPeriodSelect.jsx';
+import { notifyApiError } from '../../../services/apiErrors.js';
 
 const BatchDisburseModal = ({
   open,
@@ -209,7 +210,7 @@ const BatchDisburseModal = ({
       }
     } catch (err) {
       console.error('Batch disbursement failed:', err);
-      toast.error(err.response?.data?.message || 'Batch salary disbursement failed');
+      notifyApiError(err, 'Batch salary disbursement failed');
     } finally {
       setSubmitting(false);
     }

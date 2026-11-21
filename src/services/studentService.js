@@ -2,7 +2,7 @@
  * @file studentService.js
  * @description Student module API service following the EODSrc/services pattern.
  *
- * Provides named async functions with try/catch error handling & toast notifications,
+ * Uses the shared API client to report request errors,
  * plus default studentService export for backward compatibility.
  */
 
@@ -23,15 +23,10 @@ const buildQuery = (params = {}) => {
  * @param {object} params
  */
 export async function getStudents(params = {}) {
-  try {
-    const queryStr = buildQuery(params);
-    const url = `${STUDENT_URLS.BASE}${queryStr ? `?${queryStr}` : ""}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const queryStr = buildQuery(params);
+  const url = `${STUDENT_URLS.BASE}${queryStr ? `?${queryStr}` : ""}`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 /**
@@ -39,14 +34,9 @@ export async function getStudents(params = {}) {
  * @param {string} id
  */
 export async function getStudentById(id) {
-  try {
-    const url = STUDENT_URLS.BY_ID(id);
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = STUDENT_URLS.BY_ID(id);
+  const response = await api.get(url);
+  return response.data;
 }
 
 /**
@@ -69,14 +59,9 @@ export async function getStudentActivity(id) {
  * @param {string} id
  */
 export async function getStudentCredentials(id) {
-  try {
-    const url = `${STUDENT_URLS.BY_ID(id)}/credentials`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const url = `${STUDENT_URLS.BY_ID(id)}/credentials`;
+  const response = await api.get(url);
+  return response.data;
 }
 
 /**
@@ -84,14 +69,9 @@ export async function getStudentCredentials(id) {
  * @param {object} data
  */
 export async function createStudent(data) {
-  try {
-    const response = await api.post(STUDENT_URLS.BASE, data);
-    toast.success("Student registered successfully");
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.response?.data?.message || error.message };
-  }
+  const response = await api.post(STUDENT_URLS.BASE, data);
+  toast.success("Student registered successfully");
+  return { status: response.status, data: response.data };
 }
 
 /**
@@ -100,14 +80,9 @@ export async function createStudent(data) {
  * @param {object} data
  */
 export async function updateStudent(id, data) {
-  try {
-    const response = await api.put(STUDENT_URLS.BY_ID(id), data);
-    toast.success("Student updated successfully");
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.response?.data?.message || error.message };
-  }
+  const response = await api.put(STUDENT_URLS.BY_ID(id), data);
+  toast.success("Student updated successfully");
+  return { status: response.status, data: response.data };
 }
 
 /**
@@ -115,14 +90,9 @@ export async function updateStudent(id, data) {
  * @param {string} id
  */
 export async function deleteStudent(id) {
-  try {
-    const response = await api.delete(STUDENT_URLS.BY_ID(id));
-    toast.success("Student deleted successfully");
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.delete(STUDENT_URLS.BY_ID(id));
+  toast.success("Student deleted successfully");
+  return response.data;
 }
 
 /**
@@ -130,14 +100,9 @@ export async function deleteStudent(id) {
  * @param {string[]} ids
  */
 export async function bulkDeleteStudents(ids) {
-  try {
-    const response = await api.post(STUDENT_URLS.BULK_DELETE, { ids });
-    toast.success("Selected students deleted successfully");
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(STUDENT_URLS.BULK_DELETE, { ids });
+  toast.success("Selected students deleted successfully");
+  return response.data;
 }
 
 /**
@@ -145,14 +110,9 @@ export async function bulkDeleteStudents(ids) {
  * @param {object} payload
  */
 export async function bulkPromoteStudents(payload) {
-  try {
-    const response = await api.post(STUDENT_URLS.BULK_PROMOTE, payload);
-    toast.success("Students promoted successfully");
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.post(STUDENT_URLS.BULK_PROMOTE, payload);
+  toast.success("Students promoted successfully");
+  return response.data;
 }
 
 /**
@@ -160,26 +120,17 @@ export async function bulkPromoteStudents(payload) {
  * @param {Array<object>} students
  */
 export async function bulkImportStudents(students) {
-  try {
-    return await api.post(STUDENT_URLS.BULK_IMPORT, { students });
-  } catch (error) {
-    throw { status: error.response?.status, message: error.response?.data?.message || error.message };
-  }
+  return await api.post(STUDENT_URLS.BULK_IMPORT, { students });
 }
 
 /**
  * Export student list as CSV blob.
  */
 export async function exportStudentsCsv() {
-  try {
-    const response = await api.get(STUDENT_URLS.EXPORT_CSV, {
-      responseType: "blob",
-    });
-    return response.data;
-  } catch (error) {
-    toast.error(error.response?.data?.message || error.message);
-    throw { status: error.response?.status, message: error.message };
-  }
+  const response = await api.get(STUDENT_URLS.EXPORT_CSV, {
+    responseType: "blob",
+  });
+  return response.data;
 }
 
 /**
@@ -188,23 +139,16 @@ export async function exportStudentsCsv() {
  * @param {'photo' | 'aadhaar'} type
  */
 export async function uploadStudentFile(file, type = "photo") {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", type);
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("type", type);
 
-    const response = await api.post(STUDENT_URLS.UPLOAD_FILE, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    const msg =
-      error.response?.data?.message || error.message || "File upload failed";
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.post(STUDENT_URLS.UPLOAD_FILE, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
 }
 
 /**
@@ -212,15 +156,8 @@ export async function uploadStudentFile(file, type = "photo") {
  * @param {string} fileId
  */
 export async function getStudentFileById(fileId) {
-  try {
-    const response = await api.get(`/students/file/${fileId}`);
-    return response.data;
-  } catch (error) {
-    const msg =
-      error.response?.data?.message || error.message || "File not found";
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.get(`/students/file/${fileId}`);
+  return response.data;
 }
 
 /**
@@ -229,20 +166,11 @@ export async function getStudentFileById(fileId) {
  * @param {string} name
  */
 export async function sendStudentEmailOtp(email, name = "") {
-  try {
-    const response = await api.post(STUDENT_URLS.SEND_EMAIL_OTP, {
-      email,
-      name,
-    });
-    return response.data;
-  } catch (error) {
-    const msg =
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to send verification code";
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.post(STUDENT_URLS.SEND_EMAIL_OTP, {
+    email,
+    name,
+  });
+  return response.data;
 }
 
 /**
@@ -250,44 +178,22 @@ export async function sendStudentEmailOtp(email, name = "") {
  * @param {object} params - { email, otp, studentId? }
  */
 export async function verifyStudentEmailOtp(params) {
-  try {
-    const response = await api.post(STUDENT_URLS.VERIFY_EMAIL_OTP, params);
-    return response.data;
-  } catch (error) {
-    const msg =
-      error.response?.data?.message || error.message || "Verification failed";
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.post(STUDENT_URLS.VERIFY_EMAIL_OTP, params);
+  return response.data;
 }
 
 export async function resetStudentPassword(id, payload = {}) {
-  try {
-    const response = await api.patch(
-      `${STUDENT_URLS.BASE}/${id}/reset-password`,
-      payload
-    );
-    toast.success("Student password reset successfully");
-    return response.data;
-  } catch (error) {
-    const msg =
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to reset password";
-    toast.error(msg);
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.patch(
+    `${STUDENT_URLS.BASE}/${id}/reset-password`,
+    payload
+  );
+  toast.success("Student password reset successfully");
+  return response.data;
 }
 
 export async function cleanCorruptedStudents() {
-  try {
-    const response = await api.post("/students/clean-corrupted");
-    return response.data;
-  } catch (error) {
-    const msg =
-      error.response?.data?.message || error.message || "Cleanup failed";
-    throw { status: error.response?.status, message: msg };
-  }
+  const response = await api.post("/students/clean-corrupted");
+  return response.data;
 }
 
 const studentService = {

@@ -1,5 +1,5 @@
 // Timetable Utilities, Predefined Templates, and Timing Validation Helpers
-import { WEEKDAYS } from "../../constants";
+import { DAYS_OF_WEEK, WEEKDAYS } from "../../constants/dateTime.js";
 
 export const SLOT_TYPES = [
   {
@@ -142,6 +142,45 @@ export const calcSlotDuration = (startTime, endTime) => {
   const end = timeToMinutes(endTime);
   return Math.max(0, end - start);
 };
+
+export function masterScheduleForTimetable(schedules, timetable) {
+  const linkedId = String(timetable?.masterPeriodId || '');
+  const linked = schedules.find((schedule) => String(schedule._id || schedule.id) === linkedId);
+  const available = schedules.filter((schedule) => schedule.isActive !== false && schedule.isConfigured !== false);
+  const base = linked || available.find((schedule) => schedule.isDefault) || available[0] || null;
+  const allocations = timetable?.allocations || [];
+  const validTime = (time) => /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time);
+  if (!allocations.length || !allocations.every((slot) =>
+    validTime(slot.startTime) && validTime(slot.endTime) && slot.endTime > slot.startTime)) return base;
+
+  const days = DAYS_OF_WEEK.filter(({ id }) => allocations.some((slot) => slot.day === id));
+  const daySchedules = {};
+  for (const { id, label } of days) {
+    const slots = allocations.filter((slot) => slot.day === id).sort((a, b) => a.periodOrder - b.periodOrder);
+    if (!slots.every((slot, index) => slot.periodOrder === index + 1)) return base;
+    daySchedules[id] = {
+      name: label + ' Schedule',
+      enabled: true,
+      isHalfDay: Boolean(linked?.daySchedules?.[id]?.isHalfDay),
+      schoolStartTime: slots[0].startTime,
+      schoolEndTime: slots.at(-1).endTime,
+      periods: slots.map((slot) => ({
+        _id: slot.periodId, type: slot.periodType || 'class', customLabel: slot.customLabel,
+        startTime: slot.startTime, endTime: slot.endTime,
+      })),
+    };
+  }
+  const primary = daySchedules[days[0]?.id];
+  return primary ? {
+    _id: linkedId,
+    name: linked?.name || 'Saved Timetable',
+    days: days.map(({ id }) => id),
+    daySchedules,
+    schoolStartTime: primary.schoolStartTime,
+    schoolEndTime: primary.schoolEndTime,
+    periods: primary.periods,
+  } : base;
+}
 
 // ─── 5 Standard Predefined Selectable Timetable Templates ─────────────────────────
 export const TIMETABLE_TEMPLATES = [
