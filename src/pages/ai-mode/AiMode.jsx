@@ -9,6 +9,12 @@ import AIChatMessages from "./components/AIChatMessages.jsx";
 
 export default function AiMode() {
   const { user } = useSelector((state) => state.auth);
+  const accountId = user?._id || user?.id || user?.userId || user?.username;
+  const scope = accountId ? JSON.stringify([user.schoolId || localStorage.getItem('rges_school_id'), accountId, user.role]) : '';
+  return <AccountChat key={scope} user={user} scope={scope} />;
+}
+
+function AccountChat({ user, scope }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const promptParam = searchParams.get("prompt");
   const processedPromptRef = useRef(false);
@@ -39,6 +45,7 @@ export default function AiMode() {
     handleSendMessage,
     handleRegenerate,
   } = useAiChat({
+    scope,
     onAiResponse: (aiMsg) => {
       // If voice assistant mode is active, automatically read AI response aloud
       if (isVoiceModeRef.current && speakRef.current && aiMsg?.content) {
@@ -161,6 +168,7 @@ export default function AiMode() {
       >
         {messages.length === 0 ? (
           <AIWelcomeScreen
+            role={user?.role}
             userName={userName}
             onSelectPrompt={handleSendMessage}
           />

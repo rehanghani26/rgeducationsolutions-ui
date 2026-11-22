@@ -19,22 +19,18 @@ import {
   ChevronDown,
   Menu,
   X,
-  GraduationCap,
+  CalendarDays,
   Sparkles,
   Bell,
   Maximize2,
   Minimize2,
-  ChevronRight as ChevronRightIcon,
   Settings,
   User,
 } from "lucide-react";
 import { ROUTES } from "../routes/routes.js";
-import { ROLES } from "../constants/roles.js";
 import rgLogo from "../assets/logo/RGLOGO.png";
 import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
-import {
-  AcademicSessionProvider, AcademicSessionSelector, useAcademicSession,
-} from "../context/AcademicSessionContext.jsx";
+import { AcademicSessionProvider, useAcademicSession } from "../context/AcademicSessionContext.jsx";
 
 const resolveUserImageUrl = (userObj) => {
   const raw =
@@ -55,6 +51,32 @@ const resolveUserImageUrl = (userObj) => {
     return trimmed;
   }
 };
+
+function AcademicYearBadge({ year, compact = false }) {
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-xl border ${border.brand} ${bg.active} ${
+        compact ? "shrink-0 px-2 py-1.5 sm:px-2.5" : "w-full px-2.5 py-2"
+      }`}
+      aria-live={compact ? "polite" : undefined}
+      title={`Academic year · ${year}`}
+    >
+      <span className={`h-7 w-7 shrink-0 place-items-center rounded-lg border ${border.brand} ${bg.card} ${text.brand} ${
+        compact ? "hidden min-[420px]:grid" : "grid"
+      }`}>
+        <CalendarDays size={15} aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        <span className={`text-[9px] font-semibold uppercase leading-tight tracking-wider ${text.secondary} ${compact ? "sr-only sm:not-sr-only sm:block" : "block"}`}>
+          Academic year
+        </span>
+        <span className={`block truncate text-[11px] font-bold leading-tight tabular-nums sm:text-xs ${text.primary} ${compact ? "max-w-[5.75rem] sm:max-w-36" : ""}`}>
+          {year}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -97,15 +119,8 @@ const DashboardLayout = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const userRole = (user?.role || "").toLowerCase().replace(/_/g, "-");
-  const canManageSettings =
-    userRole === ROLES.SUPER_ADMIN ||
-    userRole === "superadmin" ||
-    userRole === ROLES.SCHOOL_ADMIN ||
-    userRole === "admin" ||
-    userRole === ROLES.PRINCIPAL;
-
-  const { sessionId, readOnly } = useAcademicSession();
+  const { active, sessionId, sessionsLoading, sessionsError } = useAcademicSession();
+  const academicYear = active?.sessionName || (sessionsLoading ? "Loading…" : sessionsError ? "Unavailable" : "No active year");
 
   React.useEffect(() => {
     refreshBranding();
@@ -303,23 +318,7 @@ const DashboardLayout = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-xl bg-orange-500/10 p-2.5 border border-orange-500/20 text-stone-800 dark:text-stone-200">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white shadow-xs">
-                <GraduationCap size={15} />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] font-semibold uppercase tracking-wider text-orange-700 dark:text-orange-300">
-                  Academic Year
-                </span>
-                <span className="text-xs font-bold truncate">2026 - 2027</span>
-              </div>
-            </div>
-            <ChevronRightIcon
-              size={14}
-              className="text-orange-400 flex-shrink-0"
-            />
-          </div>
+          <AcademicYearBadge year={academicYear} />
           <button
             type="button"
             onClick={handleLogout}
@@ -461,27 +460,7 @@ const DashboardLayout = () => {
 
         {/* Sidebar Footer */}
         <div className="border-t border-[#EFE8DD] p-2.5 space-y-2 dark:border-[#2E2C2A]">
-          {sidebarOpen && (
-            <div className="flex items-center justify-between rounded-xl bg-orange-500/10 p-2.5 border border-orange-500/20 text-stone-800 dark:text-stone-200">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white shadow-xs">
-                  <GraduationCap size={15} />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-orange-700 dark:text-orange-300">
-                    Academic Year
-                  </span>
-                  <span className="text-xs font-bold truncate">
-                    2026 - 2027
-                  </span>
-                </div>
-              </div>
-              <ChevronRightIcon
-                size={14}
-                className="text-orange-400 flex-shrink-0"
-              />
-            </div>
-          )}
+          {sidebarOpen && <AcademicYearBadge year={academicYear} />}
           <button
             type="button"
             onClick={handleLogout}
@@ -556,7 +535,7 @@ const DashboardLayout = () => {
 
             {/* RIGHT: Actions */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              <AcademicSessionSelector showLegacy={canManageSettings} />
+              <AcademicYearBadge year={academicYear} compact />
               {/* AI Mode Button */}
               <button
                 type="button"
@@ -750,11 +729,6 @@ const DashboardLayout = () => {
         {/* Main Content Viewport */}
         <main className="flex-1 min-h-0 overflow-y-auto bg-[#FAF7F2] p-2.5 sm:p-4 md:p-5 lg:p-6 text-stone-900 dark:bg-[#121214] dark:text-[#FAF7F2]">
           <ErrorBoundary compact>
-            {readOnly && (
-              <p className="border-b border-slate-200 px-4 py-2 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                Viewing records in a read-only academic session
-              </p>
-            )}
             <Outlet key={sessionId} context={{ activeDashboardTab, setActiveDashboardTab }} />
           </ErrorBoundary>
         </main>

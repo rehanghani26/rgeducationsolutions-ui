@@ -101,12 +101,13 @@ const ResultEntryTable = ({ students = [], subjects = [], existingResults = [], 
         marks: subjects.map((sub) => {
           const entry = sMarks[sub.subjectName] || {};
           return {
+            subjectId: sub.subjectId,
             subjectName: sub.subjectName,
             subjectCode: sub.subjectCode || sub.code,
             bookName: sub.bookName || '',
             obtained: Number(entry.obtained) || 0,
             maxMarks: Number(entry.maxMarks || sub.maxMarks || 100),
-            passMarks: Number(entry.passMarks || sub.passMarks || 35),
+            passMarks: Number(entry.passMarks ?? sub.passMarks ?? 35),
           };
         }),
       };
@@ -166,7 +167,7 @@ const ResultEntryTable = ({ students = [], subjects = [], existingResults = [], 
                       📖 {sub.bookName}
                     </span>
                   )}
-                  <span className="block text-[9px] text-slate-400 font-medium">Max: {sub.maxMarks || 100} · Pass: {sub.passMarks || 35}</span>
+                  <span className="block text-[9px] text-slate-400 font-medium">Max: {sub.maxMarks || 100} · Pass: {sub.passMarks ?? 35}</span>
                 </th>
               ))}
               <th className="p-3 text-center font-bold text-slate-500 uppercase tracking-wide min-w-[80px]">Total %</th>
@@ -199,7 +200,7 @@ const ResultEntryTable = ({ students = [], subjects = [], existingResults = [], 
                     const sMarks = marksMap[sid] || {};
                     const entry = sMarks[sub.subjectName] || {};
                     const maxM = sub.maxMarks || 100;
-                    const passM = sub.passMarks || 35;
+                    const passM = sub.passMarks ?? 35;
                     const val = entry.obtained !== undefined ? entry.obtained : '';
                     const isFail = val !== '' && Number(val) < passM;
                     return (
@@ -279,7 +280,7 @@ const ResultEntryTable = ({ students = [], subjects = [], existingResults = [], 
                     const sMarks = marksMap[sid] || {};
                     const entry = sMarks[sub.subjectName] || {};
                     const maxM = sub.maxMarks || 100;
-                    const passM = sub.passMarks || 35;
+                    const passM = sub.passMarks ?? 35;
                     const val = entry.obtained !== undefined ? entry.obtained : '';
                     return (
                       <div key={sub.subjectName} className="flex items-center justify-between">

@@ -76,7 +76,6 @@ export const ROUTES = {
     SYLLABUS:     '/academics/syllabus',
     classDetail: (id = ':classId') => `/academics/classes/${id}`,
   },
-  SYLLABUS: '/academics/syllabus',
 
   // ── Attendance ───────────────────────────────────────────────────────────
   ATTENDANCE: '/attendance',
@@ -97,6 +96,7 @@ export const ROUTES = {
   PAYROLL_DETAIL: '/payroll/:id',
   payrollDetail: (id = ':id') => `/payroll/${id}`,
   LIBRARY:       '/library',
+  LIBRARY_BOOK_LISTS: '/library/prescribed-books',
   TRANSPORT:     '/transport',
   HOSTEL:        '/hostel',
   CERTIFICATES:  '/certificates',

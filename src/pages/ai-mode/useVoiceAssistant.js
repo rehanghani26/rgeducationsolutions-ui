@@ -137,6 +137,13 @@ export function useVoiceAssistant({
   const currentChunkIndexRef = useRef(0);
   const lastTranscriptRef = useRef("");
 
+  const capture = useRef(false);
+  const stopping = useRef(null);
+  const generation = useRef(0);
+  const playback = useRef(0);
+  const handlers = useRef({});
+  handlers.current = { onSpeechInput, onSpeechFinal };
+
   // Keep refs synchronized
   useEffect(() => {
     isVoiceModeRef.current = isVoiceMode;
@@ -218,13 +225,13 @@ export function useVoiceAssistant({
 
   // Handle transcript changes from react-speech-recognition
   useEffect(() => {
-    if (!transcript) return;
+    if (!transcript || !capture.current || isSpeakingRef.current || isLoadingRef.current) return;
 
     lastTranscriptRef.current = transcript;
 
     // Update input box with real-time transcribed words
-    if (onSpeechInput) {
-      onSpeechInput(transcript);
+    if (handlers.current.onSpeechInput) {
+      handlers.current.onSpeechInput(transcript);
     }
 
     // Reset silence timer on new speech fragment
@@ -236,16 +243,18 @@ export function useVoiceAssistant({
     if (isVoiceModeRef.current) {
       silenceTimerRef.current = setTimeout(() => {
         const textToSend = lastTranscriptRef.current.trim();
-        if (textToSend) {
+        if (textToSend && capture.current && isVoiceModeRef.current && !isLoadingRef.current && !isSpeakingRef.current) {
+          capture.current = false;
+          stopping.current = SpeechRecognition.abortListening().finally(() => { stopping.current = null; });
           lastTranscriptRef.current = "";
-          if (onSpeechFinal) {
-            onSpeechFinal(textToSend);
+          if (handlers.current.onSpeechFinal) {
+            handlers.current.onSpeechFinal(textToSend);
           }
           // Do not call resetTranscript right away; clear on next listen
         }
       }, 1500);
     }
-  }, [transcript, onSpeechInput, onSpeechFinal]);
+  }, [transcript]);
 
   // Start listening safely
   const startListening = useCallback(async () => {
@@ -257,8 +266,10 @@ export function useVoiceAssistant({
       return;
     }
 
+    const attempt = ++generation.current;
+    await stopping.current;
     const hasPermission = await ensureMicrophonePermission();
-    if (!hasPermission) return;
+    if (!hasPermission || attempt !== generation.current || isSpeakingRef.current || isLoadingRef.current) return;
 
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -266,23 +277,31 @@ export function useVoiceAssistant({
     }
 
     try {
-      SpeechRecognition.startListening({
+      resetTranscript();
+      lastTranscriptRef.current = "";
+      capture.current = true;
+      await SpeechRecognition.startListening({
         continuous: true,
         language: "en-US",
       });
     } catch (err) {
       console.warn("Failed to start speech recognition:", err);
     }
-  }, [browserSupportsSpeechRecognition, ensureMicrophonePermission]);
+  }, [browserSupportsSpeechRecognition, ensureMicrophonePermission, resetTranscript]);
 
   // Stop listening
   const stopListening = useCallback(() => {
+    generation.current++;
+    capture.current = false;
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
     try {
-      SpeechRecognition.stopListening();
+      if (!stopping.current && SpeechRecognition.getRecognitionManager()?.listening) {
+        stopping.current = SpeechRecognition.abortListening().finally(() => { stopping.current = null; });
+      }
+      return stopping.current;
     } catch {}
   }, []);
 
@@ -303,7 +322,7 @@ export function useVoiceAssistant({
         ) {
           startListening();
         }
-      }, 400);
+      }, 850);
       return () => clearTimeout(timer);
     }
   }, [
@@ -317,6 +336,7 @@ export function useVoiceAssistant({
 
   // Stop speaking
   const stopSpeaking = useCallback(() => {
+    playback.current++;
     if (isSpeechSynSupported) {
       try {
         window.speechSynthesis.cancel();
@@ -328,26 +348,23 @@ export function useVoiceAssistant({
     isSpeakingRef.current = false;
     setSpeakingMessageId(null);
 
-    // If voice mode is on and not loading, restart listening after speech canceled
-    if (isVoiceModeRef.current && !isLoadingRef.current) {
-      setTimeout(() => {
-        if (isVoiceModeRef.current && !isSpeakingRef.current && !isLoadingRef.current) {
-          startListening();
-        }
-      }, 300);
-    }
-  }, [isSpeechSynSupported, startListening]);
+  }, [isSpeechSynSupported]);
 
   // Start speech synthesis for given text
   const speak = useCallback(
-    (rawText, messageId = null) => {
+    async (rawText, messageId = null) => {
       if (!isSpeechSynSupported || !rawText) return;
 
       const cleanText = cleanTextForSpeech(rawText);
       if (!cleanText) return;
 
       // Stop listening while speaking so mic does not capture assistant voice
-      stopListening();
+      const turn = ++playback.current;
+      isSpeakingRef.current = true;
+      setIsSpeaking(true);
+      await stopListening();
+      if (turn !== playback.current) return;
+      resetTranscript();
 
       // Cancel any ongoing speech
       try {
@@ -373,14 +390,6 @@ export function useVoiceAssistant({
           isSpeakingRef.current = false;
           setSpeakingMessageId(null);
 
-          // If voice assistant mode is active, resume listening for user's next command!
-          if (isVoiceModeRef.current && !isLoadingRef.current) {
-            setTimeout(() => {
-              if (isVoiceModeRef.current && !isSpeakingRef.current && !isLoadingRef.current) {
-                startListening();
-              }
-            }, 400);
-          }
           return;
         }
 
@@ -394,6 +403,7 @@ export function useVoiceAssistant({
         utterance.pitch = 1.0;
 
         utterance.onend = () => {
+          if (turn !== playback.current) return;
           currentChunkIndexRef.current += 1;
           playNextChunk();
         };
@@ -402,6 +412,7 @@ export function useVoiceAssistant({
           if (e.error !== "canceled" && e.error !== "interrupted") {
             console.warn("SpeechSynthesis error:", e);
           }
+          if (turn !== playback.current) return;
           currentChunkIndexRef.current += 1;
           playNextChunk();
         };
@@ -412,7 +423,7 @@ export function useVoiceAssistant({
 
       playNextChunk();
     },
-    [isSpeechSynSupported, selectedVoice, stopListening, startListening]
+    [isSpeechSynSupported, selectedVoice, stopListening, resetTranscript]
   );
 
   // Toggle Voice Mode (The master toggle)
@@ -420,6 +431,7 @@ export function useVoiceAssistant({
     (forcedState) => {
       const nextState =
         typeof forcedState === "boolean" ? forcedState : !isVoiceMode;
+      isVoiceModeRef.current = nextState;
       setIsVoiceMode(nextState);
 
       if (nextState) {
@@ -446,6 +458,9 @@ export function useVoiceAssistant({
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      generation.current++;
+      playback.current++;
+      capture.current = false;
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       try {
         SpeechRecognition.abortListening();

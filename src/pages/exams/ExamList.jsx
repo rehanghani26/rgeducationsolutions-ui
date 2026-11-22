@@ -12,9 +12,9 @@ import Modal from "../../components/ui/Modal.jsx";
 import examService from "../../services/examService.js";
 import teacherService from "../../services/teacherService.js";
 import syllabusService from "../../services/syllabusService.js";
+import { getClassRoomsBySession } from "../../services/classService.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
-import { SECTION_OPTIONS } from "../../constants/academicOptions.js";
 import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const blankSubject = { subjectName: '', subjectCode: '', bookName: '', maxMarks: 100, passMarks: 35, examDate: '', room: '' };
@@ -30,7 +30,7 @@ const blankExam = {
 };
 
 const ExamList = () => {
-  const { combinedClassOptions } = useAcademicSession();
+  const { classOptions, sessionId } = useAcademicSession();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -42,6 +42,7 @@ const ExamList = () => {
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState(blankExam);
+  const [roomOptions, setRoomOptions] = useState({ loading: true, rooms: [], error: null });
 
   // ── Class multi-select dropdown state ─────────────────────────────────────
   const [classDropOpen, setClassDropOpen] = useState(false);
@@ -57,27 +58,60 @@ const ExamList = () => {
 
   // ── Syllabus auto-fill state ──────────────────────────────────────────────
   const [syllabusLoading, setSyllabusLoading] = useState(false);
+  const targetOptions = classOptions.flatMap((grade) => {
+    const classrooms = roomOptions.rooms.filter((room) => room.classId === grade.id && room.status !== 'archived');
+    if (!classrooms.length) return [{ key: grade.id, label: grade.name, value: grade.name, classId: grade.id, className: grade.name }];
+    return classrooms.map(({ sectionId, sectionName }) => ({
+      key: grade.id + '_' + sectionId, label: grade.name + ' - ' + sectionName, value: grade.name + ' - ' + sectionName,
+      classId: grade.id, className: grade.name, sectionId, sectionName,
+    }));
+  });
 
-  const loadSyllabusForClass = async (classIdentifier) => {
-    if (!classIdentifier) return;
+  useEffect(() => {
+    if (!showCreate) return;
+    if (!sessionId || sessionId === 'legacy') {
+      setRoomOptions({ loading: false, rooms: [], error: new Error('Choose an academic session first.') });
+      return;
+    }
+    const request = new AbortController();
+    setRoomOptions({ loading: true, rooms: [], error: null });
+    getClassRoomsBySession(sessionId, request.signal).then(
+      ({ data }) => { if (!request.signal.aborted) setRoomOptions({ loading: false, rooms: data.classRooms || [], error: null }); },
+      (error) => { if (!request.signal.aborted) setRoomOptions({ loading: false, rooms: [], error }); },
+    );
+    return () => request.abort();
+  }, [showCreate, sessionId]);
+
+  const loadSyllabusForClasses = async () => {
+    const classIds = [...new Set(form.selectedClasses.map(({ classId }) => classId))];
+    if (!classIds.length || syllabusLoading) return;
     setSyllabusLoading(true);
     try {
-      const syllabus = await syllabusService.getSyllabusByClass(classIdentifier);
-      if (syllabus && Array.isArray(syllabus.subjects) && syllabus.subjects.length > 0) {
-        const mapped = syllabus.subjects.map((s) => ({
-          subjectName: s.subjectName || '',
-          subjectCode: s.subjectCode || '',
-          bookName: s.bookName || '',
-          maxMarks: Number(s.maxMarks) || 100,
-          passMarks: Number(s.passMarks) || 35,
-          examDate: '',
-          room: '',
-        }));
-        setForm((p) => ({
-          ...p,
-          subjectSchedule: mapped,
-        }));
-        toast.info(`Auto-filled ${mapped.length} subjects & textbooks from ${syllabus.className || classIdentifier} curriculum!`);
+      const plans = await Promise.all(classIds.map((classId) => syllabusService.getSyllabusByClass(classId)));
+      const missing = classIds.filter((_, index) => !plans[index]?.subjects?.length);
+      const mapped = plans.flatMap((plan) => (plan?.subjects || []).map((subject) => ({
+        ...blankSubject,
+        classId: plan.classId,
+        subjectId: subject.subjectId,
+        subjectName: subject.subjectName,
+        subjectCode: subject.subjectCode,
+        bookName: subject.bookName,
+        maxMarks: subject.maxMarks,
+        passMarks: subject.passMarks,
+      })));
+      if (mapped.length) {
+        setForm((current) => {
+          const selected = new Set(current.selectedClasses.map(({ classId }) => classId));
+          const fresh = mapped.filter((row) => selected.has(row.classId));
+          const replaced = new Set(fresh.map((row) => row.classId));
+          const existing = current.subjectSchedule.filter((row) => row.subjectName && !replaced.has(row.classId));
+          return { ...current, subjectSchedule: [...existing, ...fresh] };
+        });
+        toast.info(`Loaded ${mapped.length} subject rows from the published syllabuses.`);
+      }
+      if (missing.length) {
+        const names = missing.map((id) => form.selectedClasses.find((row) => row.classId === id)?.className || id);
+        toast.info('Published syllabus pending for ' + names.join(', ') + '.');
       }
     } catch (err) {
       console.error("Failed to auto-load syllabus:", err);
@@ -227,7 +261,7 @@ const ExamList = () => {
       })),
       supervisor: form.supervisorName || form.supervisor || '',
       supervisorId: form.supervisorId || '',
-      subjectSchedule: (form.subjectSchedule || []).filter((s) => s.subjectName),
+      subjectSchedule: (form.subjectSchedule || []).filter((s) => s.subjectName && (!s.classId || classIds.includes(s.classId))),
     };
     examService.create(payload)
       .then((res) => {
@@ -428,7 +462,10 @@ const ExamList = () => {
                     </div>
                     {/* Options */}
                     <div className="max-h-48 overflow-y-auto">
-                      {combinedClassOptions
+                      {roomOptions.loading && <p className="p-2 text-xs">Loading classrooms…</p>}
+                      {roomOptions.error && <p className="p-2 text-xs" role="alert">{!sessionId || sessionId === 'legacy'
+                        ? 'Choose an academic session first.' : 'Could not load classrooms. Reopen the exam form to retry.'}</p>}
+                      {!roomOptions.loading && !roomOptions.error && targetOptions
                         .filter((opt) => opt.label.toLowerCase().includes(classSearch.toLowerCase()))
                         .map((opt) => {
                           const isSelected = form.selectedClasses.some((c) => c.key === opt.key);
@@ -437,16 +474,12 @@ const ExamList = () => {
                               type="button"
                               key={opt.key}
                               onClick={() => {
-                                const willBeSelected = !isSelected;
                                 setForm((p) => ({
                                   ...p,
                                   selectedClasses: isSelected
                                     ? p.selectedClasses.filter((c) => c.key !== opt.key)
                                     : [...p.selectedClasses, opt],
                                 }));
-                                if (willBeSelected && (form.selectedClasses.length === 0 || (form.subjectSchedule.length <= 1 && !form.subjectSchedule[0]?.subjectName))) {
-                                  loadSyllabusForClass(opt.classId || opt.className);
-                                }
                               }}
                               className={`w-full flex items-center justify-between px-3 py-2 text-[11px] text-left transition-colors ${
                                 isSelected
@@ -607,12 +640,12 @@ const ExamList = () => {
                   <button
                     type="button"
                     disabled={syllabusLoading}
-                    onClick={() => loadSyllabusForClass(form.selectedClasses[0]?.classId || form.selectedClasses[0]?.className)}
+                    onClick={loadSyllabusForClasses}
                     className="flex items-center gap-1 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition disabled:opacity-50"
                     title="Load subjects, prescribed books, full marks, and pass marks from settings"
                   >
                     <Sparkles size={11} className={`text-amber-500 ${syllabusLoading ? "animate-spin" : ""}`} />
-                    {syllabusLoading ? "Loading..." : `Auto-fill from ${form.selectedClasses[0]?.className || "Syllabus"}`}
+                    {syllabusLoading ? "Loading..." : "Load published syllabus"}
                   </button>
                 )}
               </div>
@@ -646,13 +679,16 @@ const ExamList = () => {
                   key={i}
                   className="grid grid-cols-12 gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 items-center"
                 >
+                  {sub.classId && <span className="col-span-12 text-[11px] font-semibold text-[var(--brand-primary)]">
+                    {form.selectedClasses.find((row) => row.classId === sub.classId)?.className || 'Removed class'}
+                  </span>}
                   <div className="col-span-3">
                     <input
                       className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1.5 text-[11px] font-semibold text-slate-800 dark:text-white"
                       value={sub.subjectName}
                       onChange={(e) => {
                         const s = [...form.subjectSchedule];
-                        s[i] = { ...s[i], subjectName: e.target.value };
+                        s[i] = { ...s[i], subjectName: e.target.value, subjectId: undefined };
                         setForm({ ...form, subjectSchedule: s });
                       }}
                       placeholder="Subject Name"
@@ -664,7 +700,7 @@ const ExamList = () => {
                       value={sub.subjectCode}
                       onChange={(e) => {
                         const s = [...form.subjectSchedule];
-                        s[i] = { ...s[i], subjectCode: e.target.value };
+                        s[i] = { ...s[i], subjectCode: e.target.value, subjectId: undefined };
                         setForm({ ...form, subjectSchedule: s });
                       }}
                       placeholder="Code"

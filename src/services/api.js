@@ -17,25 +17,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
-let viewedSessionId = "";
-export const setAcademicSessionId = (id) => {
-  viewedSessionId = id || "";
-};
-
 api.interceptors.request.use(
   (config) => {
-    if (viewedSessionId && !String(config.url || "").includes("sessionId=")) {
-      if (config.params instanceof URLSearchParams) {
-        config.params = new URLSearchParams(config.params);
-        if (!config.params.get("sessionId"))
-          config.params.set("sessionId", viewedSessionId);
-      } else {
-        config.params = {
-          ...config.params,
-          sessionId: config.params?.sessionId || viewedSessionId,
-        };
-      }
-    }
     // 1. Attach Multi-Tenant Identifiers Header (both x-school-id and x-collection-name)
     const schoolIdentifier =
       localStorage.getItem("rges_school_id") ||

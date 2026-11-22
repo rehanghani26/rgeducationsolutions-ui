@@ -2,14 +2,13 @@ import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  School, Plus, X, Search, UserCheck, Calendar, Users, Clock,
+  School, Plus, X, Search, UserCheck, CalendarDays, Users, Clock,
   ArrowRight, UserPlus, GraduationCap, AlertCircle, Trash2
 } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import Loader from '../../components/ui/Loader.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import { Can, CanButton } from '../../config/access.jsx';
-import api from '../../services/api.js';
 import {
   getClassRooms,
   createClassRoom,
@@ -24,10 +23,17 @@ import { getStudents } from '../../services/studentService.js';
 import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 import { SelectInput } from '../../components/ui/FormControls.jsx';
 
+const initialCreateForm = {
+  classId: '',
+  sectionId: SECTION_OPTIONS[0].id,
+  room: 'Room 101',
+  capacity: 40,
+  classTeacherId: '',
+};
+
 const ClassList = () => {
-  const { classOptions, sessionId: selectedSessionId, choose: setSelectedSessionId, readOnly } = useAcademicSession();
+  const { active, classOptions, sessionId, sessionsLoading } = useAcademicSession();
   // State
-  const [sessions, setSessions] = useState([]);
   const [classRooms, setClassRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -47,16 +53,8 @@ const ClassList = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState('');
-  const [createForm, setCreateForm] = useState({
-    sessionId: '',
-    className: 'Class 10',
-    classCode: 'CLS-10',
-    sectionName: 'Section A',
-    sectionCode: 'SEC-A',
-    room: 'Room 101',
-    capacity: 40,
-    classTeacherId: '',
-  });
+  const [createForm, setCreateForm] = useState(initialCreateForm);
+  const createClassId = createForm.classId || classOptions[0]?.id || '';
 
   // Assign teacher modal
   const [teacherModalOpen, setTeacherModalOpen] = useState(false);
@@ -72,29 +70,12 @@ const ClassList = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [enrollSubmitting, setEnrollSubmitting] = useState(false);
 
-  // 1. Fetch Sessions
-  const fetchSessions = useCallback(async () => {
-    try {
-      const res = await api.get('/sessions').catch(() => null);
-      const list = res?.data?.data || res?.data?.sessions || [];
-      setSessions(list);
-      if (list.length > 0) {
-        const active = list.find((s) => s.isCurrent) || list[0];
-        const activeId = active._id || active.id;
-        setCreateForm((f) => ({ ...f, sessionId: f.sessionId || activeId }));
-      }
-    } catch (err) {
-      console.warn('Could not load sessions:', err);
-    }
-  }, []);
-
-  // 2. Fetch ClassRooms for selected session
+  // Fetch classrooms for the current session.
   const fetchClassRooms = useCallback(async () => {
+    if (!sessionId) return;
     setLoading(true);
     try {
-      const params = {};
-      if (selectedSessionId) params.sessionId = selectedSessionId;
-      const res = await getClassRooms(params);
+      const res = await getClassRooms({ sessionId });
       setClassRooms(res?.classRooms || res?.data?.classRooms || []);
     } catch (err) {
       console.error('Error fetching classrooms:', err);
@@ -102,7 +83,7 @@ const ClassList = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedSessionId]);
+  }, [sessionId]);
 
   // 3. Fetch Teachers list
   const fetchTeachers = useCallback(async () => {
@@ -116,9 +97,8 @@ const ClassList = () => {
   }, []);
 
   useEffect(() => {
-    fetchSessions();
     fetchTeachers();
-  }, [fetchSessions, fetchTeachers]);
+  }, [fetchTeachers]);
 
   useEffect(() => {
     fetchClassRooms();
@@ -127,21 +107,14 @@ const ClassList = () => {
   // Create classroom handler
   const handleCreateClassRoom = async (e) => {
     e.preventDefault();
+    if (!sessionId || !createClassId) return;
     setCreateSubmitting(true);
     setCreateError('');
     try {
-      await createClassRoom(createForm);
+      const section = SECTION_OPTIONS.find(({ id }) => id === createForm.sectionId);
+      await createClassRoom({ ...createForm, sessionId, classId: createClassId, sectionName: section?.name });
       setIsCreateModalOpen(false);
-      setCreateForm((f) => ({
-        ...f,
-        className: 'Class 10',
-        classCode: 'CLS-10',
-        sectionName: 'Section A',
-        sectionCode: 'SEC-A',
-        room: 'Room 101',
-        capacity: 40,
-        classTeacherId: '',
-      }));
+      setCreateForm(initialCreateForm);
       fetchClassRooms();
     } catch (err) {
       setCreateError(err?.response?.data?.message || err.message || 'Failed to create classroom');
@@ -278,7 +251,6 @@ const ClassList = () => {
     });
   }, [classRooms, search]);
 
-  const activeSessionObj = sessions.find((s) => (s._id || s.id) === selectedSessionId);
 
   return (
     <div className="space-y-4 pb-8">
@@ -309,11 +281,12 @@ const ClassList = () => {
             <Can module="academics" action="create">
               <CanButton id="CREATE_CLASSROOM">
                 <button
+                  disabled={!sessionId}
                   onClick={() => {
                     setCreateError('');
                     setIsCreateModalOpen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-md shadow-indigo-500/20 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Plus size={15} />
                   <span>New ClassRoom</span>
@@ -324,7 +297,7 @@ const ClassList = () => {
         }
       />
 
-      {/* ── Session Switcher & Quick Search Banner ────────────────────────────── */}
+      {/* Current session and student history search */}
       <div className="bg-gradient-to-br from-indigo-900/90 via-slate-900 to-slate-950 text-white rounded-2xl p-3.5 sm:p-4 border border-indigo-700/30 shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
@@ -334,41 +307,17 @@ const ClassList = () => {
                 <School size={16} />
               </span>
               <h3 className="text-sm sm:text-base font-bold tracking-tight text-white">
-                Academic Session: {activeSessionObj?.sessionName || 'Active Session'}
+                {active?.sessionName || (sessionsLoading ? 'Loading academic session…' : 'No active academic session')}
               </h3>
-              {activeSessionObj?.isCurrent && (
+              {active && (
                 <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                  Current Active
+                  Current session
                 </span>
               )}
             </div>
-            <p className="text-xs text-indigo-200/80">
-              Each classroom is scoped per session (e.g., Class 10-A in 2025-26). Assigning a Class Teacher records an immutable assignment timeline and links timetables cleanly.
-            </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {/* Session Dropdown */}
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-xl text-xs">
-              <Calendar size={14} className="text-indigo-300 shrink-0" />
-              <span className="text-indigo-200 font-semibold shrink-0">Session:</span>
-              <SelectInput
-                value={selectedSessionId}
-                onChange={(e) => setSelectedSessionId(e.target.value)}
-                className="bg-transparent font-extrabold text-white focus:outline-none cursor-pointer pr-4"
-              >
-                {sessions.map((sess) => (
-                  <option
-                    key={sess._id || sess.id}
-                    value={sess._id || sess.id}
-                    className="bg-slate-900 text-white"
-                  >
-                    {sess.name} {sess.isCurrent ? '★ (Active)' : ''}
-                  </option>
-                ))}
-              </SelectInput>
-            </div>
-
             {/* Quick Student History Search Bar */}
             <form onSubmit={handleLookupStudentHistory} className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-2 py-1">
               <input
@@ -434,7 +383,7 @@ const ClassList = () => {
       </div>
 
       {/* ── Content Area: Cards or Table ─────────────────────────────────────── */}
-      {loading ? (
+      {loading || sessionsLoading ? (
         <Loader fullPage size="lg" text="Loading classrooms for session..." />
       ) : filteredClassRooms.length === 0 ? (
         <div className="p-12 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
@@ -446,15 +395,16 @@ const ClassList = () => {
               No ClassRooms in this Session
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
-              Create your first session-scoped classroom (e.g. Class 10 - Section A for {activeSessionObj?.sessionName || 'this session'}) to assign a class teacher, timetable, and enroll students.
+              {active ? `Create your first classroom for ${active.sessionName}.` : 'Set an active academic session to create classrooms.'}
             </p>
           </div>
           <button
+            disabled={!sessionId}
             onClick={() => {
               setCreateError('');
               setIsCreateModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-md shadow-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus size={15} /> Create ClassRoom
           </button>
@@ -733,23 +683,12 @@ const ClassList = () => {
             )}
 
             <form onSubmit={handleCreateClassRoom} className="space-y-4 text-xs font-medium">
-              {/* Session Select */}
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
-                  Academic Session *
-                </label>
-                <SelectInput
-                  required
-                  value={createForm.sessionId}
-                  onChange={(e) => setCreateForm({ ...createForm, sessionId: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                >
-                  {sessions.map((s) => (
-                    <option key={s._id || s.id} value={s._id || s.id}>
-                      {s.sessionName} {s.isCurrent ? '★ (Current Session)' : ''}
-                    </option>
-                  ))}
-                </SelectInput>
+              <div className="flex items-center gap-2.5 rounded-xl border border-orange-500/25 bg-orange-500/10 px-3 py-2.5">
+                <CalendarDays size={16} aria-hidden="true" className="shrink-0 text-orange-600 dark:text-orange-400" />
+                <div>
+                  <span className="block text-[10px] text-stone-600 dark:text-stone-400">Current academic session</span>
+                  <strong>{active?.sessionName || 'No active year'}</strong>
+                </div>
               </div>
 
               {/* Class & Section Row */}
@@ -759,20 +698,12 @@ const ClassList = () => {
                     Class Level *
                   </label>
                   <SelectInput
-                    value={createForm.className}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const opt = classOptions.find((c) => c.name === val);
-                      setCreateForm({
-                        ...createForm,
-                        className: val,
-                        classCode: opt?.code || val.toUpperCase().replace(/\s+/g, '-'),
-                      });
-                    }}
+                    value={createClassId}
+                    onChange={(e) => setCreateForm({ ...createForm, classId: e.target.value })}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   >
                     {classOptions.map((c) => (
-                      <option key={c.id} value={c.name}>
+                      <option key={c.id} value={c.id}>
                         {c.name} ({c.code})
                       </option>
                     ))}
@@ -784,20 +715,12 @@ const ClassList = () => {
                     Section *
                   </label>
                   <SelectInput
-                    value={createForm.sectionName}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const opt = SECTION_OPTIONS.find((s) => s.name === val);
-                      setCreateForm({
-                        ...createForm,
-                        sectionName: val,
-                        sectionCode: opt?.code || val.replace(/Section\s*/i, 'SEC-'),
-                      });
-                    }}
+                    value={createForm.sectionId}
+                    onChange={(e) => setCreateForm({ ...createForm, sectionId: e.target.value })}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   >
                     {SECTION_OPTIONS.map((s) => (
-                      <option key={s.id} value={s.name}>
+                      <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
                     ))}
@@ -863,7 +786,7 @@ const ClassList = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={createSubmitting}
+                  disabled={createSubmitting || !sessionId || !createClassId}
                   className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center gap-2 shadow-md shadow-indigo-500/20"
                 >
                   {createSubmitting && <Loader size="sm" />}

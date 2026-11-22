@@ -4,6 +4,7 @@
  * Mirrors the EODSrc/routes/appRoutes.js pattern.
  */
 
+import LibraryBookLists from '../pages/academics/LibraryBookLists.jsx';
 import {
   Login,
   Signup,
@@ -106,7 +107,8 @@ const appRoutes = [
   { path: ROUTES.ACADEMICS.CLASSES, element: ClassList, name: 'class-list', module: 'academics' },
   { path: ROUTES.ACADEMICS.CLASS_PARAM, element: ClassDetail, name: 'class-detail', module: 'academics' },
   { path: ROUTES.ACADEMICS.SYLLABUS, element: ClassSyllabusPage, name: 'class-syllabus', module: 'academics' },
-  { path: ROUTES.SYLLABUS, element: ClassSyllabusPage, name: 'syllabus', module: 'academics' },
+  { path: ROUTES.ACADEMICS.SECTIONS, element: AcademicManagement, name: 'academic-sections', module: 'academics' },
+  { path: ROUTES.ACADEMICS.SUBJECTS, element: AcademicManagement, name: 'academic-subjects', module: 'academics' },
 
   // Attendance
   { path: ROUTES.ATTENDANCE, element: AttendanceManagement, name: 'attendance', module: 'attendance' },
@@ -123,6 +125,7 @@ const appRoutes = [
   { path: ROUTES.PAYROLL, element: PayrollManagement, name: 'payroll', module: 'payroll' },
   { path: ROUTES.PAYROLL_DETAIL, element: StaffPayrollDetail, name: 'payroll-detail', module: 'payroll' },
   { path: ROUTES.LIBRARY, element: LibraryManagement, name: 'library', module: 'library' },
+  { path: ROUTES.LIBRARY_BOOK_LISTS, element: LibraryBookLists, name: 'prescribed-book-lists', module: 'library' },
   { path: ROUTES.TRANSPORT, element: TransportManagement, name: 'transport', module: 'transport' },
   { path: ROUTES.HOSTEL, element: HostelManagement, name: 'hostel', module: 'hostel' },
   { path: ROUTES.CERTIFICATES, element: CertificatesManagement, name: 'certificates', module: 'certificates' },

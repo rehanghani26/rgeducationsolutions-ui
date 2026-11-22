@@ -1,21 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import api, { setAcademicSessionId } from '../services/api.js';
+import api from '../services/api.js';
 import { SECTION_OPTIONS } from '../constants/academicOptions.js';
-import { SelectInput } from '../components/ui/FormControls.jsx';
 
 const AcademicSessionContext = createContext(null);
 const idOf = (session) => session?._id || session?.id || '';
 
 export function AcademicSessionProvider({ children }) {
   const [sessionList, setSessionList] = useState({ sessions: [], loading: true, error: null });
-  const [choice, setChoice] = useState('');
   const [schoolClasses, setSchoolClasses] = useState({ classRange: null, classes: [], loading: true, error: null });
   const sessionRequest = useRef(0);
   const classRequest = useRef(0);
   const { sessions, loading: sessionsLoading, error: sessionsError } = sessionList;
   const active = sessions.find((session) => session.isCurrent);
-  const selected = choice === 'legacy' ? null : sessions.find((session) => idOf(session) === choice) || active;
-  const sessionId = choice === 'legacy' ? choice : idOf(selected);
+  const sessionId = idOf(active);
 
   const refresh = useCallback(async () => {
     const request = ++sessionRequest.current;
@@ -55,15 +52,8 @@ export function AcademicSessionProvider({ children }) {
       sessionRequest.current += 1;
       classRequest.current += 1;
       window.clearInterval(timer);
-      setAcademicSessionId('');
     };
   }, [refresh, refreshSchoolClasses]);
-
-  const choose = useCallback((id) => {
-    // Set the request scope before any children fetch for the new selection.
-    setAcademicSessionId(id);
-    setChoice(id);
-  }, []);
 
   const classOptions = useMemo(() => schoolClasses.classes.map(({ id, name, aliases, code }) =>
     ({ id, name, label: name, value: name, aliases, code })), [schoolClasses.classes]);
@@ -80,27 +70,10 @@ export function AcademicSessionProvider({ children }) {
   ), [classOptions]);
 
   return <AcademicSessionContext.Provider value={{
-    sessions, sessionsLoading, sessionsError, active, selected, sessionId, choice, choose, refresh,
+    sessions, sessionsLoading, sessionsError, active, selected: active, sessionId, refresh,
     classOptions, combinedClassOptions, schoolClasses, refreshSchoolClasses,
-    readOnly: choice === 'legacy' || Boolean(selected && !selected.isCurrent),
+    readOnly: !active,
   }}>{children}</AcademicSessionContext.Provider>;
 }
 
 export const useAcademicSession = () => useContext(AcademicSessionContext);
-
-export function AcademicSessionSelector({ showLegacy }) {
-  const { sessions, choice, choose } = useAcademicSession();
-  if (!sessions.length) return null;
-  return (
-    <SelectInput aria-label="Academic session" value={choice} onChange={(event) => choose(event.target.value)}
-      className="max-w-40 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
-      <option value="">Active session</option>
-      {sessions.map((session) => (
-        <option key={idOf(session)} value={idOf(session)}>
-          {session.sessionName} ({session.isCurrent ? 'Active' : session.status === 'completed' ? 'Completed' : 'Upcoming'})
-        </option>
-      ))}
-      {showLegacy && <option value="legacy">Legacy / Unassigned</option>}
-    </SelectInput>
-  );
-}

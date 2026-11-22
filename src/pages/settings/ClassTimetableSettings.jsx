@@ -7,11 +7,11 @@ import { toast } from 'react-toastify';
 import ConfirmationBox from '../../components/ui/ConfirmationBox.jsx';
 import { ErrorMessage, Field, Pending } from '../../components/ui/ProcurementUI.jsx';
 import { getUserRole } from '../../config/access.jsx';
-import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import api from '../../services/api.js';
 import { notifyApiError } from '../../services/apiErrors.js';
 import { getMasterPeriods } from '../../services/masterPeriodService.js';
+import { getClassRoomsBySession } from '../../services/classService.js';
 import { recordId } from '../../utils/procurement.js';
 import { masterScheduleForTimetable } from '../timetable/timetableUtils.js';
 import TimetableDirectory from './classTimetable/TimetableDirectory.jsx';
@@ -33,14 +33,13 @@ function ChooseClass({ classes, onOpen, onClose }) {
   const available = grade?.sections || [];
   const section = available.find((item) => item.id === sectionId) || available[0];
   const count = available.length;
-  const savedCount = SECTION_OPTIONS.length - count;
 
   let hint = 'Choose a class to see its available sections.';
   if (grade) {
     const availability = count === 1 ? '1 section available.' : count + ' sections available.';
     hint = allSections ? (count === 1 ? 'Saving will create a timetable for ' + section.name + '.'
       : 'Saving will create ' + count + ' separate timetables.')
-      : availability + (savedCount ? ' Edit saved sections in the list below.' : '');
+      : availability + (grade.hasSavedSections ? ' Edit saved sections in the list below.' : '');
   }
 
   useEffect(() => { firstField.current?.focus(); }, []);
@@ -95,6 +94,7 @@ function ChooseClass({ classes, onOpen, onClose }) {
 
 function ClassTimetables({ session, sessionId, canEdit, classes, schoolClasses, refreshSchoolClasses }) {
   const [directory, setDirectory] = useState(loadingList);
+  const [rooms, setRooms] = useState([]);
   const [master, setMaster] = useState(loadingList);
   const [directoryRequest, setDirectoryRequest] = useState(0);
   const [masterRequest, setMasterRequest] = useState(0);
@@ -102,7 +102,7 @@ function ClassTimetables({ session, sessionId, canEdit, classes, schoolClasses, 
   const [choosing, setChoosing] = useState(false);
   const [editor, setEditor] = useState(null);
   const [deleting, setDeleting] = useState(null);
-  const availableClasses = useMemo(() => classesWithAvailableSections(classes, directory.rows), [classes, directory.rows]);
+  const availableClasses = useMemo(() => classesWithAvailableSections(classes, directory.rows, rooms), [classes, directory.rows, rooms]);
   const defaultSchedule = masterScheduleForTimetable(master.rows);
   const hasTeachingPeriods = timetableDays(defaultSchedule).some((day) => day.slots.some((slot) => slot.number));
   const availabilityLoaded = !directory.loading && !directory.error && !schoolClasses.loading && !schoolClasses.error;
@@ -112,11 +112,14 @@ function ClassTimetables({ session, sessionId, canEdit, classes, schoolClasses, 
 
   useEffect(() => {
     const request = new AbortController();
-    api.get('/periods/timetable', { params: { scheduleType, sessionId: sessionId || undefined }, signal: request.signal })
-      .then(({ data }) => {
+    Promise.all([
+      api.get('/periods/timetable', { params: { scheduleType, sessionId: sessionId || undefined }, signal: request.signal }),
+      sessionId && sessionId !== 'legacy' ? getClassRoomsBySession(sessionId, request.signal) : null,
+    ]).then(([{ data }, classroomResponse]) => {
         if (request.signal.aborted) return;
         const rows = data.data?.timetables ?? data.timetables;
         if (!Array.isArray(rows)) throw new Error(data.message || 'Class timetables could not be loaded.');
+        setRooms(classroomResponse?.data?.classRooms || []);
         setDirectory({ rows, loading: false, error: null });
       })
       .catch((error) => {

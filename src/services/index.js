@@ -45,9 +45,6 @@ export { default as homeworkService } from './homeworkService.js';
 export * from './userService.js';
 export { default as userService } from './userService.js';
 
-export * from './curriculumService.js';
-export { default as curriculumService } from './curriculumService.js';
-
 export * from './classService.js';
 export { default as classService } from './classService.js';
 

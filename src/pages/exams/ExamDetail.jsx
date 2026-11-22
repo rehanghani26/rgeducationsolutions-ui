@@ -76,11 +76,8 @@ const ExamDetail = () => {
           </div>
         );
       case 'subjects':
-        const subjectsList = exam?.subjectsList || [
-          { code: 'ISL-101', name: 'Quranic Sciences & Tajweed', date: '2026-09-15', time: '09:00 AM - 11:30 AM', room: 'Hall A' },
-          { code: 'ARB-102', name: 'Classical Arabic Grammar', date: '2026-09-17', time: '09:00 AM - 11:30 AM', room: 'Hall A' },
-          { code: 'MTH-103', name: 'Mathematics & Geometry', date: '2026-09-19', time: '09:00 AM - 11:30 AM', room: 'Hall B' },
-        ];
+        const subjectsList = exam?.subjectSchedule?.length ? exam.subjectSchedule : (exam?.subjects || []).map((subjectName) => ({ subjectName }));
+        if (!subjectsList.length) return <p className="text-sm text-slate-500">No subject schedule has been set.</p>;
         return (
           <div className="overflow-x-auto text-xs">
             <table className="w-full text-left border-collapse">
@@ -96,10 +93,14 @@ const ExamDetail = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {subjectsList.map((sub, i) => (
                   <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className="py-3 font-bold text-indigo-500">{sub.code}</td>
-                    <td className="py-3 font-extrabold text-slate-800 dark:text-white">{sub.name}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-400 font-semibold">{sub.date}</td>
-                    <td className="py-3 text-slate-500 font-medium">{sub.time}</td>
+                    <td className="py-3 font-bold text-indigo-500">{sub.subjectCode}</td>
+                    <td className="py-3 font-extrabold text-slate-800 dark:text-white">{sub.subjectName}
+                      {sub.classId && <small className="block text-slate-500">{exam.classTargets?.find((row) => row.classId === sub.classId)?.className}</small>}
+                    </td>
+                    <td className="py-3 text-slate-600 dark:text-slate-400 font-semibold">
+                      {sub.examDate && format(new Date(sub.examDate), 'MMM d, yyyy')}
+                    </td>
+                    <td className="py-3 text-slate-500 font-medium">{[sub.startTime, sub.endTime].filter(Boolean).join(' – ')}</td>
                     <td className="py-3 text-slate-500 font-bold">{sub.room}</td>
                   </tr>
                 ))}

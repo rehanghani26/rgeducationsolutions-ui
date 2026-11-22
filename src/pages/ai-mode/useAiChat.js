@@ -9,11 +9,12 @@ const DEFAULT_SESSION = {
   createdAt: Date.now(),
 };
 
-export function useAiChat({ onAiResponse } = {}) {
+export function useAiChat({ onAiResponse, scope } = {}) {
+  const storageKey = scope && STORAGE_KEY_SESSIONS + ':' + scope;
   /* ── Sessions State ── */
   const [sessions, setSessions] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_SESSIONS);
+      const saved = storageKey && localStorage.getItem(storageKey);
       return saved ? JSON.parse(saved) : [{ ...DEFAULT_SESSION }];
     } catch {
       return [{ ...DEFAULT_SESSION }];
@@ -64,7 +65,7 @@ export function useAiChat({ onAiResponse } = {}) {
   /* ── Persist sessions ── */
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+      if (storageKey) localStorage.setItem(storageKey, JSON.stringify(sessions));
     } catch {}
   }, [sessions]);
 

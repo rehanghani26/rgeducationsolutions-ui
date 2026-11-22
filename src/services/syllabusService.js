@@ -1,47 +1,31 @@
-/**
- * @file syllabusService.js
- * @description API service for Class Syllabus, Subjects, Prescribed Books, and Passing Marks.
- */
+﻿import api from './api.js';
+import { SYLLABUS_URLS } from '../constants/urls.js';
 
-import { toast } from "react-toastify";
-import api from "./api.js";
-import { SYLLABUS_URLS } from "../constants/urls.js";
+const base = SYLLABUS_URLS.BASE;
+const byClass = SYLLABUS_URLS.BY_CLASS;
+const roomPath = (id) => base + '/classrooms/' + encodeURIComponent(id);
+const read = (url, config) => api.get(url, config).then(({ data }) => data.data);
+const send = (method, url, payload) => api[method](url, payload).then(({ data }) => data.data);
 
-// Fetch all configured syllabuses
-export async function getAllSyllabus() {
-  try {
-    const { data } = await api.get(SYLLABUS_URLS.BASE);
-    return data;
-  } catch (err) {
-    console.error("Failed to load syllabuses:", err);
-    throw err;
-  }
-}
-
-// Fetch syllabus for a specific class (auto-returns default template if not yet configured)
 export async function getSyllabusByClass(classId, signal) {
   if (!classId) return null;
-  const { data } = await api.get(SYLLABUS_URLS.BY_CLASS(classId), { signal });
-  return data.data?.syllabus ?? data.syllabus ?? null;
+  const { syllabus } = await read(byClass(classId), { signal });
+  return syllabus;
 }
 
-// Save or update class syllabus
-export async function saveClassSyllabus(classId, payload) {
-  const { data } = await api.put(SYLLABUS_URLS.BY_CLASS(classId), payload);
-  toast.success(data?.message || "Class syllabus updated successfully");
-  return data;
-}
+export const getAcademicWorkspace = (signal) => read(base + '/workspace', { signal });
+export const getPublishedSyllabuses = (signal) => read(base, { signal });
+export const getMyAcademics = (studentId, signal) => read(base + '/mine', { params: { studentId: studentId || undefined }, signal });
+export const getClassroomAcademics = (roomId, signal) => read(roomPath(roomId), { signal });
+export const getSyllabusDraft = (classId, signal) => read(byClass(classId) + '/draft', { signal });
+export const copySyllabus = (classId, sourceSessionId) => read(byClass(classId) + '/copy', { params: { sourceSessionId } });
+export const saveSyllabusDraft = (classId, payload) => send('put', byClass(classId), payload);
+export const changeSyllabusStatus = (classId, payload) => send('post', byClass(classId) + '/status', payload);
 
-// Reset class syllabus to recommended national standard
-export async function resetClassSyllabus(classId) {
-  const { data } = await api.post(SYLLABUS_URLS.RESET(classId));
-  toast.success(data?.message || "Curriculum reset to standard defaults");
-  return data?.syllabus;
-}
+export const changeClassroomSubject = (roomId, subjectId, action, payload) => send(
+  ['request', 'resolve'].includes(action) ? 'post' : 'put',
+  roomPath(roomId) + '/subjects/' + encodeURIComponent(subjectId) + '/' + action,
+  payload,
+);
 
-export default {
-  getAllSyllabus,
-  getSyllabusByClass,
-  saveClassSyllabus,
-  resetClassSyllabus,
-};
+export default { getSyllabusByClass };

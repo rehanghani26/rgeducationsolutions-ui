@@ -1,0 +1,113 @@
+.syllabus-workbench {
+  container: syllabus / inline-size;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  --syllabus-edge: color-mix(in srgb, var(--text-primary) 16%, var(--surface-1));
+}
+.syllabus-workbench .academic-panel { border-color: var(--syllabus-edge); }
+.syllabus-mast, .syllabus-heading, .syllabus-heading-line, .syllabus-tools,
+.syllabus-add-controls, .syllabus-content-head, .syllabus-rail-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.syllabus-mast {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: clamp(15px, 2cqw, 24px);
+  background: linear-gradient(110deg, var(--academic-tint), var(--surface-1) 55%);
+}
+.syllabus-heading-line { flex-wrap: wrap; gap: 8px; }
+.syllabus-heading h2 { font-size: clamp(1.2rem, 2cqw, 1.6rem); letter-spacing: -.03em; }
+.syllabus-heading p, .syllabus-content-head p, .syllabus-outline-subject {
+  color: var(--text-secondary);
+  font-size: .83rem;
+  margin-top: 3px;
+}
+.syllabus-heading > .academic-icon { background: var(--surface-1); border: 1px solid var(--academic-line); }
+.syllabus-tools, .syllabus-add-controls { flex-wrap: wrap; align-items: end; }
+.syllabus-tools > .form-field { width: 10.5rem; }
+.syllabus-add-controls > .form-field { flex: 1 1 12rem; max-width: 24rem; }
+.syllabus-subjects { display: grid; gap: 12px; padding-block: 16px; }
+.syllabus-subject-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+.syllabus-subject-nav button, .syllabus-add-subject summary {
+  padding: 7px 12px;
+  border: 1px solid var(--syllabus-edge);
+  border-radius: 8px;
+  font-size: .82rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.syllabus-subject-nav button:hover, .syllabus-outline button:hover, .syllabus-chapter-row:hover { background: var(--surface-2); }
+.syllabus-subject-nav button[aria-pressed=true], .syllabus-outline button[aria-current] {
+  background: var(--academic-tint);
+  color: var(--academic-accent);
+  border-color: var(--academic-line);
+}
+.syllabus-add-subject summary { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.syllabus-add-controls { margin-top: 10px; }
+.syllabus-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(16rem, 25%, 23rem); gap: 16px; align-items: start; }
+.syllabus-content { padding: 0; min-width: 0; }
+.syllabus-content-head { border-bottom: 1px solid var(--syllabus-edge); padding: 18px clamp(14px, 2cqw, 24px); }
+.syllabus-content-head h2 { font-size: 1.28rem; overflow-wrap: anywhere; }
+.syllabus-content-head > svg, .syllabus-rail-head > svg, .syllabus-book summary > svg:first-child { color: var(--academic-accent); flex: none; }
+.syllabus-content-body { padding: clamp(14px, 2cqw, 24px); gap: 16px; }
+.syllabus-section-title h3 { font-size: 1rem; }
+.syllabus-chapters, .syllabus-outline ol { list-style: none; margin: 0; padding: 0; }
+.syllabus-chapters { border: 1px solid var(--syllabus-edge); border-radius: 12px; overflow: clip; }
+.syllabus-chapters:empty { display: none; }
+.syllabus-chapters li + li { border-top: 1px solid var(--syllabus-edge); }
+.syllabus-chapter-row {
+  width: 100%; min-height: 54px; display: flex; align-items: center; gap: 12px;
+  text-align: start; padding: 10px 14px; scroll-margin-block: 1rem;
+}
+.syllabus-chapter-row strong { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: .94rem; font-weight: 650; }
+.syllabus-chapter-row small { color: var(--text-secondary); font-size: .77rem; overflow-wrap: anywhere; max-width: 28%; }
+.syllabus-chapter-row svg { flex: none; color: var(--text-secondary); }
+.syllabus-number {
+  display: inline-grid; place-items: center; flex: none; min-width: 2rem; height: 2rem; padding-inline: 3px;
+  border-radius: 7px; background: var(--surface-2); color: var(--text-secondary); font-size: .78rem; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.syllabus-chapters .is-selected > button { background: var(--academic-tint); }
+.is-selected .syllabus-number { color: var(--academic-accent); background: var(--surface-1); }
+.syllabus-chapter-edit { display: grid; gap: 12px; padding: 14px; border-top: 1px solid var(--academic-line); }
+.syllabus-disclosure { padding: 0 13px; border: 1px solid var(--syllabus-edge); border-radius: 10px; }
+.syllabus-disclosure summary {
+  display: flex; align-items: center; gap: 8px; min-height: 46px; padding-block: 8px; cursor: pointer;
+  font-weight: 650; font-size: .87rem; overflow-wrap: anywhere;
+}
+.syllabus-disclosure summary span { margin-inline-start: auto; color: var(--text-secondary); font-weight: 500; font-size: .78rem; }
+.syllabus-disclosure summary svg:last-child { margin-inline-start: auto; flex: none; }
+.syllabus-disclosure summary span + svg:last-child { margin-inline-start: 0; }
+.syllabus-disclosure[open] summary svg:last-child { transform: rotate(180deg); }
+.syllabus-disclosure > :last-child:not(summary) { margin: 3px 0 14px; }
+.syllabus-rail { display: grid; gap: 14px; min-width: 0; }
+.syllabus-outline { padding: 18px; border-top: 3px solid var(--academic-line); }
+.syllabus-outline ol { overflow-y: auto; max-height: min(48vh, 30rem); margin-top: 12px; }
+.syllabus-outline-subject { margin-inline-start: 32px; overflow-wrap: anywhere; }
+.syllabus-term { margin: 12px 5px 4px; font-weight: 700; font-size: .75rem; color: var(--text-secondary); }
+.syllabus-outline li:first-child .syllabus-term { margin-top: 0; }
+.syllabus-outline button {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 8px 6px;
+  text-align: start; border: 1px solid transparent; border-radius: 7px; font-size: .86rem; overflow-wrap: anywhere;
+}
+.syllabus-outline button span { flex: none; min-width: 1.3rem; font-variant-numeric: tabular-nums; text-align: center; color: var(--academic-accent); }
+.syllabus-workbench :is(button, summary):focus-visible { outline: 2px solid var(--academic-accent); outline-offset: -2px; }
+@media (min-height: 640px) {
+  .syllabus-rail { position: sticky; top: 12px; }
+}
+@container syllabus (max-width: 760px) {
+  .syllabus-layout { grid-template-columns: minmax(0, 1fr); }
+  .syllabus-rail { display: contents; }
+  .syllabus-outline { grid-row: 1; }
+  .syllabus-outline ol { max-height: 11rem; }
+}
+@container syllabus (max-width: 510px) {
+  .syllabus-tools { width: 100%; }
+  .syllabus-tools > .form-field { flex: 1 1 7rem; }
+  .syllabus-subject-nav { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .syllabus-subject-nav button { flex: none; }
+  .syllabus-chapter-row { padding-inline: 9px; gap: 7px; }
+}

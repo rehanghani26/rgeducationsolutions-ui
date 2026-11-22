@@ -34,12 +34,12 @@ export async function getClassRooms(params = {}) {
 /**
  * Fetch classrooms for a specific academic session
  */
-export async function getClassRoomsBySession(sessionId) {
+export async function getClassRoomsBySession(sessionId, signal) {
   try {
-    const res = await api.get(CLASSROOM_URLS.BY_SESSION(sessionId));
+    const res = await api.get(CLASSROOM_URLS.BY_SESSION(sessionId), { signal });
     return res.data;
   } catch (error) {
-    console.error('Error fetching classrooms by session:', error);
+    if (!signal?.aborted) console.error('Error fetching classrooms by session:', error);
     throw error;
   }
 }

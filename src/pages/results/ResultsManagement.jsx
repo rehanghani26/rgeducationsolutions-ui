@@ -112,7 +112,10 @@ const EnterResultsView = ({ exams, loading }) => {
   const classOptions = examClassOptions(selectedExam);
 
   const subjects = selectedExam?.subjectSchedule?.length
-    ? selectedExam.subjectSchedule
+    ? selectedExam.subjectSchedule.filter((row) => !row.classId
+      || row.classId === selectedClassId
+      || selectedExam.classTargets?.some((target) => target.classId === row.classId
+        && selectedClassId === target.classId + '_' + target.sectionId))
     : (selectedExam?.subjects || []).map((s) => ({ subjectName: typeof s === 'string' ? s : s.name, maxMarks: 100, passMarks: 35 }));
 
   useEffect(() => {

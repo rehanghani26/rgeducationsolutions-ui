@@ -1,6 +1,7 @@
 import React from "react";
 import AIToolExecutionCard from "./AIToolExecutionCard.jsx";
 import AITextResponse from "./AITextResponse.jsx";
+import AIRecordsCard from "./AIRecordsCard.jsx";
 import AIStatsGrid from "./AIStatsGrid.jsx";
 import AIAttendanceCard from "./AIAttendanceCard.jsx";
 import AIFeeSummary from "./AIFeeSummary.jsx";
@@ -269,7 +270,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        return null;
+        return act.status === 'error' ? null : <AIRecordsCard key={idx} tool={toolName} data={data} />;
       })}
     </div>
   );

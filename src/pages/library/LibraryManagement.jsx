@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../routes/routes.js';
 import api from '../../services/api.js';
 import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 import PageHeader from '../../components/ui/PageHeader.jsx';
@@ -14,7 +16,8 @@ const button = 'rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-wh
 export default function LibraryManagement() {
   const { readOnly, selected } = useAcademicSession();
   const role = useSelector((state) => state.auth.user?.role);
-  const canManage = ['super-admin', 'school-admin', 'admin', 'principal', 'librarian'].includes(role) && !readOnly;
+  const canBrowseLists = ['super-admin', 'school-admin', 'admin', 'principal', 'librarian', 'director'].includes(role);
+  const canManage = canBrowseLists && role !== 'director' && !readOnly;
   const [books, setBooks] = useState([]);
   const [loans, setLoans] = useState([]);
   const [search, setSearch] = useState('');
@@ -65,9 +68,12 @@ export default function LibraryManagement() {
     .some((value) => String(value || '').toLowerCase().includes(search.trim().toLowerCase())));
   return (
     <section className="space-y-4">
-      <PageHeader title="Library" actions={canManage && <div className="flex flex-wrap gap-2">
-        <button className={button} onClick={() => open('book')}>Add book</button>
-        <button className={button} disabled={!selected?.isCurrent} onClick={() => open('issue')}>Issue book</button>
+      <PageHeader title="Library" actions={canBrowseLists && <div className="flex flex-wrap gap-2">
+        <Link className={button} to={ROUTES.LIBRARY_BOOK_LISTS}>Prescribed book lists</Link>
+        {canManage && <>
+          <button className={button} onClick={() => open('book')}>Add book</button>
+          <button className={button} disabled={!selected?.isCurrent} onClick={() => open('issue')}>Issue book</button>
+        </>}
       </div>} />
       {error && !form && <p role="alert" className="text-sm text-red-600">{error}</p>}
       <FormInput name="catalog-search" label="Search catalog" value={search} onChange={(event) => setSearch(event.target.value)} />

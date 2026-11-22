@@ -109,47 +109,17 @@ export default function AITextResponse({ text = "" }) {
       const headerRow = tableRows[0];
       const bodyRows = tableRows.slice(1).filter((r) => !r.isDivider);
       elements.push(
-        <div
-          key={`table-${key}`}
-          className="my-3 overflow-x-auto rounded-xl border border-[#303030] bg-[#1D1D1D] shadow-sm scrollbar-thin"
-        >
-          <table className="w-full min-w-full text-left text-[12px]">
-            <thead className="border-b border-[#303030] bg-[#181818]">
-              <tr>
-                {headerRow.cols.map((col, ci) => (
-                  <th
-                    key={ci}
-                    className="px-3.5 py-2 font-bold text-[#A1A1AA] whitespace-nowrap"
-                  >
-                    {col.trim()}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#262626]">
-              {bodyRows.map((row, ri) => (
-                <tr
-                  key={ri}
-                  className="hover:bg-[#252525] transition-colors"
-                >
-                  {row.cols.map((cell, ci) => (
-                    <td
-                      key={ci}
-                      className="px-3.5 py-2 text-[#FFFFFF]"
-                      dangerouslySetInnerHTML={{
-                        __html: cell
-                          .trim()
-                          .replace(
-                            /\*\*(.*?)\*\*/g,
-                            "<strong class='text-[#FFFFFF] font-bold'>$1</strong>"
-                          ),
-                      }}
-                    />
-                  ))}
-                </tr>
+        <div key={'table-' + key} className="my-3 grid gap-2 sm:grid-cols-2">
+          {bodyRows.length ? bodyRows.map((row, index) => (
+            <dl key={index} className="min-w-0 rounded-xl border border-[#393939] border-t-2 border-t-[#FF7900] bg-[#181818] px-4 py-2">
+              {Array.from({ length: Math.max(headerRow.cols.length, row.cols.length) }, (_, i) => (
+                <div key={i} className="grid grid-cols-[minmax(4rem,2fr)_minmax(0,3fr)] gap-2 border-b border-white/10 py-2 text-sm last:border-0">
+                  <dt className="break-words text-[#A1A1AA]">{headerRow.cols[i] || 'Column ' + (i + 1)}</dt>
+                  <dd className="break-words font-medium text-white">{row.cols[i]?.replace(/\*\*(.*?)\*\*/g, '$1') || '—'}</dd>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </dl>
+          )) : <p className="text-sm text-[#A1A1AA]">No records returned.</p>}
         </div>
       );
       tableRows = [];

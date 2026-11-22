@@ -1,13 +1,27 @@
 import React from "react";
-import { Sparkles, ShieldCheck, Zap, Database } from "lucide-react";
+import { Sparkles, ShieldCheck, BookOpen, Calendar, Wallet, Settings } from "lucide-react";
 import { SUGGESTED_PROMPTS } from "../ai.constants.js";
 import AISuggestionGrid from "./AISuggestionGrid.jsx";
 import rgLogo from "../../../assets/logo/RGLOGO.png";
 
 export default function AIWelcomeScreen({
-  userName = "Rehan",
+  userName,
+  role,
   onSelectPrompt,
 }) {
+  const accountRole = String(role || '').toLowerCase().replaceAll('_', '-');
+  const admin = ['admin','superadmin','super-admin','school-admin'].includes(accountRole);
+  const personal = ['student','parent'].includes(accountRole);
+  const faculty = ['teacher','head-teacher','coordinator','hod','director'].includes(accountRole);
+  const suggestions = [
+    ...(personal ? [{ icon: BookOpen, title: 'My syllabus', description: 'Published chapters and prescribed books', prompt: 'Show my subjects, chapters and prescribed books.' },
+      { icon: Calendar, title: 'My timetable', description: 'Weekly classes and teachers', prompt: 'Show my weekly class timetable.' }] : []),
+    ...(faculty || admin || accountRole === 'principal' ? [{ icon: BookOpen, title: 'Classes & courses', description: 'Classrooms, sections and subject plans', prompt: 'Show the classes and sections I can access and their curriculum.' }] : []),
+    ...(admin || accountRole === 'principal' ? [{ icon: Settings, title: 'School setup', description: 'Profile, session, schedules and grading', prompt: 'Show school setup progress including class timetable coverage.' }] : []),
+    ...(admin || ['accountant','principal'].includes(accountRole) ? [{ icon: Wallet, title: 'Budget allocation', description: 'Current allocations and spending', prompt: 'Show the current session budget by category.' }] : []),
+    { icon: ShieldCheck, title: 'My permissions', description: 'Modules and actions available to your role', prompt: 'Which modules and actions can my role access?' },
+    ...(admin ? SUGGESTED_PROMPTS : []),
+  ];
   return (
     <div className="relative flex min-h-full flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
       {/* Ambient Top Glow (Lumix AI style) */}
@@ -63,34 +77,6 @@ export default function AIWelcomeScreen({
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base font-semibold text-[#FFA000]">
-            Your intelligent School Management Assistant.
-          </p>
-
-          {/* Description */}
-          <p className="mt-1.5 sm:mt-2 max-w-xl text-xs sm:text-[13px] leading-relaxed text-[#A1A1AA]">
-            Query students, track attendance, monitor fees, analyze exam
-            results, or execute ERP actions instantly using natural language
-            commands.
-          </p>
-
-          {/* ERP Capability Chips */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            {[
-              { icon: ShieldCheck, label: "Enterprise ERP Integrated" },
-              { icon: Database, label: "Live Database Sync" },
-              { icon: Zap, label: "Instant Multi-Module Action" },
-            ].map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-1.5 rounded-full border border-[#303030] bg-[#191919] px-3 py-1 text-[11px] font-medium text-[#A1A1AA]"
-              >
-                <Icon className="h-3 w-3 text-[#FF7900]" />
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Suggestion Cards Grid (At least 12 interactive cards, 16 available) */}
@@ -100,11 +86,11 @@ export default function AIWelcomeScreen({
               Explore Modules & Quick Inquiries
             </span>
             <span className="text-[11px] text-[#A1A1AA]/70 font-mono">
-              16 Actions Available
+              {suggestions.length} suggestions
             </span>
           </div>
           <AISuggestionGrid
-            items={SUGGESTED_PROMPTS}
+            items={suggestions}
             onSelectPrompt={onSelectPrompt}
           />
         </div>

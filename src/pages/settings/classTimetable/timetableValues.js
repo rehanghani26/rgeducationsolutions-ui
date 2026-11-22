@@ -22,7 +22,7 @@ export function timetableClass(row, classes) {
   };
 }
 
-export function classesWithAvailableSections(classes, timetables) {
+export function classesWithAvailableSections(classes, timetables, rooms = []) {
   const savedSections = new Map();
   for (const timetable of timetables) {
     const { classId, sectionId } = timetableClass(timetable, classes);
@@ -30,10 +30,16 @@ export function classesWithAvailableSections(classes, timetables) {
     if (!savedSections.has(classId)) savedSections.set(classId, new Set());
     savedSections.get(classId).add(sectionId);
   }
-  return classes.map((grade) => ({
-    ...grade,
-    sections: SECTION_OPTIONS.filter(({ id }) => !savedSections.get(grade.id)?.has(id)),
-  })).filter((grade) => grade.sections.length > 0);
+  return classes.map((grade) => {
+    const configured = rooms.filter((room) => room.classId === grade.id && room.status !== 'archived')
+      .map((room) => ({ id: room.sectionId, name: room.sectionName }));
+    const sections = configured.length ? configured : SECTION_OPTIONS;
+    return {
+      ...grade,
+      hasSavedSections: Boolean(savedSections.get(grade.id)?.size),
+      sections: sections.filter(({ id }) => !savedSections.get(grade.id)?.has(id)),
+    };
+  }).filter((grade) => grade.sections.length > 0);
 }
 
 export const classLabel = ({ className, sectionName }) =>

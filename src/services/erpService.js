@@ -36,12 +36,6 @@ export async function getSections() {
   }
 }
 
-export async function createSection(data) {
-  const response = await api.post(ERP_URLS.SECTIONS, data);
-  toast.success('Section created successfully');
-  return { status: response.status, data: response.data };
-}
-
 export async function getSubjects() {
   try {
     const response = await api.get(ERP_URLS.SUBJECTS);
@@ -104,7 +98,6 @@ const erpService = {
   getClasses,
   createClass,
   getSections,
-  createSection,
   getSubjects,
   createSubject,
   getDashboard: getDashboardStats,

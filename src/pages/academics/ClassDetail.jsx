@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   School, GraduationCap, Calendar, Clock, ArrowLeft,
   UserCheck, Trash2, AlertCircle, UserPlus,
-  ExternalLink, X, ArrowUpRight
+  ExternalLink, X, ArrowUpRight, User
 } from 'lucide-react';
 import Loader from '../../components/ui/Loader.jsx';
 import Modal from '../../components/ui/Modal.jsx';
@@ -25,10 +25,12 @@ import { getStudents } from '../../services/studentService.js';
 import { SCHOOL_DAY_NAMES } from '../../constants';
 import { formatDate } from '../../utils';
 import { SelectInput } from '../../components/ui/FormControls.jsx';
+import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
 
 const ClassDetail = () => {
   const { classId } = useParams();
   const navigate = useNavigate();
+  const { sessions } = useAcademicSession();
 
   // Core Data State
   const [classData, setClassData] = useState(null);
@@ -70,7 +72,6 @@ const ClassDetail = () => {
 
   // Modal: Promote Students
   const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
-  const [sessions, setSessions] = useState([]);
   const [targetSessionId, setTargetSessionId] = useState('');
   const [targetClassId, setTargetClassId] = useState('');
   const [targetSectionId, setTargetSectionId] = useState('A');
@@ -275,21 +276,12 @@ const ClassDetail = () => {
   };
 
   // Open Promote Modal
-  const handleOpenPromoteModal = async () => {
+  const handleOpenPromoteModal = () => {
     setIsPromoteModalOpen(true);
     setPromoteStudentIds(
       studentsList.map((s) => s.studentId?._id || s.studentId || s._id || s.id)
     );
-    try {
-      const res = await api.get('/sessions').catch(() => null);
-      const list = res?.data?.data || res?.data?.sessions || [];
-      setSessions(list);
-      if (list.length > 0) {
-        setTargetSessionId(list[0]._id || list[0].id);
-      }
-    } catch (err) {
-      console.warn('Could not load sessions for promotion:', err);
-    }
+    setTargetSessionId(sessions[0]?._id || sessions[0]?.id || '');
   };
 
   // Submit Promotion
@@ -339,6 +331,10 @@ const ClassDetail = () => {
         </Link>
 
         <div className="flex items-center gap-2">
+          <Link to={'/academics?tab=curriculum&room=' + encodeURIComponent(classId)}
+            className="inline-flex items-center rounded-xl border border-[var(--border-color)] bg-[var(--surface-1)] px-3 py-1.5 text-xs font-bold text-[var(--text-primary)] hover:border-[var(--brand-primary)]">
+            Subjects & coverage
+          </Link>
           <button
             onClick={handleOpenTeacherModal}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:border-indigo-500 transition shadow-xs"
@@ -1114,9 +1110,10 @@ const ClassDetail = () => {
                   onChange={(e) => setTargetSessionId(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                 >
+                  <option value="">Choose a session</option>
                   {sessions.map((s) => (
                     <option key={s._id || s.id} value={s._id || s.id}>
-                      {s.name} {s.isCurrent ? '(Active)' : ''}
+                      {s.sessionName} {s.isCurrent ? '(Active)' : ''}
                     </option>
                   ))}
                 </SelectInput>
