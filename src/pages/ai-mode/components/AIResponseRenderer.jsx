@@ -11,6 +11,11 @@ import AiStudentListCard from "./AiStudentListCard.jsx";
 import AiStudentIdCard from "./AiStudentIdCard.jsx";
 import AiStudentLeaveCard from "./AiStudentLeaveCard.jsx";
 import AiStudentProfileCard from "./AiStudentProfileCard.jsx";
+import AiTeacherListCard from "./AiTeacherListCard.jsx";
+import AiClassSectionListCard from "./AiClassSectionListCard.jsx";
+import AiTimetableCard from "./AiTimetableCard.jsx";
+import AiSetupWizardCard from "./AiSetupWizardCard.jsx";
+import AiTableDataCard from "./AiTableDataCard.jsx";
 import { Users, GraduationCap, DollarSign, Calendar, BookOpen, AlertCircle } from "lucide-react";
 
 export default function AIResponseRenderer({
@@ -65,7 +70,7 @@ export default function AIResponseRenderer({
         const toolName = act.tool;
         const data = act.data || act.result || {};
 
-        // Student Directory / Filter List
+        // ── 3.1. Student Directory / Filter List
         if (
           toolName === "getStudents" &&
           data.students &&
@@ -88,7 +93,106 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Student ID Card
+        // ── 3.2. Faculty & Teachers Directory
+        if (
+          (toolName === "getTeachers" ||
+            toolName === "getTeacherById" ||
+            toolName === "createTeacher" ||
+            toolName === "updateTeacher") &&
+          (data.teachers || data.teacher)
+        ) {
+          const teacherList = data.teachers || (data.teacher ? [data.teacher] : []);
+          return (
+            <div key={`resp-teachers-${idx}`} className="pt-2">
+              <AiTeacherListCard
+                teachers={teacherList}
+                total={data.total || data.count || teacherList.length}
+                initialFilters={act.args || {}}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.3. Classes, Sections, Subjects, Curriculum & Class Students
+        if (
+          toolName === "getClasses" ||
+          toolName === "getSections" ||
+          toolName === "getSubjects" ||
+          toolName === "getClassStudents" ||
+          toolName === "getClassSyllabus" ||
+          toolName === "getAcademicWorkspace" ||
+          toolName === "getMyAcademicPlan"
+        ) {
+          const classList =
+            data.classes ||
+            (data.rooms
+              ? data.rooms.map((r) => ({
+                  name: r.className,
+                  code: r.sectionName,
+                  capacity: r.studentCount || "—",
+                }))
+              : []);
+          const sectionList = data.sections || [];
+          const subjectList = data.subjects || [];
+
+          return (
+            <div key={`resp-academics-${idx}`} className="pt-2">
+              <AiClassSectionListCard
+                classes={classList}
+                sections={sectionList}
+                subjects={subjectList}
+                syllabus={data.syllabus || (toolName === "getClassSyllabus" ? data : null)}
+                classStudents={toolName === "getClassStudents" ? data : null}
+                onAskAiPrompt={onAskAiPrompt}
+                onSelectStudentForIdCard={onSelectStudentForIdCard}
+                onSelectStudentForReport={onSelectStudentForReport}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.4. Class Timetable with Live Conflict Detection
+        if (
+          (toolName === "getClassTimetable" || toolName === "getTodayTimetable") &&
+          (data.timetable || Array.isArray(data.schedule))
+        ) {
+          return (
+            <div key={`resp-timetable-${idx}`} className="pt-2">
+              <AiTimetableCard
+                timetable={data.timetable || data.schedule || []}
+                className={data.class || act.args?.class || ""}
+                section={data.section || act.args?.section || ""}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.5. Core Setup & 5 Foundation Anchors (P1 - P5)
+        if (
+          toolName === "getSetupWizardStatus" ||
+          toolName === "getSchoolSetupOverview" ||
+          toolName === "getAcademicSetupProgress" ||
+          toolName.startsWith("runSetupStep") ||
+          toolName === "getSchoolSettings" ||
+          toolName === "updateSchoolSettings" ||
+          toolName === "getActiveAcademicSession" ||
+          toolName === "listAcademicSessions" ||
+          data.steps ||
+          data.percentComplete !== undefined
+        ) {
+          return (
+            <div key={`resp-setup-${idx}`} className="pt-2">
+              <AiSetupWizardCard
+                setupStatus={data}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.6. Student ID Card
         if (
           (toolName === "getStudentIdCard" ||
             toolName === "updateStudentIdCardData") &&
@@ -110,7 +214,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Student Leaves
+        // ── 3.7. Student Leaves
         if (
           (toolName === "getStudentLeaves" ||
             toolName === "applyStudentLeave" ||
@@ -130,7 +234,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Student Comprehensive Dossier
+        // ── 3.8. Student Comprehensive Dossier
         if (toolName === "getStudentComprehensiveReport" && data.student) {
           return (
             <div key={`resp-report-${idx}`} className="pt-2">
@@ -148,7 +252,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Attendance Response
+        // ── 3.9. Attendance Response
         if (
           (toolName === "getAttendanceByDate" ||
             toolName === "getAttendanceStats" ||
@@ -168,7 +272,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Fee Management Response
+        // ── 3.10. Fee Management Response
         if (
           (toolName === "getFeeSummary" ||
             toolName === "getPendingFees" ||
@@ -186,7 +290,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Exam Results & Rankings
+        // ── 3.11. Exam Results & Rankings
         if (
           (toolName === "getClassResults" ||
             toolName === "getExamStats" ||
@@ -206,7 +310,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Executive Dashboard Stats
+        // ── 3.12. Executive Dashboard Stats
         if (toolName === "getDashboardStats" && data.stats) {
           const s = data.stats;
           const kpis = [
@@ -245,7 +349,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // Action confirmation or write execution card
+        // ── 3.13. Action confirmation or write execution card
         if (
           data.requiresConfirmation ||
           (data.success && data.message && act.args?.action)
@@ -270,9 +374,11 @@ export default function AIResponseRenderer({
           );
         }
 
-        return act.status === 'error' ? null : <AIRecordsCard key={idx} tool={toolName} data={data} />;
+        // ── 3.14. Universal Table / Records Fallback Card
+        return act.status === "error" ? null : (
+          <AIRecordsCard key={idx} tool={toolName} data={data} />
+        );
       })}
     </div>
   );
 }
-

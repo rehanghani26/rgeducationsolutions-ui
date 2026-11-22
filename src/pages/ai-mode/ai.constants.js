@@ -137,39 +137,43 @@ export const SUGGESTED_PROMPTS = [
 
 export const QUICK_CHIPS = [
   {
-    label: "Academic Session",
-    prompt: "Show the active academic session and setup progress",
+    label: "Core Setup (P1-P5)",
+    prompt: "Show setup wizard status for Core Setup, Period Slots, Timetable, and Grading Scale",
   },
   {
-    label: "Exams",
-    prompt: "Show all exams and subject schedule",
-  },
-  {
-    label: "Results & Toppers",
-    prompt: "Show exam results and top rankers",
-  },
-  {
-    label: "Class Syllabus",
-    prompt: "Show prescribed books for Class 1 and Class 10",
-  },
-  {
-    label: "Settings",
-    prompt: "Show school settings and profile info",
+    label: "Teachers & Faculty",
+    prompt: "Show all teachers and faculty directory",
   },
   {
     label: "Students",
-    prompt: "Show me all enrolled students",
+    prompt: "Show all students with filters for class, section, and status",
+  },
+  {
+    label: "Classes & Curriculum",
+    prompt: "Show all classes, sections, subjects, and curriculum",
+  },
+  {
+    label: "Timetable & Slots",
+    prompt: "Show class timetable and check for teacher schedule conflicts",
+  },
+  {
+    label: "Academic Session",
+    prompt: "Show the active academic session and calendar dates",
+  },
+  {
+    label: "Grading Scale",
+    prompt: "Show academic passing percentage and grading scale rules",
   },
   {
     label: "Attendance",
-    prompt: "Give me today's attendance overview",
+    prompt: "Give me today's attendance overview and absent students",
   },
   {
     label: "Fees",
     prompt: "Show pending fee collections and defaulters",
   },
   {
-    label: "Payroll",
-    prompt: "Show payroll summary and pending salaries",
+    label: "Results & Toppers",
+    prompt: "Show exam results and top rankers",
   },
 ];

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Copy, Check, Terminal } from "lucide-react";
+import AiMarkdownTableCard from "./AiMarkdownTableCard.jsx";
 
 /**
  * Sanitizes any raw function calls that might accidentally appear in LLM text output
@@ -106,21 +107,8 @@ export default function AITextResponse({ text = "" }) {
 
   const flushTable = (key) => {
     if (tableRows.length > 0) {
-      const headerRow = tableRows[0];
-      const bodyRows = tableRows.slice(1).filter((r) => !r.isDivider);
       elements.push(
-        <div key={'table-' + key} className="my-3 grid gap-2 sm:grid-cols-2">
-          {bodyRows.length ? bodyRows.map((row, index) => (
-            <dl key={index} className="min-w-0 rounded-xl border border-[#393939] border-t-2 border-t-[#FF7900] bg-[#181818] px-4 py-2">
-              {Array.from({ length: Math.max(headerRow.cols.length, row.cols.length) }, (_, i) => (
-                <div key={i} className="grid grid-cols-[minmax(4rem,2fr)_minmax(0,3fr)] gap-2 border-b border-white/10 py-2 text-sm last:border-0">
-                  <dt className="break-words text-[#A1A1AA]">{headerRow.cols[i] || 'Column ' + (i + 1)}</dt>
-                  <dd className="break-words font-medium text-white">{row.cols[i]?.replace(/\*\*(.*?)\*\*/g, '$1') || '—'}</dd>
-                </div>
-              ))}
-            </dl>
-          )) : <p className="text-sm text-[#A1A1AA]">No records returned.</p>}
-        </div>
+        <AiMarkdownTableCard key={`table-${key}`} tableRows={[...tableRows]} />
       );
       tableRows = [];
       inTable = false;
