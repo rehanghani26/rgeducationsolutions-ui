@@ -13,6 +13,7 @@ import {
   StudentDetail,
   StudentEdit,
   TeacherList,
+  TeacherBulkImport,
   TeacherDetail,
   TeacherEdit,
   FeeList,
@@ -79,6 +80,7 @@ const appRoutes = [
   // Teachers
   { path: ROUTES.TEACHERS.LIST, element: TeacherList, name: 'teacher-list', module: 'teachers' },
   { path: ROUTES.TEACHERS.CREATE, element: TeacherEdit, name: 'teacher-create', module: 'teachers' },
+  { path: ROUTES.TEACHERS.BULK_IMPORT, element: TeacherBulkImport, name: 'teacher-import', module: 'teachers' },
   { path: ROUTES.TEACHERS.DETAIL_PARAM, element: TeacherDetail, name: 'teacher-detail', module: 'teachers' },
   { path: ROUTES.TEACHERS.EDIT_PARAM, element: TeacherEdit, name: 'teacher-edit', module: 'teachers' },
 

@@ -3,49 +3,113 @@
  * @description Centralized constant dropdown options for Teacher Creation & Profile Editing.
  */
 
-export const DESIGNATION_OPTIONS = [
-  { value: "Senior Faculty", label: "Senior Faculty" },
-  { value: "Head of Department (HOD)", label: "Head of Department (HOD)" },
-  { value: "Academic Coordinator", label: "Academic Coordinator" },
-  { value: "Assistant Teacher", label: "Assistant Teacher" },
-  { value: "Head Teacher", label: "Head Teacher" },
-  { value: "Guest Lecturer", label: "Guest Lecturer" },
-  { value: "Vice Principal", label: "Vice Principal" },
-  { value: "Lab Instructor", label: "Lab Instructor" },
-  { value: "Physical Education Teacher", label: "Physical Education Teacher" },
-];
+import { optionsFromValues } from '../utils/formOptions.js';
 
-export const DEPARTMENT_OPTIONS = [
-  { value: "Islamic Theology & Quranic Studies", label: "Islamic Theology & Quranic Studies" },
-  { value: "Arabic Language & Grammar", label: "Arabic Language & Grammar" },
-  { value: "Mathematics", label: "Mathematics" },
-  { value: "Science & Physics", label: "Science & Physics" },
-  { value: "Computer Science & IT", label: "Computer Science & IT" },
-  { value: "English Literature", label: "English Literature" },
-  { value: "Social Studies & History", label: "Social Studies & History" },
-  { value: "Primary & Foundation Academics", label: "Primary & Foundation Academics" },
-  { value: "Physical Education & Athletics", label: "Physical Education & Athletics" },
-];
+export const DESIGNATION_OPTIONS = optionsFromValues([
+  'Teacher',
+  'Pre-Primary Teacher',
+  'Primary School Teacher',
+  'Assistant Teacher',
+  'Middle School Teacher',
+  'Secondary School Teacher',
+  'Senior Secondary Teacher',
+  'Language Teacher',
+  'Computer Science Teacher',
+  'Lab Instructor',
+  'Special Education Teacher',
+  'Art Teacher',
+  'Music Teacher',
+  'Physical Education Teacher',
+  'Guest Lecturer',
+  'Senior Faculty',
+  'Academic Coordinator',
+  'Head Teacher',
+  'Head of Department (HOD)',
+  'Vice Principal',
+]);
 
-export const QUALIFICATION_OPTIONS = [
-  { value: "Ph.D. in Islamic Studies", label: "Ph.D. in Islamic Studies" },
-  { value: "M.A. Islamic Theology", label: "M.A. Islamic Theology" },
-  { value: "M.Sc. Mathematics", label: "M.Sc. Mathematics" },
-  { value: "M.A. English Literature", label: "M.A. English Literature" },
-  { value: "B.Ed. Education", label: "B.Ed. Education" },
-  { value: "B.Sc. Pure Sciences", label: "B.Sc. Pure Sciences" },
-  { value: "B.A. Arts & Humanities", label: "B.A. Arts & Humanities" },
-  { value: "Fazil / Alim Degree", label: "Fazil / Alim Degree" },
-  { value: "Diploma in Primary Education", label: "Diploma in Primary Education" },
-];
+export const DEPARTMENT_OPTIONS = optionsFromValues([
+  'English Literature',
+  'Early Childhood Education',
+  'Primary & Foundation Academics',
+  'Urdu',
+  'Social Studies & History',
+  'Science & Physics',
+  'Chemistry',
+  'Hindi',
+  'Computer Science & IT',
+  'Biology',
+  'Special Education',
+  'Visual Arts',
+  'Music',
+  'Physical Education & Athletics',
+  'Arabic Language & Grammar',
+  'Islamic Theology & Quranic Studies',
+  'Economics',
+  'Geography',
+  'Mathematics',
+  'Commerce & Accountancy',
+]);
 
-export const EXPERIENCE_OPTIONS = [
-  { value: "Fresher (< 1 Year)", label: "Fresher (< 1 Year)" },
-  { value: "1 - 3 Years", label: "1 - 3 Years" },
-  { value: "3 - 5 Years", label: "3 - 5 Years" },
-  { value: "5 - 10 Years", label: "5 - 10 Years" },
-  { value: "10 - 15 Years", label: "10 - 15 Years" },
-  { value: "15+ Years (Veteran Faculty)", label: "15+ Years (Veteran Faculty)" },
+export const QUALIFICATION_OPTIONS = optionsFromValues([
+  'M.A. English Literature',
+  'Diploma in Primary Education',
+  'D.El.Ed.',
+  'Fazil / Alim Degree',
+  'B.El.Ed.',
+  'M.Sc. Physics',
+  'M.Sc. Chemistry',
+  'B.Ed. Education',
+  'M.Sc. Computer Science',
+  'B.Sc. Pure Sciences',
+  'Diploma in Special Education',
+  'B.A. Arts & Humanities',
+  'Bachelor of Music (B.Mus.)',
+  'B.P.Ed.',
+  'M.A. Islamic Theology',
+  'Ph.D. in Islamic Studies',
+  'M.A. Economics',
+  'M.Ed.',
+  'M.Sc. Mathematics',
+  'M.Com.',
+]);
+
+export const SPECIALIZATION_OPTIONS = optionsFromValues([
+  'English Language & Literature',
+  'Early Childhood Education',
+  'Primary Education',
+  'Urdu Language',
+  'History & Civics',
+  'Physics',
+  'Chemistry',
+  'Hindi Language',
+  'Computer Science',
+  'Biology',
+  'Special Education',
+  'Visual Arts',
+  'Music',
+  'Physical Education',
+  'Arabic Language',
+  'Quranic Studies & Tajweed',
+  'Economics',
+  'Geography',
+  'Mathematics',
+  'Commerce & Accountancy',
+]);
+
+export const EXPERIENCE_OPTIONS = optionsFromValues([
+  'Fresher (< 1 Year)',
+  '1 Year',
+  ...Array.from({ length: 17 }, (_, index) => (index + 2) + ' Years'),
+  '19+ Years',
+]);
+
+export const TEACHER_EMPLOYMENT_FIELDS = [
+  { name: 'designation', label: 'Designation', options: DESIGNATION_OPTIONS, required: true },
+  { name: 'department', label: 'Department', options: DEPARTMENT_OPTIONS },
+  { name: 'qualification', label: 'Qualification', options: QUALIFICATION_OPTIONS },
+  { name: 'specialization', label: 'Specialization', options: SPECIALIZATION_OPTIONS },
+  { name: 'experience', label: 'Experience', options: EXPERIENCE_OPTIONS },
 ];
 
 export const SUBJECT_OPTIONS = [
@@ -70,6 +134,7 @@ export default {
   DESIGNATION_OPTIONS,
   DEPARTMENT_OPTIONS,
   QUALIFICATION_OPTIONS,
+  SPECIALIZATION_OPTIONS,
   EXPERIENCE_OPTIONS,
   SUBJECT_OPTIONS,
   TEACHER_ROLE_OPTIONS,

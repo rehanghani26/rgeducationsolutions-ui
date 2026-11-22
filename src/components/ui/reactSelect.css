@@ -1,0 +1,70 @@
+.rges-select { min-width: 0; max-width: 100%; }
+.rges-select.form-control { cursor: pointer; }
+.rges-select:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--brand-primary) 65%, var(--surface-1));
+  outline-offset: 1px;
+}
+.rges-select[data-disabled] { opacity: .62; }
+.rges-select__control { gap: 5px; }
+.rges-select__value-container { gap: 3px; min-width: 0; }
+.rges-select__single-value, .rges-select__placeholder {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rges-select__placeholder, .rges-select__indicators { color: var(--text-secondary); }
+.rges-select .rges-select__input {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  color: inherit;
+  font: inherit;
+}
+.rges-select__indicator-separator { display: none; }
+.rges-select__indicator { display: grid; place-items: center; }
+.rges-select__indicator svg { width: 15px; height: 15px; }
+.rges-select__clear-indicator { margin-inline-end: 3px; }
+.rges-select__indicator:hover { color: var(--text-primary); }
+.rges-select__menu {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  box-shadow: 0 8px 22px #120b062b;
+  font-size: 13px;
+}
+.rges-select__menu-list { padding: 4px; overscroll-behavior: contain; }
+.rges-select__option {
+  min-height: 34px;
+  padding: 7px 9px;
+  border-radius: 5px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.rges-select__option--is-focused { background: var(--surface-2); }
+.rges-select__option--is-selected {
+  background: color-mix(in srgb, var(--brand-primary) 15%, var(--surface-1));
+  color: var(--text-primary);
+  font-weight: 650;
+}
+.rges-select__option--is-disabled { color: var(--text-secondary); opacity: .65; cursor: not-allowed; }
+.rges-select__menu-notice { padding: 8px; color: var(--text-secondary); }
+.rges-select__multi-value {
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--brand-primary) 12%, var(--surface-1));
+}
+.rges-select__multi-value__label { padding: 2px 5px; min-width: 0; font-size: 12px; }
+.rges-select__multi-value__remove { padding-inline: 3px; cursor: pointer; }
+.rges-select__multi-value__remove:hover { background: var(--surface-2); }
+
+@media (max-width: 640px) {
+  .rges-select .rges-select__input { font-size: 16px; }
+  .rges-select__option { min-height: 40px; }
+}

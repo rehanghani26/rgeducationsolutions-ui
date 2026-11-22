@@ -15,6 +15,7 @@ import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 import { formatCurrency, dateOnly } from "../../utils";
 import { PAYMENT_METHOD_OPTIONS, FEE_STATUS_OPTIONS } from "../../constants";
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const FeeList = () => {
   const navigate = useNavigate();
@@ -265,7 +266,7 @@ const FeeList = () => {
             <label className="block font-bold text-slate-500 uppercase mb-1">
               Payment Method
             </label>
-            <select
+            <SelectInput
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white"
               value={collectForm.method}
               onChange={(e) => setCollectForm({ ...collectForm, method: e.target.value })}
@@ -274,7 +275,7 @@ const FeeList = () => {
               <option>UPI / QR Code</option>
               <option>Cash Deposit</option>
               <option>Cheque</option>
-            </select>
+            </SelectInput>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button

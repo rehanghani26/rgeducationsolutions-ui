@@ -13,6 +13,7 @@ export { default as EmptyState }        from './ui/EmptyState.jsx';
 export { default as FilterBar }         from './ui/FilterBar.jsx';
 export { default as FormInput }         from './ui/FormInput.jsx';
 export { default as FormSelect }        from './ui/FormSelect.jsx';
+export { default as ReactSelect }        from './ui/ReactSelect.jsx';
 export { default as FormTextarea }      from './ui/FormTextarea.jsx';
 export { CheckboxInput, Input, SelectInput, SwitchInput, TextareaInput } from './ui/FormControls.jsx';
 export { default as MultiSelect }       from './ui/MultiSelect.jsx';

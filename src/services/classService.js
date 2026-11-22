@@ -146,14 +146,9 @@ export async function getClassTeacherHistory(classRoomId) {
 /**
  * Get teacher's all current & past classroom assignments
  */
-export async function getTeacherClassHistory(teacherId) {
-  try {
-    const res = await api.get(CLASSROOM_URLS.TEACHER_HISTORY(teacherId));
-    return res.data;
-  } catch (error) {
-    console.error('Error fetching teacher class history:', error);
-    throw error;
-  }
+export async function getTeacherClassHistory(teacherId, signal) {
+  const res = await api.get(CLASSROOM_URLS.TEACHER_HISTORY(teacherId), { signal });
+  return res.data;
 }
 
 /**

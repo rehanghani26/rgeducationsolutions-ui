@@ -1,115 +1,185 @@
-import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
-import { Save, Wand2 } from 'lucide-react';
-import Button from '../../components/ui/Button.jsx';
+import { useEffect, useRef, useState } from 'react';
+import { Briefcase, FileCheck, FileText, LockKeyhole, UserRound, Wand2 } from 'lucide-react';
+import ConfirmationBox from '../../components/ui/ConfirmationBox.jsx';
 import { Input, SelectInput, SwitchInput, TextareaInput } from '../../components/ui/FormControls.jsx';
-import MultiSelect from '../../components/ui/MultiSelect.jsx';
-import PermissionMatrix from '../../components/ui/PermissionMatrix.jsx';
-import { getDefaultRolePermissions } from '../../config/access.jsx';
-import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
-import { COMMON_STATUS_OPTIONS, GENDER_OPTIONS, LOGIN_RESTRICTION_OPTIONS } from '../../constants/commonOptions.js';
-import { DEPARTMENT_OPTIONS, DESIGNATION_OPTIONS, EXPERIENCE_OPTIONS, QUALIFICATION_OPTIONS, SUBJECT_OPTIONS, TEACHER_ROLE_OPTIONS } from '../../constants/teacherOptions.js';
-import { splitSelections } from '../../utils/formOptions.js';
-import { permissionOptions, randomPassword } from '../../utils/teacherForm.js';
+import { ErrorMessage } from '../../components/ui/ProcurementUI.jsx';
+import { BLOOD_GROUP_OPTIONS, COMMON_STATUS_OPTIONS, GENDER_OPTIONS, LOGIN_RESTRICTION_OPTIONS } from '../../constants/commonOptions.js';
+import { TEACHER_EMPLOYMENT_FIELDS, TEACHER_ROLE_OPTIONS } from '../../constants/teacherOptions.js';
+import { randomPassword, teacherUploadError, validateTeacherStep } from '../../utils/teacherForm.js';
+import { TeacherAvatar, TeacherFacts } from './TeacherProfileParts.jsx';
 
-export { blankTeacherForm, payloadFromForm, permissionOptions, randomPassword } from '../../utils/teacherForm.js';
+const steps = [
+  { id: 'personal', name: 'Personal', title: 'Personal details', icon: UserRound },
+  { id: 'employment', name: 'Employment', title: 'Employment and qualifications', icon: Briefcase },
+  { id: 'documents', name: 'Documents', title: 'Photo and documents', icon: FileText },
+  { id: 'portal', name: 'Portal access', title: 'Teacher portal access', icon: LockKeyhole },
+  { id: 'review', name: 'Review', title: 'Review teacher profile', icon: FileCheck },
+];
 
-const sectionNames = SECTION_OPTIONS.map(({ name }) => name);
-
-function TeacherSection({ title, children }) {
-  return <section className="space-y-3 rounded-xl border border-[var(--border-color)] bg-[var(--surface-1)] p-3 sm:p-4 min-w-0">
-    <h3 className="text-sm font-bold text-[var(--text-primary)]">{title}</h3>
-    {children}
-  </section>;
+function TeacherFileField({ kind, file, record, error, onChoose }) {
+  const photo = kind === 'photo';
+  const label = photo ? 'Profile photo' : 'Aadhaar PDF';
+  const existing = photo ? record?.photoName : record?.aadhaarFileName;
+  return <div className="teacher-file-card">
+    <label htmlFor={'teacher-' + kind}><strong>{label}</strong></label>
+    {photo && <TeacherAvatar teacher={record} file={file} />}
+    <input id={'teacher-' + kind} type="file" accept={photo ? 'image/jpeg,image/png,image/webp' : 'application/pdf,.pdf'}
+      onChange={(event) => {
+        if (event.target.files[0]) onChoose(kind, event.target.files[0]);
+        event.target.value = '';
+      }} />
+    <p className="teacher-note">{photo ? 'JPG, PNG, or WebP. Up to 1 MB.' : 'PDF. Up to 1 MB.'}</p>
+    {(file || existing) && <p className="teacher-note">{file?.name || existing}</p>}
+    {(file || error) && <button type="button" className="proc-link justify-self-start text-xs" onClick={() => onChoose(kind, null)}>
+      {file ? 'Remove selected file' : 'Clear selection'}
+    </button>}
+    {error && <p className="text-xs text-[var(--proc-danger)]" role="alert">{error}</p>}
+  </div>;
 }
 
-export default function TeacherForm({ form, onChange, editing = false, onSubmit, onCancel, submitting, hideButtons = false }) {
-  const { classOptions } = useAcademicSession();
-  const classNames = classOptions.map(({ name }) => name);
-  const update = (name, value) => onChange({ ...form, [name]: value });
-  const field = (name) => ({ name, value: form[name] ?? '', onChange: (event) => update(name, event.target.value) });
-  const picks = (name) => ({
-    name,
-    value: splitSelections(form[name]),
-    onChange: (values) => update(name, values.join(', ')),
-  });
-  const check = (name) => ({
-    name,
-    checked: Boolean(form[name]),
-    onChange: (event) => update(name, event.target.checked),
-  });
-  const permissions = form.permissions || [];
+export default function TeacherForm({ form, onChange, files, onFilesChange, record, initialStep, editing, saving, error, onClearError, onSave, onCancel }) {
+  const [index, setIndex] = useState(() => Math.max(0, steps.findIndex(({ id }) => id === initialStep)));
+  const [errors, setErrors] = useState({});
+  const [fileErrors, setFileErrors] = useState({});
+  const [confirm, setConfirm] = useState(false);
+  const heading = useRef(null);
+  const step = steps[index];
+  const reviewing = step.id === 'review';
 
-  function applyRole(event) {
-    const role = event.target.value;
-    onChange({ ...form, role, permissions: getDefaultRolePermissions(role) });
+  useEffect(() => { if (index > 0) heading.current?.focus(); }, [index]);
+
+  function patch(changes) {
+    onChange((current) => ({ ...current, ...changes }));
+    setErrors((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !Object.hasOwn(changes, key))));
+    if (error) onClearError();
+  }
+  const field = (name) => ({
+    name, value: form[name] ?? '', errorMessage: errors[name],
+    onChange: (event) => patch({ [name]: event.target.value }),
+  });
+  const check = (name) => ({ name, checked: Boolean(form[name]), onChange: (event) => patch({ [name]: event.target.checked }) });
+
+  function chooseFile(kind, file) {
+    const issue = file ? teacherUploadError(kind, file) : '';
+    setFileErrors((current) => ({ ...current, [kind]: issue }));
+    if (!issue) onFilesChange((current) => ({ ...current, [kind]: file }));
+    if (error) onClearError();
   }
 
-  function generatePassword() {
-    const password = randomPassword();
-    onChange({ ...form, password, confirmPassword: password });
+  function next(event) {
+    event.preventDefault();
+    if (saving) return;
+    const targets = reviewing ? steps.slice(0, -1) : [step];
+    for (const target of targets) {
+      if (target.id === 'documents' && Object.values(fileErrors).some(Boolean)) {
+        setIndex(steps.indexOf(target));
+        return;
+      }
+      const issues = validateTeacherStep(target.id, form, editing);
+      if (Object.keys(issues).length) {
+        setErrors(issues);
+        setIndex(steps.indexOf(target));
+        return;
+      }
+    }
+    if (reviewing) setConfirm(true);
+    else setIndex(index + 1);
   }
 
-  return <form onSubmit={onSubmit} className="space-y-4">
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-      <TeacherSection title="Personal details">
-        <div className="grid grid-cols-2 gap-2.5">
-          <Input label="First name" {...field('firstName')} autoComplete="given-name" required />
-          <Input label="Last name" {...field('lastName')} autoComplete="family-name" required />
-          <SelectInput label="Gender" {...field('gender')} options={GENDER_OPTIONS} showPlaceholder={false} preserveValue />
-          <Input label="Date of birth" {...field('dob')} type="date" />
-          <Input label="Phone number" {...field('phone')} type="tel" required />
-          <Input label="Alternate phone" {...field('alternatePhone')} type="tel" />
-        </div>
-        <Input label="Email address" {...field('email')} type="email" required />
-        <TextareaInput label="Address" {...field('address')} rows={3} />
-      </TeacherSection>
-
-      <TeacherSection title="Staff and teaching assignments">
-        <div className="grid grid-cols-2 gap-2.5">
-          <Input label="Joining date" {...field('joiningDate')} type="date" />
-          <Input label="Salary (₹)" {...field('salary')} type="number" step="0.01" />
-        </div>
-        <SelectInput label="Designation" {...field('designation')} options={DESIGNATION_OPTIONS} preserveValue />
-        <SelectInput label="Department" {...field('department')} options={DEPARTMENT_OPTIONS} preserveValue />
-        <SelectInput label="Qualification" {...field('qualification')} options={QUALIFICATION_OPTIONS} preserveValue />
-        <SelectInput label="Experience" {...field('experience')} options={EXPERIENCE_OPTIONS} preserveValue />
-        <MultiSelect label="Classes assigned" {...picks('classesAssignedText')} options={classNames} placeholder="Choose classes" />
-        <MultiSelect label="Sections assigned" {...picks('sectionsAssignedText')} options={sectionNames} placeholder="Choose sections" />
-        <MultiSelect label="Subjects assigned" {...picks('subjectsAssignedText')} options={SUBJECT_OPTIONS} placeholder="Choose subjects" />
-        <SwitchInput {...check('isClassTeacher')} label="Class teacher" />
-      </TeacherSection>
-
-      <TeacherSection title="Account access">
-        <SelectInput label="Role" {...field('role')} options={TEACHER_ROLE_OPTIONS} onChange={applyRole} showPlaceholder={false} preserveValue />
-        {!editing && <>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
-            <Input label="Password" {...field('password')} autoComplete="new-password" required />
-            <Button type="button" variant="secondary" size="sm" aria-label="Generate password" title="Generate password"
-              icon={<Wand2 size={16} />} onClick={generatePassword} className="min-h-9" />
+  return <div className="teacher-form">
+    <nav className="teacher-nav teacher-steps" aria-label="Teacher registration steps">
+      {steps.map(({ id, name, icon: Icon }, position) => <button key={id} type="button"
+        aria-current={position === index ? 'step' : undefined} disabled={position > index || saving}
+        onClick={() => setIndex(position)}><Icon size={15} aria-hidden="true" /> {name}</button>)}
+    </nav>
+    <form className="teacher-panel !p-0" onSubmit={next} noValidate aria-busy={saving}>
+      <div className="teacher-form-heading">
+        <h2 ref={heading} tabIndex={-1}>{step.title}</h2>
+        <p className="teacher-note">Step {index + 1} of {steps.length}</p>
+      </div>
+      <div className="teacher-form-body">
+        {error && <ErrorMessage error={error} />}
+        {step.id === 'personal' && <div className="teacher-fields">
+          <Input label="First name" required autoComplete="given-name" {...field('firstName')} />
+          <Input label="Last name" required autoComplete="family-name" {...field('lastName')} />
+          <Input label="Login email" type="email" required autoComplete="email" {...field('email')} />
+          <Input label="Phone number" type="tel" required autoComplete="tel" {...field('phone')} />
+          <SelectInput label="Gender" options={GENDER_OPTIONS} preserveValue {...field('gender')} />
+          <Input label="Date of birth" type="date" {...field('dob')} />
+          <SelectInput label="Blood group" options={BLOOD_GROUP_OPTIONS} preserveValue {...field('bloodGroup')} />
+          <Input label="Alternate phone" type="tel" {...field('alternatePhone')} />
+          <TextareaInput label="Address" rows={2} className="teacher-field-wide" {...field('address')} />
+          <Input label="Emergency contact name" {...field('emergencyContactName')} />
+          <Input label="Emergency contact phone" type="tel" {...field('emergencyContactPhone')} />
+          <Input label="Emergency contact relationship" {...field('emergencyContactRelation')} />
+        </div>}
+        {step.id === 'employment' && <>
+          <div className="teacher-fields">
+            {TEACHER_EMPLOYMENT_FIELDS.map(({ name, label, options, required }) =>
+              <SelectInput key={name} label={label} required={required} options={options} preserveValue {...field(name)} />
+            )}
+            <Input label="Employment type" list="teacher-employment-types" {...field('employmentType')} />
+            <Input label="Joining date" type="date" {...field('joiningDate')} />
+            <Input label="Monthly salary" type="number" min={0} step="0.01" {...field('salary')} />
+            <Input label="Employee ID" hint="Leave blank to generate an employee ID." readOnly={editing} {...field('employeeId')} />
           </div>
-          <Input label="Confirm password" {...field('confirmPassword')} autoComplete="new-password" required />
+          <datalist id="teacher-employment-types">
+            {['Full-time', 'Part-time', 'Contract', 'Visiting'].map((value) => <option key={value} value={value} />)}
+          </datalist>
+          <p className="teacher-note">Set teaching periods in the class timetable after registration.</p>
         </>}
-        {editing && <PermissionMatrix permissions={permissions} options={permissionOptions} onChange={(permission) => update(
-          'permissions', permissions.includes(permission) ? permissions.filter((value) => value !== permission) : [...permissions, permission],
-        )} />}
-        <div className="grid grid-cols-2 gap-2.5">
-          <SelectInput label="Status" {...field('status')} options={COMMON_STATUS_OPTIONS} showPlaceholder={false} preserveValue />
-          <Input label="Expiry date" {...field('accountExpiryDate')} type="date" />
+        {step.id === 'documents' && <>
+          <div className="teacher-fields teacher-documents">
+            <TeacherFileField kind="photo" file={files.photo} record={record} error={fileErrors.photo} onChoose={chooseFile} />
+            <TeacherFileField kind="aadhaar" file={files.aadhaar} record={record} error={fileErrors.aadhaar} onChoose={chooseFile} />
+          </div>
+          <div className="teacher-fields">
+            <Input label="Aadhaar number" inputMode="numeric" hint="Optional, 12 digits." {...field('aadhaarNumber')} />
+          </div>
+        </>}
+        {step.id === 'portal' && <>
+          <div className="teacher-fields">
+            <SelectInput label="Faculty role" options={TEACHER_ROLE_OPTIONS} showPlaceholder={false} preserveValue
+              hint="The faculty role controls portal access." {...field('role')} />
+            <SelectInput label="Account status" options={COMMON_STATUS_OPTIONS} showPlaceholder={false} preserveValue {...field('status')} />
+            <SelectInput label="Login restriction" options={LOGIN_RESTRICTION_OPTIONS} showPlaceholder={false} preserveValue {...field('loginRestriction')} />
+            <Input label="Account expiry" type="date" {...field('accountExpiryDate')} />
+            {!editing && <>
+              <Input label="Password" type="password" autoComplete="new-password" hint="Leave blank to generate a password." {...field('password')} />
+              <Input label="Confirm password" type="password" autoComplete="new-password" {...field('confirmPassword')} />
+            </>}
+          </div>
+          {!editing && <button type="button" className="proc-btn justify-self-start" onClick={() => {
+            const password = randomPassword();
+            patch({ password, confirmPassword: password });
+          }}><Wand2 size={15} /> Generate password</button>}
+          <div className="teacher-fields">
+            <SwitchInput label="Require password change on login" {...check('forcePasswordChange')} />
+            <SwitchInput label="Two-factor authentication" {...check('twoFactorEnabled')} />
+          </div>
+        </>}
+        {reviewing && <TeacherFacts items={[
+          ['Name', [form.firstName, form.lastName].join(' ')], ['Login email', form.email], ['Phone', form.phone],
+          ['Designation', form.designation], ['Department', form.department || '—'], ['Employment type', form.employmentType || '—'],
+          ['Qualification', form.qualification || '—'], ['Specialization', form.specialization || '—'],
+          ['Joining date', form.joiningDate || '—'], ['Faculty role', TEACHER_ROLE_OPTIONS.find(({ value }) => value === form.role)?.label],
+          ['Profile photo', files.photo?.name || record?.photoName || '—'], ['Aadhaar PDF', files.aadhaar?.name || record?.aadhaarFileName || '—'],
+          ['Aadhaar number', form.aadhaarNumber ? 'Ending in ' + form.aadhaarNumber.replace(/[\s-]/g, '').slice(-4) : '—'],
+        ]} />}
+      </div>
+      <div className="teacher-form-footer">
+        <button type="button" className="proc-btn" disabled={saving} onClick={onCancel}>Cancel</button>
+        <div className="proc-actions">
+          {index > 0 && <button type="button" className="proc-btn" disabled={saving} onClick={() => setIndex(index - 1)}>Back</button>}
+          <button type="submit" className="proc-btn proc-primary" disabled={saving}>
+            {saving ? 'Saving…' : reviewing ? (editing ? 'Save changes' : 'Register teacher') : 'Continue'}
+          </button>
         </div>
-        <SelectInput label="Login restriction" {...field('loginRestriction')} options={LOGIN_RESTRICTION_OPTIONS}
-          showPlaceholder={false} preserveValue />
-        <div className="grid gap-2">
-          <SwitchInput {...check('forcePasswordChange')} label="Require password change on first login" />
-          <SwitchInput {...check('twoFactorEnabled')} label="Two-factor authentication" />
-        </div>
-      </TeacherSection>
-    </div>
-
-    {!hideButtons && onCancel && <div className="flex flex-wrap justify-end gap-2 border-t border-[var(--border-color)] pt-3">
-      <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>
-      <Button type="submit" variant="primary" icon={<Save size={14} />} loading={submitting}>
-        {submitting ? 'Saving…' : 'Save teacher'}
-      </Button>
-    </div>}
-  </form>;
+      </div>
+      {confirm && <ConfirmationBox heading={editing ? 'Save teacher changes?' : 'Register teacher?'}
+        confirmationMessage={editing ? 'Save the updated profile and selected files.' : 'Create a profile and portal login for ' + form.firstName + ' ' + form.lastName + '.'}
+        leftButtonName="Cancel" rightButtonName={editing ? 'Save changes' : 'Register teacher'} rightButtonDisabled={saving}
+        onLeftButtonClick={() => setConfirm(false)} onRightButtonClick={async () => { await onSave(); setConfirm(false); }} />}
+    </form>
+  </div>;
 }

@@ -33,6 +33,7 @@ import { CERTIFICATE_TYPES } from '../constants/documentConstants.js';
 import { getVerificationUrl } from '../utils/qrUtils.js';
 import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
 import { openDocumentInNewTab } from '../utils/printUtils.js';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function CertificatesModule({ schoolSettings = {}, userRole = '', authUser = null }) {
   const [certificates, setCertificates] = useState([]);
@@ -216,7 +217,7 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '',
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <select
+          <SelectInput
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
             className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
@@ -227,9 +228,9 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '',
                 {v}
               </option>
             ))}
-          </select>
+          </SelectInput>
 
-          <select
+          <SelectInput
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
@@ -237,7 +238,7 @@ export default function CertificatesModule({ schoolSettings = {}, userRole = '',
             <option value="ALL">All Statuses</option>
             <option value="VALID">Valid</option>
             <option value="REVOKED">Revoked</option>
-          </select>
+          </SelectInput>
         </div>
       </div>
 

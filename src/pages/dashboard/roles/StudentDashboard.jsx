@@ -13,6 +13,7 @@ import {
 } from '../components/DashboardOverview.jsx';
 
 import StudentCharts from '../components/StudentCharts.jsx';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const attendanceLabels = { present: 'Present', late: 'Late', absent: 'Absent', halfDay: 'Half day', leave: 'Leave' };
 
@@ -66,17 +67,17 @@ function AttendanceHistory({ records }) {
         <div className="mt-2 grid grid-cols-2 gap-2">
           <label className="space-y-1 text-sm">
             <span className="overview-muted">Month</span>
-            <select className="overview-select" value={month} onChange={(event) => { setMonth(event.target.value); setLimit(12); }}>
+            <SelectInput className="overview-select" value={month} onChange={(event) => { setMonth(event.target.value); setLimit(12); }}>
               <option value="">All months</option>
               {months.map((key) => <option key={key} value={key}>{monthLabel(key)} {key.slice(0, 4)}</option>)}
-            </select>
+            </SelectInput>
           </label>
           <label className="space-y-1 text-sm">
             <span className="overview-muted">Status</span>
-            <select className="overview-select" value={status} onChange={(event) => { setStatus(event.target.value); setLimit(12); }}>
+            <SelectInput className="overview-select" value={status} onChange={(event) => { setStatus(event.target.value); setLimit(12); }}>
               <option value="">All statuses</option>
               {Object.entries(attendanceLabels).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-            </select>
+            </SelectInput>
           </label>
         </div>
         <div className="mt-2">

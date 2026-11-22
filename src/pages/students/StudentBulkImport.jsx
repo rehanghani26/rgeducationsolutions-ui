@@ -7,18 +7,20 @@ import { useSelector } from 'react-redux';
 import { getUserRole } from '../../config/access.jsx';
 import { ROUTES } from '../../routes/routes.js';
 import { bulkImportStudents, cleanCorruptedStudents } from '../../services/studentService.js';
-import { downloadStudentTemplate, readStudentImport, studentImportHeaders } from '../../utils/studentImport.js';
+import { downloadStudentTemplate, readStudentImport, studentTemplateHeaders } from '../../utils/studentImport.js';
 import './studentRegistration.css';
 import { Input } from '../../components/ui/FormControls.jsx';
+import { ErrorMessage } from '../../components/ui/ProcurementUI.jsx';
 import { notifyApiError } from '../../services/apiErrors.js';
 
-const panel = 'min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5 dark:border-slate-700 dark:bg-slate-900';
-const muted = 'text-sm text-slate-600 dark:text-slate-300';
+const panel = 'min-w-0 rounded-lg border border-[var(--border-color)] bg-[var(--surface-1)] p-3 sm:p-5';
+const muted = 'text-sm text-[var(--text-secondary)]';
 const secondary = 'student-button student-secondary';
 const fieldGuide = [
   ['Student name', 'Use firstName and lastName, or a single Name column.'],
-  ['Class and section', 'Use a class and section name or ID, such as Class 10 and Section A, or cls-10 and sec-a. Blank values use Class 1 and Section A.'],
-  ['Legacy and dates', 'Use true or false for isLegacyStudent. Blank means false. Use YYYY-MM-DD for dates and enter admissionDate and joiningDate separately.'],
+  ['Class and section', 'Use the names, codes, or IDs listed in the workbook. Blank class uses Class 1 if offered, otherwise the first configured class. Blank section uses Section A.'],
+  ['Legacy and dates', 'Use true or false for isLegacyStudent. Blank means false. Use YYYY-MM-DD or an Excel date. Admission and joining dates can differ.'],
+  ['Student login password', 'Use the password column to enter at least 6 characters. Format it as Text in Excel. A blank cell gets a generated password.'],
   ['Documents and history', 'Optional documents and academicHistory cells accept JSON arrays. Documents use name and url. History entries use school, class, year, and percentage.'],
   ['Identifiers', 'Admission and roll numbers are assigned on import. In Excel, format phone and Aadhaar columns as Text to preserve leading zeroes.'],
 ];
@@ -37,7 +39,7 @@ function RowIssues({ issues }) {
   );
 }
 
-function ImportPreview({ students, issues, importing, onSubmit }) {
+function ImportPreview({ students, issues, importing, canImport, onSubmit }) {
   return (
     <section className={`${panel} space-y-3`} aria-labelledby="student-import-preview">
       <div className="flex flex-wrap items-baseline justify-between gap-1">
@@ -73,7 +75,7 @@ function ImportPreview({ students, issues, importing, onSubmit }) {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className={muted}>Showing {Math.min(students.length, 8)} of {students.length} valid rows.</p>
-            <button type="button" className="student-button student-primary" disabled={importing} onClick={onSubmit}>
+            <button type="button" className="student-button student-primary" disabled={importing || !canImport} onClick={onSubmit}>
               {importing ? 'Importing…' : `Import ${students.length} ${students.length === 1 ? 'student' : 'students'}`}
             </button>
           </div>
@@ -84,7 +86,15 @@ function ImportPreview({ students, issues, importing, onSubmit }) {
 }
 
 export default function StudentBulkImport() {
-  const { classOptions } = useAcademicSession();
+  const scope = useAcademicSession();
+  return <StudentImportPage key={scope.sessionId} scope={scope} />;
+}
+
+function StudentImportPage({ scope }) {
+  const {
+    selected, sessionId, readOnly, sessionsLoading, sessionsError, refresh,
+    classOptions, schoolClasses, refreshSchoolClasses,
+  } = scope;
   const role = useSelector((state) => getUserRole(state.auth?.user));
   const [fileName, setFileName] = useState('');
   const [preview, setPreview] = useState(null);
@@ -97,9 +107,12 @@ export default function StudentBulkImport() {
   const [templateBusy, setTemplateBusy] = useState(false);
   const busy = reading || importing;
   const processing = useRef(false);
+  const loadingOptions = schoolClasses.loading || (sessionsLoading && !sessionId);
+  const optionsError = schoolClasses.error || (!sessionId && sessionsError);
+  const canImport = !loadingOptions && !optionsError && !readOnly && classOptions.length > 0;
 
   async function chooseFile(file) {
-    if (!file || processing.current) return;
+    if (!file || processing.current || !canImport) return;
     processing.current = true;
     setDragging(false);
     setReading(true);
@@ -118,16 +131,20 @@ export default function StudentBulkImport() {
   }
 
   async function importStudents() {
-    if (!preview?.students.length || processing.current) return;
+    if (!canImport || !preview?.students.length || processing.current) return;
     processing.current = true;
     setImporting(true);
     setFileError('');
     try {
-      const { data } = await bulkImportStudents(preview.students.map(({ student }) => student));
-      const issues = [...preview.issues, ...(data.errors || []).map(({ index, error }) => ({
+      const { data } = await bulkImportStudents(preview.students.map(({ student }) => student), sessionId);
+      const report = data?.data ?? data;
+      if (!data?.success || !Number.isInteger(report?.count)) {
+        throw new Error(data?.message || 'The server could not complete the import.');
+      }
+      const issues = [...preview.issues, ...(report.errors || []).map(({ index, error }) => ({
         number: preview.students[index]?.number, message: error,
       }))];
-      setResult({ count: data.count, issues });
+      setResult({ count: report.count, issues });
       setPreview(null);
     } catch (error) {
       setFileError(error.message || 'Could not import the students.');
@@ -140,7 +157,7 @@ export default function StudentBulkImport() {
   async function template(format) {
     setTemplateBusy(true);
     try {
-      await downloadStudentTemplate(format);
+      await downloadStudentTemplate(format, classOptions, selected);
     } catch (error) {
       notifyApiError(error);
     } finally {
@@ -171,42 +188,24 @@ export default function StudentBulkImport() {
           <div className="student-page-icon"><FileSpreadsheet size={24} aria-hidden="true" /></div>
           <div>
             <h1>Bulk import students</h1>
-            <p>Upload a spreadsheet to preview and register student records.</p>
+            <p>{selected?.sessionName ? 'Academic session ' + selected.sessionName : 'Register students from a spreadsheet.'}</p>
           </div>
         </div>
       </header>
 
-      <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.65fr)] lg:items-start lg:gap-4">
-        <section className={`${panel} space-y-3`} aria-labelledby="student-import-upload">
-          <h2 className="text-base font-bold" id="student-import-upload">Upload spreadsheet</h2>
-          <div className={`rounded-lg border border-dashed p-3 sm:p-4 ${dragging
-            ? 'border-orange-600 bg-orange-50 dark:border-orange-400 dark:bg-orange-950'
-            : 'border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/60'}`}
-            onDragOver={(event) => { event.preventDefault(); if (!busy) setDragging(true); }}
-            onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }}
-            onDrop={(event) => { event.preventDefault(); setDragging(false); chooseFile(event.dataTransfer.files[0]); }}>
-            <Input className="sr-only student-file-input" id="student-import-file" aria-describedby="student-import-file-hint"
-              type="file" accept=".csv,.xlsx,.xls,.txt" disabled={busy} onChange={(event) => {
-                chooseFile(event.target.files[0]);
-                event.target.value = '';
-              }} />
-            <label htmlFor="student-import-file" className={secondary}><Upload size={16} aria-hidden="true" /> {reading ? 'Reading spreadsheet…' : fileName ? 'Choose another file' : 'Choose file'}</label>
-            <p className={`mt-2 ${muted}`} id="student-import-file-hint">CSV or Excel. You can also drop a file here.</p>
-            {fileName && <p className="mt-2 break-words text-sm font-semibold" role="status">{fileName}</p>}
-          </div>
-          {fileError && <p className="student-error" role="alert">{fileError}</p>}
-        </section>
-
+      <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(18rem,0.75fr)_minmax(0,1fr)] lg:items-start lg:gap-4">
         <section className={`${panel} space-y-3`} aria-labelledby="student-import-template">
           <div>
             <h2 className="text-base font-bold" id="student-import-template">Spreadsheet template</h2>
-            <p className={`mt-1 ${muted}`}>Replace the sample row with your student records.</p>
+            <p className={`mt-1 ${muted}`}>Fill the Students sheet in Excel. The workbook includes an example and your school's class options.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button type="button" className="student-button student-primary !ml-0" disabled={templateBusy || schoolClasses.loading} onClick={() => template('xlsx')}>
+              <Download size={15} aria-hidden="true" /> {templateBusy ? 'Preparing template…' : 'Excel template'}
+            </button>
             <button type="button" className={secondary} onClick={() => template('csv')}><Download size={15} aria-hidden="true" /> CSV template</button>
-            <button type="button" className={secondary} disabled={templateBusy} onClick={() => template('xlsx')}><Download size={15} aria-hidden="true" /> Excel template</button>
           </div>
-          <details className="border-t border-slate-200 pt-3 text-sm dark:border-slate-700">
+          <details className="border-t border-[var(--border-color)] pt-3 text-sm">
             <summary className="cursor-pointer font-semibold">Column formatting</summary>
             <dl className={`mt-2 space-y-2 ${muted}`}>
               {fieldGuide.map(([label, description]) => (
@@ -215,7 +214,7 @@ export default function StudentBulkImport() {
             </dl>
             <button type="button" className="student-link mt-2" onClick={async () => {
               try {
-                await navigator.clipboard.writeText(studentImportHeaders.join(','));
+                await navigator.clipboard.writeText(studentTemplateHeaders.join(','));
                 toast.success('CSV header copied.');
               } catch {
                 toast.error('Could not copy the header. It is included in the CSV template.');
@@ -223,9 +222,40 @@ export default function StudentBulkImport() {
             }}>Copy CSV header</button>
           </details>
         </section>
+
+        <section className={`${panel} space-y-3`} aria-labelledby="student-import-upload">
+          <h2 className="text-base font-bold" id="student-import-upload">Upload spreadsheet</h2>
+          {optionsError && <ErrorMessage error={optionsError} onRetry={() => {
+            if (schoolClasses.error) refreshSchoolClasses();
+            if (!sessionId && sessionsError) refresh().catch(() => {});
+          }} />}
+          {!loadingOptions && !optionsError && readOnly && <p className={muted} role="status">Select the active academic session to import students.</p>}
+          {!loadingOptions && !optionsError && !readOnly && classOptions.length === 0 &&
+            <p className={muted} role="status">Set the school class range before importing students.</p>}
+          <div className={`rounded-lg border border-dashed p-3 sm:p-4 ${dragging
+            ? 'border-orange-600 bg-orange-50 dark:border-orange-400 dark:bg-orange-950'
+            : 'border-[var(--border-color)] bg-[var(--surface-2)]'}`}
+            onDragOver={(event) => { event.preventDefault(); if (!busy && canImport) setDragging(true); }}
+            onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }}
+            onDrop={(event) => { event.preventDefault(); setDragging(false); chooseFile(event.dataTransfer.files[0]); }}>
+            <Input className="sr-only student-file-input" id="student-import-file" aria-describedby="student-import-file-hint"
+              type="file" accept=".csv,.xlsx,.xls,.txt" disabled={busy || !canImport} onChange={(event) => {
+                chooseFile(event.target.files[0]);
+                event.target.value = '';
+              }} />
+            <label htmlFor="student-import-file" className={secondary + (busy || !canImport ? ' !cursor-default opacity-60' : '')}>
+              <Upload size={16} aria-hidden="true" /> {reading ? 'Reading spreadsheet…' : fileName ? 'Choose another file' : 'Choose file'}
+            </label>
+            <p className={`mt-2 ${muted}`} id="student-import-file-hint" role={loadingOptions ? 'status' : undefined}>
+              {loadingOptions ? 'Loading academic session and class options…' : 'Choose or drop a CSV or Excel file.'}
+            </p>
+            {fileName && <p className="mt-2 break-words text-sm font-semibold" role="status">{fileName}</p>}
+          </div>
+          {fileError && <p className="student-error" role="alert">{fileError}</p>}
+        </section>
       </div>
 
-      {preview && <ImportPreview {...preview} importing={importing} onSubmit={importStudents} />}
+      {preview && <ImportPreview {...preview} importing={importing} canImport={canImport} onSubmit={importStudents} />}
       {result && (
         <section className={`${panel} space-y-3`} aria-labelledby="student-import-results">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -238,6 +268,7 @@ export default function StudentBulkImport() {
             </div>
             <Link to={ROUTES.STUDENTS.LIST} className={secondary}>Student directory</Link>
           </div>
+          {result.count > 0 && <p className={muted}>A super-admin can view the login password under <strong>DB Credentials</strong> on the student profile.</p>}
           <RowIssues issues={result.issues} />
           {result.issues.length > 0 && <p className={muted}>To retry, upload a spreadsheet with only the corrected rows.</p>}
         </section>

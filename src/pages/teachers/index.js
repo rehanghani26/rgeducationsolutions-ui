@@ -7,4 +7,5 @@
 export { default as TeacherList }   from './TeacherList.jsx';
 export { default as TeacherDetail } from './TeacherDetail.jsx';
 export { default as TeacherEdit }   from './TeacherEdit.jsx';
+export { default as TeacherBulkImport } from './TeacherBulkImport.jsx';
 export { default as TeacherForm }   from './TeacherForm.jsx';

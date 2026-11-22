@@ -4,6 +4,7 @@ import { ROUTES } from '../../../routes/routes.js';
 import { formatCurrency } from '../../../utils';
 import { ChartCollection, CompositionChart, RankedBars, attendanceSeries } from './InsightCharts.jsx';
 import { dashboardNumber, dashboardPercent, dateLabel, monthLabel, OverviewChart, OverviewEmpty, OverviewPanel } from './DashboardOverview.jsx';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const filters = [['attendance', 'Attendance'], ['coursework', 'Coursework'], ['accounts', 'Fees & library']];
 const learningSeries = [
@@ -71,9 +72,9 @@ function SubjectTrend({ subjects }) {
   return (
     <div className="space-y-2">
       <label htmlFor={selectId} className="overview-muted block text-sm font-medium">Subject</label>
-      <select id={selectId} value={subject.key} onChange={(event) => setSelected(event.target.value)} className="overview-select sm:max-w-xs">
+      <SelectInput id={selectId} value={subject.key} onChange={(event) => setSelected(event.target.value)} className="overview-select sm:max-w-xs">
         {subjects.map(({ key, name }) => <option value={key} key={key}>{name}</option>)}
-      </select>
+      </SelectInput>
       <OverviewChart data={subject.scores} series={scoreSeries} xKey="name" type="line"
         domain={[0, 100]} valueLabel={dashboardPercent} empty="No scores recorded for this subject." />
     </div>

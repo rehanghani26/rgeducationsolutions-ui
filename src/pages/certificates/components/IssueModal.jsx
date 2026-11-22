@@ -12,6 +12,7 @@ import { getStudents } from '../../../services/studentService.js';
 import { getTeachers } from '../../../services/teacherService.js';
 import { getClasses } from '../../../services/erpService.js';
 import Modal from '../../../components/ui/Modal.jsx';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function IssueModal({
   isOpen,
@@ -219,7 +220,7 @@ export default function IssueModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5">Recipient Category</label>
-              <select
+              <SelectInput
                 value={recipientType}
                 onChange={(e) => {
                   setRecipientType(e.target.value);
@@ -231,12 +232,12 @@ export default function IssueModal({
                 <option value="student">Student</option>
                 <option value="teacher">Teacher / Faculty</option>
                 <option value="staff">Staff Member</option>
-              </select>
+              </SelectInput>
             </div>
 
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5">Certificate Type</label>
-              <select
+              <SelectInput
                 value={certificateType}
                 onChange={(e) => setCertificateType(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
@@ -246,7 +247,7 @@ export default function IssueModal({
                     {label}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
           </div>
 
@@ -254,7 +255,7 @@ export default function IssueModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5">Certificate Template</label>
-              <select
+              <SelectInput
                 value={templateId}
                 onChange={(e) => setTemplateId(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
@@ -264,7 +265,7 @@ export default function IssueModal({
                     {t.name}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
 
             <div>
@@ -283,7 +284,7 @@ export default function IssueModal({
           {recipientType === 'student' && (
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5">Filter by Class</label>
-              <select
+              <SelectInput
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
@@ -294,7 +295,7 @@ export default function IssueModal({
                     {c.name}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
           )}
 
@@ -310,7 +311,7 @@ export default function IssueModal({
                   Loading recipients...
                 </div>
               ) : (
-                <select
+                <SelectInput
                   value={selectedRecipientId}
                   onChange={(e) => setSelectedRecipientId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
@@ -327,7 +328,7 @@ export default function IssueModal({
                       </option>
                     );
                   })}
-                </select>
+                </SelectInput>
               )}
             </div>
           ) : (

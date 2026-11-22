@@ -29,6 +29,7 @@ import Loader from "../../components/ui/Loader.jsx";
 import { Can, CanButton, getUserFromStorage } from "../../config/access.jsx";
 import onlineClassService from "../../services/onlineClassService.js";
 import { useSelector } from "react-redux";
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PLATFORMS = [
@@ -576,7 +577,7 @@ const OnlineClassesManagement = () => {
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
                   Platform
                 </label>
-                <select
+                <SelectInput
                   value={form.platform}
                   onChange={(e) => setField("platform", e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -586,17 +587,17 @@ const OnlineClassesManagement = () => {
                       {p}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
                   Class Name *
                 </label>
-                <select required value={form.className} onChange={(e) => setField('className', e.target.value)}
+                <SelectInput required value={form.className} onChange={(e) => setField('className', e.target.value)}
                   className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800">
                   <option value="">Choose a class</option>
                   {classOptions.map((grade) => <option key={grade.id} value={grade.name}>{grade.name}</option>)}
-                </select>
+                </SelectInput>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
@@ -707,7 +708,7 @@ const OnlineClassesManagement = () => {
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">
                   Status
                 </label>
-                <select
+                <SelectInput
                   value={form.status}
                   onChange={(e) => setField("status", e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -717,7 +718,7 @@ const OnlineClassesManagement = () => {
                       {s.charAt(0).toUpperCase() + s.slice(1)}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">

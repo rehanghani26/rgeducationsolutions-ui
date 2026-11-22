@@ -1,91 +1,89 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import PageHeader from '../../components/ui/PageHeader.jsx';
-import Loader from '../../components/ui/Loader.jsx';
+import { ErrorMessage, Pending } from '../../components/ui/ProcurementUI.jsx';
 import TeacherForm from './TeacherForm.jsx';
-import { blankTeacherForm, payloadFromForm, teacherDraftFromRecord } from '../../utils/teacherForm.js';
-import { getTeacherById, updateTeacher } from '../../services';
+import { TeacherCredentialsDialog } from './TeacherProfileParts.jsx';
+import { blankTeacherForm, payloadFromForm, teacherDraftFromRecord, teacherManagerRoles } from '../../utils/teacherForm.js';
+import { createTeacher, getTeacherById, updateTeacher } from '../../services/teacherService.js';
 import { notifyApiError } from '../../services/apiErrors.js';
+import { getUserRole } from '../../config/access.jsx';
+import { ROUTES } from '../../routes/routes.js';
+import './teacher.css';
 
-const TeacherEdit = () => {
+export default function TeacherEdit() {
   const { teacherId } = useParams();
+  const [query] = useSearchParams();
+  const initialStep = teacherId && query.get('step') === 'documents' ? 'documents' : 'personal';
+  return <TeacherProfileEditor key={(teacherId || 'new') + '-' + initialStep} teacherId={teacherId} initialStep={initialStep} />;
+}
+
+function TeacherProfileEditor({ teacherId, initialStep }) {
   const navigate = useNavigate();
-  const [teacher, setTeacher] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const role = useSelector((state) => getUserRole(state.auth?.user));
+  const canManage = teacherManagerRoles.includes(role);
+  const [record, setRecord] = useState(null);
+  const [loading, setLoading] = useState(Boolean(teacherId));
+  const [loadError, setLoadError] = useState(null);
+  const [reload, setReload] = useState(0);
   const [form, setForm] = useState(blankTeacherForm);
+  const [files, setFiles] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [login, setLogin] = useState(null);
+  const submitting = useRef(false);
 
   useEffect(() => {
-    if (!teacherId) return;
-    const fetchTeacher = async () => {
-      setLoading(true);
-      try {
-        const res = await getTeacherById(teacherId);
-        const found = res?.teacher || res?.data?.teacher || (res?._id || res?.id ? res : null);
-        if (found) {
-          setTeacher(found);
-        } else {
-          toast.error("Teacher record not found");
-        }
-      } catch (err) {
-        notifyApiError(err, "Failed to load teacher record from server");
-        setTeacher(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTeacher();
-  }, [teacherId]);
+    if (!teacherId || !canManage) return;
+    const request = new AbortController();
+    setLoading(true);
+    setLoadError(null);
+    getTeacherById(teacherId, request.signal).then((data) => {
+      if (request.signal.aborted) return;
+      const teacher = data.teacher || data.data?.teacher;
+      if (!teacher) throw new Error('Teacher profile could not be loaded.');
+      setRecord(teacher);
+      setForm(teacherDraftFromRecord(teacher));
+    }).catch((error) => {
+      if (!request.signal.aborted) setLoadError(error);
+    }).finally(() => {
+      if (!request.signal.aborted) setLoading(false);
+    });
+    return () => request.abort();
+  }, [teacherId, canManage, reload]);
 
-  useEffect(() => {
-    if (teacher) setForm(teacherDraftFromRecord(teacher));
-  }, [teacher]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = payloadFromForm(form);
-    delete payload.password;
-    delete payload.confirmPassword;
-
+  const returnPath = teacherId ? ROUTES.TEACHERS.detail(teacherId) : ROUTES.TEACHERS.LIST;
+  async function save() {
+    if (submitting.current || !canManage) return;
+    submitting.current = true;
+    setSaving(true);
+    setSaveError(null);
     try {
-      setSubmitting(true);
-      await updateTeacher(teacherId, payload);
-      navigate(`/teachers/${teacherId}`);
-    } catch (err) {
-      console.error("Teacher update error:", err);
+      const profile = payloadFromForm(form, Boolean(teacherId));
+      const { data } = teacherId ? await updateTeacher(teacherId, profile, files) : await createTeacher(profile, files);
+      const id = data.teacher?._id || data.teacher?.id || teacherId;
+      if (!data.success || !id) throw new Error(data.message || 'Teacher profile could not be saved.');
+      if (!teacherId && data.accountCreated) setLogin({ ...data.accountCreated, id });
+      else navigate(ROUTES.TEACHERS.detail(id));
+    } catch (error) {
+      setSaveError(error);
+      notifyApiError(error, 'Could not save the teacher profile.');
     } finally {
-      setSubmitting(false);
+      submitting.current = false;
+      setSaving(false);
     }
-  };
-
-  if (loading) {
-    return <Loader fullPage size="lg" text="Loading teacher record from API..." className="py-24" />;
   }
 
-  return (
-    <div className="space-y-4 pb-8">
-      <PageHeader
-        title="Edit Teacher"
-        subtitle={teacher?.name}
-        breadcrumbs={[
-          { label: 'Teachers', to: '/teachers' },
-          { label: teacher?.name || 'Teacher', to: `/teachers/${teacherId}` },
-          { label: 'Edit' },
-        ]}
-      />
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-sm">
-        <TeacherForm
-          form={form}
-          onChange={setForm}
-          editing
-          onSubmit={handleSubmit}
-          onCancel={() => navigate(`/teachers/${teacherId}`)}
-          submitting={submitting}
-        />
-      </div>
-    </div>
-  );
-};
-
-export default TeacherEdit;
+  return <main className="teacher-page">
+    <PageHeader title={teacherId ? 'Edit teacher' : 'Register teacher'} subtitle={record?.name}
+      breadcrumbs={[{ label: 'Teachers', to: ROUTES.TEACHERS.LIST }, { label: teacherId ? 'Edit profile' : 'Registration' }]} />
+    {!canManage ? <ErrorMessage error="You do not have permission to manage teacher profiles." />
+      : loading ? <Pending label="Loading teacher profile…" />
+      : loadError ? <ErrorMessage error={loadError} onRetry={() => setReload((value) => value + 1)} />
+      : <TeacherForm form={form} onChange={setForm} files={files} onFilesChange={setFiles} record={record} initialStep={initialStep}
+        editing={Boolean(teacherId)} saving={saving} error={saveError} onClearError={() => setSaveError(null)}
+        onSave={save} onCancel={() => navigate(returnPath)} />}
+    {login && <TeacherCredentialsDialog account={login} created onClose={() => navigate(ROUTES.TEACHERS.detail(login.id))} />}
+  </main>;
+}

@@ -39,6 +39,7 @@ import { getTeachers } from '../../../services/teacherService.js';
 import { getClasses } from '../../../services/erpService.js';
 import { getCustomTemplates, getDefaultTemplate, setDefaultTemplate } from '../services/documentService.js';
 import { MOCK_STUDENT_DATA, MOCK_TEACHER_DATA, MOCK_STAFF_DATA } from '../constants/documentConstants.js';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function IdCardsModule({ schoolSettings = {}, userRole = '', authUser = null }) {
   const normalizedRole = String(userRole || authUser?.role || 'student').toLowerCase();
@@ -722,7 +723,7 @@ export default function IdCardsModule({ schoolSettings = {}, userRole = '', auth
                 </div>
 
                 {effectiveRecipientType === 'student' && (
-                  <select
+                  <SelectInput
                     value={selectedClass}
                     onChange={(e) => setSelectedClass(e.target.value)}
                     className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
@@ -733,7 +734,7 @@ export default function IdCardsModule({ schoolSettings = {}, userRole = '', auth
                         {c.name}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 )}
               </div>
 

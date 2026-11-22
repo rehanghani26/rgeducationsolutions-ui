@@ -4,10 +4,10 @@ const PermissionMatrix = ({ permissions = [], options = [], readOnly = false, on
     {options.map(([value, label]) => (
       <label
         key={value}
-        className={`flex items-center gap-2 text-[11px] font-semibold p-2.5 rounded-lg border ${
+        className={`flex items-center gap-2 text-[11px] font-semibold p-2.5 rounded-md border ${
           permissions.includes(value)
-            ? 'border-indigo-500/30 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400'
-            : 'border-slate-100 dark:border-slate-800 text-slate-500'
+            ? 'border-[var(--border-color)] bg-[var(--proc-accent-bg)] text-[var(--proc-accent)]'
+            : 'border-[var(--border-color)] bg-[var(--surface-2)] text-[var(--text-secondary)]'
         }`}
       >
         <CheckboxInput

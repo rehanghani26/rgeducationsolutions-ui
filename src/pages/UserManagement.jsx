@@ -41,6 +41,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import Modal from '../components/ui/Modal.jsx';
 import { ROUTES } from '../routes/routes.js';
 import { notifyApiError } from '../services/apiErrors.js';
+import { SelectInput } from '../components/ui/FormControls.jsx';
 
 // Role Badge & Color Mapping (Excludes students and parents)
 const ROLE_CONFIG = {
@@ -517,7 +518,7 @@ const UserManagement = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <select
+            <SelectInput
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none dark:border-slate-800 dark:bg-[#1C1B1A] dark:text-slate-300"
@@ -525,7 +526,7 @@ const UserManagement = () => {
               <option value="all">All Status</option>
               <option value="active">Active Only</option>
               <option value="inactive">Inactive Only</option>
-            </select>
+            </SelectInput>
           </div>
         </div>
 
@@ -814,7 +815,7 @@ const UserManagement = () => {
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                 Assigned Role *
               </label>
-              <select
+              <SelectInput
                 required
                 value={
                   formData.role === 'teacher'
@@ -859,7 +860,7 @@ const UserManagement = () => {
                 <option value="accountant">Accountant (Multiple)</option>
                 <option value="librarian">Librarian (Multiple)</option>
                 <option value="peon">Peon / Support Staff (Multiple)</option>
-              </select>
+              </SelectInput>
             </div>
 
             <div>

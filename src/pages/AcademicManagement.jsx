@@ -39,6 +39,7 @@ import StudentAcademicView, {
   ENRICHED_STUDENT_SUBJECTS,
 } from "./academics/StudentAcademicView.jsx";
 import ClassSyllabusSettings from "./settings/ClassSyllabusSettings.jsx";
+import { SelectInput } from '../components/ui/FormControls.jsx';
 
 // Fallback placeholder data used before API responds or when API returns no data
 const mockAcademics = {
@@ -650,7 +651,7 @@ const AcademicManagement = () => {
           <div className="flex items-center gap-2 self-stretch lg:self-auto flex-wrap">
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-xl text-xs">
               <span className="text-indigo-200 font-semibold">Class:</span>
-              <select
+              <SelectInput
                 value={previewClass}
                 onChange={(e) => setPreviewClass(e.target.value)}
                 className="bg-transparent font-extrabold text-white focus:outline-none cursor-pointer"
@@ -664,12 +665,12 @@ const AcademicManagement = () => {
                     {c.name}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
 
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-xl text-xs">
               <span className="text-indigo-200 font-semibold">Section:</span>
-              <select
+              <SelectInput
                 value={previewSection}
                 onChange={(e) => setPreviewSection(e.target.value)}
                 className="bg-transparent font-extrabold text-white focus:outline-none cursor-pointer"
@@ -683,7 +684,7 @@ const AcademicManagement = () => {
                     {sec.name}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
 
             <button
@@ -1144,7 +1145,7 @@ const AcademicManagement = () => {
                           <span className="text-slate-400 font-medium">
                             Class:
                           </span>
-                          <select
+                          <SelectInput
                             value={curriculumClassFilter}
                             onChange={(e) =>
                               setCurriculumClassFilter(e.target.value)
@@ -1160,7 +1161,7 @@ const AcademicManagement = () => {
                                 {c.name}
                               </option>
                             ))}
-                          </select>
+                          </SelectInput>
                         </div>
 
                         {/* Section Filter */}
@@ -1168,7 +1169,7 @@ const AcademicManagement = () => {
                           <span className="text-slate-400 font-medium">
                             Section:
                           </span>
-                          <select
+                          <SelectInput
                             value={curriculumSectionFilter}
                             onChange={(e) =>
                               setCurriculumSectionFilter(e.target.value)
@@ -1181,7 +1182,7 @@ const AcademicManagement = () => {
                                 {sec.name}
                               </option>
                             ))}
-                          </select>
+                          </SelectInput>
                         </div>
                       </div>
 
@@ -1699,7 +1700,7 @@ const AcademicManagement = () => {
                     <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                       Linked Class Level *
                     </label>
-                    <select
+                    <SelectInput
                       name="className"
                       value={formData.className}
                       onChange={(e) => {
@@ -1718,7 +1719,7 @@ const AcademicManagement = () => {
                           {c.name}
                         </option>
                       ))}
-                    </select>
+                    </SelectInput>
                   </div>
                 </div>
 
@@ -1803,7 +1804,7 @@ const AcademicManagement = () => {
                     <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                       Category
                     </label>
-                    <select
+                    <SelectInput
                       name="type"
                       value={formData.type}
                       onChange={handleInputChange}
@@ -1811,7 +1812,7 @@ const AcademicManagement = () => {
                     >
                       <option value="theory">Theory</option>
                       <option value="practical">Practical</option>
-                    </select>
+                    </SelectInput>
                   </div>
                 </div>
 
@@ -1903,7 +1904,7 @@ const AcademicManagement = () => {
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Target Class Level *
                 </label>
-                <select
+                <SelectInput
                   name="className"
                   required
                   value={curriculumFormData.className}
@@ -1915,14 +1916,14 @@ const AcademicManagement = () => {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Section Allocation *
                 </label>
-                <select
+                <SelectInput
                   name="sectionName"
                   value={curriculumFormData.sectionName}
                   onChange={handleCurriculumInputChange}
@@ -1934,7 +1935,7 @@ const AcademicManagement = () => {
                       {sec.name}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
             </div>
 
@@ -1976,7 +1977,7 @@ const AcademicManagement = () => {
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Course Type
                 </label>
-                <select
+                <SelectInput
                   name="type"
                   value={curriculumFormData.type}
                   onChange={handleCurriculumInputChange}
@@ -1984,7 +1985,7 @@ const AcademicManagement = () => {
                 >
                   <option value="theory">Theory</option>
                   <option value="practical">Practical / Lab</option>
-                </select>
+                </SelectInput>
               </div>
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
@@ -2251,7 +2252,7 @@ const AcademicManagement = () => {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <select
+                  <SelectInput
                     value={unitFormData.status}
                     onChange={(e) =>
                       setUnitFormData((prev) => ({
@@ -2264,7 +2265,7 @@ const AcademicManagement = () => {
                     <option value="upcoming">Upcoming</option>
                     <option value="in-progress">In-Progress</option>
                     <option value="completed">Completed</option>
-                  </select>
+                  </SelectInput>
                 </div>
                 <div>
                   <input
@@ -2394,7 +2395,7 @@ const AcademicManagement = () => {
                   <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                     Format / Type
                   </label>
-                  <select
+                  <SelectInput
                     value={materialFormData.type}
                     onChange={(e) =>
                       setMaterialFormData((prev) => ({
@@ -2408,7 +2409,7 @@ const AcademicManagement = () => {
                     <option value="PPTX">PowerPoint Slides (PPTX)</option>
                     <option value="DOCX">Word Document (DOCX)</option>
                     <option value="ZIP">Archive (ZIP)</option>
-                  </select>
+                  </SelectInput>
                 </div>
                 <div>
                   <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">

@@ -15,6 +15,7 @@ import syllabusService from "../../services/syllabusService.js";
 import Loader from "../../components/ui/Loader.jsx";
 import { CanButton } from "../../config/buttonAccess.jsx";
 import { SECTION_OPTIONS } from "../../constants/academicOptions.js";
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const blankSubject = { subjectName: '', subjectCode: '', bookName: '', maxMarks: 100, passMarks: 35, examDate: '', room: '' };
 
@@ -472,11 +473,11 @@ const ExamList = () => {
             {/* Status */}
             <div>
               <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Status</label>
-              <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+              <SelectInput className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                 <option value="upcoming">Upcoming</option>
                 <option value="ongoing">Ongoing</option>
                 <option value="completed">Completed</option>
-              </select>
+              </SelectInput>
             </div>
           </div>
 

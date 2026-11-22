@@ -21,6 +21,7 @@ import { ALL_TEMPLATES, getTemplateById } from "../../certificates/templates/reg
 import { renderTemplate, prepareTemplateData } from "../../certificates/utils/templateRenderer.js";
 import { printDocument } from "../../certificates/utils/printUtils.js";
 import api from "../../../services/api.js";
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const DEFAULT_TEMPLATES = [
   { id: "student-id-classic", name: "Classic Student", orientation: "vertical" },
@@ -178,7 +179,7 @@ export default function AiStudentIdCard({
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Template Selector Dropdown */}
-          <select
+          <SelectInput
             value={currentTemplateId}
             onChange={(e) => setCurrentTemplateId(e.target.value)}
             className={`rounded-xl border ${border.default} ${bg.input} px-2.5 py-1 text-xs font-semibold ${text.primary} focus:outline-none focus:ring-1 focus:ring-orange-500`}
@@ -189,7 +190,7 @@ export default function AiStudentIdCard({
                 🎨 {t.name} ({t.orientation || "card"})
               </option>
             ))}
-          </select>
+          </SelectInput>
 
           {/* Quick Edit Toggle Button */}
           <button
@@ -290,7 +291,7 @@ export default function AiStudentIdCard({
               <label className={`block text-[10px] font-bold uppercase ${text.muted} mb-1`}>
                 Blood Group
               </label>
-              <select
+              <SelectInput
                 value={formData.bloodGroup}
                 onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
                 className={`w-full rounded-lg border ${border.default} ${bg.input} px-2.5 py-1 text-xs ${text.primary} focus:ring-1 focus:ring-orange-500`}
@@ -303,7 +304,7 @@ export default function AiStudentIdCard({
                 <option value="O-">O-</option>
                 <option value="AB+">AB+</option>
                 <option value="AB-">AB-</option>
-              </select>
+              </SelectInput>
             </div>
 
             {/* Emergency Phone */}

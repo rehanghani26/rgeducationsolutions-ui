@@ -52,6 +52,7 @@ import { SECTION_OPTIONS, LEAVE_STATUS_OPTIONS, LEAVE_TYPE_OPTIONS } from '../co
 import { formatDate } from '../utils';
 import { getUserFromStorage, getUserRole } from '../config/access.jsx';
 import { ROLES } from '../constants/roles.js';
+import { SelectInput } from '../components/ui/FormControls.jsx';
 
 const CATEGORY_OPTIONS = [
   'Medical Leave',
@@ -567,7 +568,7 @@ const LeaveManagement = () => {
             {/* Dynamic Class & Section selector (When Student tab is active) */}
             {isElevated && (roleTab === 'student' || roleTab === 'all') && (
               <>
-                <select
+                <SelectInput
                   value={selectedClass}
                   onChange={(e) => {
                     setSelectedClass(e.target.value);
@@ -581,9 +582,9 @@ const LeaveManagement = () => {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
 
-                <select
+                <SelectInput
                   value={selectedSection}
                   onChange={(e) => {
                     setSelectedSection(e.target.value);
@@ -597,19 +598,19 @@ const LeaveManagement = () => {
                       {s.name}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </>
             )}
 
             {/* Date Quick Filter */}
-            <select
+            <SelectInput
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
             >
               <option value="all">All Dates</option>
               <option value="today">Today Active</option>
-            </select>
+            </SelectInput>
 
             {/* Status Filter Pills */}
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl">
@@ -953,7 +954,7 @@ const LeaveManagement = () => {
             <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] mb-1">
               Leave Category *
             </label>
-            <select
+            <SelectInput
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 focus:outline-none"
@@ -963,7 +964,7 @@ const LeaveManagement = () => {
                   {cat}
                 </option>
               ))}
-            </select>
+            </SelectInput>
           </div>
 
           {/* Half-Day Toggle */}
@@ -998,14 +999,14 @@ const LeaveManagement = () => {
                 <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase text-[10px] mb-1">
                   Session
                 </label>
-                <select
+                <SelectInput
                   value={form.halfDaySession}
                   onChange={(e) => setForm({ ...form, halfDaySession: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                 >
                   <option value="first_half">First Half (Morning Session)</option>
                   <option value="second_half">Second Half (Afternoon Session)</option>
-                </select>
+                </SelectInput>
               </div>
             </div>
           ) : (

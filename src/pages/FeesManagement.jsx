@@ -13,6 +13,7 @@ import Modal from '../components/ui/Modal.jsx';
 import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
 import { formatCurrency, dateOnly } from '../utils';
+import { SelectInput } from '../components/ui/FormControls.jsx';
 
 const inputCls = 'w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1';
@@ -226,7 +227,7 @@ const FeesManagement = () => {
         <div className="space-y-4 text-xs">
           <div>
             <label className={labelCls}>Select Student billing record</label>
-            <select className={inputCls} value={collectForm.studentId} onChange={(e) => setCollectForm({ ...collectForm, studentId: e.target.value })}>
+            <SelectInput className={inputCls} value={collectForm.studentId} onChange={(e) => setCollectForm({ ...collectForm, studentId: e.target.value })}>
               <option value="">-- Select Student --</option>
               {fees && fees.length > 0 ? (
                 fees.map((f) => {
@@ -242,7 +243,7 @@ const FeesManagement = () => {
               ) : (
                 <option value="" disabled>No student billing records available</option>
               )}
-            </select>
+            </SelectInput>
           </div>
           <div>
             <CurrencyInput
@@ -259,11 +260,11 @@ const FeesManagement = () => {
           </div>
           <div>
             <label className={labelCls}>Payment Method Mode</label>
-            <select className={inputCls} value={collectForm.method} onChange={(e) => setCollectForm({ ...collectForm, method: e.target.value })}>
+            <SelectInput className={inputCls} value={collectForm.method} onChange={(e) => setCollectForm({ ...collectForm, method: e.target.value })}>
               <option value="Online">Online Gateway</option>
               <option value="Cash">Cash Receipt</option>
               <option value="Bank Transfer">Bank Wire Transfer</option>
-            </select>
+            </SelectInput>
           </div>
           <div>
             <label className={labelCls}>Reference Voucher ID</label>
@@ -310,14 +311,14 @@ const FeesManagement = () => {
           </div>
           <div>
             <label className={labelCls}>Billing Category</label>
-            <select className={inputCls} value={expenseForm.category} onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}>
+            <SelectInput className={inputCls} value={expenseForm.category} onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}>
               <option value="Utilities">Utilities</option>
               <option value="Payroll">Payroll</option>
               <option value="Maintenance">Maintenance</option>
               <option value="Academic Supplies">Academic Supplies</option>
               <option value="Transport">Transport</option>
               <option value="Others">Others</option>
-            </select>
+            </SelectInput>
           </div>
           <div>
             <label className={labelCls}>Expenditure Date</label>

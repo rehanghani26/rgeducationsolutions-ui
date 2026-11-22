@@ -16,6 +16,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { bg, border, text, badge, button, shadow } from "@/theme/color";
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function AiStudentListCard({
   students = [],
@@ -194,7 +195,7 @@ export default function AiStudentListCard({
             <label className={`block text-[10px] font-semibold uppercase ${text.muted} mb-1`}>
               Class
             </label>
-            <select
+            <SelectInput
               value={selectedClass}
               onChange={(e) => {
                 setSelectedClass(e.target.value);
@@ -208,7 +209,7 @@ export default function AiStudentListCard({
                   {c}
                 </option>
               ))}
-            </select>
+            </SelectInput>
           </div>
 
           {/* Section Filter */}
@@ -216,7 +217,7 @@ export default function AiStudentListCard({
             <label className={`block text-[10px] font-semibold uppercase ${text.muted} mb-1`}>
               Section
             </label>
-            <select
+            <SelectInput
               value={selectedSection}
               onChange={(e) => {
                 setSelectedSection(e.target.value);
@@ -230,7 +231,7 @@ export default function AiStudentListCard({
                   Section {sec}
                 </option>
               ))}
-            </select>
+            </SelectInput>
           </div>
 
           {/* Status Filter */}
@@ -238,7 +239,7 @@ export default function AiStudentListCard({
             <label className={`block text-[10px] font-semibold uppercase ${text.muted} mb-1`}>
               Status
             </label>
-            <select
+            <SelectInput
               value={selectedStatus}
               onChange={(e) => {
                 setSelectedStatus(e.target.value);
@@ -250,7 +251,7 @@ export default function AiStudentListCard({
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
               <option value="passout">Passout</option>
-            </select>
+            </SelectInput>
           </div>
 
           {/* Gender Filter */}
@@ -258,7 +259,7 @@ export default function AiStudentListCard({
             <label className={`block text-[10px] font-semibold uppercase ${text.muted} mb-1`}>
               Gender
             </label>
-            <select
+            <SelectInput
               value={selectedGender}
               onChange={(e) => {
                 setSelectedGender(e.target.value);
@@ -270,7 +271,7 @@ export default function AiStudentListCard({
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Other">Other</option>
-            </select>
+            </SelectInput>
           </div>
 
           {/* Blood Group */}
@@ -278,7 +279,7 @@ export default function AiStudentListCard({
             <label className={`block text-[10px] font-semibold uppercase ${text.muted} mb-1`}>
               Blood Group
             </label>
-            <select
+            <SelectInput
               value={selectedBloodGroup}
               onChange={(e) => {
                 setSelectedBloodGroup(e.target.value);
@@ -295,7 +296,7 @@ export default function AiStudentListCard({
               <option value="O-">O-</option>
               <option value="AB+">AB+</option>
               <option value="AB-">AB-</option>
-            </select>
+            </SelectInput>
           </div>
         </div>
       </div>

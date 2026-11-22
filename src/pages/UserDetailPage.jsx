@@ -48,6 +48,7 @@ import { CurrencyInput } from '../components/ui/CurrencyInput.jsx';
 import { ROUTES } from '../routes/routes.js';
 import { formatCurrency, formatDate, formatDateTime } from '../utils';
 import { notifyApiError } from '../services/apiErrors.js';
+import { SelectInput } from '../components/ui/FormControls.jsx';
 
 const ROLE_CONFIG = {
   'super-admin': {
@@ -1225,7 +1226,7 @@ const UserDetailPage = () => {
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                 Gender
               </label>
-              <select
+              <SelectInput
                 value={editForm.gender}
                 onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 focus:border-indigo-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
@@ -1234,7 +1235,7 @@ const UserDetailPage = () => {
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
-              </select>
+              </SelectInput>
             </div>
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">

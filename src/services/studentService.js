@@ -116,11 +116,12 @@ export async function bulkPromoteStudents(payload) {
 }
 
 /**
- * Bulk import students from CSV array data.
+ * Bulk import the rows from a student spreadsheet.
  * @param {Array<object>} students
+ * @param {string} [sessionId]
  */
-export async function bulkImportStudents(students) {
-  return await api.post(STUDENT_URLS.BULK_IMPORT, { students });
+export async function bulkImportStudents(students, sessionId) {
+  return api.post(STUDENT_URLS.BULK_IMPORT, { students }, { params: { sessionId: sessionId || undefined } });
 }
 
 /**

@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { memo, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle } from "lucide-react";
+import "./procurement.css";
 
 const ConfirmationBox = ({
   confirmationMessage = "Are you sure?",
@@ -57,32 +58,32 @@ const ConfirmationBox = ({
       aria-label={heading ? undefined : "Confirmation"}
       aria-describedby={confirmationMessage ? messageId : undefined}
       onCancel={handleCancel}
-      className={`fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center bg-transparent p-4 open:flex backdrop:bg-[#051c2c]/50 backdrop:backdrop-blur-[2px] ${parentClassName}`}
+      className={`fixed inset-0 m-0 h-full max-h-none w-full max-w-none items-center justify-center bg-transparent p-4 open:flex backdrop:bg-black/50 backdrop:backdrop-blur-[2px] ${parentClassName}`}
     >
-      <div className={`max-h-full max-w-full overflow-y-auto rounded-2xl bg-white shadow-[0_24px_64px_rgba(5,28,44,0.18)] ${className}`}>
+      <div className={`max-h-full max-w-full overflow-y-auto rounded-lg border border-[var(--border-color)] bg-[var(--surface-1)] text-[var(--text-primary)] shadow-2xl ${className}`}>
         {heading && (
-          <div className="flex items-center gap-3 rounded-t-2xl bg-[#051c2c] px-5 py-4">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10">
-              <AlertTriangle size={14} className="text-amber-300" aria-hidden="true" />
+          <div className="flex items-center gap-3 border-b border-l-[3px] border-[var(--border-color)] border-l-[var(--brand-primary)] bg-[var(--surface-2)] px-5 py-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--proc-accent-bg)] text-[var(--proc-accent)]">
+              <AlertTriangle size={17} aria-hidden="true" />
             </div>
-            <h3 id={headingId} className="text-[13px] font-black leading-tight text-white">{heading}</h3>
+            <h3 id={headingId} className="text-sm font-bold leading-tight">{heading}</h3>
           </div>
         )}
         <div className="space-y-4 px-5 py-4">
           {confirmationMessage && (
-            <p id={messageId} className={`break-words text-sm leading-relaxed text-gray-500 ${confirmationMessageClassName}`}>
+            <p id={messageId} className={`break-words text-sm leading-relaxed text-[var(--text-secondary)] ${confirmationMessageClassName}`}>
               {confirmationMessage}
             </p>
           )}
           {children}
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2.5 rounded-b-2xl border-t border-gray-100 bg-gray-50 px-5 py-3.5">
+        <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-[var(--border-color)] bg-[var(--surface-2)] px-5 py-3">
           <button
             ref={cancelButton}
             type="button"
             onClick={onLeftButtonClick}
             disabled={leftButtonDisabled || isSubmitting}
-            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold text-[#051c2c] transition-colors hover:border-[#0064E0]/40 hover:bg-[#EEF4FF] disabled:cursor-not-allowed disabled:opacity-40"
+            className="proc-btn rounded-md"
           >
             {leftButtonName}
           </button>
@@ -90,7 +91,7 @@ const ConfirmationBox = ({
             type="button"
             onClick={handleRightClick}
             disabled={rightButtonDisabled || isSubmitting}
-            className="rounded-lg bg-[#0064E0] px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#051c2c] disabled:cursor-not-allowed disabled:opacity-40"
+            className="proc-btn proc-primary rounded-md"
           >
             {rightButtonName}
           </button>

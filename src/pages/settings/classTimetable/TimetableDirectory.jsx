@@ -6,6 +6,7 @@ import { formatDate } from '../../../utils/formatters.js';
 import { recordId } from '../../../utils/procurement.js';
 import { masterScheduleForTimetable } from '../../timetable/timetableUtils.js';
 import { classLabel, readAllocations, textKey, timetableClass, timetableDays, timetableProgress } from './timetableValues.js';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const pageSize = 10;
 const collator = new Intl.Collator(undefined, { numeric: true });
@@ -101,11 +102,11 @@ export default function TimetableDirectory({
         {!directory.loading && !directory.error && <div className="proc-actions">
           {entries.length > 0 && <>
             <SearchField label="Search class, subject or teacher" value={search} onChange={(value) => { setSearch(value); setPage(1); }} />
-            <select className="ct-control ct-sort" aria-label="Sort timetables" value={sort} onChange={(event) => { setSort(event.target.value); setPage(1); }}>
+            <SelectInput className="ct-control ct-sort" aria-label="Sort timetables" value={sort} onChange={(event) => { setSort(event.target.value); setPage(1); }}>
               <option value="updated">Recently updated</option>
               <option value="class">Class name</option>
               <option value="periods">Periods assigned</option>
-            </select>
+            </SelectInput>
           </>}
           <button type="button" className="proc-btn ct-icon-action" onClick={onReload} aria-label="Refresh timetables" title="Refresh timetables">
             <RefreshCw size={15} />

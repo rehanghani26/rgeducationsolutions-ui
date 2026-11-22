@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button.jsx';
 import { CurrencyInput } from '../../components/ui/CurrencyInput.jsx';
 import feeService from '../../services/feeService.js';
 import { notifyApiError } from '../../services/apiErrors.js';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const inputCls = 'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none';
 const labelCls = 'block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase';
@@ -100,11 +101,11 @@ const FeeEdit = () => {
           </div>
           <div>
             <label className={labelCls}>Status</label>
-            <select className={inputCls} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+            <SelectInput className={inputCls} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
               <option value="Paid">Paid</option>
               <option value="Partial">Partial</option>
               <option value="Overdue">Overdue</option>
-            </select>
+            </SelectInput>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={() => navigate(`/fees/${id}`)}>Cancel</Button>

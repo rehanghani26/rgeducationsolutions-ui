@@ -40,6 +40,7 @@ import resultService from '../../services/resultService.js';
 import { getStudents } from '../../services/studentService.js';
 import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
 import { notifyApiError } from '../../services/apiErrors.js';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const useAuth = () => {
@@ -71,7 +72,7 @@ const gradeBg = (grade) => {
 const SelectField = ({ label, value, onChange, options, placeholder = 'Select...', disabled }) => (
   <div>
     {label && <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wide">{label}</label>}
-    <select
+    <SelectInput
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
@@ -81,7 +82,7 @@ const SelectField = ({ label, value, onChange, options, placeholder = 'Select...
       {options.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>
       ))}
-    </select>
+    </SelectInput>
   </div>
 );
 

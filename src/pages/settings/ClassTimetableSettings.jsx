@@ -18,6 +18,7 @@ import TimetableDirectory from './classTimetable/TimetableDirectory.jsx';
 import TimetableEditor from './classTimetable/TimetableEditor.jsx';
 import { classLabel, classesWithAvailableSections, scheduleType, timetableClass, timetableDays } from './classTimetable/timetableValues.js';
 import './classTimetable/classTimetable.css';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const writeRoles = ['super-admin', 'school-admin', 'admin', 'principal'];
 const loadingList = { rows: [], loading: true, error: null };
@@ -62,17 +63,17 @@ function ChooseClass({ classes, onOpen, onClose }) {
       <form onSubmit={open}>
         <div className="ct-create-fields">
           <Field label="Class">
-            <select ref={firstField} className="ct-control" value={grade?.id || ''} onChange={changeClass} required>
+            <SelectInput ref={firstField} className="ct-control" value={grade?.id || ''} onChange={changeClass} required>
               <option value="">Choose a class</option>
               {classes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
+            </SelectInput>
           </Field>
           <Field label="Section">
-            <select className="ct-control" value={allSections ? '' : section?.id || ''} disabled={!grade || allSections}
+            <SelectInput className="ct-control" value={allSections ? '' : section?.id || ''} disabled={!grade || allSections}
               onChange={(event) => setSectionId(event.target.value)} required={!allSections}>
               {!grade || allSections ? <option value="">{allSections ? 'All selected' : 'Select a class'}</option>
                 : available.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
+            </SelectInput>
           </Field>
           <label className="ct-all-sections" data-checked={allSections || undefined} data-disabled={!grade || undefined}>
             <input type="checkbox" checked={allSections} disabled={!grade} aria-describedby="ct-available-sections"

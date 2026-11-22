@@ -16,6 +16,7 @@ import Loader from '../../components/ui/Loader.jsx';
 import { Can, CanButton, getUserFromStorage } from '../../config/access.jsx';
 import homeworkService from '../../services/homeworkService.js';
 import { useSelector } from 'react-redux';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PRIORITIES = ['low', 'normal', 'high'];
@@ -145,12 +146,12 @@ const SubmissionsList = ({ submissions = [], homeworkId, totalMarks, canGrade, o
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
-              <select value={gradeForm.status}
+              <SelectInput value={gradeForm.status}
                 onChange={(e) => setGradeForm((p) => ({ ...p, status: e.target.value }))}
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white">
                 <option value="graded">Graded</option>
                 <option value="returned">Returned for Revision</option>
-              </select>
+              </SelectInput>
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <button type="button" onClick={() => setGradeModal(null)}
@@ -471,11 +472,11 @@ const HomeworkManagement = () => {
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Class Name *</label>
-              <select required value={form.className} onChange={(e) => setField('className', e.target.value)}
+              <SelectInput required value={form.className} onChange={(e) => setField('className', e.target.value)}
                   className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800">
                   <option value="">Choose a class</option>
                   {classOptions.map((grade) => <option key={grade.id} value={grade.name}>{grade.name}</option>)}
-                </select>
+                </SelectInput>
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Section</label>
@@ -490,17 +491,17 @@ const HomeworkManagement = () => {
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Priority</label>
-              <select value={form.priority} onChange={(e) => setField('priority', e.target.value)}
+              <SelectInput value={form.priority} onChange={(e) => setField('priority', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 {PRIORITIES.map((p) => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
-              </select>
+              </SelectInput>
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Status</label>
-              <select value={form.status} onChange={(e) => setField('status', e.target.value)}
+              <SelectInput value={form.status} onChange={(e) => setField('status', e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
                 {HW_STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-              </select>
+              </SelectInput>
             </div>
             <div className="sm:col-span-2">
               <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Instructions *</label>

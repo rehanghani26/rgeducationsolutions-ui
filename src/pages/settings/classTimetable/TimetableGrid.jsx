@@ -2,6 +2,7 @@ import { BookOpen, Copy, MapPin, Pencil, Plus, User } from 'lucide-react';
 import { Empty, Field } from '../../../components/ui/ProcurementUI.jsx';
 import { timeRange } from '../masterPeriods/masterPeriodValues.js';
 import { hasAssignment, textKey } from './timetableValues.js';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 function PeriodDetails({ slot, assignment, editing }) {
   return (
@@ -113,10 +114,10 @@ export function TeacherSchedule({ days, assignments, teacher, onTeacherChange })
   return (
     <div className="ct-teachers">
       <Field label="Teacher">
-        <select className="ct-control" value={selected} onChange={(event) => onTeacherChange(event.target.value)}>
+        <SelectInput className="ct-control" value={selected} onChange={(event) => onTeacherChange(event.target.value)}>
           <option value="">All assigned teachers</option>
           {teachers.map(([key, name]) => <option value={key} key={key}>{name}</option>)}
-        </select>
+        </SelectInput>
       </Field>
       <ul className="ct-day-periods" aria-label="Teacher assignments">
         {rows.filter((row) => !selected || row.teacherKey === selected).map(({ day, slot, value }) => <li key={slot.key}>

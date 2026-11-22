@@ -38,6 +38,7 @@ import { WEEKDAYS as DEFAULT_DAYS,
   DAY_NAMES_LOWER } from "../../constants";
 import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import { notifyApiError } from '../../services/apiErrors.js';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 // Category meta definitions matching Master Period settings
 const PERIOD_META = {
@@ -961,7 +962,7 @@ const TimetableManagement = () => {
               />
             )}
           </span>
-          <select
+          <SelectInput
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
             disabled={isStudent}
@@ -979,7 +980,7 @@ const TimetableManagement = () => {
                   : ""}
               </option>
             ))}
-          </select>
+          </SelectInput>
 
           {isStudent && (
             <span className="text-[10px] font-black uppercase bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full border border-indigo-200 dark:border-indigo-800/60 flex items-center gap-1 shadow-xs">
@@ -1352,7 +1353,7 @@ const TimetableManagement = () => {
                                 ) : (
                                   <div className="space-y-1.5 p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 bg-slate-50 dark:bg-slate-800/30 transition-all shadow-xs">
                                     {/* Subject Dropdown Select */}
-                                    <select
+                                    <SelectInput
                                       value={alloc.subject || ""}
                                       onChange={(e) =>
                                         handleCellChange(
@@ -1372,10 +1373,10 @@ const TimetableManagement = () => {
                                           {sub}
                                         </option>
                                       ))}
-                                    </select>
+                                    </SelectInput>
 
                                     {/* Teacher Dropdown Select */}
-                                    <select
+                                    <SelectInput
                                       value={alloc.teacherId || ""}
                                       onChange={(e) =>
                                         handleCellTeacherChange(
@@ -1397,7 +1398,7 @@ const TimetableManagement = () => {
                                           {t.name} ({t.employeeId || "EMP"})
                                         </option>
                                       ))}
-                                    </select>
+                                    </SelectInput>
 
                                     {/* More details link / modal edit */}
                                     <div className="flex items-center justify-between text-[10px] pt-1 text-slate-500 dark:text-slate-400">
@@ -1447,7 +1448,7 @@ const TimetableManagement = () => {
 
                 <div className="flex items-center gap-2">
                   <User size={16} className="text-indigo-500" />
-                  <select
+                  <SelectInput
                     value={selectedTeacherFilter}
                     onChange={(e) => setSelectedTeacherFilter(e.target.value)}
                     className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm min-w-[240px]"
@@ -1461,7 +1462,7 @@ const TimetableManagement = () => {
                         {t.designation ? `- ${t.designation}` : ""}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
               </div>
 
@@ -1679,7 +1680,7 @@ const TimetableManagement = () => {
                     )}
                   </label>
 
-                  <select
+                  <SelectInput
                     value={slotForm.teacherId}
                     onChange={(e) => {
                       const id = e.target.value;
@@ -1703,7 +1704,7 @@ const TimetableManagement = () => {
                         {t.designation ? `- ${t.designation}` : ""}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
                 {/* Subject Selection / Input */}
@@ -1712,7 +1713,7 @@ const TimetableManagement = () => {
                     Select or Enter Subject Name
                   </label>
                   <div className="space-y-2">
-                    <select
+                    <SelectInput
                       value={
                         subjectsList.includes(slotForm.subject)
                           ? slotForm.subject
@@ -1734,7 +1735,7 @@ const TimetableManagement = () => {
                           {sub}
                         </option>
                       ))}
-                    </select>
+                    </SelectInput>
 
                     <input
                       type="text"

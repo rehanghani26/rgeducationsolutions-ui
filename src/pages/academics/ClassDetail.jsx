@@ -24,6 +24,7 @@ import { getTeachers } from '../../services/teacherService.js';
 import { getStudents } from '../../services/studentService.js';
 import { SCHOOL_DAY_NAMES } from '../../constants';
 import { formatDate } from '../../utils';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const ClassDetail = () => {
   const { classId } = useParams();
@@ -833,7 +834,7 @@ const ClassDetail = () => {
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Select Faculty Teacher *
                 </label>
-                <select
+                <SelectInput
                   required
                   value={selectedTeacherId}
                   onChange={(e) => setSelectedTeacherId(e.target.value)}
@@ -845,7 +846,7 @@ const ClassDetail = () => {
                       {t.name} · {t.employeeId || t.email || 'Teacher'}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               <div>
@@ -1023,7 +1024,7 @@ const ClassDetail = () => {
                   <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                     Select Existing Timetable *
                   </label>
-                  <select
+                  <SelectInput
                     required
                     value={selectedTimetableId}
                     onChange={(e) => setSelectedTimetableId(e.target.value)}
@@ -1035,7 +1036,7 @@ const ClassDetail = () => {
                         {tt.title || tt.className} ({tt.sessionName || 'Default'})
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
               )}
 
@@ -1044,7 +1045,7 @@ const ClassDetail = () => {
                   <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                     Template Timetable to Clone From *
                   </label>
-                  <select
+                  <SelectInput
                     required
                     value={cloneFromId}
                     onChange={(e) => setCloneFromId(e.target.value)}
@@ -1056,7 +1057,7 @@ const ClassDetail = () => {
                         {tt.title || tt.className}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
               )}
 
@@ -1107,7 +1108,7 @@ const ClassDetail = () => {
             <form onSubmit={handlePromoteSubmit} className="space-y-4 text-xs font-medium">
               <div>
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">Target Academic Session *</label>
-                <select
+                <SelectInput
                   required
                   value={targetSessionId}
                   onChange={(e) => setTargetSessionId(e.target.value)}
@@ -1118,7 +1119,7 @@ const ClassDetail = () => {
                       {s.name} {s.isCurrent ? '(Active)' : ''}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

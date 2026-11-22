@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useMemo } from "react";
+import PropTypes from "prop-types";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,32 +8,19 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Layers,
   Inbox,
-} from 'lucide-react';
-import EmptyState from './EmptyState.jsx';
-import Button from './Button.jsx';
+} from "lucide-react";
+import { SelectInput } from './FormControls.jsx';
 
-/**
- * DataTable — Universal, highly-reusable data table with built-in:
- * - Search filter (client-side automatic or controlled via props)
- * - Column sorting (asc/desc with indicators)
- * - Automatic client-side or server-side pagination
- * - Skeleton loading state with customizable rows
- * - Selectable rows with batch select-all
- * - Header toolbar with title, subtitle, badge, and custom actions
- * - Custom cell renders, alignments, and widths
- * - Empty states with custom actions
- */
 const DataTable = ({
   // Core Data
   columns = [],
   data = [],
-  keyField = '_id',
+  keyField = "_id",
 
   // Header & Toolbar
-  title = '',
-  subtitle = '',
+  title = "",
+  subtitle = "",
   icon: TitleIcon = null,
   badge = null,
   headerActions = null,
@@ -41,20 +28,20 @@ const DataTable = ({
 
   // Search
   searchable = false,
-  searchPlaceholder = 'Search records...',
+  searchPlaceholder = "Search records...",
   searchValue = undefined, // controlled
   onSearchChange = undefined, // controlled callback
   searchFields = [], // specific keys to search in; defaults to all text values
 
   // Sorting
-  defaultSortKey = '',
-  defaultSortDirection = 'asc', // 'asc' | 'desc'
+  defaultSortKey = "",
+  defaultSortDirection = "asc", // 'asc' | 'desc'
 
   // Loading & Empty
   loading = false,
   skeletonRows = 6,
-  emptyTitle = 'No records found',
-  emptyDescription = 'There are no records matching your criteria.',
+  emptyTitle = "No records found",
+  emptyDescription = "There are no records matching your criteria.",
   emptyIcon = null,
   emptyAction = null,
 
@@ -69,8 +56,8 @@ const DataTable = ({
   hoverable = true,
   striped = false,
   compact = false,
-  className = '',
-  tableClassName = '',
+  className = "",
+  tableClassName = "",
 
   // Pagination (boolean for client-side auto-pagination, or object for server pagination)
   pagination = false,
@@ -83,7 +70,7 @@ const DataTable = ({
   mobileColumnsCount = 3,
 }) => {
   // ─── Local State for Uncontrolled Search, Sort & Pagination ─────────────────
-  const [internalSearch, setInternalSearch] = useState('');
+  const [internalSearch, setInternalSearch] = useState("");
   const [sortKey, setSortKey] = useState(defaultSortKey);
   const [sortDir, setSortDir] = useState(defaultSortDirection);
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,10 +91,10 @@ const DataTable = ({
   const handleSort = (key) => {
     if (!key) return;
     if (sortKey === key) {
-      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortKey(key);
-      setSortDir('asc');
+      setSortDir("asc");
     }
   };
 
@@ -136,13 +123,17 @@ const DataTable = ({
         if (searchFields.length > 0) {
           return searchFields.some((f) => {
             const val = row[f];
-            return val !== undefined && val !== null && String(val).toLowerCase().includes(q);
+            return (
+              val !== undefined &&
+              val !== null &&
+              String(val).toLowerCase().includes(q)
+            );
           });
         }
         // Default: test all string / number fields
         return Object.values(row).some((val) => {
           if (val === undefined || val === null) return false;
-          if (typeof val === 'object') {
+          if (typeof val === "object") {
             try {
               return JSON.stringify(val).toLowerCase().includes(q);
             } catch {
@@ -164,20 +155,31 @@ const DataTable = ({
         if (bVal === undefined || bVal === null) return -1;
 
         let res = 0;
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
+        if (typeof aVal === "number" && typeof bVal === "number") {
           res = aVal - bVal;
         } else {
-          res = String(aVal).localeCompare(String(bVal), undefined, { numeric: true });
+          res = String(aVal).localeCompare(String(bVal), undefined, {
+            numeric: true,
+          });
         }
-        return sortDir === 'asc' ? res : -res;
+        return sortDir === "asc" ? res : -res;
       });
     }
 
     return list;
-  }, [data, searchable, onSearchChange, activeSearch, searchFields, sortKey, sortDir]);
+  }, [
+    data,
+    searchable,
+    onSearchChange,
+    activeSearch,
+    searchFields,
+    sortKey,
+    sortDir,
+  ]);
 
   // ─── Determine Pagination Model ───────────────────────────────────────────
-  const isServerPagination = typeof pagination === 'object' && pagination !== null;
+  const isServerPagination =
+    typeof pagination === "object" && pagination !== null;
   const isClientPagination = pagination === true;
 
   // Sliced data for display
@@ -195,9 +197,12 @@ const DataTable = ({
     : processedData.length;
   const effectivePage = isServerPagination ? pagination.page || 1 : currentPage;
   const effectivePages = isServerPagination
-    ? pagination.pages || Math.ceil((pagination.total || 1) / (pagination.limit || perPage))
+    ? pagination.pages ||
+      Math.ceil((pagination.total || 1) / (pagination.limit || perPage))
     : Math.ceil(totalCount / perPage) || 1;
-  const effectiveLimit = isServerPagination ? pagination.limit || perPage : perPage;
+  const effectiveLimit = isServerPagination
+    ? pagination.limit || perPage
+    : perPage;
 
   const handlePageSelect = (page) => {
     const valid = Math.max(1, Math.min(page, effectivePages));
@@ -216,7 +221,9 @@ const DataTable = ({
   // Selection helpers
   const allCurrentSelected =
     displayData.length > 0 &&
-    displayData.every((row) => selectedIds.includes(row[keyField] || row.id || row._id));
+    displayData.every((row) =>
+      selectedIds.includes(row[keyField] || row.id || row._id)
+    );
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -282,7 +289,7 @@ const DataTable = ({
                 {activeSearch && (
                   <button
                     type="button"
-                    onClick={() => handleSearchInput('')}
+                    onClick={() => handleSearchInput("")}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
                   >
                     <X size={14} />
@@ -315,40 +322,50 @@ const DataTable = ({
                 const isSortActive = sortKey === col.key;
                 const canSort = col.sortable !== false;
                 const alignClass =
-                  col.align === 'right'
-                    ? 'text-right'
-                    : col.align === 'center'
-                    ? 'text-center'
-                    : 'text-left';
+                  col.align === "right"
+                    ? "text-right"
+                    : col.align === "center"
+                      ? "text-center"
+                      : "text-left";
                 const isMobileVis = isColVisibleOnMobile(col, idx);
-                const mobileCellClass = isMobileVis ? '' : 'hidden md:table-cell';
+                const mobileCellClass = isMobileVis
+                  ? ""
+                  : "hidden md:table-cell";
 
                 return (
                   <th
                     key={col.key || idx}
                     style={{ width: col.width }}
                     onClick={() => canSort && handleSort(col.key)}
-                    className={`py-2 px-3 sm:py-2.5 sm:px-4 ${alignClass} ${col.className || ''} ${mobileCellClass} ${
-                      canSort ? 'cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400' : ''
+                    className={`py-2 px-3 sm:py-2.5 sm:px-4 ${alignClass} ${col.className || ""} ${mobileCellClass} ${
+                      canSort
+                        ? "cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
+                        : ""
                     } transition-colors`}
                   >
                     <div
                       className={`inline-flex items-center gap-1.5 ${
-                        col.align === 'right'
-                          ? 'justify-end'
-                          : col.align === 'center'
-                          ? 'justify-center'
-                          : 'justify-start'
+                        col.align === "right"
+                          ? "justify-end"
+                          : col.align === "center"
+                            ? "justify-center"
+                            : "justify-start"
                       }`}
                     >
                       <span>{col.label}</span>
                       {canSort && (
                         <span className="text-slate-400">
                           {isSortActive ? (
-                            sortDir === 'asc' ? (
-                              <ArrowUp size={13} className="text-indigo-600 dark:text-indigo-400" />
+                            sortDir === "asc" ? (
+                              <ArrowUp
+                                size={13}
+                                className="text-indigo-600 dark:text-indigo-400"
+                              />
                             ) : (
-                              <ArrowDown size={13} className="text-indigo-600 dark:text-indigo-400" />
+                              <ArrowDown
+                                size={13}
+                                className="text-indigo-600 dark:text-indigo-400"
+                              />
                             )
                           ) : (
                             <ArrowUpDown size={12} className="opacity-40" />
@@ -374,12 +391,19 @@ const DataTable = ({
                   )}
                   {columns.map((col, cIdx) => {
                     const isMobileVis = isColVisibleOnMobile(col, cIdx);
-                    const mobileCellClass = isMobileVis ? '' : 'hidden md:table-cell';
+                    const mobileCellClass = isMobileVis
+                      ? ""
+                      : "hidden md:table-cell";
                     return (
-                      <td key={col.key || cIdx} className={`py-3 px-3 sm:py-4 sm:px-4 ${mobileCellClass}`}>
+                      <td
+                        key={col.key || cIdx}
+                        className={`py-3 px-3 sm:py-4 sm:px-4 ${mobileCellClass}`}
+                      >
                         <div
                           className="h-3 rounded bg-slate-200 dark:bg-slate-800"
-                          style={{ width: `${Math.max(35, (cIdx * 25 + 40) % 90)}%` }}
+                          style={{
+                            width: `${Math.max(35, (cIdx * 25 + 40) % 90)}%`,
+                          }}
                         />
                       </td>
                     );
@@ -416,7 +440,8 @@ const DataTable = ({
             /* Table Body: Data Rows */
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {displayData.map((row, rIdx) => {
-                const rowId = row[keyField] || row.id || row._id || `row-${rIdx}`;
+                const rowId =
+                  row[keyField] || row.id || row._id || `row-${rIdx}`;
                 const isSelected = selectable && selectedIds.includes(rowId);
 
                 return (
@@ -424,27 +449,31 @@ const DataTable = ({
                     key={rowId}
                     onClick={() => onRowClick?.(row)}
                     className={[
-                      onRowClick ? 'cursor-pointer' : '',
+                      onRowClick ? "cursor-pointer" : "",
                       isSelected
-                        ? 'bg-indigo-50/70 dark:bg-indigo-950/40'
+                        ? "bg-indigo-50/70 dark:bg-indigo-950/40"
                         : striped && rIdx % 2 === 1
-                        ? 'bg-slate-50/40 dark:bg-slate-900/40'
-                        : 'bg-white dark:bg-slate-900',
-                      hoverable ? 'hover:bg-indigo-50/40 dark:hover:bg-slate-800/60' : '',
-                      'transition-colors duration-100',
+                          ? "bg-slate-50/40 dark:bg-slate-900/40"
+                          : "bg-white dark:bg-slate-900",
+                      hoverable
+                        ? "hover:bg-indigo-50/40 dark:hover:bg-slate-800/60"
+                        : "",
+                      "transition-colors duration-100",
                     ]
                       .filter(Boolean)
-                      .join(' ')}
+                      .join(" ")}
                   >
                     {selectable && (
                       <td
-                        className={`py-3.5 px-4 text-center ${compact ? 'py-2.5' : ''}`}
+                        className={`py-3.5 px-4 text-center ${compact ? "py-2.5" : ""}`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={(e) => onSelectChange?.(rowId, e.target.checked)}
+                          onChange={(e) =>
+                            onSelectChange?.(rowId, e.target.checked)
+                          }
                           className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
                         />
                       </td>
@@ -452,22 +481,26 @@ const DataTable = ({
 
                     {columns.map((col, cIdx) => {
                       const alignClass =
-                        col.align === 'right'
-                          ? 'text-right'
-                          : col.align === 'center'
-                          ? 'text-center'
-                          : 'text-left';
+                        col.align === "right"
+                          ? "text-right"
+                          : col.align === "center"
+                            ? "text-center"
+                            : "text-left";
                       const isMobileVis = isColVisibleOnMobile(col, cIdx);
-                      const mobileCellClass = isMobileVis ? '' : 'hidden md:table-cell';
+                      const mobileCellClass = isMobileVis
+                        ? ""
+                        : "hidden md:table-cell";
 
                       return (
                         <td
                           key={col.key || cIdx}
-                          className={`py-2 px-3 sm:py-2.5 sm:px-4 ${compact ? 'py-1.5' : ''} ${alignClass} ${
-                            col.className || ''
+                          className={`py-2 px-3 sm:py-2.5 sm:px-4 ${compact ? "py-1.5" : ""} ${alignClass} ${
+                            col.className || ""
                           } ${mobileCellClass} text-slate-700 dark:text-slate-300`}
                         >
-                          {col.render ? col.render(row, rIdx) : (row[col.key] ?? '—')}
+                          {col.render
+                            ? col.render(row, rIdx)
+                            : (row[col.key] ?? "—")}
                         </td>
                       );
                     })}
@@ -480,71 +513,79 @@ const DataTable = ({
       </div>
 
       {/* ── Pagination Footer ──────────────────────────────────────────────── */}
-      {(isClientPagination || isServerPagination) && !loading && displayData.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3.5 bg-slate-50/80 dark:bg-slate-950/40 border-t border-slate-100 dark:border-slate-800 text-xs">
-          {/* Showing Count */}
-          <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 font-medium">
-            <span>
-              Showing{' '}
-              <strong className="text-slate-800 dark:text-slate-200">
-                {totalCount === 0 ? 0 : (effectivePage - 1) * effectiveLimit + 1}
-              </strong>{' '}
-              to{' '}
-              <strong className="text-slate-800 dark:text-slate-200">
-                {Math.min(effectivePage * effectiveLimit, totalCount)}
-              </strong>{' '}
-              of{' '}
-              <strong className="text-slate-800 dark:text-slate-200">{totalCount}</strong>{' '}
-              entries
-            </span>
+      {(isClientPagination || isServerPagination) &&
+        !loading &&
+        displayData.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3.5 bg-slate-50/80 dark:bg-slate-950/40 border-t border-slate-100 dark:border-slate-800 text-xs">
+            {/* Showing Count */}
+            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 font-medium">
+              <span>
+                Showing{" "}
+                <strong className="text-slate-800 dark:text-slate-200">
+                  {totalCount === 0
+                    ? 0
+                    : (effectivePage - 1) * effectiveLimit + 1}
+                </strong>{" "}
+                to{" "}
+                <strong className="text-slate-800 dark:text-slate-200">
+                  {Math.min(effectivePage * effectiveLimit, totalCount)}
+                </strong>{" "}
+                of{" "}
+                <strong className="text-slate-800 dark:text-slate-200">
+                  {totalCount}
+                </strong>{" "}
+                entries
+              </span>
 
-            {/* Client-side Rows Per Page Selector */}
-            {isClientPagination && (
-              <div className="hidden sm:flex items-center gap-1.5 ml-2">
-                <span className="text-[11px]">Rows:</span>
-                <select
-                  value={perPage}
-                  onChange={(e) => handlePerPageChange(Number(e.target.value))}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  {pageSizeOptions.map((sz) => (
-                    <option key={sz} value={sz}>
-                      {sz}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+              {/* Client-side Rows Per Page Selector */}
+              {isClientPagination && (
+                <div className="hidden sm:flex items-center gap-1.5 ml-2">
+                  <span className="text-[11px]">Rows:</span>
+                  <SelectInput
+                    value={perPage}
+                    onChange={(e) =>
+                      handlePerPageChange(Number(e.target.value))
+                    }
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-2 py-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    {pageSizeOptions.map((sz) => (
+                      <option key={sz} value={sz}>
+                        {sz}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </div>
+              )}
+            </div>
+
+            {/* Page Buttons */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                disabled={effectivePage <= 1}
+                onClick={() => handlePageSelect(effectivePage - 1)}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                title="Previous Page"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              <span className="px-2.5 py-1 text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
+                {effectivePage} / {effectivePages}
+              </span>
+
+              <button
+                type="button"
+                disabled={effectivePage >= effectivePages}
+                onClick={() => handlePageSelect(effectivePage + 1)}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                title="Next Page"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
-
-          {/* Page Buttons */}
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              disabled={effectivePage <= 1}
-              onClick={() => handlePageSelect(effectivePage - 1)}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
-              title="Previous Page"
-            >
-              <ChevronLeft size={14} />
-            </button>
-
-            <span className="px-2.5 py-1 text-xs font-mono font-bold text-slate-800 dark:text-slate-200">
-              {effectivePage} / {effectivePages}
-            </span>
-
-            <button
-              type="button"
-              disabled={effectivePage >= effectivePages}
-              onClick={() => handlePageSelect(effectivePage + 1)}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
-              title="Next Page"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
@@ -556,7 +597,7 @@ DataTable.propTypes = {
       label: PropTypes.node.isRequired,
       render: PropTypes.func,
       sortable: PropTypes.bool,
-      align: PropTypes.oneOf(['left', 'center', 'right']),
+      align: PropTypes.oneOf(["left", "center", "right"]),
       className: PropTypes.string,
       width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     })
@@ -575,7 +616,7 @@ DataTable.propTypes = {
   onSearchChange: PropTypes.func,
   searchFields: PropTypes.arrayOf(PropTypes.string),
   defaultSortKey: PropTypes.string,
-  defaultSortDirection: PropTypes.oneOf(['asc', 'desc']),
+  defaultSortDirection: PropTypes.oneOf(["asc", "desc"]),
   loading: PropTypes.bool,
   skeletonRows: PropTypes.number,
   emptyTitle: PropTypes.node,

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { bg, border, text, badge, button, shadow } from "@/theme/color";
 import api from "../../../services/api.js";
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function AiStudentEditModal({
   student,
@@ -164,7 +165,7 @@ export default function AiStudentEditModal({
               <label className={`block text-[11px] font-bold uppercase ${text.muted} mb-1`}>
                 Gender
               </label>
-              <select
+              <SelectInput
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                 className={`w-full rounded-xl border ${border.default} ${bg.input} px-3 py-1.5 text-xs ${text.primary} focus:ring-1 focus:ring-orange-500`}
@@ -172,7 +173,7 @@ export default function AiStudentEditModal({
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
-              </select>
+              </SelectInput>
             </div>
 
             {/* Blood Group */}
@@ -180,7 +181,7 @@ export default function AiStudentEditModal({
               <label className={`block text-[11px] font-bold uppercase ${text.muted} mb-1`}>
                 Blood Group
               </label>
-              <select
+              <SelectInput
                 value={formData.bloodGroup}
                 onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
                 className={`w-full rounded-xl border ${border.default} ${bg.input} px-3 py-1.5 text-xs ${text.primary} focus:ring-1 focus:ring-orange-500`}
@@ -193,7 +194,7 @@ export default function AiStudentEditModal({
                 <option value="O-">O-</option>
                 <option value="AB+">AB+</option>
                 <option value="AB-">AB-</option>
-              </select>
+              </SelectInput>
             </div>
 
             {/* Date of Birth */}
@@ -214,7 +215,7 @@ export default function AiStudentEditModal({
               <label className={`block text-[11px] font-bold uppercase ${text.muted} mb-1`}>
                 Enrollment Status
               </label>
-              <select
+              <SelectInput
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className={`w-full rounded-xl border ${border.default} ${bg.input} px-3 py-1.5 text-xs ${text.primary} focus:ring-1 focus:ring-orange-500`}
@@ -222,7 +223,7 @@ export default function AiStudentEditModal({
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="Passout">Passout</option>
-              </select>
+              </SelectInput>
             </div>
 
             {/* Contact Number */}

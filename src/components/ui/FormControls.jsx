@@ -1,5 +1,6 @@
-import { Children, forwardRef, isValidElement, useEffect, useId, useImperativeHandle, useRef } from 'react';
+import { Children, forwardRef, isValidElement, useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
 import { normalizeOptions, readOptionLabel } from '../../utils/formOptions.js';
+import ReactSelect from './ReactSelect.jsx';
 import './formControls.css';
 
 // Bare controls keep native form props and refs. Labels, help, and errors add a field wrapper.
@@ -117,31 +118,60 @@ export const Input = forwardRef(function Input({
   </ControlFrame>;
 });
 
+function optionText(value) {
+  if (Array.isArray(value)) return value.map(optionText).join('');
+  if (isValidElement(value)) return optionText(value.props.children);
+  return value == null || typeof value === 'boolean' ? '' : String(value);
+}
+
 function optionChildren(children) {
   return Children.toArray(children).flatMap((child) => {
     if (!isValidElement(child)) return [];
     if (child.type === 'option') {
-      const value = child.props.value ?? child.props.children;
-      return [{ value, label: child.props.children, disabled: child.props.disabled }];
+      const text = optionText(child.props.children);
+      return [{ value: child.props.value ?? text, label: child.props.label ?? text, disabled: child.props.disabled }];
     }
     return optionChildren(child.props.children);
   });
 }
 
+function selectEvent(items, attributes, multiple, type = 'change') {
+  const selectedOptions = items.map((option) => ({
+    value: String(option.value ?? ''), label: option.label, text: option.label, disabled: option.disabled, selected: true,
+  }));
+  const target = {
+    id: attributes.id,
+    name: attributes.name,
+    type: multiple ? 'select-multiple' : 'select-one',
+    multiple,
+    value: selectedOptions[0]?.value ?? '',
+    selectedOptions,
+  };
+  return { type, target, currentTarget: target };
+}
+
+function canCreateOption(input, _selected, options) {
+  const term = input.trim().toLowerCase();
+  return Boolean(term) && !options.some(({ value, label }) =>
+    [value, label].some((item) => String(item).trim().toLowerCase() === term));
+}
+
 export const SelectInput = forwardRef(function SelectInput({
   value, defaultValue, options, children, selectClassName, placeholder, showPlaceholder,
   placeholderDisabled = false, emptyMessage = 'No options available', preserveValue = false,
-  multiple = false, readOnly = false, ...props
+  multiple = false, readOnly = false, creatable = false, onValueChange, ...props
 }, ref) {
   const { native, frame } = useField(props, { controlClassName: selectClassName });
-  const current = value === undefined ? defaultValue : value;
+  const [draft, setDraft] = useState(defaultValue);
+  const current = value === undefined ? draft : value;
   const selected = multiple && Array.isArray(current) ? current : [current];
-  const supplied = options !== undefined;
-  const normalized = supplied || readOnly
-    ? normalizeOptions(options ?? optionChildren(children), preserveValue ? selected.filter((entry) => entry !== '') : [])
-    : [];
-  const placeholderVisible = !multiple && (showPlaceholder ?? supplied) && !normalized.some((option) => option.key === '');
+  const normalized = normalizeOptions(options ?? optionChildren(children),
+    preserveValue && !creatable ? selected.filter((entry) => entry !== '') : [])
+    .map((option) => ({ ...option, label: optionText(option.label) }));
+  const blank = normalized.find((option) => option.key === '');
+  const placeholderVisible = !multiple && (showPlaceholder ?? options !== undefined) && !blank;
   const defaultPlaceholder = typeof props.label === 'string' && props.label ? 'Select ' + props.label.toLowerCase() : 'Select an option';
+  const placeholderLabel = blank?.label ?? (placeholder || defaultPlaceholder);
 
   if (readOnly) {
     const text = selected.filter((entry) => entry != null && entry !== '').map((entry) => readOptionLabel(normalized, entry));
@@ -152,17 +182,37 @@ export const SelectInput = forwardRef(function SelectInput({
     </ControlFrame>;
   }
 
-  const domValue = (entry) => typeof entry === 'boolean' ? String(entry) : entry;
-  const selectValue = (entry) => Array.isArray(entry) ? entry.map(domValue) : domValue(entry);
+  const choices = placeholderVisible
+    ? [{ key: '', value: '', label: placeholderLabel, disabled: placeholderDisabled }, ...normalized]
+    : normalized;
+  const keyed = new Map(normalized.map((option) => [option.key, option]));
+  const chosen = selected.filter((entry) => entry != null && entry !== '').map((entry) =>
+    keyed.get(String(entry)) || (creatable ? { value: entry, label: String(entry) } : null)).filter(Boolean);
+  const firstOption = !blank && !placeholderVisible && !creatable ? choices.find((option) => !option.disabled) : null;
+  const selection = multiple ? chosen : chosen[0] || firstOption || null;
+  const { disabled, onChange, onBlur, name, ...control } = native;
+
+  function change(option) {
+    const items = multiple ? option || [] : option ? [option] : [];
+    const next = multiple ? items.map((item) => item.value) : items[0]?.value ?? '';
+    if (value === undefined) setDraft(next);
+    onValueChange?.(next);
+    onChange?.(selectEvent(items, native, multiple));
+  }
+
   return <ControlFrame frame={frame}>
-    <select {...native} ref={ref} value={value === null ? (multiple ? [] : '') : selectValue(value)}
-      defaultValue={selectValue(defaultValue)} multiple={multiple}>
-      {placeholderVisible && <option value="" disabled={placeholderDisabled}>{placeholder || defaultPlaceholder}</option>}
-      {supplied ? normalized.map((option) =>
-        <option value={domValue(option.value)} key={option.key} disabled={option.disabled}>{option.label}</option>
-      ) : children}
-      {supplied && !normalized.length && emptyMessage && <option disabled value="">{emptyMessage}</option>}
-    </select>
+    <ReactSelect {...control} ref={ref} name={multiple && !chosen.length ? undefined : name}
+      value={selection} options={choices} placeholder={placeholderLabel} isMulti={multiple} isDisabled={disabled}
+      creatable={creatable} isClearable={creatable || multiple} isValidNewOption={creatable ? canCreateOption : undefined}
+      noOptionsMessage={({ inputValue }) => inputValue ? 'No matching options' : emptyMessage}
+      onChange={change}
+      onBlur={onBlur ? (event) => onBlur({
+        ...event, ...selectEvent(multiple ? chosen : selection ? [selection] : [], native, multiple, 'blur'),
+      }) : undefined}
+      onInputChange={creatable ? (input, { action }) => {
+        if (action === 'input-change') change(input ? { value: input, label: input } : null);
+      } : undefined}
+    />
   </ControlFrame>;
 });
 

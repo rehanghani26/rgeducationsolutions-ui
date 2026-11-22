@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import api, { setAcademicSessionId } from '../services/api.js';
 import { SECTION_OPTIONS } from '../constants/academicOptions.js';
+import { SelectInput } from '../components/ui/FormControls.jsx';
 
 const AcademicSessionContext = createContext(null);
 const idOf = (session) => session?._id || session?.id || '';
@@ -91,7 +92,7 @@ export function AcademicSessionSelector({ showLegacy }) {
   const { sessions, choice, choose } = useAcademicSession();
   if (!sessions.length) return null;
   return (
-    <select aria-label="Academic session" value={choice} onChange={(event) => choose(event.target.value)}
+    <SelectInput aria-label="Academic session" value={choice} onChange={(event) => choose(event.target.value)}
       className="max-w-40 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-900">
       <option value="">Active session</option>
       {sessions.map((session) => (
@@ -100,6 +101,6 @@ export function AcademicSessionSelector({ showLegacy }) {
         </option>
       ))}
       {showLegacy && <option value="legacy">Legacy / Unassigned</option>}
-    </select>
+    </SelectInput>
   );
 }

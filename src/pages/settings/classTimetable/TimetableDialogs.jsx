@@ -4,6 +4,7 @@ import Modal from '../../../components/ui/Modal.jsx';
 import { Empty, ErrorMessage, Field, Pending } from '../../../components/ui/ProcurementUI.jsx';
 import { timeRange } from '../masterPeriods/masterPeriodValues.js';
 import { emptyAllocation, hasAssignment, textKey } from './timetableValues.js';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export function AssignmentDialog({ selection, assignment, options, canCopy, onRetry, onApply, onClose }) {
   const subjectList = useId();
@@ -67,13 +68,13 @@ export function AssignmentDialog({ selection, assignment, options, canCopy, onRe
         </div></div>}
         <div className="ct-assignment-pair">
           <Field label="Teacher">
-            <select className="ct-control" value={savedTeacher} onChange={(event) => changeTeacher(event.target.value)}>
+            <SelectInput className="ct-control" value={savedTeacher} onChange={(event) => changeTeacher(event.target.value)}>
               <option value="">{options.loading ? 'Loading teachers…' : 'Choose a teacher'}</option>
               {fallbackTeacher && <option value={savedTeacher}>{draft.teacherName || 'Saved teacher'}</option>}
               {options.teachers.map((teacher) => <option key={teacher._id || teacher.id} value={teacher._id || teacher.id}>
                 {teacher.name}{teacher.employeeId ? ' · ' + teacher.employeeId : ''}
               </option>)}
-            </select>
+            </SelectInput>
           </Field>
           <Field label="Room">
             <input type="text" className="ct-control" placeholder="e.g. Room 12" value={draft.roomNo} onChange={(event) => setDraft({ ...draft, roomNo: event.target.value })} />

@@ -22,6 +22,7 @@ import {
 import { getTeachers } from '../../services/teacherService.js';
 import { getStudents } from '../../services/studentService.js';
 import { SECTION_OPTIONS } from '../../constants/academicOptions.js';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const ClassList = () => {
   const { classOptions, sessionId: selectedSessionId, choose: setSelectedSessionId, readOnly } = useAcademicSession();
@@ -351,7 +352,7 @@ const ClassList = () => {
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-xl text-xs">
               <Calendar size={14} className="text-indigo-300 shrink-0" />
               <span className="text-indigo-200 font-semibold shrink-0">Session:</span>
-              <select
+              <SelectInput
                 value={selectedSessionId}
                 onChange={(e) => setSelectedSessionId(e.target.value)}
                 className="bg-transparent font-extrabold text-white focus:outline-none cursor-pointer pr-4"
@@ -365,7 +366,7 @@ const ClassList = () => {
                     {sess.name} {sess.isCurrent ? '★ (Active)' : ''}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
 
             {/* Quick Student History Search Bar */}
@@ -737,7 +738,7 @@ const ClassList = () => {
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Academic Session *
                 </label>
-                <select
+                <SelectInput
                   required
                   value={createForm.sessionId}
                   onChange={(e) => setCreateForm({ ...createForm, sessionId: e.target.value })}
@@ -748,7 +749,7 @@ const ClassList = () => {
                       {s.sessionName} {s.isCurrent ? '★ (Current Session)' : ''}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               {/* Class & Section Row */}
@@ -757,7 +758,7 @@ const ClassList = () => {
                   <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                     Class Level *
                   </label>
-                  <select
+                  <SelectInput
                     value={createForm.className}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -775,14 +776,14 @@ const ClassList = () => {
                         {c.name} ({c.code})
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
                 <div>
                   <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                     Section *
                   </label>
-                  <select
+                  <SelectInput
                     value={createForm.sectionName}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -800,7 +801,7 @@ const ClassList = () => {
                         {s.name}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
               </div>
 
@@ -809,7 +810,7 @@ const ClassList = () => {
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Class Teacher (Assigned from Teacher Module)
                 </label>
-                <select
+                <SelectInput
                   value={createForm.classTeacherId}
                   onChange={(e) => setCreateForm({ ...createForm, classTeacherId: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -820,7 +821,7 @@ const ClassList = () => {
                       {t.name} · {t.employeeId || t.email || 'Teacher'}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               {/* Room & Capacity */}
@@ -893,7 +894,7 @@ const ClassList = () => {
                 <label className="block text-slate-600 dark:text-slate-400 mb-1 font-bold">
                   Select Teacher from Faculty Module *
                 </label>
-                <select
+                <SelectInput
                   required
                   value={assignTeacherId}
                   onChange={(e) => setAssignTeacherId(e.target.value)}
@@ -905,7 +906,7 @@ const ClassList = () => {
                       {t.name} · {t.employeeId || t.email || 'Faculty'}
                     </option>
                   ))}
-                </select>
+                </SelectInput>
               </div>
 
               <div>

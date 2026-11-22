@@ -17,6 +17,7 @@ import {
 import api from "../../../services/api.js";
 import { getUserFromStorage } from "../../../config/access.jsx";
 import { dateOnly, formatDate, getDayName } from "../../../utils";
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const StudentAttendance = ({ studentId: propStudentId }) => {
   const authUser = useSelector((state) => state.auth?.user);
@@ -261,7 +262,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
             </div>
 
             {/* Status Filter */}
-            <select
+            <SelectInput
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
@@ -271,10 +272,10 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
               <option value="absent">Absent</option>
               <option value="late">Late</option>
               <option value="half day">Half Day</option>
-            </select>
+            </SelectInput>
 
             {/* Month Filter */}
-            <select
+            <SelectInput
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
@@ -283,7 +284,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
               <option value="5">May 2026</option>
               <option value="4">April 2026</option>
               <option value="3">March 2026</option>
-            </select>
+            </SelectInput>
           </div>
         </div>
 

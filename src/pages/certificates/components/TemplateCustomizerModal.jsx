@@ -11,6 +11,7 @@ import { createCustomTemplate, updateCustomTemplate } from '../services/document
 import { renderTemplate, prepareTemplateData } from '../utils/templateRenderer.js';
 import { MOCK_STUDENT_DATA, MOCK_CERTIFICATE_DATA } from '../constants/documentConstants.js';
 import Modal from '../../../components/ui/Modal.jsx';
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 export default function TemplateCustomizerModal({
   isOpen,
@@ -151,7 +152,7 @@ export default function TemplateCustomizerModal({
             {/* Base Template */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">Base Template Layout</label>
-              <select
+              <SelectInput
                 value={baseTemplateId}
                 onChange={(e) => setBaseTemplateId(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
@@ -161,7 +162,7 @@ export default function TemplateCustomizerModal({
                     [{t.category}] {t.name}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
 
             {/* Colors */}
@@ -213,7 +214,7 @@ export default function TemplateCustomizerModal({
             {/* Typography */}
             <div className="pt-2 border-t border-slate-800">
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">Typography Family</label>
-              <select
+              <SelectInput
                 value={fontFamily}
                 onChange={(e) => setFontFamily(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
@@ -223,7 +224,7 @@ export default function TemplateCustomizerModal({
                 <option value="'Georgia', serif">Georgia (Classic Academic)</option>
                 <option value="'Playfair Display', serif">Playfair Display (Editorial)</option>
                 <option value="system-ui">System UI</option>
-              </select>
+              </SelectInput>
             </div>
 
             {/* Component Toggles */}

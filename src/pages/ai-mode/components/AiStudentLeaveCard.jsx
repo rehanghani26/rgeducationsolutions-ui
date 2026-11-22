@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { bg, border, text, badge, button, shadow } from "@/theme/color";
 import api from "../../../services/api.js";
+import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
 const CATEGORIES = [
   "Medical Leave",
@@ -256,7 +257,7 @@ export default function AiStudentLeaveCard({
               <label className={`block text-[10px] font-bold uppercase ${text.muted} mb-1`}>
                 Category
               </label>
-              <select
+              <SelectInput
                 value={newLeave.category}
                 onChange={(e) => setNewLeave({ ...newLeave, category: e.target.value })}
                 className={`w-full rounded-lg border ${border.default} ${bg.input} px-2.5 py-1 text-xs ${text.primary}`}
@@ -266,7 +267,7 @@ export default function AiStudentLeaveCard({
                     {cat}
                   </option>
                 ))}
-              </select>
+              </SelectInput>
             </div>
 
             <div>

@@ -46,6 +46,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { notifyApiError } from '../../services/apiErrors.js';
+import { SelectInput } from '../../components/ui/FormControls.jsx';
 
 const AttendanceManagement = () => {
   const { classOptions, schoolClasses } = useAcademicSession();
@@ -1241,7 +1242,7 @@ const AttendanceManagement = () => {
                     <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
                       Class Level
                     </label>
-                    <select
+                    <SelectInput
                       value={attClass}
                       onChange={(e) => {
                         setAttClass(e.target.value);
@@ -1255,13 +1256,13 @@ const AttendanceManagement = () => {
                           {cls.name}
                         </option>
                       ))}
-                    </select>
+                    </SelectInput>
                   </div>
                   <div>
                     <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
                       Section
                     </label>
-                    <select
+                    <SelectInput
                       value={attSection}
                       onChange={(e) => {
                         setAttSection(e.target.value);
@@ -1275,7 +1276,7 @@ const AttendanceManagement = () => {
                           {sec.name}
                         </option>
                       ))}
-                    </select>
+                    </SelectInput>
                   </div>
                 </>
               ) : (
@@ -1283,7 +1284,7 @@ const AttendanceManagement = () => {
                   <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
                     Department
                   </label>
-                  <select
+                  <SelectInput
                     value={attDepartment}
                     onChange={(e) => setAttDepartment(e.target.value)}
                     className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -1294,7 +1295,7 @@ const AttendanceManagement = () => {
                     <option>Languages</option>
                     <option>Arts</option>
                     <option>Commerce</option>
-                  </select>
+                  </SelectInput>
                 </div>
               )}
 
@@ -1722,7 +1723,7 @@ const AttendanceManagement = () => {
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                     Month
                   </label>
-                  <select
+                  <SelectInput
                     value={selectedMonth}
                     onChange={(e) => {
                       setSelectedMonth(e.target.value);
@@ -1735,7 +1736,7 @@ const AttendanceManagement = () => {
                         {m.label}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
                 {/* Year Dropdown */}
@@ -1743,7 +1744,7 @@ const AttendanceManagement = () => {
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                     Year
                   </label>
-                  <select
+                  <SelectInput
                     value={selectedYear}
                     onChange={(e) => {
                       setSelectedYear(e.target.value);
@@ -1756,7 +1757,7 @@ const AttendanceManagement = () => {
                         {y.label}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
                 {/* Class Dropdown */}
@@ -1764,7 +1765,7 @@ const AttendanceManagement = () => {
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                     Class
                   </label>
-                  <select
+                  <SelectInput
                     value={selectedClass}
                     onChange={(e) => {
                       setSelectedClass(e.target.value);
@@ -1779,7 +1780,7 @@ const AttendanceManagement = () => {
                         {cls}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
                 {/* Section Dropdown */}
@@ -1787,7 +1788,7 @@ const AttendanceManagement = () => {
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                     Section
                   </label>
-                  <select
+                  <SelectInput
                     value={selectedSection}
                     onChange={(e) => {
                       setSelectedSection(e.target.value);
@@ -1801,7 +1802,7 @@ const AttendanceManagement = () => {
                         Section {sec}
                       </option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
                 {/* Clear All Filters Button */}
