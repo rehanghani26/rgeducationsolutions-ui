@@ -14,6 +14,11 @@ import {
   Phone,
   Droplet,
   GraduationCap,
+  UserPlus,
+  Banknote,
+  CalendarCheck,
+  Award,
+  KeyRound,
 } from "lucide-react";
 import { bg, border, text, badge, button, shadow } from "@/theme/color";
 import { SelectInput } from '../../../components/ui/FormControls.jsx';
@@ -159,16 +164,26 @@ export default function AiStudentListCard({
           </div>
         </div>
 
-        {hasActiveFilters && (
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={resetFilters}
-            className={`flex items-center gap-1.5 rounded-lg border ${border.default} px-2.5 py-1 text-xs font-medium ${text.secondary} hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors`}
+            onClick={() => onAskAiPrompt?.("I want to add a student")}
+            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:from-orange-600 hover:to-amber-600 transition-all"
           >
-            <RotateCcw className="h-3 w-3" />
-            Reset Filters
+            <UserPlus className="h-3.5 w-3.5" />
+            + Enroll Student
           </button>
-        )}
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className={`flex items-center gap-1.5 rounded-lg border ${border.default} px-2.5 py-1 text-xs font-medium ${text.secondary} hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors`}
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset Filters
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Multi-Field Filter Bar ── */}
@@ -445,6 +460,51 @@ export default function AiStudentListCard({
                   >
                     <Edit3 className="h-3 w-3 text-sky-600" />
                     Edit
+                  </button>
+
+                  {/* Attendance */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onAskAiPrompt?.(
+                        `Show attendance history for student ${student.name} (${student.admissionNumber})`
+                      )
+                    }
+                    className={`inline-flex items-center gap-1 rounded-lg border ${border.default} bg-stone-100 dark:bg-stone-800/60 px-2 py-1 text-[11px] font-medium ${text.secondary} hover:bg-stone-200/70 dark:hover:bg-stone-700 transition-colors`}
+                    title="Attendance History"
+                  >
+                    <CalendarCheck className="h-3 w-3 text-teal-500" />
+                    Attendance
+                  </button>
+
+                  {/* Fees */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onAskAiPrompt?.(
+                        `Show fee ledger and dues for student ${student.name} (${student.admissionNumber})`
+                      )
+                    }
+                    className={`inline-flex items-center gap-1 rounded-lg border ${border.default} bg-stone-100 dark:bg-stone-800/60 px-2 py-1 text-[11px] font-medium ${text.secondary} hover:bg-stone-200/70 dark:hover:bg-stone-700 transition-colors`}
+                    title="Fee Status & Ledger"
+                  >
+                    <Banknote className="h-3 w-3 text-amber-500" />
+                    Fees
+                  </button>
+
+                  {/* Marksheet */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onAskAiPrompt?.(
+                        `Show exam marksheet and report card for student ${student.name} (${student.admissionNumber})`
+                      )
+                    }
+                    className={`inline-flex items-center gap-1 rounded-lg border ${border.default} bg-stone-100 dark:bg-stone-800/60 px-2 py-1 text-[11px] font-medium ${text.secondary} hover:bg-stone-200/70 dark:hover:bg-stone-700 transition-colors`}
+                    title="Exam Marksheet"
+                  >
+                    <Award className="h-3 w-3 text-blue-500" />
+                    Marksheet
                   </button>
 
                   {/* Full Dossier / Report */}

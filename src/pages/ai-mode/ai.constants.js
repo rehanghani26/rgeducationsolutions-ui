@@ -136,17 +136,44 @@ export const SUGGESTED_PROMPTS = [
 
 export const QUICK_CHIPS = [
   {
-    label: "Core Setup (P1-P5)",
-    prompt:
-      "Show setup wizard status for Core Setup, Period Slots, Timetable, and Grading Scale",
+    label: "My Class Students",
+    prompt: "Show all students in my class",
+  },
+  {
+    label: "Add Student",
+    prompt: "I want to add a student",
+  },
+  {
+    label: "Student ID Card",
+    prompt: "Show student ID card and studio preview",
+  },
+  {
+    label: "Student Report Card",
+    prompt: "Show student marksheet and academic report card",
+  },
+  {
+    label: "Student Fee Ledger",
+    prompt: "Show student fee ledger, dues, and payment breakdown",
+  },
+  {
+    label: "Transfer Certificate",
+    prompt: "Generate transfer certificate for student",
+  },
+  {
+    label: "Student Promotion",
+    prompt: "Check student promotion eligibility and progression",
+  },
+  {
+    label: "Students Directory",
+    prompt: "Show all students with filters for class, section, and status",
+  },
+  {
+    label: "Attendance",
+    prompt: "Give me today's attendance overview and absent students",
   },
   {
     label: "Teachers & Faculty",
     prompt: "Show all teachers and faculty directory",
-  },
-  {
-    label: "Students",
-    prompt: "Show all students with filters for class, section, and status",
   },
   {
     label: "Classes & Curriculum",
@@ -155,25 +182,5 @@ export const QUICK_CHIPS = [
   {
     label: "Timetable & Slots",
     prompt: "Show class timetable and check for teacher schedule conflicts",
-  },
-  {
-    label: "Academic Session",
-    prompt: "Show the active academic session and calendar dates",
-  },
-  {
-    label: "Grading Scale",
-    prompt: "Show academic passing percentage and grading scale rules",
-  },
-  {
-    label: "Attendance",
-    prompt: "Give me today's attendance overview and absent students",
-  },
-  {
-    label: "Fees",
-    prompt: "Show pending fee collections and defaulters",
-  },
-  {
-    label: "Results & Toppers",
-    prompt: "Show exam results and top rankers",
   },
 ];

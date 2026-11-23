@@ -64,6 +64,116 @@ const TOOL_FRIENDLY_META = {
     successText: "Comprehensive student report prepared",
     icon: Sparkles,
   },
+  getStudentEnrollmentForm: {
+    loadingText: "Preparing student admission console...",
+    successText: "Interactive admission form opened",
+    icon: Users,
+  },
+  getStudentAttendanceRecord: {
+    loadingText: "Loading student monthly attendance calendar...",
+    successText: "Attendance calendar retrieved",
+    icon: Calendar,
+  },
+  getStudentFeeLedger: {
+    loadingText: "Compiling student fee ledger & dues...",
+    successText: "Fee statement & receipts retrieved",
+    icon: DollarSign,
+  },
+  getStudentAcademicReport: {
+    loadingText: "Generating official exam marksheet...",
+    successText: "Academic report card generated",
+    icon: Award,
+  },
+  getStudentCredentials: {
+    loadingText: "Retrieving student portal credentials...",
+    successText: "Portal credentials loaded securely",
+    icon: Sparkles,
+  },
+  resetStudentPassword: {
+    loadingText: "Resetting student password...",
+    successText: "New credentials generated",
+    icon: Sparkles,
+  },
+  getStudentPromotion: {
+    loadingText: "Checking promotion eligibility...",
+    successText: "Promotion status verified",
+    icon: Sparkles,
+  },
+  promoteStudentAction: {
+    loadingText: "Executing academic progression...",
+    successText: "Student promoted successfully",
+    icon: Sparkles,
+  },
+  getStudentActivityLog: {
+    loadingText: "Loading student audit trail...",
+    successText: "Activity history retrieved",
+    icon: Database,
+  },
+  getStudentDocuments: {
+    loadingText: "Opening digital document vault...",
+    successText: "Student documents loaded",
+    icon: BookOpen,
+  },
+  generateStudentCertificate: {
+    loadingText: "Generating formal certificate...",
+    successText: "Certificate generated successfully",
+    icon: Award,
+  },
+  getStudentMedicalProfile: {
+    loadingText: "Retrieving medical and emergency info...",
+    successText: "Medical profile loaded",
+    icon: Sparkles,
+  },
+  getStudentFamily: {
+    loadingText: "Mapping family and sibling tree...",
+    successText: "Family records retrieved",
+    icon: Users,
+  },
+  getStudentTransport: {
+    loadingText: "Checking bus route and pickup stop...",
+    successText: "Transport allocation retrieved",
+    icon: Sliders,
+  },
+  getStudentHostel: {
+    loadingText: "Checking hostel dormitory room...",
+    successText: "Hostel allocation retrieved",
+    icon: Sliders,
+  },
+  getStudentLibrary: {
+    loadingText: "Checking library issued books...",
+    successText: "Library records retrieved",
+    icon: BookOpen,
+  },
+  getStudentDisciplinary: {
+    loadingText: "Loading disciplinary record...",
+    successText: "Conduct & merit log retrieved",
+    icon: Award,
+  },
+  getStudentHomework: {
+    loadingText: "Fetching homework assignments...",
+    successText: "Homework list retrieved",
+    icon: BookOpen,
+  },
+  getStudentTimetableSchedule: {
+    loadingText: "Loading daily class schedule...",
+    successText: "Class timetable retrieved",
+    icon: Calendar,
+  },
+  deactivateStudentStatus: {
+    loadingText: "Updating student status...",
+    successText: "Student status updated",
+    icon: Users,
+  },
+  reallocateRollNumbers: {
+    loadingText: "Sequencing roll numbers alphabetically...",
+    successText: "Roll numbers reallocated",
+    icon: Users,
+  },
+  getStudentAnalytics: {
+    loadingText: "Computing 360 performance radar...",
+    successText: "Performance analytics compiled",
+    icon: Sparkles,
+  },
   getAttendanceByDate: {
     loadingText: "Checking attendance logs...",
     successText: "Attendance records retrieved",

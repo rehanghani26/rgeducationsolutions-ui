@@ -16,6 +16,27 @@ import AiClassSectionListCard from "./AiClassSectionListCard.jsx";
 import AiTimetableCard from "./AiTimetableCard.jsx";
 import AiSetupWizardCard from "./AiSetupWizardCard.jsx";
 import AiTableDataCard from "./AiTableDataCard.jsx";
+
+// ── Specialized Student Module ERP Components (25+ Cases) ──
+import AiStudentEnrollCard from "./AiStudentEnrollCard.jsx";
+import AiStudentAttendanceCard from "./AiStudentAttendanceCard.jsx";
+import AiStudentFeeCard from "./AiStudentFeeCard.jsx";
+import AiStudentMarksheetCard from "./AiStudentMarksheetCard.jsx";
+import AiStudentCredentialsCard from "./AiStudentCredentialsCard.jsx";
+import AiStudentPromotionCard from "./AiStudentPromotionCard.jsx";
+import AiStudentActivityCard from "./AiStudentActivityCard.jsx";
+import AiStudentDocumentsCard from "./AiStudentDocumentsCard.jsx";
+import AiStudentCertificateCard from "./AiStudentCertificateCard.jsx";
+import AiStudentMedicalCard from "./AiStudentMedicalCard.jsx";
+import AiStudentFamilyCard from "./AiStudentFamilyCard.jsx";
+import AiStudentTransportCard from "./AiStudentTransportCard.jsx";
+import AiStudentHostelCard from "./AiStudentHostelCard.jsx";
+import AiStudentLibraryCard from "./AiStudentLibraryCard.jsx";
+import AiStudentDisciplineCard from "./AiStudentDisciplineCard.jsx";
+import AiStudentHomeworkCard from "./AiStudentHomeworkCard.jsx";
+import AiStudentAnalyticsCard from "./AiStudentAnalyticsCard.jsx";
+import AiStudentRollAllocationCard from "./AiStudentRollAllocationCard.jsx";
+import AiStudentStatusCard from "./AiStudentStatusCard.jsx";
 import {
   Users,
   GraduationCap,
@@ -258,6 +279,313 @@ export default function AIResponseRenderer({
                 onSelectStudentForIdCard={onSelectStudentForIdCard}
                 onSelectStudentForLeaves={onSelectStudentForLeaves}
                 onSelectStudentForEdit={onOpenEditStudent}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.1. Interactive Student Enrollment Form
+        if (
+          toolName === "getStudentEnrollmentForm" ||
+          (toolName === "createStudent" && (data.formType || !data.success))
+        ) {
+          return (
+            <div key={`resp-enroll-${idx}`} className="pt-2">
+              <AiStudentEnrollCard
+                defaultValues={data.defaultValues || act.args || {}}
+                availableClasses={data.availableClasses}
+                availableSections={data.availableSections}
+                onStudentEnrolled={(newStudent) =>
+                  onAskAiPrompt &&
+                  onAskAiPrompt(
+                    `Student ${newStudent.name} enrolled with ID ${newStudent.admissionNumber}. Show updated student profile.`
+                  )
+                }
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        if (toolName === "createStudent" && data.success && data.student) {
+          return (
+            <div key={`resp-created-student-${idx}`} className="pt-2">
+              <AiStudentProfileCard
+                student={data.student}
+                attendance={{ percentage: 100, present: 1, absent: 0, late: 0 }}
+                leavesSummary={{ total: 0, pending: 0, approved: 0 }}
+                fee={{ amountPaid: 0, amountPending: 0, status: "Current" }}
+                onSelectStudentForIdCard={onSelectStudentForIdCard}
+                onSelectStudentForLeaves={onSelectStudentForLeaves}
+                onSelectStudentForEdit={onOpenEditStudent}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.2. Student Detailed Monthly Attendance Calendar
+        if (toolName === "getStudentAttendanceRecord" && data.student) {
+          return (
+            <div key={`resp-stu-att-${idx}`} className="pt-2">
+              <AiStudentAttendanceCard
+                student={data.student}
+                month={data.month}
+                stats={data.stats}
+                streak={data.streak}
+                records={data.records}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.3. Student Fee Ledger & Dues Breakdown
+        if (toolName === "getStudentFeeLedger" && data.student) {
+          return (
+            <div key={`resp-stu-fee-${idx}`} className="pt-2">
+              <AiStudentFeeCard
+                student={data.student}
+                summary={data.summary}
+                feeHeads={data.feeHeads}
+                paymentsHistory={data.paymentsHistory}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.4. Student Exam Marksheet & Academic Report Card
+        if (toolName === "getStudentAcademicReport" && data.student) {
+          return (
+            <div key={`resp-stu-marksheet-${idx}`} className="pt-2">
+              <AiStudentMarksheetCard
+                student={data.student}
+                examName={data.examName}
+                academicYear={data.academicYear}
+                totalObtained={data.totalObtained}
+                totalMax={data.totalMax}
+                percentage={data.percentage}
+                overallGrade={data.overallGrade}
+                rank={data.rank}
+                totalStudentsInClass={data.totalStudentsInClass}
+                resultStatus={data.resultStatus}
+                subjects={data.subjects}
+                remarks={data.remarks}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.5. Student Portal Credentials & Password Reset
+        if (
+          (toolName === "getStudentCredentials" ||
+            toolName === "resetStudentPassword") &&
+          data.credentials
+        ) {
+          return (
+            <div key={`resp-stu-creds-${idx}`} className="pt-2">
+              <AiStudentCredentialsCard
+                student={data.student}
+                credentials={data.credentials}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.6. Academic Progression & Promotion
+        if (
+          (toolName === "getStudentPromotion" ||
+            toolName === "promoteStudentAction") &&
+          data.student
+        ) {
+          return (
+            <div key={`resp-stu-promote-${idx}`} className="pt-2">
+              <AiStudentPromotionCard
+                student={data.student}
+                currentClass={data.currentClass || data.previousClass}
+                currentSection={data.currentSection}
+                targetClass={data.targetClass || data.newClass}
+                targetSection={data.targetSection || data.newSection}
+                academicYear={data.academicYear}
+                isEligible={data.isEligible}
+                criteria={data.criteria}
+                remarks={data.remarks}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.7. Student Activity Log & Audit Trail
+        if (toolName === "getStudentActivityLog" && data.timeline) {
+          return (
+            <div key={`resp-stu-activity-${idx}`} className="pt-2">
+              <AiStudentActivityCard
+                student={data.student}
+                timeline={data.timeline}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.8. Digital Document & Certificate Vault
+        if (toolName === "getStudentDocuments" && data.documents) {
+          return (
+            <div key={`resp-stu-docs-${idx}`} className="pt-2">
+              <AiStudentDocumentsCard
+                student={data.student}
+                totalDocuments={data.totalDocuments}
+                documents={data.documents}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.9. Transfer Certificate (TC) & Bonafide Generator
+        if (toolName === "generateStudentCertificate" && data.certificate) {
+          return (
+            <div key={`resp-stu-cert-${idx}`} className="pt-2">
+              <AiStudentCertificateCard
+                certificate={data.certificate}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.10. Medical Profile & Emergency Contacts
+        if (toolName === "getStudentMedicalProfile" && data.medical) {
+          return (
+            <div key={`resp-stu-med-${idx}`} className="pt-2">
+              <AiStudentMedicalCard
+                student={data.student}
+                medical={data.medical}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.11. Family Tree & Sibling Linkages
+        if (toolName === "getStudentFamily" && data.family) {
+          return (
+            <div key={`resp-stu-fam-${idx}`} className="pt-2">
+              <AiStudentFamilyCard
+                student={data.student}
+                family={data.family}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.12. School Bus & Transport Allocation
+        if (toolName === "getStudentTransport" && data.transport) {
+          return (
+            <div key={`resp-stu-trans-${idx}`} className="pt-2">
+              <AiStudentTransportCard
+                student={data.student}
+                transport={data.transport}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.13. Hostel Dormitory Allocation
+        if (toolName === "getStudentHostel" && data.hostel) {
+          return (
+            <div key={`resp-stu-hostel-${idx}`} className="pt-2">
+              <AiStudentHostelCard
+                student={data.student}
+                hostel={data.hostel}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.14. Library Borrowed Books & Fines
+        if (toolName === "getStudentLibrary" && data.library) {
+          return (
+            <div key={`resp-stu-lib-${idx}`} className="pt-2">
+              <AiStudentLibraryCard
+                student={data.student}
+                library={data.library}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.15. Disciplinary Merits & Conduct
+        if (toolName === "getStudentDisciplinary" && data.disciplinary) {
+          return (
+            <div key={`resp-stu-disc-${idx}`} className="pt-2">
+              <AiStudentDisciplineCard
+                student={data.student}
+                disciplinary={data.disciplinary}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.16. Daily Homework & Assignments
+        if (toolName === "getStudentHomework" && data.homeworkList) {
+          return (
+            <div key={`resp-stu-hw-${idx}`} className="pt-2">
+              <AiStudentHomeworkCard
+                student={data.student}
+                summary={data.summary}
+                homeworkList={data.homeworkList}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.17. Performance Analytics & Subject Radar
+        if (toolName === "getStudentAnalytics" && data.analytics) {
+          return (
+            <div key={`resp-stu-analytics-${idx}`} className="pt-2">
+              <AiStudentAnalyticsCard
+                student={data.student}
+                analytics={data.analytics}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.18. Alphabetical Roll Number Reallocation
+        if (toolName === "reallocateRollNumbers" && data.reallocated) {
+          return (
+            <div key={`resp-stu-realloc-${idx}`} className="pt-2">
+              <AiStudentRollAllocationCard
+                class={data.class}
+                section={data.section}
+                totalCount={data.totalCount}
+                reallocated={data.reallocated}
+                onAskAiPrompt={onAskAiPrompt}
+              />
+            </div>
+          );
+        }
+
+        // ── 3.8.19. Student Status Change
+        if (toolName === "deactivateStudentStatus" && data.statusChange) {
+          return (
+            <div key={`resp-stu-status-${idx}`} className="pt-2">
+              <AiStudentStatusCard
+                student={data.student}
+                statusChange={data.statusChange}
                 onAskAiPrompt={onAskAiPrompt}
               />
             </div>

@@ -10,10 +10,13 @@ const local_url = "http://localhost:5000/api/v1";
 const dev_url = "https://inventorymanagementserver-9tyo.onrender.com/api/v1";
 
 // Change this to local_url or dev_url as needed:
-const url = dev_url;
+const url = local_url;
 
-export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL?.trim() || url).replace(/\/+$/, "");
-export const API_HEALTH_URL = API_BASE_URL.replace(/\/api(?:\/v\d+)?$/, "") + "/api/health";
+export const API_BASE_URL = (
+  import.meta.env?.VITE_API_BASE_URL?.trim() || url
+).replace(/\/+$/, "");
+export const API_HEALTH_URL =
+  API_BASE_URL.replace(/\/api(?:\/v\d+)?$/, "") + "/api/health";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -76,10 +79,14 @@ let refreshPromise;
 
 function refreshAccessToken() {
   if (!refreshPromise) {
-    refreshPromise = axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+    refreshPromise = axios
+      .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
       .then(({ data }) => {
         const token = data.accessToken || data.data?.accessToken;
-        if (!token) throw new Error("Unable to renew your session. Please sign in again.");
+        if (!token)
+          throw new Error(
+            "Unable to renew your session. Please sign in again."
+          );
         localStorage.setItem("token", token);
         return token;
       })
@@ -91,7 +98,9 @@ function refreshAccessToken() {
         else notifyAfterRedirect(error, "/login");
         throw error;
       })
-      .finally(() => { refreshPromise = null; });
+      .finally(() => {
+        refreshPromise = null;
+      });
   }
   return refreshPromise;
 }
@@ -160,10 +169,15 @@ api.interceptors.response.use(
     }
 
     const rawToken = localStorage.getItem("token");
-    const canRefresh = status === 401 && originalRequest && !originalRequest._retry
-      && rawToken && rawToken !== "undefined" && rawToken !== "null"
-      && !originalRequest.url?.includes("/auth/login")
-      && !originalRequest.url?.includes("/auth/refresh");
+    const canRefresh =
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      rawToken &&
+      rawToken !== "undefined" &&
+      rawToken !== "null" &&
+      !originalRequest.url?.includes("/auth/login") &&
+      !originalRequest.url?.includes("/auth/refresh");
     if (!canRefresh) {
       notifyApiError(error);
       throw error;

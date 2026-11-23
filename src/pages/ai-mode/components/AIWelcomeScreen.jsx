@@ -20,7 +20,7 @@ export default function AIWelcomeScreen({
     ...(admin || accountRole === 'principal' ? [{ icon: Settings, title: 'School setup', description: 'Profile, session, schedules and grading', prompt: 'Show school setup progress including class timetable coverage.' }] : []),
     ...(admin || ['accountant','principal'].includes(accountRole) ? [{ icon: Wallet, title: 'Budget allocation', description: 'Current allocations and spending', prompt: 'Show the current session budget by category.' }] : []),
     { icon: ShieldCheck, title: 'My permissions', description: 'Modules and actions available to your role', prompt: 'Which modules and actions can my role access?' },
-    ...(admin ? SUGGESTED_PROMPTS : []),
+    ...(admin || faculty || accountRole === 'principal' ? SUGGESTED_PROMPTS : SUGGESTED_PROMPTS.slice(0, 8)),
   ];
   return (
     <div className="relative flex min-h-full flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
