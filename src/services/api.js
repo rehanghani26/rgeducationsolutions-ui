@@ -10,7 +10,7 @@ const local_url = "http://localhost:5000/api/v1";
 const dev_url = "https://inventorymanagementserver-9tyo.onrender.com/api/v1";
 
 // Change this to local_url or dev_url as needed:
-const url = local_url;
+const url = dev_url;
 
 export const API_BASE_URL = (
   import.meta.env?.VITE_API_BASE_URL?.trim() || url
