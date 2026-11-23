@@ -183,36 +183,56 @@ const Login = () => {
       <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-orange-500/10 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-500/10 blur-[100px]" />
 
-      <div className="relative z-10 w-full max-w-md bg-[#1C1B1A]/85 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 shadow-2xl shadow-black/50">
+      <div className="relative z-10 w-full max-w-[400px] bg-[#1C1B1A]/90 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xl shadow-black/70">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <img
-            src={rgLogo}
-            alt="RG EduCore Logo"
-            style={{ mixBlendMode: "screen" }}
-            className="inline-block w-18 h-18 sm:w-22 sm:h-22 object-contain mb-3 sm:mb-4"
-          />
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+        <div className="text-center mb-5 sm:mb-6">
+          <div className="relative mb-3 inline-flex items-center justify-center">
+            <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-orange-500/25 via-amber-500/20 to-orange-500/25 blur-md" />
+            <div
+              className="relative flex items-center justify-center rounded-2xl border border-white/10 bg-[#141312] p-2 shadow-xl ring-1 ring-orange-500/30 overflow-hidden"
+              style={{
+                width: "56px",
+                height: "56px",
+                minWidth: "56px",
+                minHeight: "56px",
+                maxWidth: "56px",
+                maxHeight: "56px",
+              }}
+            >
+              <img
+                src={rgLogo}
+                alt="RG EduCore Logo"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  mixBlendMode: "screen",
+                }}
+                className="transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             RG EduCore
           </h2>
-          <p className="text-orange-400/90 text-[11px] sm:text-xs mt-1.5 sm:mt-2 uppercase tracking-widest font-bold">
+          <p className="text-orange-400/90 text-[10px] sm:text-[11px] mt-1 uppercase tracking-widest font-bold">
             The Core of Smarter School Management
           </p>
         </div>
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-500/10 border border-red-500/20 text-red-200 text-xs rounded-xl flex items-center gap-2">
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-200 text-xs rounded-xl flex items-center gap-2">
             <span>⚠️</span>
-            <p>{error}</p>
+            <p className="text-xs leading-relaxed">{error}</p>
           </div>
         )}
 
         {/* Login Form: ALWAYS visible directly (no self-registration from client ERP) */}
-        <div className="space-y-4 sm:space-y-5">
+        <div className="space-y-3.5 sm:space-y-4">
           {/* Username / Email */}
           <div>
-            <label className="block text-stone-300 text-xs font-semibold mb-1.5 sm:mb-2">
+            <label className="block text-stone-300 text-[11.5px] font-semibold mb-1.5">
               Username / Official Email
             </label>
             <div className="relative">
@@ -226,7 +246,7 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-2.5 sm:py-3 pl-10 pr-4 text-white text-xs sm:text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
+                className="w-full bg-[#121214]/70 border border-stone-800 rounded-xl py-2.5 pl-10 pr-4 text-white text-xs sm:text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 placeholder-stone-500 transition-all"
               />
             </div>
             {localErrors.username && (
@@ -238,8 +258,8 @@ const Login = () => {
 
           {/* Password */}
           <div>
-            <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-              <label className="block text-stone-300 text-xs font-semibold">
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-stone-300 text-[11.5px] font-semibold">
                 Password
               </label>
               <button
@@ -264,7 +284,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-[#121214]/60 border border-stone-700/60 rounded-xl py-2.5 sm:py-3 pl-10 pr-10 text-white text-xs sm:text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 placeholder-stone-500"
+                className="w-full bg-[#121214]/70 border border-stone-800 rounded-xl py-2.5 pl-10 pr-10 text-white text-xs sm:text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 placeholder-stone-500 transition-all"
               />
               <button
                 type="button"
@@ -288,10 +308,13 @@ const Login = () => {
             type="button"
             onClick={handleLogin}
             disabled={loading || checkingSchool}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs sm:text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50 cursor-pointer transition-all"
+            className="w-full bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-[0.99] text-white font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs sm:text-sm focus:outline-none flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50 cursor-pointer transition-all"
           >
             {loading || checkingSchool ? (
-              <Loader2 className="animate-spin" size={18} />
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                <span>Signing in...</span>
+              </>
             ) : (
               <span>Sign In to School ERP</span>
             )}
@@ -299,9 +322,9 @@ const Login = () => {
         </div>
 
         {/* Footer info: Institutional Registration is via Admin Panel */}
-        <div className="mt-8 pt-5 border-t border-white/5 text-center flex items-center justify-center gap-1.5 text-stone-400 text-[11px]">
+        <div className="mt-6 pt-4 border-t border-white/5 text-center flex items-center justify-center gap-1.5 text-stone-400 text-[11px]">
           <ShieldCheck size={13} className="text-orange-400 shrink-0" />
-          <span>School onboarding is managed via the RGES Admin Portal</span>
+          <span>School onboarding is managed via RGES Admin Portal</span>
         </div>
       </div>
 

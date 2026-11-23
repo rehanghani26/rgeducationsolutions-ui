@@ -18,7 +18,11 @@ export default function AIRecordsCard({ tool = "", data = {} }) {
               Effective Role Access · {data.role}
             </span>
             <p className="text-[11px] text-[#A1A1AA]">
-              View scope: <strong className="text-[#FFA000]">{data.viewScope?.replaceAll("_", " ") || "All Institutional Records"}</strong>
+              View scope:{" "}
+              <strong className="text-[#FFA000]">
+                {data.viewScope?.replaceAll("_", " ") ||
+                  "All Institutional Records"}
+              </strong>
             </p>
           </div>
         </div>
@@ -53,13 +57,7 @@ export default function AIRecordsCard({ tool = "", data = {} }) {
   }
 
   if (targetArray && targetArray.length > 0) {
-    return (
-      <AiTableDataCard
-        title={title}
-        data={targetArray}
-        icon={Layers}
-      />
-    );
+    return <AiTableDataCard title={title} data={targetArray} icon={Layers} />;
   }
 
   // Single record object display

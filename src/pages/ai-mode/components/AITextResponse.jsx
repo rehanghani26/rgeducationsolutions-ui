@@ -165,7 +165,12 @@ export default function AITextResponse({ text = "" }) {
       line.trim().startsWith("* ") ||
       /^\d+\.\s/.test(line.trim())
     ) {
-      listBuffer.push(line.trim().replace(/^[-*]|\d+\.\s*/, "").trim());
+      listBuffer.push(
+        line
+          .trim()
+          .replace(/^[-*]|\d+\.\s*/, "")
+          .trim()
+      );
       return;
     } else {
       flushList(index);
@@ -251,4 +256,3 @@ export default function AITextResponse({ text = "" }) {
 
   return <div className="space-y-1">{elements}</div>;
 }
-

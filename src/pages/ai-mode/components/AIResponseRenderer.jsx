@@ -16,7 +16,14 @@ import AiClassSectionListCard from "./AiClassSectionListCard.jsx";
 import AiTimetableCard from "./AiTimetableCard.jsx";
 import AiSetupWizardCard from "./AiSetupWizardCard.jsx";
 import AiTableDataCard from "./AiTableDataCard.jsx";
-import { Users, GraduationCap, DollarSign, Calendar, BookOpen, AlertCircle } from "lucide-react";
+import {
+  Users,
+  GraduationCap,
+  DollarSign,
+  Calendar,
+  BookOpen,
+  AlertCircle,
+} from "lucide-react";
 
 export default function AIResponseRenderer({
   message,
@@ -101,7 +108,8 @@ export default function AIResponseRenderer({
             toolName === "updateTeacher") &&
           (data.teachers || data.teacher)
         ) {
-          const teacherList = data.teachers || (data.teacher ? [data.teacher] : []);
+          const teacherList =
+            data.teachers || (data.teacher ? [data.teacher] : []);
           return (
             <div key={`resp-teachers-${idx}`} className="pt-2">
               <AiTeacherListCard
@@ -142,7 +150,10 @@ export default function AIResponseRenderer({
                 classes={classList}
                 sections={sectionList}
                 subjects={subjectList}
-                syllabus={data.syllabus || (toolName === "getClassSyllabus" ? data : null)}
+                syllabus={
+                  data.syllabus ||
+                  (toolName === "getClassSyllabus" ? data : null)
+                }
                 classStudents={toolName === "getClassStudents" ? data : null}
                 onAskAiPrompt={onAskAiPrompt}
                 onSelectStudentForIdCard={onSelectStudentForIdCard}
@@ -154,7 +165,8 @@ export default function AIResponseRenderer({
 
         // ── 3.4. Class Timetable with Live Conflict Detection
         if (
-          (toolName === "getClassTimetable" || toolName === "getTodayTimetable") &&
+          (toolName === "getClassTimetable" ||
+            toolName === "getTodayTimetable") &&
           (data.timetable || Array.isArray(data.schedule))
         ) {
           return (

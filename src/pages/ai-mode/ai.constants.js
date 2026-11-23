@@ -25,7 +25,8 @@ export const SUGGESTED_PROMPTS = [
   {
     icon: Users,
     title: "Student Directory",
-    description: "Browse students with smart filters by class, section & status",
+    description:
+      "Browse students with smart filters by class, section & status",
     prompt:
       "Show all students with interactive filters for class, section, status, and gender.",
   },
@@ -40,8 +41,7 @@ export const SUGGESTED_PROMPTS = [
     icon: UserPlus,
     title: "Student Admissions",
     description: "New student admission and enrollment management",
-    prompt:
-      "Show all student admission applications and pending enrollments.",
+    prompt: "Show all student admission applications and pending enrollments.",
   },
   {
     icon: Palmtree,
@@ -109,8 +109,7 @@ export const SUGGESTED_PROMPTS = [
     icon: Wallet,
     title: "Payroll Management",
     description: "Staff salary and payroll processing overview",
-    prompt:
-      "Show staff payroll summary and pending salary disbursements.",
+    prompt: "Show staff payroll summary and pending salary disbursements.",
   },
   {
     icon: BookUser,
@@ -138,7 +137,8 @@ export const SUGGESTED_PROMPTS = [
 export const QUICK_CHIPS = [
   {
     label: "Core Setup (P1-P5)",
-    prompt: "Show setup wizard status for Core Setup, Period Slots, Timetable, and Grading Scale",
+    prompt:
+      "Show setup wizard status for Core Setup, Period Slots, Timetable, and Grading Scale",
   },
   {
     label: "Teachers & Faculty",
