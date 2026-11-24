@@ -1,13 +1,4 @@
-import React from "react";
-import {
-  HeartPulse,
-  Droplet,
-  Phone,
-  AlertTriangle,
-  Hospital,
-  ShieldAlert,
-  Sparkles,
-} from "lucide-react";
+import { HeartPulse, Droplet, Phone, AlertTriangle } from "lucide-react";
 import { bg, border, text, badge, shadow } from "@/theme/color";
 
 export default function AiStudentMedicalCard({
@@ -55,14 +46,19 @@ export default function AiStudentMedicalCard({
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Allergies */}
-          <div className={`p-3 rounded-xl border ${border.default} ${bg.surface}`}>
+          <div
+            className={`p-3 rounded-xl border ${border.default} ${bg.surface}`}
+          >
             <span className="text-[10px] uppercase font-bold text-amber-400 flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" />
               Known Allergies
             </span>
             <div className="mt-1 flex flex-wrap gap-1">
               {medical.allergies?.map((a, idx) => (
-                <span key={idx} className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[11px] font-semibold">
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[11px] font-semibold"
+                >
                   {a}
                 </span>
               ))}
@@ -70,7 +66,9 @@ export default function AiStudentMedicalCard({
           </div>
 
           {/* Conditions */}
-          <div className={`p-3 rounded-xl border ${border.default} ${bg.surface}`}>
+          <div
+            className={`p-3 rounded-xl border ${border.default} ${bg.surface}`}
+          >
             <span className="text-[10px] uppercase font-bold text-stone-400">
               Chronic Conditions
             </span>
@@ -80,12 +78,15 @@ export default function AiStudentMedicalCard({
           </div>
 
           {/* Vision & Diet */}
-          <div className={`p-3 rounded-xl border ${border.default} ${bg.surface}`}>
+          <div
+            className={`p-3 rounded-xl border ${border.default} ${bg.surface}`}
+          >
             <span className="text-[10px] uppercase font-bold text-stone-400">
               Diet & Vision
             </span>
             <p className={`text-xs font-semibold ${text.primary} mt-1`}>
-              {medical.dietaryRestrictions || "Regular"} • {medical.visionCorrection || "Standard"}
+              {medical.dietaryRestrictions || "Regular"} •{" "}
+              {medical.visionCorrection || "Standard"}
             </p>
           </div>
         </div>
@@ -105,7 +106,9 @@ export default function AiStudentMedicalCard({
                   <span className={`text-xs font-bold ${text.primary} block`}>
                     {c.name} ({c.relation})
                   </span>
-                  <span className="text-[11px] text-stone-400 font-mono">{c.phone}</span>
+                  <span className="text-[11px] text-stone-400 font-mono">
+                    {c.phone}
+                  </span>
                 </div>
                 <a
                   href={`tel:${c.phone}`}
