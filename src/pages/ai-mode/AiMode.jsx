@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { useAiChat } from "./useAiChat.js";
@@ -44,6 +44,7 @@ function AccountChat({ user, scope }) {
     handleRenameSession,
     handleSendMessage,
     handleRegenerate,
+    handleEditMessage,
   } = useAiChat({
     scope,
     onAiResponse: (aiMsg) => {
@@ -74,7 +75,7 @@ function AccountChat({ user, scope }) {
     },
     onSpeechFinal: (finalText) => {
       if (finalText && finalText.trim()) {
-        handleSendMessage(finalText.trim());
+        handleSendMessageWithVoiceNotice(finalText.trim());
       }
     },
   });
@@ -85,14 +86,41 @@ function AccountChat({ user, scope }) {
     isVoiceModeRef.current = isVoiceMode;
   }, [speak, isVoiceMode]);
 
+  // Wrapped sender that speaks immediate spoken acknowledgment when Voice Mode is active
+  const handleSendMessageWithVoiceNotice = useCallback(
+    (promptToSend) => {
+      const prompt = (promptToSend || inputPrompt).trim();
+      if (!prompt || loading) return;
+
+      // If voice mode is active, immediately speak spoken notice while AI is thinking
+      if (isVoiceModeRef.current && speakRef.current) {
+        speakRef.current("AI is thinking, please wait for response.");
+      }
+
+      return handleSendMessage(prompt);
+    },
+    [handleSendMessage, inputPrompt, loading]
+  );
+
+  const handleRegenerateWithVoiceNotice = useCallback(
+    (promptToResend) => {
+      if (!promptToResend || loading) return;
+      if (isVoiceModeRef.current && speakRef.current) {
+        speakRef.current("AI is thinking, please wait for response.");
+      }
+      return handleRegenerate(promptToResend);
+    },
+    [handleRegenerate, loading]
+  );
+
   // Execute prompt from URL if present
   useEffect(() => {
     if (promptParam && !processedPromptRef.current) {
       processedPromptRef.current = true;
-      handleSendMessage(promptParam);
+      handleSendMessageWithVoiceNotice(promptParam);
       setSearchParams({}, { replace: true });
     }
-  }, [promptParam, handleSendMessage, setSearchParams]);
+  }, [promptParam, handleSendMessageWithVoiceNotice, setSearchParams]);
 
   // Responsive sidebar resize listener
   useEffect(() => {
@@ -144,6 +172,9 @@ function AccountChat({ user, scope }) {
         sidebarOpen={sidebarOpen}
         onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         onCloseSidebar={() => setSidebarOpen(false)}
+        userRole={user?.role || "Administrator"}
+        userName={userName}
+        messageCount={messages.length}
         sessions={filteredSessions}
         activeSessionId={activeSessionId}
         onSelectSession={handleSelectSession}
@@ -164,26 +195,27 @@ function AccountChat({ user, scope }) {
         loading={loading}
         inputPrompt={inputPrompt}
         setInputPrompt={setInputPrompt}
-        onSendMessage={handleSendMessage}
+        onSendMessage={handleSendMessageWithVoiceNotice}
       >
         {messages.length === 0 ? (
           <AIWelcomeScreen
             role={user?.role}
             userName={userName}
-            onSelectPrompt={handleSendMessage}
+            onSelectPrompt={handleSendMessageWithVoiceNotice}
           />
         ) : (
           <AIChatMessages
             messages={messages}
+            user={user}
             loading={loading}
             messagesEndRef={messagesEndRef}
             isSpeaking={isSpeaking}
             speakingMessageId={speakingMessageId}
             onSpeakMessage={(msgContent, id) => speak(msgContent, id)}
             onStopSpeaking={stopSpeaking}
-            onAskAiPrompt={handleSendMessage}
-            onRegenerate={handleRegenerate}
-            onRetry={handleRegenerate}
+            onAskAiPrompt={handleSendMessageWithVoiceNotice}
+            onRegenerate={handleRegenerateWithVoiceNotice}
+            onRetry={handleRegenerateWithVoiceNotice}
           />
         )}
       </AIChatLayout>

@@ -1,5 +1,6 @@
 import React from "react";
-import { Menu, ArrowLeft, Mic, MicOff, Volume2, Sparkles } from "lucide-react";
+import { Menu, ArrowLeft, Mic, MicOff, Volume2 } from "lucide-react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../routes/routes.js";
 import ThemeToggle from "../../../components/ui/ThemeToggle.jsx";
@@ -19,13 +20,15 @@ export default function AIHeader({
     <header className="relative z-10 flex h-14 flex-shrink-0 items-center justify-between border-b border-[#303030] bg-[#141414] px-3.5 backdrop-blur-xl sm:px-5">
       {/* Left side: Sidebar Toggle & Brand */}
       <div className="flex items-center gap-2.5 sm:gap-3.5">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onToggleSidebar}
-          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-[#303030] bg-[#1D1D1D] text-[#A1A1AA] hover:text-[#FFFFFF] hover:border-[#FF7900]/40 transition-all active:scale-95 cursor-pointer"
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-[#1D1D20] text-[#A1A1AA] hover:text-white hover:border-[#FF7900]/40 transition-colors cursor-pointer"
           title="Toggle Sidebar"
         >
           <Menu className="h-4 w-4" />
-        </button>
+        </motion.button>
 
         <div className="flex items-center gap-2.5">
           {/* Status Dot */}
@@ -58,12 +61,14 @@ export default function AIHeader({
         </div>
 
         {/* Voice Assistant Toggle */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
           onClick={() => onToggleVoiceMode?.()}
-          className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition-all active:scale-95 cursor-pointer ${
+          className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[11px] font-bold transition-all cursor-pointer ${
             isVoiceMode
               ? "border-[#FF7900] bg-[#FF7900]/15 text-[#FFA000] shadow-[0_0_12px_rgba(255,121,0,0.15)] ring-1 ring-[#FF7900]/30"
-              : "border-[#303030] bg-[#1D1D1D] text-[#A1A1AA] hover:text-[#FFFFFF] hover:border-[#FF7900]/40"
+              : "border-white/[0.08] bg-[#1D1D20] text-[#A1A1AA] hover:text-white hover:border-[#FF7900]/40"
           }`}
           title={
             isVoiceMode
@@ -93,7 +98,7 @@ export default function AIHeader({
               <span className="text-[#A1A1AA]">OFF</span>
             </>
           )}
-        </button>
+        </motion.button>
 
         {/* Theme Toggle */}
         <div className="flex items-center">
@@ -101,14 +106,16 @@ export default function AIHeader({
         </div>
 
         {/* Back to ERP button */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
           onClick={() => navigate(ROUTES?.DASHBOARD || "/dashboard")}
-          className="flex items-center gap-1.5 rounded-xl border border-[#303030] bg-[#1D1D1D] px-2.5 py-1.5 text-[11px] font-semibold text-[#A1A1AA] hover:text-[#FFFFFF] hover:border-[#FF7900]/40 transition-all active:scale-95 cursor-pointer"
+          className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#1D1D20] px-2.5 py-1.5 text-[11px] font-semibold text-[#A1A1AA] hover:text-white hover:border-[#FF7900]/40 transition-colors cursor-pointer"
           title="Return to ERP Dashboard"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Back to ERP</span>
-        </button>
+        </motion.button>
       </div>
     </header>
   );

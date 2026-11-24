@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
   Clock,
@@ -424,7 +425,12 @@ export default function AIToolExecutionCard({
     : `${meta.successText}${countLabel}`;
 
   return (
-    <div className="mb-3 rounded-xl border border-[#303030] bg-[#141414] overflow-hidden transition-all shadow-xs">
+    <motion.div
+      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="mb-3 rounded-xl border border-white/[0.08] bg-[#141416] overflow-hidden transition-all shadow-xs"
+    >
       <div className="flex items-center justify-between px-3.5 py-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           {/* Status icon badge */}
@@ -501,7 +507,7 @@ export default function AIToolExecutionCard({
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 

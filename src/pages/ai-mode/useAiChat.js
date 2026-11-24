@@ -163,6 +163,8 @@ export function useAiChat({ onAiResponse, scope } = {}) {
         role: "model",
         content: response.reply,
         actionsExecuted: response.actionsExecuted || [],
+        userPrompt: prompt,
+        isNew: true,
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -186,7 +188,9 @@ export function useAiChat({ onAiResponse, scope } = {}) {
       const errorMessage = {
         id: errorMessageId,
         role: "model",
-        content: `⚠️ **Unable to reach AI Provider**\n\n${err.message}\n\nPlease verify your connection and configuration and try again.`,
+        content: `I am currently experiencing a brief delay connecting to the records. Please try your request again in a moment.`,
+        userPrompt: prompt,
+        isNew: true,
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -219,6 +223,115 @@ export function useAiChat({ onAiResponse, scope } = {}) {
     [loading, handleSendMessage]
   );
 
+  /* ── Edit Previous User Message & Regenerate from that point ── */
+  const handleEditMessage = useCallback(
+    async (messageId, newContent) => {
+      const prompt = (newContent || "").trim();
+      if (!prompt || loading) return;
+
+      const msgIndex = messages.findIndex((m) => m.id === messageId);
+      if (msgIndex === -1) return;
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      // Keep conversation history strictly before this edited message
+      const historyBefore = messages.slice(0, msgIndex);
+      const updatedUserMessage = {
+        ...messages[msgIndex],
+        content: prompt,
+        isEdited: true,
+        timestamp: timeStr,
+      };
+
+      const messagesUpToEdited = [...historyBefore, updatedUserMessage];
+
+      // Update state immediately to reflect edited user prompt
+      setSessions((prev) =>
+        prev.map((s) => {
+          if (s.id === activeSessionId) {
+            const title =
+              msgIndex === 0
+                ? prompt.slice(0, 40) + (prompt.length > 40 ? "..." : "")
+                : s.title;
+            return { ...s, title, messages: messagesUpToEdited };
+          }
+          return s;
+        })
+      );
+
+      setLoading(true);
+
+      try {
+        const historyForApi = historyBefore.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+        const response = await sendAiChatMessage(historyForApi, prompt);
+
+        const aiMessageId = `msg-ai-${Date.now()}`;
+        const aiMessage = {
+          id: aiMessageId,
+          role: "model",
+          content: response.reply,
+          actionsExecuted: response.actionsExecuted || [],
+          userPrompt: prompt,
+          isNew: true,
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === activeSessionId
+              ? { ...s, messages: [...messagesUpToEdited, aiMessage] }
+              : s
+          )
+        );
+
+        if (typeof onAiResponse === "function") {
+          onAiResponse(aiMessage);
+        }
+        return aiMessage;
+      } catch (err) {
+        const errorMessageId = `msg-err-${Date.now()}`;
+        const errorMessage = {
+          id: errorMessageId,
+          role: "model",
+          content: `I am currently experiencing a brief delay connecting to the records. Please try your request again in a moment.`,
+          userPrompt: prompt,
+          isNew: true,
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          isError: true,
+        };
+
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === activeSessionId
+              ? { ...s, messages: [...messagesUpToEdited, errorMessage] }
+              : s
+          )
+        );
+
+        if (typeof onAiResponse === "function") {
+          onAiResponse(errorMessage);
+        }
+        return errorMessage;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [messages, loading, activeSessionId, onAiResponse]
+  );
+
   return {
     sessions,
     filteredSessions,
@@ -238,5 +351,6 @@ export function useAiChat({ onAiResponse, scope } = {}) {
     handleRenameSession,
     handleSendMessage,
     handleRegenerate,
+    handleEditMessage,
   };
 }

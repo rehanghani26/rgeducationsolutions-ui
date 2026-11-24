@@ -8,6 +8,9 @@ export default function AIChatLayout({
   sidebarOpen,
   onToggleSidebar,
   onCloseSidebar,
+  userRole,
+  userName,
+  messageCount,
   sessions,
   activeSessionId,
   onSelectSession,
@@ -36,7 +39,7 @@ export default function AIChatLayout({
       className="flex h-screen w-screen overflow-hidden bg-[#111111] text-[#FFFFFF]"
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
-      {/* Left Sidebar */}
+      {/* Left Sidebar (Divided into Chat History & AI Copilot Hub) */}
       <AISidebar
         isOpen={sidebarOpen}
         onClose={onCloseSidebar}
@@ -49,6 +52,10 @@ export default function AIChatLayout({
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
         providerName={providerName}
+        onAskAiPrompt={onSendMessage}
+        userRole={userRole}
+        userName={userName}
+        messageCount={messageCount}
       />
 
       {/* Main Chat Area */}
@@ -76,8 +83,10 @@ export default function AIChatLayout({
         />
 
         {/* Scrollable Center Content */}
-        <div className="relative flex-1 overflow-y-auto scrollbar-thin">
-          {children}
+        <div className="relative flex flex-1 min-h-0 overflow-hidden">
+          <div className="relative flex-1 overflow-y-auto scrollbar-thin">
+            {children}
+          </div>
         </div>
 
         {/* Fixed Bottom Message Composer */}
@@ -92,6 +101,7 @@ export default function AIChatLayout({
           interimTranscript={interimTranscript}
           isSpeaking={isSpeaking}
           onStopSpeaking={onStopSpeaking}
+          hideQuickActions={messageCount === 0}
         />
       </div>
     </div>

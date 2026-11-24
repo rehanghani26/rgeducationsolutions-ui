@@ -117,11 +117,19 @@ api.interceptors.response.use(
     const status = error.response?.status;
     await normalizeApiError(error);
 
+    // AI endpoints (/ai/chat, /ai/health) are sub-services and must NEVER take down the ERP with maintenance page!
+    const isAiEndpoint =
+      Boolean(originalRequest?.url && (
+        originalRequest.url.includes("/ai/") ||
+        originalRequest.url.endsWith("/ai")
+      ));
+
     // Detect if server is offline or unreachable (no response, ERR_NETWORK, connection refused, 502/503/504)
     const isServerDown =
-      !error.response ||
-      error.code === "ERR_NETWORK" ||
-      [502, 503, 504].includes(status);
+      !isAiEndpoint &&
+      (!error.response ||
+        error.code === "ERR_NETWORK" ||
+        [502, 503, 504].includes(status));
 
     if (isServerDown && typeof window !== "undefined") {
       window.dispatchEvent(

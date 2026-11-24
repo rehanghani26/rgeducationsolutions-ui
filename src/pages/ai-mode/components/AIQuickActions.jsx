@@ -1,46 +1,31 @@
 import React from "react";
-import {
-  Calendar,
-  BookOpen,
-  Award,
-  FileSpreadsheet,
-  Sliders,
-  Users,
-  ClipboardList,
-  DollarSign,
-  Wallet,
-} from "lucide-react";
+import { motion } from "framer-motion";
 import { QUICK_CHIPS } from "../ai.constants.js";
-
-const CHIP_ICON_MAP = {
-  "Academic Session": Calendar,
-  Exams: BookOpen,
-  "Results & Toppers": Award,
-  "Class Syllabus": FileSpreadsheet,
-  Settings: Sliders,
-  Students: Users,
-  Attendance: ClipboardList,
-  Fees: DollarSign,
-  Payroll: Wallet,
-};
 
 export default function AIQuickActions({ onSelectAction }) {
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-0.5">
       {QUICK_CHIPS.map((chip, idx) => {
-        const Icon = CHIP_ICON_MAP[chip.label] || Calendar;
+        const Icon = chip.icon;
         return (
-          <button
-            key={idx}
+          <motion.button
+            key={chip.label || idx}
+            whileHover={{
+              scale: 1.04,
+              y: -1,
+              transition: { duration: 0.15 },
+            }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => onSelectAction(chip.prompt)}
-            className="flex-shrink-0 flex items-center gap-1.5 rounded-full border border-[#303030] bg-[#191919] px-3 py-1.5 text-[11px] font-medium text-[#A1A1AA] hover:text-[#FFFFFF] hover:border-[#FF7900]/50 hover:bg-[#202020] active:scale-95 transition-all whitespace-nowrap cursor-pointer shadow-xs"
+            className="flex-shrink-0 flex items-center gap-2 rounded-full border border-white/[0.08] bg-[#1A1A1D] px-3.5 py-1.5 text-[11.5px] font-medium text-[#D4D4D8] hover:text-white hover:border-[#FF7900]/50 hover:bg-[#222227] hover:shadow-[0_4px_16px_rgba(255,121,0,0.18)] transition-all whitespace-nowrap cursor-pointer shadow-xs select-none"
           >
-            <Icon className="h-3 w-3 text-[#FFA000]" />
+            <div className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#FF7900]/15 text-[#FFA000]">
+              {Icon && <Icon className="h-3 w-3" />}
+            </div>
             <span>{chip.label}</span>
-          </button>
+          </motion.button>
         );
       })}
     </div>
   );
 }
-

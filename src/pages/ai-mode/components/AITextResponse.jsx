@@ -1,6 +1,199 @@
 import React, { useState } from "react";
-import { Copy, Check, Terminal } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Terminal,
+  Users,
+  ClipboardList,
+  Banknote,
+  Calendar,
+  BookUser,
+  Award,
+  Layers,
+  School,
+  Sparkles,
+  CheckCircle2,
+  ChevronRight,
+  BookOpen,
+} from "lucide-react";
 import AiMarkdownTableCard from "./AiMarkdownTableCard.jsx";
+
+/**
+ * Maps bullet point content to an appropriate Lucide React icon.
+ */
+function getBulletIcon(item = "") {
+  const text = item.toLowerCase();
+  if (
+    text.includes("attendance") ||
+    text.includes("absent") ||
+    text.includes("present") ||
+    text.includes("leave")
+  ) {
+    return ClipboardList;
+  }
+  if (
+    text.includes("student") ||
+    text.includes("enroll") ||
+    text.includes("admit") ||
+    text.includes("admission") ||
+    text.includes("roll")
+  ) {
+    return Users;
+  }
+  if (
+    text.includes("teacher") ||
+    text.includes("faculty") ||
+    text.includes("staff")
+  ) {
+    return BookUser;
+  }
+  if (
+    text.includes("fee") ||
+    text.includes("payment") ||
+    text.includes("dues") ||
+    text.includes("finance") ||
+    text.includes("salary") ||
+    text.includes("budget") ||
+    text.includes("defaulter")
+  ) {
+    return Banknote;
+  }
+  if (
+    text.includes("timetable") ||
+    text.includes("period") ||
+    text.includes("schedule") ||
+    text.includes("routine")
+  ) {
+    return Calendar;
+  }
+  if (
+    text.includes("exam") ||
+    text.includes("result") ||
+    text.includes("grade") ||
+    text.includes("mark")
+  ) {
+    return Award;
+  }
+  if (
+    text.includes("subject") ||
+    text.includes("syllabus") ||
+    text.includes("book") ||
+    text.includes("curriculum")
+  ) {
+    return BookOpen;
+  }
+  if (text.includes("class") || text.includes("section")) {
+    return Layers;
+  }
+  if (
+    text.includes("success") ||
+    text.includes("enrolled") ||
+    text.includes("completed") ||
+    text.includes("done")
+  ) {
+    return CheckCircle2;
+  }
+  return ChevronRight;
+}
+
+function getBulletIconColor(item = "") {
+  const text = item.toLowerCase();
+  if (text.includes("attendance")) return "text-amber-400";
+  if (
+    text.includes("student") ||
+    text.includes("enroll") ||
+    text.includes("admission")
+  )
+    return "text-sky-400";
+  if (
+    text.includes("teacher") ||
+    text.includes("faculty") ||
+    text.includes("staff")
+  )
+    return "text-purple-400";
+  if (
+    text.includes("fee") ||
+    text.includes("payment") ||
+    text.includes("dues") ||
+    text.includes("finance")
+  )
+    return "text-emerald-400";
+  if (
+    text.includes("timetable") ||
+    text.includes("period") ||
+    text.includes("schedule")
+  )
+    return "text-orange-400";
+  if (
+    text.includes("exam") ||
+    text.includes("result") ||
+    text.includes("grade")
+  )
+    return "text-yellow-400";
+  if (text.includes("subject") || text.includes("syllabus"))
+    return "text-cyan-400";
+  if (
+    text.includes("success") ||
+    text.includes("enrolled") ||
+    text.includes("completed")
+  )
+    return "text-emerald-400";
+  return "text-[#FFA000]";
+}
+
+/**
+ * Maps heading text to an appropriate Lucide React icon.
+ */
+function getHeadingIcon(headingText = "") {
+  const text = headingText.toLowerCase();
+  if (text.includes("attendance"))
+    return { icon: ClipboardList, color: "text-amber-400" };
+  if (
+    text.includes("student") ||
+    text.includes("enroll") ||
+    text.includes("admission")
+  )
+    return { icon: Users, color: "text-sky-400" };
+  if (
+    text.includes("teacher") ||
+    text.includes("faculty") ||
+    text.includes("staff")
+  )
+    return { icon: BookUser, color: "text-purple-400" };
+  if (
+    text.includes("fee") ||
+    text.includes("payment") ||
+    text.includes("finance") ||
+    text.includes("dues")
+  )
+    return { icon: Banknote, color: "text-emerald-400" };
+  if (
+    text.includes("timetable") ||
+    text.includes("schedule") ||
+    text.includes("period")
+  )
+    return { icon: Calendar, color: "text-orange-400" };
+  if (
+    text.includes("exam") ||
+    text.includes("result") ||
+    text.includes("report")
+  )
+    return { icon: Award, color: "text-yellow-400" };
+  if (
+    text.includes("school") ||
+    text.includes("overview") ||
+    text.includes("campus") ||
+    text.includes("educore")
+  )
+    return { icon: School, color: "text-[#FFA000]" };
+  if (
+    text.includes("class") ||
+    text.includes("section") ||
+    text.includes("subject")
+  )
+    return { icon: Layers, color: "text-cyan-400" };
+  return { icon: Sparkles, color: "text-[#FFA000]" };
+}
 
 /**
  * Sanitizes any raw function calls that might accidentally appear in LLM text output
@@ -16,6 +209,15 @@ export function sanitizeModelText(rawText = "") {
   );
   // Remove tool_call markers
   clean = clean.replace(/tool_calls?:?\s*\[.*?\]/gis, "");
+  // Remove raw tool JSON code blocks or standalone objects: { "tool": "...", "arguments": ... }
+  clean = clean.replace(
+    /```(?:json)?\s*\{\s*"(?:tool|name|action)"\s*:\s*"[^"]+"\s*,\s*"(?:arguments|parameters)"\s*:\s*\{[^{}]*\}\s*\}\s*```/gis,
+    ""
+  );
+  clean = clean.replace(
+    /\{\s*"(?:tool|name|action)"\s*:\s*"[^"]+"\s*,\s*"(?:arguments|parameters)"\s*:\s*\{[^{}]*\}\s*\}/gis,
+    ""
+  );
   // Remove empty dangling lines
   clean = clean.replace(/\n{3,}/g, "\n\n").trim();
   return clean;
@@ -62,8 +264,14 @@ function CodeBlock({ code, language = "" }) {
 }
 
 export default function AITextResponse({ text = "" }) {
-  const sanitized = sanitizeModelText(text);
-  if (!sanitized) return null;
+  let sanitized = sanitizeModelText(text);
+  if (!sanitized) {
+    if (/\{\s*"(?:tool|name|action)"/i.test(text)) {
+      sanitized = "Processing requested school records...";
+    } else {
+      return null;
+    }
+  }
 
   const lines = sanitized.split("\n");
   const elements = [];
@@ -77,28 +285,34 @@ export default function AITextResponse({ text = "" }) {
   const flushList = (key) => {
     if (listBuffer.length > 0) {
       elements.push(
-        <ul key={`list-${key}`} className="my-2 space-y-1.5 pl-1">
-          {listBuffer.map((item, i) => (
-            <li
-              key={i}
-              className="flex items-start gap-2.5 text-[13px] leading-relaxed text-[#FFFFFF]"
-            >
-              <span className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#FF7900]" />
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: item
-                    .replace(
-                      /\*\*(.*?)\*\*/g,
-                      "<strong class='text-[#FFFFFF] font-bold'>$1</strong>"
-                    )
-                    .replace(
-                      /`([^`]+)`/g,
-                      "<code class='rounded bg-[#1D1D1D] px-1.5 py-0.5 text-[12px] font-mono text-[#FFA000] border border-[#303030]'>$1</code>"
-                    ),
-                }}
-              />
-            </li>
-          ))}
+        <ul key={`list-${key}`} className="my-2 space-y-1.5 pl-0.5">
+          {listBuffer.map((item, i) => {
+            const BIcon = getBulletIcon(item);
+            const iconColor = getBulletIconColor(item);
+            return (
+              <li
+                key={i}
+                className="flex items-start gap-2.5 text-[13px] leading-relaxed text-[#FFFFFF]"
+              >
+                <span className="mt-1 flex-shrink-0">
+                  <BIcon className={`h-3.5 w-3.5 ${iconColor}`} />
+                </span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: item
+                      .replace(
+                        /\*\*(.*?)\*\*/g,
+                        "<strong class='text-[#FFFFFF] font-bold'>$1</strong>"
+                      )
+                      .replace(
+                        /`([^`]+)`/g,
+                        "<code class='rounded bg-[#1D1D1D] px-1.5 py-0.5 text-[12px] font-mono text-[#FFA000] border border-[#303030]'>$1</code>"
+                      ),
+                  }}
+                />
+              </li>
+            );
+          })}
         </ul>
       );
       listBuffer = [];
@@ -178,12 +392,16 @@ export default function AITextResponse({ text = "" }) {
 
     // Heading 1
     if (line.startsWith("# ")) {
+      const cleanTitle = line.replace("# ", "").replace(/^[^\w\s]+\s*/, "").trim();
+      const meta = getHeadingIcon(cleanTitle);
+      const HIcon = meta.icon;
       elements.push(
         <h2
           key={index}
-          className="mt-4 mb-2 text-base font-bold text-[#FFFFFF] tracking-tight border-b border-[#303030] pb-1"
+          className="mt-4 mb-2 flex items-center gap-2 text-base font-bold text-[#FFFFFF] tracking-tight border-b border-[#303030] pb-1"
         >
-          {line.replace("# ", "")}
+          <HIcon className={`h-4.5 w-4.5 flex-shrink-0 ${meta.color}`} />
+          <span>{cleanTitle}</span>
         </h2>
       );
       return;
@@ -191,12 +409,16 @@ export default function AITextResponse({ text = "" }) {
 
     // Heading 2
     if (line.startsWith("## ")) {
+      const cleanTitle = line.replace("## ", "").replace(/^[^\w\s]+\s*/, "").trim();
+      const meta = getHeadingIcon(cleanTitle);
+      const HIcon = meta.icon;
       elements.push(
         <h3
           key={index}
-          className="mt-3.5 mb-1.5 text-sm font-bold text-[#FFA000]"
+          className="mt-3.5 mb-1.5 flex items-center gap-2 text-sm font-bold text-[#FFA000]"
         >
-          {line.replace("## ", "")}
+          <HIcon className={`h-4 w-4 flex-shrink-0 ${meta.color}`} />
+          <span>{cleanTitle}</span>
         </h3>
       );
       return;
@@ -204,12 +426,16 @@ export default function AITextResponse({ text = "" }) {
 
     // Heading 3
     if (line.startsWith("### ")) {
+      const cleanTitle = line.replace("### ", "").replace(/^[^\w\s]+\s*/, "").trim();
+      const meta = getHeadingIcon(cleanTitle);
+      const HIcon = meta.icon;
       elements.push(
         <h4
           key={index}
-          className="mt-3 mb-1 text-[13px] font-semibold text-[#FFFFFF]"
+          className="mt-3 mb-1 flex items-center gap-1.5 text-[13px] font-semibold text-[#FFFFFF]"
         >
-          {line.replace("### ", "")}
+          <HIcon className={`h-3.5 w-3.5 flex-shrink-0 ${meta.color}`} />
+          <span>{cleanTitle}</span>
         </h4>
       );
       return;

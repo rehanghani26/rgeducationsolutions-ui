@@ -1,6 +1,7 @@
 import React from "react";
-import AIToolExecutionCard from "./AIToolExecutionCard.jsx";
+import { motion } from "framer-motion";
 import AITextResponse from "./AITextResponse.jsx";
+import AiTypewriterResponse from "./AiTypewriterResponse.jsx";
 import AIRecordsCard from "./AIRecordsCard.jsx";
 import AIStatsGrid from "./AIStatsGrid.jsx";
 import AIAttendanceCard from "./AIAttendanceCard.jsx";
@@ -37,17 +38,38 @@ import AiStudentHomeworkCard from "./AiStudentHomeworkCard.jsx";
 import AiStudentAnalyticsCard from "./AiStudentAnalyticsCard.jsx";
 import AiStudentRollAllocationCard from "./AiStudentRollAllocationCard.jsx";
 import AiStudentStatusCard from "./AiStudentStatusCard.jsx";
-import {
-  Users,
-  GraduationCap,
-  DollarSign,
-  Calendar,
-  BookOpen,
-  AlertCircle,
-} from "lucide-react";
+
+function shouldRenderSpecializedComponent(toolName, userPrompt = "", data = {}) {
+  // 1. Visual ID Card Graphic Preview (cannot be displayed purely as text)
+  if (toolName === "getStudentIdCard" || toolName === "updateStudentIdCardData") {
+    return true;
+  }
+
+  // 2. Critical Action Confirmation Dialog
+  if (data?.requiresConfirmation || (data?.success && data?.message && data?.action)) {
+    return true;
+  }
+
+  // 3. Render heavy card ONLY if user explicitly commanded an interactive UI widget / form
+  const p = (userPrompt || "").toLowerCase();
+  const explicitlyRequestedUiWidget =
+    p.includes("open form") ||
+    p.includes("show form") ||
+    p.includes("admission form") ||
+    p.includes("open component") ||
+    p.includes("show card") ||
+    p.includes("interactive card") ||
+    p.includes("launch wizard") ||
+    p.includes("open wizard") ||
+    p.includes("show widget") ||
+    p.includes("open studio");
+
+  return explicitlyRequestedUiWidget;
+}
 
 export default function AIResponseRenderer({
   message,
+  userPrompt = "",
   onAskAiPrompt,
   onOpenEditStudent,
   onSelectStudentForIdCard,
@@ -55,50 +77,51 @@ export default function AIResponseRenderer({
   onSelectStudentForReport,
 }) {
   const { content, actionsExecuted = [], isError } = message;
+  const promptContext = userPrompt || message?.userPrompt || "";
 
   if (isError) {
+    const cleanError = (content || "")
+      .replace(/^⚠️\s*\*\*Unable to reach AI Provider\*\*\s*/i, "")
+      .replace(/^AI Assistant Notice:\s*/i, "")
+      .replace(/Please update the API key in the server \.env file\./i, "Please try again shortly.")
+      .trim();
+
     return (
-      <div className="flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5">
-        <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-rose-400" />
-        <div className="space-y-1 min-w-0">
-          <p className="text-[12px] font-bold text-rose-300 uppercase tracking-wider">
-            System Notice
-          </p>
-          <div className="text-[13px] leading-relaxed text-rose-200/90 whitespace-pre-wrap">
-            {content}
-          </div>
-        </div>
+      <div className="text-[13px] leading-relaxed text-[#D4D4D8]">
+        {cleanError || "I am currently unable to complete that request right now. Please try again in a moment."}
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {/* 1. Tool execution badges (humanized, friendly, no raw JSON or function names) */}
-      {actionsExecuted.length > 0 && (
-        <div className="space-y-2">
-          {actionsExecuted.map((act, idx) => (
-            <AIToolExecutionCard
-              key={`tool-exec-${idx}`}
-              toolName={act.tool}
-              status={act.status || "success"}
-              durationMs={act.durationMs}
-              data={act.data || act.result}
-              args={act.args}
-            />
-          ))}
-        </div>
+      {/* 1. Primary Markdown Text Commentary & Tables (Chat-First with Dynamic Typewriter) */}
+      {content && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <AiTypewriterResponse
+            text={content}
+            messageId={message?.id}
+            isNew={Boolean(message?.isNew)}
+          />
+        </motion.div>
       )}
 
-      {/* 2. Primary Markdown Text Commentary */}
-      {content && <AITextResponse text={content} />}
-
-      {/* 3. Dynamic ERP Visual Response Cards driven by backend data */}
+      {/* 2. Visual Cards (Chat-First: Only in last-case / strictly necessary scenarios) */}
       {actionsExecuted.map((act, idx) => {
-        const toolName = act.tool;
-        const data = act.data || act.result || {};
+        const toolCard = (() => {
+          const toolName = act.tool;
+          const data = act.data || act.result || {};
 
-        // ── 3.1. Student Directory / Filter List
+          // Enforce Chat-First: Keep enroll student, add student, counts & lists in chat!
+          if (!shouldRenderSpecializedComponent(toolName, promptContext, data)) {
+            return null;
+          }
+
+        // ── 2.1. Student Directory / Filter List
         if (
           toolName === "getStudents" &&
           data.students &&
@@ -121,7 +144,7 @@ export default function AIResponseRenderer({
           );
         }
 
-        // ── 3.2. Faculty & Teachers Directory
+        // ── 2.2. Faculty & Teachers Directory
         if (
           (toolName === "getTeachers" ||
             toolName === "getTeacherById" ||
@@ -714,11 +737,25 @@ export default function AIResponseRenderer({
           );
         }
 
-        // ── 3.14. Universal Table / Records Fallback Card
+        // ── 2.14. Universal Table / Records Fallback Card
         return act.status === "error" ? null : (
           <AIRecordsCard key={idx} tool={toolName} data={data} />
         );
-      })}
+      })();
+
+      if (!toolCard) return null;
+
+      return (
+        <motion.div
+          key={`animated-visual-card-${act.tool}-${idx}`}
+          initial={{ opacity: 0, y: 14, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        >
+          {toolCard}
+        </motion.div>
+      );
+    })}
     </div>
   );
 }
