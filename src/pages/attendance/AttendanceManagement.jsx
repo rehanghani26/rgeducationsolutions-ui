@@ -1,58 +1,65 @@
-import { useAcademicSession } from '../../context/AcademicSessionContext.jsx';
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { format } from "date-fns";
-import { toast } from "react-toastify";
+import {
+  ArrowLeft,
+  BookOpen,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  ClipboardCheck,
+  Clock,
+  Edit3,
+  Eye,
+  GraduationCap,
+  LayoutGrid,
+  Plus,
+  RotateCcw,
+  Search,
+  SquarePen,
+  TrendingUp,
+  Users,
+  X,
+} from "lucide-react";
+import { useAcademicSession } from "../../context/AcademicSessionContext.jsx";
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
-import SearchFilters from "../../components/ui/SearchFilters.jsx";
-import StatsCard from "../../components/ui/StatsCard.jsx";
-import Modal from "../../components/ui/Modal.jsx";
+import { SelectInput } from "../../components/ui/FormControls.jsx";
 import {
-  getAttendanceRecords,
   getAttendanceById,
-  getStudentAttendance,
+  getAttendanceRecords,
   getAttendanceStats,
-  createAttendance,
+  getAttendanceStatus,
   getMyAttendance,
-  getStudents,
 } from "../../services";
-import { SECTION_OPTIONS,
-  MONTH_OPTIONS_WITH_ALL as MONTH_OPTIONS,
-  YEAR_OPTIONS_WITH_ALL as YEAR_OPTIONS,
-  ROLES } from "../../constants";
-import { getActiveLeavesOnDate } from "../../services/leaveService.js";
-import { getUserFromStorage, getUserRole } from "../../config/access.jsx";
 import {
-  Eye,
-  Calendar,
-  User,
-  Users,
-  Plus,
-  ArrowLeft,
-  GraduationCap,
-  Save,
-  Search,
-  Filter,
-  FileText,
-  X,
-  RefreshCw,
-  Loader2,
-  Clock,
-  TrendingUp,
-  RotateCcw,
-  CalendarDays,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react";
-import { notifyApiError } from '../../services/apiErrors.js';
-import { SelectInput } from '../../components/ui/FormControls.jsx';
+  CLASS_OPTIONS,
+  MONTH_OPTIONS_WITH_ALL as MONTH_OPTIONS,
+  ROLES,
+  SECTION_OPTIONS,
+  YEAR_OPTIONS_WITH_ALL as YEAR_OPTIONS,
+} from "../../constants";
+import {
+  getUserFromStorage,
+  getUserRole,
+  hasModuleAccess,
+} from "../../config/access.jsx";
+import {
+  attendanceDateKeyOf,
+  initialsOf,
+  rateTone,
+} from "./components/attendanceHelpers.js";
+import TakeAttendanceForm from "./components/TakeAttendanceForm.jsx";
+import AttendanceDetailView from "./components/AttendanceDetailView.jsx";
+import StudentAttendanceHistoryModal from "./components/StudentAttendanceHistoryModal.jsx";
+import PersonalAttendanceView from "./components/PersonalAttendanceView.jsx";
 
 const AttendanceManagement = () => {
-  const { classOptions, schoolClasses } = useAcademicSession();
+  const { classOptions, schoolClasses, active, readOnly } = useAcademicSession();
   const authUser = useSelector((state) => state.auth?.user);
-  const user = authUser ||
-    getUserFromStorage() || { name: "Administrator", role: "super-admin" };
+  const user = authUser || getUserFromStorage() || {};
   const userRole = getUserRole(user);
 
   const isStudent = userRole === ROLES.STUDENT;
@@ -70,59 +77,63 @@ const AttendanceManagement = () => {
     "staff",
     "support",
   ].includes(userRole);
-  const isAdminRole = [
+  const canManageAttendance = [
     ROLES.SUPER_ADMIN,
     ROLES.SCHOOL_ADMIN,
     ROLES.PRINCIPAL,
+    ROLES.TEACHER,
+    ROLES.HEAD_TEACHER,
+    "superadmin",
+    "admin",
   ].includes(userRole);
+  const canViewStudentProfile = hasModuleAccess(user, "students");
+  const canViewTeacherProfile = hasModuleAccess(user, "teachers");
 
-  // Active Main Navigation Tab: "student" | "teacher"
   const [activeMainTab, setActiveMainTab] = useState(
-    [ROLES.PEON, ROLES.LIBRARIAN, ROLES.ACCOUNTANT, "staff", "support"].includes(userRole) ? "teacher" : "student"
+    [ROLES.PEON, ROLES.LIBRARIAN, ROLES.ACCOUNTANT, "staff", "support"].includes(userRole)
+      ? "teacher"
+      : "student"
   );
   const [viewMode, setViewMode] = useState("list"); // "list" | "take_attendance" | "view_record"
+  const [takeTarget, setTakeTarget] = useState(null);
 
   const [page, setPage] = useState(1);
   const [records, setRecords] = useState([]);
   const [stats, setStats] = useState({
-    present: 0,
-    absent: 0,
-    late: 0,
+    totalStudents: 0,
+    todayPresent: 0,
+    todayAbsent: 0,
+    notTaken: "0 Pending",
+    notTakenClasses: 0,
+    overallAttendance: "0%",
     percentage: 0,
   });
   const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [loading, setLoading] = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
+
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [studentSearch, setStudentSearch] = useState("");
-
-  // Individual Student History Modal State
+  const [detailLoading, setDetailLoading] = useState(false);
   const [inspectStudentHistory, setInspectStudentHistory] = useState(null);
-
-  // Filters for Student Personal View
-  const [studentStatusFilter, setStudentStatusFilter] = useState("all");
-  const [studentDateFilter, setStudentDateFilter] = useState("");
-
-  // Take Attendance State
-  const [attendeeType, setAttendeeType] = useState("student");
-  const [attDate, setAttDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [attClass, setAttClass] = useState("");
-  const [attSection, setAttSection] = useState("");
-  const [attDepartment, setAttDepartment] = useState("");
-  const [attTakenBy, setAttTakenBy] = useState(user?.name || "");
-  const [roster, setRoster] = useState([]);
-  const [rosterLoading, setRosterLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  // My Attendance Personal State
   const [myAttData, setMyAttData] = useState({ summary: {}, logs: [] });
 
-  // ── Filters State: Specific Day, Date Range, Month, Year, Class, Section ──
+  // Tracker date & view filter for daily completion overview
+  const [trackerDate, setTrackerDate] = useState("");
+  const [trackerFilter, setTrackerFilter] = useState("all"); // "all" | "pending" | "taken"
+  const [trackerExpanded, setTrackerExpanded] = useState(true);
+  const [dailyOverview, setDailyOverview] = useState({
+    type: "student",
+    date: "",
+    today: "",
+    classSections: [],
+    departments: [],
+  });
+
+  // Filters
   const [dateFilterMode, setDateFilterMode] = useState("all"); // "all" | "day" | "range"
-  const [date, setDate] = useState(""); // Specific Day
-  const [startDate, setStartDate] = useState(""); // Range Start
-  const [endDate, setEndDate] = useState(""); // Range End
+  const [date, setDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedClass, setSelectedClass] = useState("all");
@@ -134,8 +145,9 @@ const AttendanceManagement = () => {
     sections: [],
   });
 
-  // Fetch Attendance Records & Dynamic Stats from Backend with Query Params
+  // Fetch attendance records, stats, daily overview, and personal logs
   useEffect(() => {
+    let activeReq = true;
     const fetchAttendanceData = async () => {
       setLoading(true);
       const filterType = activeMainTab === "teacher" ? "teacher" : "student";
@@ -154,57 +166,68 @@ const AttendanceManagement = () => {
       };
 
       try {
-        const [recRes, statsRes, myRes] = await Promise.all([
-          getAttendanceRecords(params).catch(() => null),
-          getAttendanceStats(params).catch(() => null),
-          getMyAttendance().catch(() => null),
+        const shouldFetchList = !isStudent && !(isTeacherRole && activeMainTab === "teacher");
+        const shouldFetchPersonal = isStudent || (isTeacherRole && activeMainTab === "teacher");
+
+        const [recRes, statsRes, statusRes, myRes] = await Promise.all([
+          shouldFetchList ? getAttendanceRecords(params).catch(() => null) : Promise.resolve(null),
+          shouldFetchList ? getAttendanceStats(params).catch(() => null) : Promise.resolve(null),
+          shouldFetchList
+            ? getAttendanceStatus({
+                type: filterType,
+                ...(trackerDate ? { date: trackerDate } : {}),
+              }).catch(() => null)
+            : Promise.resolve(null),
+          shouldFetchPersonal ? getMyAttendance().catch(() => null) : Promise.resolve(null),
         ]);
 
-        if (recRes?.records) {
-          setRecords(recRes.records);
-          if (recRes.pagination) setPagination(recRes.pagination);
-          if (recRes.availableFilters) {
+        if (!activeReq) return;
+
+        if (recRes) {
+          const recList = recRes.records || recRes.data?.records || [];
+          setRecords(recList);
+          const pag = recRes.pagination || recRes.data?.pagination;
+          if (pag) setPagination(pag);
+          const filtersMeta = recRes.availableFilters || recRes.data?.availableFilters;
+          if (filtersMeta) {
             setAvailableFilterOptions((prev) => ({
-              months:
-                recRes.availableFilters.months?.length > 0
-                  ? recRes.availableFilters.months
-                  : prev.months,
-              classes:
-                recRes.availableFilters.classes?.length > 0
-                  ? recRes.availableFilters.classes
-                  : prev.classes,
-              sections:
-                recRes.availableFilters.sections?.length > 0
-                  ? recRes.availableFilters.sections
-                  : prev.sections,
+              months: filtersMeta.months?.length ? filtersMeta.months : prev.months,
+              classes: filtersMeta.classes?.length ? filtersMeta.classes : prev.classes,
+              sections: filtersMeta.sections?.length ? filtersMeta.sections : prev.sections,
             }));
           }
-        } else if (recRes?.data?.records) {
-          setRecords(recRes.data.records);
-          if (recRes.data.pagination) setPagination(recRes.data.pagination);
-        } else {
-          setRecords([]);
         }
 
-        if (statsRes?.stats) {
-          setStats(statsRes.stats);
-        } else if (statsRes?.data?.stats) {
-          setStats(statsRes.data.stats);
+        const st = statsRes?.stats || statsRes?.data?.stats;
+        if (st) setStats(st);
+
+        if (statusRes) {
+          const ov = statusRes.data && !statusRes.classSections ? statusRes.data : statusRes;
+          setDailyOverview({
+            type: ov?.type || filterType,
+            date: ov?.date || "",
+            today: ov?.today || "",
+            classSections: ov?.classSections || [],
+            departments: ov?.departments || [],
+          });
+          if (!trackerDate && ov?.date) setTrackerDate(ov.date);
         }
 
         if (myRes?.summary || myRes?.data?.summary) {
           setMyAttData({
-            summary: myRes?.summary || myRes?.data?.summary,
+            summary: myRes?.summary || myRes?.data?.summary || {},
             logs: myRes?.logs || myRes?.data?.logs || [],
           });
         }
-      } catch (err) {
-        console.error("Error fetching attendance:", err);
       } finally {
-        setLoading(false);
+        if (activeReq) setLoading(false);
       }
     };
+
     fetchAttendanceData();
+    return () => {
+      activeReq = false;
+    };
   }, [
     page,
     activeMainTab,
@@ -217,28 +240,46 @@ const AttendanceManagement = () => {
     selectedClass,
     selectedSection,
     searchQuery,
+    trackerDate,
+    refreshTick,
+    isStudent,
+    isTeacherRole,
   ]);
 
-  // Filter student personal logs
-  const filteredMyLogs = myAttData.logs.filter((log) => {
-    const matchesStatus =
-      studentStatusFilter === "all" ||
-      log.status.toLowerCase() === studentStatusFilter.toLowerCase();
-    const matchesDate =
-      !studentDateFilter || log.date.includes(studentDateFilter);
-    return matchesStatus && matchesDate;
-  });
+  const effectiveClassOptions = useMemo(() => {
+    if (Array.isArray(classOptions) && classOptions.length > 0) {
+      return classOptions;
+    }
+    const overviewClasses = [];
+    const seen = new Set();
+    (dailyOverview.classSections || []).forEach((cs) => {
+      if (cs.className && !seen.has(cs.className)) {
+        seen.add(cs.className);
+        overviewClasses.push({
+          id: cs.classId || cs.className,
+          name: cs.className,
+        });
+      }
+    });
+    if (overviewClasses.length > 0) {
+      return overviewClasses;
+    }
+    return CLASS_OPTIONS.filter((c) => !c.isPassout);
+  }, [classOptions, dailyOverview.classSections]);
 
-  // Filter options and derived lists (imported from central constants)
-  const availableClasses = schoolClasses.classRange
-    ? classOptions.map((grade) => grade.name)
-    : availableFilterOptions.classes || [];
+  const availableClasses = useMemo(() => {
+    if (schoolClasses.classRange && classOptions.length > 0) {
+      return classOptions.map((grade) => grade.name);
+    }
+    return availableFilterOptions.classes || [];
+  }, [schoolClasses.classRange, classOptions, availableFilterOptions.classes]);
 
   const availableSections = useMemo(() => {
+    const fromOverview = (dailyOverview.classSections || []).map((cs) => cs.sectionName);
     const fromApi = availableFilterOptions.sections || [];
     const fromConstants = SECTION_OPTIONS.map((s) => s.name);
-    return Array.from(new Set([...fromApi, ...fromConstants])).sort();
-  }, [availableFilterOptions.sections]);
+    return Array.from(new Set([...fromOverview, ...fromApi, ...fromConstants].filter(Boolean))).sort();
+  }, [dailyOverview.classSections, availableFilterOptions.sections]);
 
   const handleClearFilters = () => {
     setDateFilterMode("all");
@@ -262,14 +303,16 @@ const AttendanceManagement = () => {
     (selectedSection !== "all" ? 1 : 0) +
     (searchQuery ? 1 : 0);
 
-  const [detailLoading, setDetailLoading] = useState(false);
-
-  const handleOpenRecordDetail = async (record) => {
-    setSelectedRecord(record);
-    setStudentSearch("");
+  const handleOpenRecordDetail = useCallback(async (recordOrId) => {
+    const recordId =
+      typeof recordOrId === "string" ? recordOrId : recordOrId?._id || recordOrId?.id;
+    if (typeof recordOrId === "object" && recordOrId !== null) {
+      setSelectedRecord(recordOrId);
+    } else {
+      setSelectedRecord(null);
+    }
     setViewMode("view_record");
 
-    const recordId = record._id || record.id;
     if (recordId && !String(recordId).startsWith("att-")) {
       setDetailLoading(true);
       try {
@@ -284,273 +327,49 @@ const AttendanceManagement = () => {
         setDetailLoading(false);
       }
     }
-  };
+  }, []);
 
-  // Extract roster list from selected record
-  const recordRosterLogs = (() => {
-    if (!selectedRecord) return [];
-    const rawList =
-      selectedRecord.students ||
-      selectedRecord.records ||
-      selectedRecord.attendance ||
-      [];
-    return rawList.map((item, idx) => {
-      const name =
-        item.name ||
-        item.memberId?.name ||
-        (typeof item.memberId === "object"
-          ? `${item.memberId.firstName || ""} ${item.memberId.lastName || ""}`.trim()
-          : "") ||
-        `Student #${idx + 1}`;
-      const roll =
-        item.rollNo ||
-        item.roll ||
-        item.studentId ||
-        item.memberId?._id ||
-        item.memberId ||
-        (idx + 1);
-      let statusStr = item.status || "Present";
-      if (String(statusStr).toLowerCase() === "present") statusStr = "Present";
-      else if (String(statusStr).toLowerCase() === "absent") statusStr = "Absent";
-      else if (String(statusStr).toLowerCase() === "late") statusStr = "Late";
-      else if (String(statusStr).toLowerCase() === "half-day") statusStr = "Half Day";
+  const handleEditRecord = useCallback(async (record) => {
+    const recordId = record?._id || record?.id;
+    let targetRecord = record;
+    if (recordId && !record?.students?.length && !String(recordId).startsWith("att-")) {
+      try {
+        const res = await getAttendanceById(recordId);
+        const fetched = res?.record || res?.data?.record;
+        if (fetched) targetRecord = fetched;
+      } catch {
+        // fallback to existing record object
+      }
+    }
+    setTakeTarget({ editRecord: targetRecord });
+    setViewMode("take_attendance");
+  }, []);
 
-      return {
-        id: item.studentId || item.id || item._id || item.memberId || idx,
-        name,
-        roll,
-        classSection:
-          item.classSection ||
-          (selectedRecord.className && selectedRecord.sectionName
-            ? `${selectedRecord.className} - ${selectedRecord.sectionName}`
-            : selectedRecord.classSection || ""),
-        status: statusStr,
-        remarks: item.remarks || "",
-        time: item.time || "08:00 AM",
-      };
-    });
-  })();
-
-  const detailStudentLogs = recordRosterLogs.filter(
-    (s) =>
-      !studentSearch ||
-      (s.name && s.name.toLowerCase().includes(studentSearch.toLowerCase())) ||
-      (s.roll && String(s.roll).toLowerCase().includes(studentSearch.toLowerCase()))
+  const handleStartNewAttendance = useCallback(
+    (preset = null) => {
+      setTakeTarget(
+        preset || {
+          type: activeMainTab === "teacher" ? "teacher" : "student",
+          date: trackerDate || dailyOverview.today || new Date().toLocaleDateString("en-CA"),
+        }
+      );
+      setViewMode("take_attendance");
+    },
+    [activeMainTab, trackerDate, dailyOverview.today]
   );
 
-  // ── Load students for selected class + section from API & Pre-populate Leaves ──
-  const loadRosterStudents = useCallback(async (className, sectionName) => {
-    if (!className || !sectionName) {
-      toast.warning("Please select both Class and Section first.");
-      return;
-    }
-    setRosterLoading(true);
-    setRoster([]);
-    try {
-      const [studentsRes, leavesRes] = await Promise.all([
-        getStudents({
-          class: className,
-          section: sectionName,
-          limit: 200,
-        }).catch(() => null),
-        getActiveLeavesOnDate({
-          date: attDate,
-          className,
-          sectionName,
-          role: "student",
-        }).catch(() => null),
-      ]);
-
-      const students = studentsRes?.students || studentsRes?.data?.students || [];
-      const activeLeaves =
-        leavesRes?.leaves ||
-        leavesRes?.data?.leaves ||
-        (Array.isArray(leavesRes?.data) ? leavesRes.data : []) ||
-        [];
-
-      if (students.length === 0) {
-        toast.info(`No students found for ${className} - ${sectionName}`);
-      } else {
-        const leaveCount = activeLeaves.length;
-        if (leaveCount > 0) {
-          toast.success(
-            `Loaded ${students.length} students (${leaveCount} approved on leave for ${attDate})`
-          );
-        } else {
-          toast.success(
-            `Loaded ${students.length} students for ${className} - ${sectionName}`
-          );
-        }
-      }
-
-      setRoster(
-        students.map((s) => {
-          const studentIdStr = String(s._id || s.id || "");
-          const admNoStr = String(s.admissionNumber || "");
-          const rollStr = String(s.rollNumber || "");
-
-          const matchingLeave = activeLeaves.find(
-            (l) =>
-              (l.applicantId && String(l.applicantId) === studentIdStr) ||
-              (l.admissionNumber && String(l.admissionNumber) === admNoStr) ||
-              (l.rollNumber && String(l.rollNumber) === rollStr)
-          );
-
-          if (matchingLeave) {
-            return {
-              id: s._id || s.id,
-              roll: s.rollNumber || s.admissionNumber || s._id,
-              name:
-                `${s.firstName || ""} ${s.lastName || ""}`.trim() ||
-                s.name ||
-                "Unknown",
-              classSection: `${s.class || className} - ${s.section || sectionName}`,
-              status: matchingLeave.isHalfDay ? "Half Day" : "Leave",
-              remarks: `Approved Leave: ${matchingLeave.category}${matchingLeave.isHalfDay ? ` (${matchingLeave.halfDaySession || "1st"})` : ""}${matchingLeave.reason ? ` — ${matchingLeave.reason}` : ""}`,
-              isOnLeave: true,
-              leaveCategory: matchingLeave.category,
-              leaveRef: matchingLeave.leaveCode,
-            };
-          }
-
-          return {
-            id: s._id || s.id,
-            roll: s.rollNumber || s.admissionNumber || s._id,
-            name:
-              `${s.firstName || ""} ${s.lastName || ""}`.trim() ||
-              s.name ||
-              "Unknown",
-            classSection: `${s.class || className} - ${s.section || sectionName}`,
-            status: "Present",
-            remarks: "",
-            isOnLeave: false,
-          };
-        })
-      );
-    } catch (err) {
-      notifyApiError(err, "Failed to load students. Check your connection.");
-      setRoster([]);
-    } finally {
-      setRosterLoading(false);
-    }
-  }, [attDate]);
-
-  const handleAttendeeTypeChange = (newType) => {
-    setAttendeeType(newType);
-    setRoster([]);
-    setAttClass("");
-    setAttSection("");
-    setAttDepartment("");
-  };
-
-  const handleMarkAllStatus = (targetStatus) => {
-    // Preserve students with authorized approved leave to prevent accidental marking as absent/present
-    setRoster((prev) =>
-      prev.map((item) => (item.isOnLeave ? item : { ...item, status: targetStatus }))
-    );
-  };
-
-  const handleStatusChange = (id, newStatus) => {
-    setRoster((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, status: newStatus } : item
-      )
-    );
-  };
-
-  const handleRemarksChange = (id, text) => {
-    setRoster((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, remarks: text } : item))
-    );
-  };
-
-  const handleSaveAttendance = async (e) => {
-    e.preventDefault();
-    if (roster.length === 0) {
-      toast.warning("Please load students before saving attendance.");
-      return;
-    }
-    setSubmitting(true);
-
-    const presentCount = roster.filter((r) => r.status === "Present").length;
-    const absentCount = roster.filter((r) => r.status === "Absent").length;
-    const lateCount = roster.filter((r) => r.status === "Late").length;
-    const leaveCount = roster.filter((r) => r.status === "Leave" || r.status === "Half Day").length;
-
-    // Build payload matching exact requested JSON structure:
-    const payload = {
-      date: attDate,
-      attendanceDate: attDate,
-      attendanceTakenDate: new Date().toISOString(),
-      type: attendeeType,
-      classId: attClass || "CLASS_ID",
-      sectionId: attSection || "SECTION_ID",
-      className: attendeeType === "student" ? attClass : "Teaching Staff",
-      sectionName: attendeeType === "student" ? attSection : attDepartment,
-      classSection:
-        attendeeType === "student"
-          ? `${attClass} - ${attSection}`
-          : `Staff - ${attDepartment}`,
-      takenBy: {
-        userId: user?.id || user?._id || "USER_ID",
-        name: user?.name || user?.username || attTakenBy || "shadab md",
-      },
-      total: roster.length,
-      present: presentCount,
-      absent: absentCount,
-      late: lateCount,
-      leaveCount: leaveCount,
-      // Exact requested 'students' array structure:
-      students: roster.map((item) => ({
-        studentId: item.id,
-        name: item.name,
-        rollNo: item.roll || "",
-        status: (item.status || "present").toLowerCase(),
-        remarks: item.remarks || "",
-      })),
-    };
-
-    try {
-      const res = await createAttendance(payload);
-      // Update state: replace if record for same date & class exists, or prepend
-      const savedRecord = res?.data?.record || res?.data?.attendance || res?.data || payload;
-      setRecords((prev) => {
-        const idx = prev.findIndex(
-          (r) =>
-            new Date(r.attendanceDate || r.date).toDateString() === new Date(attDate).toDateString() &&
-            (r.classId === payload.classId || r.className === payload.className) &&
-            (!payload.sectionName || r.sectionName === payload.sectionName)
-        );
-        if (idx !== -1) {
-          const updated = [...prev];
-          updated[idx] = {
-            ...updated[idx],
-            ...payload,
-            ...savedRecord,
-            id: savedRecord._id || savedRecord.id || updated[idx].id,
-          };
-          return updated;
-        }
-        return [
-          {
-            ...payload,
-            id: savedRecord._id || savedRecord.id || `att-${Date.now()}`,
-            ...savedRecord,
-          },
-          ...prev,
-        ];
-      });
-      setRoster([]);
-      setAttClass("");
-      setAttSection("");
+  const handleAttendanceSaved = useCallback((savedRecord, isEdit) => {
+    setRefreshTick((t) => t + 1);
+    if (isEdit && savedRecord) {
+      setSelectedRecord(savedRecord);
+      setViewMode("view_record");
+    } else {
+      setTakeTarget(null);
       setViewMode("list");
-    } catch (err) {
-      // Even on error, keep the user on the form so they can retry
-      console.error("Save attendance error:", err);
-    } finally {
-      setSubmitting(false);
     }
-  };
+  }, []);
+
+  const todayKey = dailyOverview.today || new Date().toLocaleDateString("en-CA");
 
   const columns = [
     {
@@ -558,47 +377,55 @@ const AttendanceManagement = () => {
       label: "Attendance Date",
       showOnMobile: true,
       render: (row) => {
-        const sessionDate = row.attendanceDate || row.date;
+        const dk = attendanceDateKeyOf(row);
         const takenDate = row.attendanceTakenDate || row.createdAt;
-        const isPast =
-          sessionDate &&
-          takenDate &&
-          new Date(sessionDate).toDateString() !== new Date(takenDate).toDateString();
+        const takenKey =
+          takenDate && !isNaN(new Date(takenDate).getTime())
+            ? new Date(takenDate).toLocaleDateString("en-CA")
+            : "";
+        const isToday = dk && dk === todayKey;
+        const isPast = dk && takenKey && dk !== takenKey;
 
         return (
-          <div className="space-y-0.5">
+          <div className="space-y-0.5 tabular-nums">
             <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 flex-wrap">
               <Calendar size={13} className="text-indigo-500 shrink-0" />
               <span>
-                {sessionDate ? format(new Date(sessionDate), "MMM d, yyyy") : "—"}
+                {dk ? format(new Date(`${dk}T00:00:00`), "MMM d, yyyy") : "—"}
               </span>
-              {isPast && (
-                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap">
-                  Past Date
+              {isToday ? (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/25">
+                  Today
                 </span>
-              )}
+              ) : isPast ? (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400 border border-amber-200 dark:border-amber-500/25 whitespace-nowrap">
+                  Backdated
+                </span>
+              ) : null}
             </div>
-            {takenDate && (
-              <div className="md:hidden flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+            {takenDate && !isNaN(new Date(takenDate).getTime()) ? (
+              <div className="md:hidden flex items-center gap-1 text-[10px] text-slate-400 font-medium">
                 <Clock size={10} className="shrink-0" />
-                <span>Recorded: {format(new Date(takenDate), "h:mm a")}</span>
+                <span>Recorded {format(new Date(takenDate), "h:mm a")}</span>
               </div>
-            )}
+            ) : null}
           </div>
         );
       },
     },
     {
       key: "takenDate",
-      label: "Recorded / Taken At",
+      label: "Recorded At",
       hideOnMobile: true,
       render: (row) => {
         const takenDate = row.attendanceTakenDate || row.createdAt || row.date;
         return (
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-            <Clock size={12} className="text-slate-400" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap tabular-nums">
+            <Clock size={12} className="text-slate-400 shrink-0" />
             <span>
-              {takenDate ? format(new Date(takenDate), "MMM d, yyyy, h:mm a") : "—"}
+              {takenDate && !isNaN(new Date(takenDate).getTime())
+                ? format(new Date(takenDate), "MMM d · h:mm a")
+                : "—"}
             </span>
           </div>
         );
@@ -606,116 +433,239 @@ const AttendanceManagement = () => {
     },
     {
       key: "classSection",
-      label: "Class / Department",
+      label: activeMainTab === "teacher" ? "Department" : "Class & Section",
       showOnMobile: true,
-      render: (row) => (
-        <span className="font-extrabold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
-          {row.classSection ||
-            `${row.className || "Grade 10"} - ${row.sectionName || "Section A"}`}
-        </span>
-      ),
+      render: (row) => {
+        const label =
+          row.classSection ||
+          [row.className, row.sectionName].filter(Boolean).join(" - ") ||
+          "—";
+        return (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50/90 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/50 text-xs font-extrabold whitespace-nowrap">
+            {label}
+          </span>
+        );
+      },
     },
     {
       key: "takenBy",
       label: "Taken By",
+      sortable: false,
       hideOnMobile: true,
       render: (row) => {
         const nameStr =
           typeof row.takenBy === "object" && row.takenBy !== null
             ? row.takenBy.name || row.takenBy.username
             : row.takenBy;
+        const display = nameStr || "Staff";
         return (
-          <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
-            <User size={13} className="text-slate-400" />
-            <span>{nameStr || "shadab md"}</span>
+          <div className="flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+            <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-extrabold text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
+              {initialsOf(display)}
+            </span>
+            <span className="truncate max-w-[120px]">{display}</span>
           </div>
         );
       },
     },
     {
-      key: "total",
-      label: "Total Members",
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="font-bold text-slate-700 dark:text-slate-300">
-          {row.total || (row.records || []).length || 34}
-        </span>
-      ),
-    },
-    {
-      key: "present",
-      label: "Present",
+      key: "summary",
+      label: "Breakdown",
+      sortable: false,
       hideOnMobile: true,
       render: (row) => {
-        const count =
+        const list = row.students || row.records || row.attendance || [];
+        const total = row.total ?? list.length;
+        const present =
           row.present != null
             ? row.present
-            : (row.records || []).filter((r) => r.status === "present").length;
+            : list.filter((r) => String(r.status || "").toLowerCase() === "present").length;
+        const absent =
+          row.absent != null
+            ? row.absent
+            : list.filter((r) => String(r.status || "").toLowerCase() === "absent").length;
+        const late = row.late ?? 0;
+        const halfDay = row.halfDay ?? 0;
+        const leave = row.leave ?? row.leaveCount ?? 0;
         return (
-          <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-            {count}
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap tabular-nums">
+            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-extrabold">
+              {total} total
+            </span>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-500/20 text-[11px] font-bold">
+              {present} P
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${
+                absent > 0
+                  ? "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200/80 dark:border-rose-500/20"
+                  : "bg-slate-50 dark:bg-slate-800/60 text-slate-400 border-slate-200/60 dark:border-slate-700/60"
+              }`}
+            >
+              {absent} A
+            </span>
+            {late > 0 ? (
+              <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-500/20 text-[11px] font-bold">
+                {late} L
+              </span>
+            ) : null}
+            {halfDay > 0 ? (
+              <span className="px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-200/80 dark:border-teal-500/20 text-[11px] font-bold">
+                {halfDay} HD
+              </span>
+            ) : null}
+            {leave > 0 ? (
+              <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-200/80 dark:border-purple-500/20 text-[11px] font-bold">
+                {leave} LV
+              </span>
+            ) : null}
+          </div>
         );
       },
     },
     {
-      key: "absent",
-      label: "Absent",
+      key: "rate",
+      label: "Rate",
+      sortable: false,
       hideOnMobile: true,
       render: (row) => {
-        const count =
-          row.absent != null
-            ? row.absent
-            : (row.records || []).filter((r) => r.status === "absent").length;
+        const list = row.students || row.records || row.attendance || [];
+        const total = row.total ?? list.length;
+        const present =
+          row.present != null
+            ? row.present
+            : list.filter((r) => String(r.status || "").toLowerCase() === "present").length;
+        const halfDay = row.halfDay ?? 0;
+        const pct =
+          total > 0 ? Math.min(100, Math.round(((present + halfDay * 0.5) / total) * 100)) : 0;
+        const tone = rateTone(pct);
         return (
-          <span className="font-extrabold text-rose-600 dark:text-rose-400">
-            {count}
-          </span>
+          <div className="w-20 space-y-1 tabular-nums">
+            <div className="flex items-center justify-between text-[11px] font-extrabold">
+              <span className={tone.textClass}>{pct}%</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div
+                className={`h-full rounded-full ${tone.barClass}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
         );
       },
     },
     {
       key: "action",
-      label: "Details",
+      label: "Actions",
+      sortable: false,
       hideOnMobile: true,
       render: (row) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleOpenRecordDetail(row);
-          }}
-          className="flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800/50 transition-colors"
-        >
-          <Eye size={13} /> View Attendance Roster
-        </button>
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenRecordDetail(row);
+            }}
+            className="flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100/80 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800/50 transition-colors cursor-pointer"
+          >
+            <Eye size={13} /> View
+          </button>
+          {canManageAttendance && !readOnly ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditRecord(row);
+              }}
+              className="flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+            >
+              <Edit3 size={12} /> Edit
+            </button>
+          ) : null}
+        </div>
       ),
     },
   ];
 
+  const overviewMatchesTab =
+    !dailyOverview.type || dailyOverview.type === activeMainTab;
+  const studentOverviewSections = useMemo(
+    () => (overviewMatchesTab && activeMainTab === "student" ? dailyOverview.classSections || [] : []),
+    [overviewMatchesTab, activeMainTab, dailyOverview.classSections]
+  );
+  const teacherOverviewDepts = useMemo(
+    () => (overviewMatchesTab && activeMainTab === "teacher" ? dailyOverview.departments || [] : []),
+    [overviewMatchesTab, activeMainTab, dailyOverview.departments]
+  );
+
+  const pendingSections = studentOverviewSections.filter((c) => !c.taken);
+  const takenSections = studentOverviewSections.filter((c) => c.taken);
+  const trackerCompletionPct =
+    studentOverviewSections.length > 0
+      ? Math.round((takenSections.length / studentOverviewSections.length) * 100)
+      : 0;
+
+  const groupedTrackerClasses = useMemo(() => {
+    const filtered = studentOverviewSections.filter((cs) => {
+      if (trackerFilter === "pending") return !cs.taken;
+      if (trackerFilter === "taken") return Boolean(cs.taken);
+      return true;
+    });
+    const byClass = new Map();
+    filtered.forEach((cs) => {
+      const key = cs.className || "Other";
+      if (!byClass.has(key)) {
+        byClass.set(key, { className: key, sections: [] });
+      }
+      byClass.get(key).sections.push(cs);
+    });
+    return Array.from(byClass.values());
+  }, [studentOverviewSections, trackerFilter]);
+
+  const totalUnitsForKpi = stats?.totalClasses ?? studentOverviewSections.length;
+  const markedUnitsForKpi = stats?.todayMarkedClasses ?? takenSections.length;
+  const kpiCoveragePct =
+    totalUnitsForKpi > 0
+      ? Math.min(100, Math.round((markedUnitsForKpi / totalUnitsForKpi) * 100))
+      : 0;
+  const overallRatePct = Number(
+    stats?.percentage ??
+      (typeof stats?.overallAttendance === "string"
+        ? parseInt(stats.overallAttendance, 10) || 0
+        : 0)
+  );
+  const overallTone = rateTone(overallRatePct);
+
   return (
-    <div className="space-y-4 pb-8 text-slate-800 dark:text-slate-100 font-sans">
+    <div className="space-y-5 pb-10 text-slate-800 dark:text-slate-100 font-sans">
       <PageHeader
         title="Attendance Management"
         subtitle={
           isStudent
-            ? "Track and review your personal daily attendance record list."
-            : "Monitor student and teacher & staff daily attendance."
+            ? "Track and review your personal daily attendance record."
+            : active?.sessionName
+              ? `Daily attendance tracking and completion status · Session ${active.sessionName}`
+              : "Monitor student and teacher & staff daily attendance."
         }
         actions={
-          viewMode === "list" && !isStudent ? (
+          viewMode === "list" && !isStudent && canManageAttendance && !readOnly ? (
             <button
-              onClick={() => setViewMode("take_attendance")}
-              className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02] cursor-pointer"
+              type="button"
+              onClick={() => handleStartNewAttendance()}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-md shadow-indigo-600/25 transition-all hover:scale-[1.01] cursor-pointer"
             >
-              <Plus size={15} /> Take Attendance
+              <Plus size={16} /> Take Attendance
             </button>
           ) : viewMode !== "list" ? (
             <button
+              type="button"
               onClick={() => {
                 setViewMode("list");
                 setSelectedRecord(null);
+                setTakeTarget(null);
               }}
-              className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs transition-all cursor-pointer"
             >
               <ArrowLeft size={15} /> Back to Attendance List
             </button>
@@ -723,872 +673,514 @@ const AttendanceManagement = () => {
         }
       />
 
-      {/* ── TOP TWO MAIN TABS (STUDENT vs TEACHER & STAFF) ────────────────── */}
-      {viewMode === "list" && !isStudent && (
-        <div className="grid grid-cols-2 sm:flex sm:w-fit items-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl w-full shadow-xs">
-          <button
-            onClick={() => setActiveMainTab("student")}
-            className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs transition-all text-center cursor-pointer ${
-              activeMainTab === "student"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800"
-            }`}
-          >
-            <GraduationCap size={15} className="flex-shrink-0" />
-            <span className="truncate">Student Attendance</span>
-          </button>
-
-          {!isStudent && (
+      {viewMode === "list" && !isStudent ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="grid grid-cols-2 sm:inline-flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-2xl shadow-xs">
             <button
-              onClick={() => setActiveMainTab("teacher")}
-              className={`flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl font-extrabold text-xs transition-all text-center ${
-                activeMainTab === "teacher"
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800"
+              type="button"
+              onClick={() => {
+                setActiveMainTab("student");
+                setTrackerFilter("all");
+                setPage(1);
+              }}
+              className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs transition-all text-center cursor-pointer ${
+                activeMainTab === "student"
+                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/25"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-800"
               }`}
             >
-              <Users size={16} className="flex-shrink-0" />
-              <span className="truncate">Teacher & Staff <span className="hidden sm:inline">Attendance</span></span>
+              <GraduationCap size={15} className="shrink-0" />
+              <span className="truncate">Student Attendance</span>
             </button>
-          )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMainTab("teacher");
+                setTrackerFilter("all");
+                setPage(1);
+              }}
+              className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs transition-all text-center cursor-pointer ${
+                activeMainTab === "teacher"
+                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/25"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-800"
+              }`}
+            >
+              <Users size={15} className="shrink-0" />
+              <span className="truncate">
+                Teacher &amp; Staff <span className="hidden sm:inline">Attendance</span>
+              </span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap text-xs">
+            {active?.sessionName ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold text-slate-700 dark:text-slate-200 shadow-xs">
+                <Calendar size={13} className="text-indigo-500" />
+                Session {active.sessionName}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-semibold text-slate-600 dark:text-slate-300 shadow-xs tabular-nums">
+              <Clock size={13} className="text-emerald-500" />
+              Today:{" "}
+              {/^\d{4}-\d{2}-\d{2}$/.test(todayKey)
+                ? format(new Date(`${todayKey}T00:00:00`), "EEE, MMM d, yyyy")
+                : format(new Date(), "EEE, MMM d, yyyy")}
+            </span>
+          </div>
         </div>
-      )}
+      ) : null}
 
-      {/* ── 1. STUDENT LOGGED IN PERSONAL VIEW ("MY ATTENDANCE LIST") ─────── */}
       {isStudent ? (
-        <div className="space-y-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <GraduationCap className="text-indigo-600 dark:text-indigo-400" size={18} />{" "}
-                  Student Personal Attendance List
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Logged in as{" "}
-                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">
-                    {user?.name || "Student"}
-                  </span>{" "}
-                  · Section Class 10-A (STD-0001)
-                </p>
+        <PersonalAttendanceView
+          isStudent
+          user={user}
+          sessionName={active?.sessionName}
+          myAttData={myAttData}
+        />
+      ) : isTeacherRole && activeMainTab === "teacher" ? (
+        <PersonalAttendanceView
+          isStudent={false}
+          user={user}
+          sessionName={active?.sessionName}
+          myAttData={myAttData}
+        />
+      ) : viewMode === "view_record" && selectedRecord ? (
+        <AttendanceDetailView
+          selectedRecord={selectedRecord}
+          detailLoading={detailLoading}
+          canEdit={canManageAttendance && !readOnly}
+          canViewProfile={
+            (selectedRecord.type || "").toLowerCase() === "teacher"
+              ? canViewTeacherProfile
+              : canViewStudentProfile
+          }
+          onEditRecord={handleEditRecord}
+          onInspectStudent={(student) => setInspectStudentHistory(student)}
+        />
+      ) : viewMode === "take_attendance" ? (
+        <TakeAttendanceForm
+          user={user}
+          classOptions={effectiveClassOptions}
+          activeSession={active}
+          readOnly={readOnly}
+          initialTarget={takeTarget}
+          onCancel={() => {
+            setTakeTarget(null);
+            setViewMode("list");
+          }}
+          onSaved={handleAttendanceSaved}
+          onViewExisting={(existing) => handleOpenRecordDetail(existing)}
+        />
+      ) : (
+        <>
+          {/* 5 Compact KPI Summary Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 tabular-nums">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs flex flex-col justify-between gap-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+                    {activeMainTab === "teacher" ? "Total Faculty" : "Total Students"}
+                  </p>
+                  <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
+                    {stats?.totalStudents ?? 0}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 flex items-center justify-center shrink-0">
+                  <Users size={15} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
               </div>
+              <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                {totalUnitsForKpi} {activeMainTab === "teacher" ? "departments" : "class sections"}
+              </p>
+            </div>
 
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-xl text-xs">
-                <Calendar size={15} className="text-indigo-600 dark:text-indigo-400" />
-                <span className="font-bold text-slate-700 dark:text-slate-200">
-                  Academic Year 2025-2026
-                </span>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs flex flex-col justify-between gap-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+                    Present Today
+                  </p>
+                  <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5">
+                    {stats?.todayPresent ?? 0}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center shrink-0">
+                  <GraduationCap size={15} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+              <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                {(stats?.todayLate ?? 0) + (stats?.todayHalfDay ?? 0) > 0
+                  ? `${stats?.todayLate ?? 0} late · ${stats?.todayHalfDay ?? 0} half-day`
+                  : markedUnitsForKpi > 0
+                    ? `${markedUnitsForKpi} sheet${markedUnitsForKpi === 1 ? "" : "s"} marked today`
+                    : "No sheets marked today"}
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs flex flex-col justify-between gap-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+                    Absent Today
+                  </p>
+                  <p className="text-xl font-black text-rose-600 dark:text-rose-400 mt-0.5">
+                    {stats?.todayAbsent ?? 0}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 flex items-center justify-center shrink-0">
+                  <X size={15} className="text-rose-600 dark:text-rose-400" />
+                </div>
+              </div>
+              <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                {(stats?.todayLeave ?? 0) > 0
+                  ? `${stats.todayLeave} on approved leave`
+                  : "0 on approved leave"}
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs flex flex-col justify-between gap-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+                    {activeMainTab === "teacher" ? "Pending Depts" : "Pending Sections"}
+                  </p>
+                  <p className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5 truncate">
+                    {stats?.notTaken ?? "0 Pending"}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center shrink-0">
+                  <Clock size={15} className="text-amber-600 dark:text-amber-400" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="w-full h-1 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      kpiCoveragePct === 100 ? "bg-emerald-500" : "bg-amber-500"
+                    }`}
+                    style={{ width: `${kpiCoveragePct}%` }}
+                  />
+                </div>
+                <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                  {markedUnitsForKpi}/{totalUnitsForKpi} marked ({kpiCoveragePct}%)
+                </p>
               </div>
             </div>
 
-            {/* Stat Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-              <div className="bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/40 p-3.5 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 uppercase">
-                  Attendance Rate
-                </p>
-                <p className="text-xl font-black text-indigo-700 dark:text-indigo-400 mt-1">
-                  {myAttData.summary.percentage}
-                </p>
+            <div className="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-xs flex flex-col justify-between gap-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+                    Overall Rate
+                  </p>
+                  <p className={`text-xl font-black mt-0.5 ${overallTone.textClass}`}>
+                    {stats?.overallAttendance || `${overallRatePct}%`}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center shrink-0">
+                  <TrendingUp size={15} className="text-purple-600 dark:text-purple-400" />
+                </div>
               </div>
-              <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 p-3.5 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                  Present
-                </p>
-                <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
-                  {myAttData.summary.presentCount || 5} Days
-                </p>
-              </div>
-              <div className="bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 p-3.5 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-rose-700 dark:text-rose-300 uppercase">
-                  Absent
-                </p>
-                <p className="text-xl font-black text-rose-700 dark:text-rose-400 mt-1">
-                  {myAttData.summary.absentCount || 1} Days
-                </p>
-              </div>
-              <div className="bg-cyan-50/80 dark:bg-cyan-950/30 border border-cyan-200/80 dark:border-cyan-800/40 p-3.5 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 uppercase">
-                  Half Day
-                </p>
-                <p className="text-xl font-black text-cyan-700 dark:text-cyan-400 mt-1">
-                  {myAttData.summary.halfDayCount || 2} Days
-                </p>
-              </div>
-              <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-3.5 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-amber-700 dark:text-amber-300 uppercase">
-                  Late
-                </p>
-                <p className="text-xl font-black text-amber-700 dark:text-amber-400 mt-1">
-                  {myAttData.summary.lateCount || 1} Days
+              <div className="space-y-1">
+                <div className="w-full h-1 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${overallTone.barClass}`}
+                    style={{ width: `${overallRatePct}%` }}
+                  />
+                </div>
+                <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                  From {stats?.recordsCount ?? 0} sheet{stats?.recordsCount === 1 ? "" : "s"}
                 </p>
               </div>
             </div>
+          </div>
 
-            {/* Filters Bar for Day-wise Student Attendance List */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mb-4 text-xs">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                  <Filter size={13} /> Filter Status:
-                </span>
-                {["all", "present", "absent", "half day", "late"].map((st) => (
-                  <button
-                    key={st}
-                    onClick={() => setStudentStatusFilter(st)}
-                    className={`px-3 py-1.5 rounded-lg font-bold capitalize transition-all ${
-                      studentStatusFilter === st
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          {/* Compact Daily Completion Tracker */}
+          {activeMainTab === "student" && studentOverviewSections.length > 0 ? (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xs space-y-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center shrink-0">
+                    <ClipboardCheck size={14} className="text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                    Daily Class &amp; Section Tracker
+                  </h3>
+                  <span
+                    className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border tabular-nums shrink-0 ${
+                      trackerCompletionPct === 100
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/25"
+                        : "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800/50"
                     }`}
                   >
-                    {st === "all" ? "All Records" : st}
+                    {takenSections.length}/{studentOverviewSections.length} · {trackerCompletionPct}%
+                  </span>
+                  <div className="hidden md:block w-24 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        trackerCompletionPct === 100 ? "bg-emerald-500" : "bg-indigo-500"
+                      }`}
+                      style={{ width: `${trackerCompletionPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="inline-flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px] font-bold">
+                    {[
+                      { id: "all", label: `All (${studentOverviewSections.length})`, icon: LayoutGrid },
+                      { id: "pending", label: `Pending (${pendingSections.length})`, icon: Clock },
+                      { id: "taken", label: `Marked (${takenSections.length})`, icon: CheckCircle2 },
+                    ].map((tab) => {
+                      const TabIcon = tab.icon;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setTrackerFilter(tab.id)}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md transition-all cursor-pointer tabular-nums ${
+                            trackerFilter === tab.id
+                              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          <TabIcon size={11} />
+                          <span>{tab.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <input
+                    type="date"
+                    max={dailyOverview.today || undefined}
+                    value={trackerDate || dailyOverview.date || ""}
+                    onChange={(e) => setTrackerDate(e.target.value)}
+                    className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+
+                  {trackerDate && trackerDate !== todayKey ? (
+                    <button
+                      type="button"
+                      onClick={() => setTrackerDate(todayKey)}
+                      className="px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50 text-[11px] font-bold hover:bg-indigo-100 cursor-pointer"
+                    >
+                      Today
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    aria-label={trackerExpanded ? "Collapse tracker" : "Expand tracker"}
+                    onClick={() => setTrackerExpanded((v) => !v)}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    {trackerExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    <span className="hidden sm:inline">{trackerExpanded ? "Hide" : "Show"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {trackerExpanded ? (
+                groupedTrackerClasses.length === 0 ? (
+                  <div className="py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    {trackerFilter === "pending"
+                      ? "All class sections have completed attendance for this date."
+                      : "No class sections have recorded attendance for this date yet."}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    {groupedTrackerClasses.map((grp) => {
+                      const doneCount = grp.sections.filter((s) => s.taken).length;
+                      const allDone = doneCount === grp.sections.length;
+                      return (
+                        <div
+                          key={grp.className}
+                          className="bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/70 rounded-xl p-2 flex flex-col gap-1.5"
+                        >
+                          <div className="flex items-center justify-between gap-1.5 px-0.5">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-slate-900 dark:text-white truncate">
+                              <BookOpen size={12} className="text-indigo-500 shrink-0" />
+                              <span className="truncate">{grp.className}</span>
+                            </span>
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border tabular-nums shrink-0 ${
+                                allDone
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                                  : doneCount > 0
+                                    ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20"
+                                    : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+                              }`}
+                            >
+                              {doneCount}/{grp.sections.length}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {grp.sections.map((cs) => {
+                              const shortSection = String(cs.sectionName || "").replace(
+                                /^Section\s+/i,
+                                "Sec "
+                              );
+                              return (
+                                <button
+                                  key={cs.key}
+                                  type="button"
+                                  title={
+                                    cs.taken
+                                      ? `${cs.classSection}: ${cs.present}/${cs.total} present — Click to view`
+                                      : `${cs.classSection}: ${cs.studentCount} students — Click to mark`
+                                  }
+                                  onClick={() => {
+                                    if (cs.taken && cs.attendanceId) {
+                                      handleOpenRecordDetail(cs.attendanceId);
+                                    } else if (canManageAttendance && !readOnly) {
+                                      handleStartNewAttendance({
+                                        type: "student",
+                                        date: trackerDate || dailyOverview.date || todayKey,
+                                        className: cs.className,
+                                        sectionName: cs.sectionName,
+                                      });
+                                    }
+                                  }}
+                                  className={`group flex items-center justify-between gap-1 px-2 py-1.5 rounded-lg border text-[11px] transition-all cursor-pointer tabular-nums min-w-0 ${
+                                    cs.taken
+                                      ? "bg-white dark:bg-slate-900 border-emerald-200/90 dark:border-emerald-800/50 hover:border-emerald-400"
+                                      : "bg-white dark:bg-slate-900/90 border-amber-200/80 dark:border-amber-800/40 hover:border-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20"
+                                  }`}
+                                >
+                                  <span className="flex items-center gap-1 min-w-0">
+                                    {cs.taken ? (
+                                      <CheckCircle2
+                                        size={12}
+                                        className="text-emerald-600 dark:text-emerald-400 shrink-0"
+                                      />
+                                    ) : (
+                                      <Clock
+                                        size={12}
+                                        className="text-amber-500 dark:text-amber-400 shrink-0"
+                                      />
+                                    )}
+                                    <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                                      {shortSection}
+                                    </span>
+                                  </span>
+
+                                  {cs.taken ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 shrink-0">
+                                      <span>
+                                        {cs.present}/{cs.total}
+                                      </span>
+                                      <Eye
+                                        size={11}
+                                        className="hidden sm:inline opacity-60 group-hover:opacity-100"
+                                      />
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">
+                                      <span className="inline-flex items-center gap-0.5">
+                                        <Users size={10} />
+                                        {cs.studentCount}
+                                      </span>
+                                      <SquarePen
+                                        size={11}
+                                        className="text-amber-600 group-hover:text-indigo-600 transition-colors"
+                                      />
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : null}
+            </div>
+          ) : activeMainTab === "teacher" && teacherOverviewDepts.length > 0 ? (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xs space-y-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-500/10 border border-purple-200/70 dark:border-purple-500/20 flex items-center justify-center shrink-0">
+                    <Building2 size={14} className="text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
+                    Daily Department Attendance Tracker
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <input
+                    type="date"
+                    max={dailyOverview.today || undefined}
+                    value={trackerDate || dailyOverview.date || ""}
+                    onChange={(e) => setTrackerDate(e.target.value)}
+                    className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 tabular-nums">
+                {teacherOverviewDepts.map((dept) => (
+                  <button
+                    key={dept.department}
+                    type="button"
+                    onClick={() => {
+                      if (dept.taken && dept.attendanceId) {
+                        handleOpenRecordDetail(dept.attendanceId);
+                      } else if (canManageAttendance && !readOnly) {
+                        handleStartNewAttendance({
+                          type: "teacher",
+                          date: trackerDate || dailyOverview.date || todayKey,
+                          department: dept.department,
+                        });
+                      }
+                    }}
+                    className={`group flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl border text-left text-xs transition-all cursor-pointer ${
+                      dept.taken
+                        ? "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-400"
+                        : "bg-slate-50/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:bg-indigo-50/30"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-extrabold text-slate-900 dark:text-white truncate">
+                        {dept.department}
+                      </p>
+                      <p className="inline-flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+                        <Users size={10} /> {dept.staffCount} staff
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-1 rounded-lg border ${
+                        dept.taken
+                          ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700/50"
+                          : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600"
+                      }`}
+                    >
+                      {dept.taken ? (
+                        <>
+                          <CheckCircle2 size={11} /> Marked
+                        </>
+                      ) : (
+                        <>
+                          <SquarePen size={11} /> Mark
+                        </>
+                      )}
+                    </span>
                   </button>
                 ))}
               </div>
-
-              <div className="relative w-full sm:w-56">
-                <input
-                  type="date"
-                  value={studentDateFilter}
-                  onChange={(e) => setStudentDateFilter(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
             </div>
+          ) : null}
 
-            {/* Day-wise Attendance History List Table */}
-            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="py-3 px-4">Date & Day</th>
-                    <th className="py-3 px-4">Attendance Status</th>
-                    <th className="py-3 px-4">Remarks / Notes</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                  {filteredMyLogs.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="py-8 text-center text-slate-400 dark:text-slate-500 font-semibold"
-                      >
-                        No attendance records match your filter criteria.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredMyLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
-                          {log.date}{" "}
-                          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                            ({log.dayName || "School Day"})
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-2.5 py-1 rounded text-[10px] font-extrabold uppercase ${
-                              log.status === "Present"
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-                                : log.status === "Absent"
-                                  ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
-                                  : log.status === "Half Day"
-                                    ? "bg-cyan-50 text-cyan-700 border border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20"
-                                    : "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
-                            }`}
-                          >
-                            {log.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-slate-500 dark:text-slate-400 italic">
-                          {log.remarks || "—"}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      ) : isTeacherRole && activeMainTab === "teacher" ? (
-        /* ── 2. TEACHER LOGGED IN MY ATTENDANCE VIEW ───────────────────────── */
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm">
-            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-              <Users className="text-purple-600 dark:text-purple-400" size={24} /> Faculty & Staff Personal
-              Attendance & Check-In Log
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-              Logged in as Faculty / Staff Member{" "}
-              <span className="text-purple-600 dark:text-purple-400 font-bold">{user?.name}</span>
-            </p>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
-              <div className="bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/40 p-4 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-purple-700 dark:text-purple-300 uppercase">
-                  Faculty Presence
-                </p>
-                <p className="text-2xl font-black text-purple-700 dark:text-purple-400 mt-1">
-                  98.0%
-                </p>
-              </div>
-              <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 p-4 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                  Check-In Today
-                </p>
-                <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
-                  07:42 AM
-                </p>
-              </div>
-              <div className="bg-cyan-50/80 dark:bg-cyan-950/30 border border-cyan-200/80 dark:border-cyan-800/40 p-4 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 uppercase">
-                  Leave Balance
-                </p>
-                <p className="text-2xl font-black text-cyan-700 dark:text-cyan-400 mt-1">
-                  12 Days
-                </p>
-              </div>
-              <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-4 rounded-xl text-center shadow-xs">
-                <p className="text-[10px] font-bold text-amber-700 dark:text-amber-300 uppercase">
-                  Approved Leaves
-                </p>
-                <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mt-1">
-                  2 Days
-                </p>
-              </div>
-            </div>
-
-            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4">Check-In</th>
-                    <th className="py-3 px-4">Check-Out</th>
-                    <th className="py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                  {myAttData.logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">
-                        {log.date}
-                      </td>
-                      <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                        {log.arrivalTime !== "—" ? log.arrivalTime : "—"}
-                      </td>
-                      <td className="py-3 px-4 text-slate-500 dark:text-slate-400 font-medium">
-                        04:30 PM
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-                          {log.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      ) : viewMode === "view_record" && selectedRecord ? (
-        /* ── 3. FULL PAGE RECORD DETAIL REPORT ─────────────────────────────── */
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
-                Class / Department
-              </p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">
-                {selectedRecord.classSection ||
-                  `${selectedRecord.className || "Grade 10"} - ${selectedRecord.sectionName || "Section A"}`}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
-                <User size={14} className="text-indigo-600 dark:text-indigo-400" />
-                Taken by:{" "}
-                <strong className="text-slate-900 dark:text-white">
-                  {typeof selectedRecord.takenBy === "object" && selectedRecord.takenBy !== null
-                    ? selectedRecord.takenBy?.name || selectedRecord.takenBy?.username || "shadab md"
-                    : (typeof selectedRecord.takenBy === "string" && selectedRecord.takenBy.length === 24 && !selectedRecord.takenBy.includes(" ")
-                        ? (user?.name || "shadab md")
-                        : selectedRecord.takenBy) || "shadab md"}
-                </strong>
-              </p>
-
-              {/* Attendance Date & Taken Date Details */}
-              <div className="flex flex-wrap items-center gap-2.5 mt-3 text-xs">
-                <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/40 px-3 py-1.5 rounded-xl font-bold text-indigo-700 dark:text-indigo-300">
-                  <Calendar size={13} />
-                  <span>
-                    Attendance For:{" "}
-                    {selectedRecord.attendanceDate || selectedRecord.date
-                      ? format(new Date(selectedRecord.attendanceDate || selectedRecord.date), "EEEE, MMM d, yyyy")
-                      : "—"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 font-semibold">
-                  <Clock size={13} className="text-slate-400" />
-                  <span>
-                    Recorded On:{" "}
-                    {selectedRecord.attendanceTakenDate || selectedRecord.createdAt
-                      ? format(new Date(selectedRecord.attendanceTakenDate || selectedRecord.createdAt), "MMM d, yyyy, h:mm a")
-                      : "—"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <span
-                className={`text-xs font-bold px-3 py-1.5 rounded-xl capitalize ${
-                  selectedRecord.type === "teacher"
-                    ? "bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20"
-                    : "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"
-                }`}
-              >
-                {selectedRecord.type || "student"} Attendance
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
-            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
-              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
-                Total Members
-              </p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                {selectedRecord.total || 34}
-              </p>
-            </div>
-            <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
-              <p className="text-[10px] font-bold text-emerald-800/80 dark:text-emerald-300 uppercase">
-                Present
-              </p>
-              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
-                {selectedRecord.present ?? 32}
-              </p>
-            </div>
-            <div className="bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
-              <p className="text-[10px] font-bold text-rose-800/80 dark:text-rose-300 uppercase">
-                Absent
-              </p>
-              <p className="text-2xl font-black text-rose-700 dark:text-rose-400 mt-1">
-                {selectedRecord.absent ?? 1}
-              </p>
-            </div>
-            <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-3.5 sm:p-4 rounded-2xl text-center shadow-xs">
-              <p className="text-[10px] font-bold text-amber-800/80 dark:text-amber-300 uppercase">
-                Late
-              </p>
-              <p className="text-2xl font-black text-amber-700 dark:text-amber-400 mt-1">
-                {selectedRecord.late ?? 1}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <h4 className="font-extrabold text-base text-slate-900 dark:text-white">
-                Full Member Attendance Roster
-              </h4>
-              <div className="relative w-full sm:w-72">
-                <Search
-                  size={14}
-                  className="absolute left-3 top-2.5 text-slate-400"
-                />
-                <input
-                  type="text"
-                  placeholder="Search student or roll no..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl pl-9 pr-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
-                  <tr>
-                    <th className="py-3 px-4">Roll / ID</th>
-                    <th className="py-3 px-4">Name</th>
-                    <th className="py-3 px-4">Arrival Time</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Actions / History</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                  {detailStudentLogs.map((s, idx) => (
-                    <tr key={s.id || idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4 font-bold text-indigo-600 dark:text-indigo-400">
-                        {s.roll}
-                      </td>
-                      <td className="py-3 px-4 font-extrabold text-slate-900 dark:text-white">
-                        {s.name}
-                      </td>
-                      <td className="py-3 px-4 text-slate-500 dark:text-slate-400 font-medium">
-                        {s.time || "—"}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-1 rounded ${
-                            s.status === "Present"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-                              : s.status === "Absent"
-                                ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
-                                : "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400"
-                          }`}
-                        >
-                          {s.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <button
-                          onClick={() => setInspectStudentHistory(s)}
-                          className="flex items-center gap-1 text-[11px] font-bold text-indigo-700 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-500/20 transition-all"
-                        >
-                          <FileText size={12} /> View Student Log List
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      ) : viewMode === "take_attendance" ? (
-        /* ── 4. TAKE ATTENDANCE FORM VIEW ──────────────────────────────────── */
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                {attendeeType === "student" ? (
-                  <GraduationCap className="text-indigo-600 dark:text-indigo-400" size={22} />
-                ) : (
-                  <Users className="text-purple-600 dark:text-purple-400" size={22} />
-                )}
-                Take{" "}
-                {attendeeType === "student" ? "Student" : "Teacher & Staff"}{" "}
-                Attendance
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-2 sm:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => handleAttendeeTypeChange("student")}
-                className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all ${
-                  attendeeType === "student"
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <GraduationCap size={14} /> Student
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAttendeeTypeChange("teacher")}
-                className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all ${
-                  attendeeType === "teacher"
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <Users size={14} /> Teacher & Staff
-              </button>
-            </div>
-          </div>
-
-          <form onSubmit={handleSaveAttendance} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 text-xs">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px]">
-                    Attendance Date
-                  </label>
-                  {attDate && new Date(attDate).toDateString() !== new Date().toDateString() && (
-                    <span className="text-[9px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.2 rounded border border-amber-200 dark:border-amber-800/40">
-                      Past Date
-                    </span>
-                  )}
-                </div>
-                <input
-                  type="date"
-                  required
-                  value={attDate}
-                  onChange={(e) => setAttDate(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
-                  Attendance Taken Date
-                </label>
-                <div className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                  <span className="truncate">{format(new Date(), "MMM d, yyyy, h:mm a")}</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0 ml-1">
-                    Live
-                  </span>
-                </div>
-              </div>
-
-              {attendeeType === "student" ? (
-                <>
-                  <div>
-                    <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
-                      Class Level
-                    </label>
-                    <SelectInput
-                      value={attClass}
-                      onChange={(e) => {
-                        setAttClass(e.target.value);
-                        setRoster([]); // clear roster when class changes
-                      }}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="">-- Select Class --</option>
-                      {classOptions.map((cls) => (
-                        <option key={cls.id || cls.name} value={cls.name}>
-                          {cls.name}
-                        </option>
-                      ))}
-                    </SelectInput>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
-                      Section
-                    </label>
-                    <SelectInput
-                      value={attSection}
-                      onChange={(e) => {
-                        setAttSection(e.target.value);
-                        setRoster([]); // clear roster when section changes
-                      }}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="">-- Select Section --</option>
-                      {SECTION_OPTIONS.map((sec) => (
-                        <option key={sec.id || sec.name} value={sec.name}>
-                          {sec.name}
-                        </option>
-                      ))}
-                    </SelectInput>
-                  </div>
-                </>
-              ) : (
-                <div>
-                  <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
-                    Department
-                  </label>
-                  <SelectInput
-                    value={attDepartment}
-                    onChange={(e) => setAttDepartment(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >
-                    <option value="">-- Select Department --</option>
-                    <option>Sciences</option>
-                    <option>Mathematics</option>
-                    <option>Languages</option>
-                    <option>Arts</option>
-                    <option>Commerce</option>
-                  </SelectInput>
-                </div>
-              )}
-
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-400 uppercase text-[10px] mb-1">
-                  Taken By
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={attTakenBy}
-                  onChange={(e) => setAttTakenBy(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            {/* ── Load Students Button ── */}
-            {attendeeType === "student" && (
-              <div className="flex items-center justify-between gap-4 bg-indigo-50/60 dark:bg-slate-800/80 border border-indigo-100 dark:border-slate-700 rounded-xl px-4 py-3">
-                <div className="text-xs text-slate-600 dark:text-slate-400">
-                  {roster.length > 0 ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                      ✓ {roster.length} students loaded for{" "}
-                      <span className="text-slate-900 dark:text-white font-extrabold">
-                        {attClass} – {attSection}
-                      </span>
-                    </span>
-                  ) : (
-                    <span>
-                      Select class &amp; section above, then click{" "}
-                      <strong className="text-indigo-600 dark:text-indigo-400">Load Students</strong>{" "}
-                      to fetch the roster.
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  disabled={!attClass || !attSection || rosterLoading}
-                  onClick={() => loadRosterStudents(attClass, attSection)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-sm"
-                >
-                  {rosterLoading ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <RefreshCw size={14} />
-                  )}
-                  {rosterLoading ? "Loading Students..." : "Load Students"}
-                </button>
-              </div>
-            )}
-
-            {/* ── Quick Mark + Live Counts ── */}
-            {roster.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                    Quick Mark All:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleMarkAllStatus("Present")}
-                    className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-xs font-bold transition-colors"
-                  >
-                    ✓ Mark All Present
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleMarkAllStatus("Absent")}
-                    className="px-3 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition-colors"
-                  >
-                    ✕ Mark All Absent
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleMarkAllStatus("Late")}
-                    className="px-3 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 text-xs font-bold transition-colors"
-                  >
-                    ⏰ Mark All Late
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-bold flex-wrap">
-                  <span className="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30">
-                    Present:{" "}
-                    {roster.filter((r) => r.status === "Present").length}
-                  </span>
-                  <span className="text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-200 dark:border-rose-500/30">
-                    Absent: {roster.filter((r) => r.status === "Absent").length}
-                  </span>
-                  <span className="text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-500/30">
-                    Late: {roster.filter((r) => r.status === "Late").length}
-                  </span>
-                  <span className="text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-500/30">
-                    On Leave: {roster.filter((r) => r.status === "Leave" || r.status === "Half Day").length}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* ── Roster Table ── */}
-            {rosterLoading ? (
-              <div className="flex items-center justify-center py-16 gap-3 text-slate-400">
-                <Loader2 size={24} className="animate-spin text-indigo-500" />
-                <span className="text-sm font-semibold">
-                  Loading students for {attClass} – {attSection}...
-                </span>
-              </div>
-            ) : roster.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
-                <GraduationCap size={36} className="text-slate-400 dark:text-slate-600" />
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No students loaded yet</p>
-                <p className="text-xs text-slate-500">
-                  {attClass && attSection
-                    ? `Click "Load Students" to fetch ${attClass} – ${attSection} roster`
-                    : "Select a class and section, then click Load Students"}
-                </p>
-              </div>
-            ) : (
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
-                    <tr>
-                      <th className="py-3 px-4">#</th>
-                      <th className="py-3 px-4">Roll / ID</th>
-                      <th className="py-3 px-4">Student Name</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4">Remarks</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                    {roster.map((item, idx) => (
-                      <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-4 text-slate-400 dark:text-slate-500 font-semibold">
-                          {idx + 1}
-                        </td>
-                        <td className="py-3 px-4 font-bold text-indigo-600 dark:text-indigo-400">
-                          {item.roll}
-                        </td>
-                        <td className="py-3 px-4 font-extrabold text-slate-900 dark:text-white">
-                          {item.name}
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-bold">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleStatusChange(item.id, "Present")
-                              }
-                              className={`px-3 py-1 rounded-md transition-all ${item.status === "Present" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-emerald-600"}`}
-                            >
-                              P
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleStatusChange(item.id, "Absent")
-                              }
-                              className={`px-3 py-1 rounded-md transition-all ${item.status === "Absent" ? "bg-rose-600 text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-rose-600"}`}
-                            >
-                              A
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleStatusChange(item.id, "Late")
-                              }
-                              className={`px-3 py-1 rounded-md transition-all ${item.status === "Late" ? "bg-amber-600 text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-amber-600"}`}
-                            >
-                              L
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleStatusChange(item.id, "Leave")
-                              }
-                              className={`px-3 py-1 rounded-md transition-all ${item.status === "Leave" || item.status === "Half Day" ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 dark:text-slate-400 hover:text-purple-600"}`}
-                            >
-                              LV
-                            </button>
-                          </div>
-                          {item.isOnLeave ? (
-                            <span className="ml-2 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                              Approved Leave ({item.leaveCategory || "Leave"})
-                            </span>
-                          ) : (
-                            <span
-                              className={`ml-2 text-[10px] font-bold ${
-                                item.status === "Present"
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : item.status === "Absent"
-                                    ? "text-rose-600 dark:text-rose-400"
-                                    : item.status === "Late"
-                                      ? "text-amber-600 dark:text-amber-400"
-                                      : "text-purple-600 dark:text-purple-400"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <input
-                            type="text"
-                            placeholder="Optional notes..."
-                            value={item.remarks}
-                            onChange={(e) =>
-                              handleRemarksChange(item.id, e.target.value)
-                            }
-                            className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => setViewMode("list")}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors text-center"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02]"
-              >
-                <Save size={15} /> Save & Submit Record
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : (
-        /* ── 5. MAIN LIST VIEW FOR ADMIN & TEACHERS ───────────────────────── */
-        <>
-          {/* ── 5 Stat Cards (Total Student, Today Present, Today Absent, Not Taken, Overall Attendance) ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
-            <StatsCard
-              title={`${activeMainTab === "teacher" ? "TOTAL FACULTY" : "TOTAL STUDENTS"}`}
-              value={stats?.totalStudents ?? 450}
-              icon={Users}
-              className="border-l-4 border-l-blue-500 bg-white dark:bg-slate-900 shadow-xs"
-              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
-              iconClassName="text-orange-500 dark:text-orange-400"
-            />
-            <StatsCard
-              title={`${activeMainTab === "teacher" ? "FACULTY" : "TODAY"} PRESENT`}
-              value={stats?.todayPresent ?? stats?.present ?? 391}
-              icon={GraduationCap}
-              className="border-l-4 border-l-emerald-500 bg-white dark:bg-slate-900 shadow-xs"
-              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
-              iconClassName="text-orange-500 dark:text-orange-400"
-            />
-            <StatsCard
-              title="ABSENT"
-              value={stats?.todayAbsent ?? stats?.absent ?? 9}
-              icon={X}
-              className="border-l-4 border-l-rose-500 bg-white dark:bg-slate-900 shadow-xs"
-              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
-              iconClassName="text-orange-600 dark:text-orange-400"
-            />
-            <StatsCard
-              title="NOT TAKEN"
-              value={stats?.notTaken ?? "0 Classes"}
-              icon={Clock}
-              className="border-l-4 border-l-amber-500 bg-white dark:bg-slate-900 shadow-xs"
-              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
-              iconClassName="text-orange-500 dark:text-orange-400"
-            />
-            <StatsCard
-              title="OVERALL ATTENDANCE"
-              value={
-                stats?.overallAttendance ||
-                (stats?.percentage != null ? `${stats.percentage}%` : "93%")
-              }
-              icon={TrendingUp}
-              className="border-l-4 border-l-orange-500 bg-white dark:bg-slate-900 shadow-xs"
-              iconContainerClassName="bg-orange-50/80 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30"
-              iconClassName="text-orange-500 dark:text-orange-400"
-            />
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 shadow-sm space-y-4">
-            {/* ── Comprehensive Filter Toolbar ── */}
+          {/* Records Table + Balanced Filter Toolbar */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
             <div className="space-y-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-              {/* Row 1: Search & Date Mode Selection */}
               <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-3 text-slate-400" size={15} />
+                  <Search className="absolute left-3.5 top-2.5 text-slate-400" size={15} />
                   <input
                     type="text"
                     value={searchQuery}
@@ -1596,10 +1188,10 @@ const AttendanceManagement = () => {
                       setSearchQuery(e.target.value);
                       setPage(1);
                     }}
-                    placeholder="Search by class, section, teacher..."
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 pl-9 pr-3 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Search by class, section, department, or taken by..."
+                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl py-2 pl-9 pr-8 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                  {searchQuery && (
+                  {searchQuery ? (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
@@ -1607,10 +1199,9 @@ const AttendanceManagement = () => {
                     >
                       <X size={14} />
                     </button>
-                  )}
+                  ) : null}
                 </div>
 
-                {/* Date Filter Mode Buttons */}
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold shrink-0 self-start md:self-auto">
                   <button
                     type="button"
@@ -1635,7 +1226,7 @@ const AttendanceManagement = () => {
                       setDateFilterMode("day");
                       setStartDate("");
                       setEndDate("");
-                      if (!date) setDate(new Date().toISOString().split("T")[0]);
+                      if (!date) setDate(todayKey);
                       setPage(1);
                     }}
                     className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
@@ -1664,61 +1255,65 @@ const AttendanceManagement = () => {
                 </div>
               </div>
 
-              {/* Row 2: Active Date Inputs & Filter Dropdowns */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2.5 text-xs">
-                {/* Specific Day Picker */}
-                {dateFilterMode === "day" && (
-                  <div className="sm:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                      Specific Day
-                    </label>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => {
-                        setDate(e.target.value);
-                        setPage(1);
-                      }}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
-                )}
-
-                {/* Date Range Pickers */}
-                {dateFilterMode === "range" && (
-                  <>
-                    <div>
+              {dateFilterMode !== "all" ? (
+                <div className="flex flex-wrap items-end gap-3 p-3 rounded-xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/70 text-xs">
+                  {dateFilterMode === "day" ? (
+                    <div className="w-full sm:w-56">
                       <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        From Date
+                        Selected Day
                       </label>
                       <input
                         type="date"
-                        value={startDate}
+                        value={date}
                         onChange={(e) => {
-                          setStartDate(e.target.value);
+                          setDate(e.target.value);
                           setPage(1);
                         }}
-                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        To Date
-                      </label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => {
-                          setEndDate(e.target.value);
-                          setPage(1);
-                        }}
-                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <div className="w-full sm:w-48">
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                          From Date
+                        </label>
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => {
+                            setStartDate(e.target.value);
+                            setPage(1);
+                          }}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="w-full sm:w-48">
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                          To Date
+                        </label>
+                        <input
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => {
+                            setEndDate(e.target.value);
+                            setPage(1);
+                          }}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : null}
 
-                {/* Month Dropdown */}
+              <div
+                className={`grid gap-3 text-xs ${
+                  activeMainTab === "student"
+                    ? "grid-cols-2 sm:grid-cols-4"
+                    : "grid-cols-2 max-w-lg"
+                }`}
+              >
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                     Month
@@ -1739,7 +1334,6 @@ const AttendanceManagement = () => {
                   </SelectInput>
                 </div>
 
-                {/* Year Dropdown */}
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                     Year
@@ -1760,160 +1354,103 @@ const AttendanceManagement = () => {
                   </SelectInput>
                 </div>
 
-                {/* Class Dropdown */}
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                    Class
-                  </label>
-                  <SelectInput
-                    value={selectedClass}
-                    onChange={(e) => {
-                      setSelectedClass(e.target.value);
-                      setSelectedSection("all");
-                      setPage(1);
-                    }}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                  >
-                    <option value="all">All Classes</option>
-                    {availableClasses.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </div>
+                {activeMainTab === "student" ? (
+                  <>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                        Class
+                      </label>
+                      <SelectInput
+                        value={selectedClass}
+                        onChange={(e) => {
+                          setSelectedClass(e.target.value);
+                          setSelectedSection("all");
+                          setPage(1);
+                        }}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                      >
+                        <option value="all">All Classes</option>
+                        {availableClasses.map((cls) => (
+                          <option key={cls} value={cls}>
+                            {cls}
+                          </option>
+                        ))}
+                      </SelectInput>
+                    </div>
 
-                {/* Section Dropdown */}
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                    Section
-                  </label>
-                  <SelectInput
-                    value={selectedSection}
-                    onChange={(e) => {
-                      setSelectedSection(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                  >
-                    <option value="all">All Sections</option>
-                    {availableSections.map((sec) => (
-                      <option key={sec} value={sec}>
-                        Section {sec}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </div>
-
-                {/* Clear All Filters Button */}
-                {activeFiltersCount > 0 && (
-                  <div className="flex items-end">
-                    <button
-                      type="button"
-                      onClick={handleClearFilters}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 text-xs font-bold transition-all cursor-pointer"
-                    >
-                      <RotateCcw size={13} />
-                      <span>Reset ({activeFiltersCount})</span>
-                    </button>
-                  </div>
-                )}
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                        Section
+                      </label>
+                      <SelectInput
+                        value={selectedSection}
+                        onChange={(e) => {
+                          setSelectedSection(e.target.value);
+                          setPage(1);
+                        }}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                      >
+                        <option value="all">All Sections</option>
+                        {availableSections.map((sec) => (
+                          <option key={sec} value={sec}>
+                            {sec}
+                          </option>
+                        ))}
+                      </SelectInput>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
 
-            {/* ── Active Filter Badges & Results Counter ── */}
-            <div className="flex items-center justify-between gap-3 pt-1 pb-2">
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                  {pagination?.total || records.length} Session
-                  {(pagination?.total || records.length) !== 1 ? "s" : ""} Found
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-extrabold text-slate-800 dark:text-slate-200 tabular-nums">
+                  {pagination?.total ?? records.length} Record
+                  {(pagination?.total ?? records.length) !== 1 ? "s" : ""} Found
                 </span>
 
-                {/* Active filter pills */}
-                {activeFiltersCount > 0 && (
-                  <div className="flex items-center gap-1.5 ml-1 flex-wrap">
-                    {dateFilterMode === "day" && date && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                        Date: {date}
-                        <button
-                          type="button"
-                          onClick={() => setDate("")}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <X size={11} />
-                        </button>
-                      </span>
-                    )}
-                    {dateFilterMode === "range" && (startDate || endDate) && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                        {startDate || "Start"} → {endDate || "End"}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setStartDate("");
-                            setEndDate("");
-                          }}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <X size={11} />
-                        </button>
-                      </span>
-                    )}
-                    {selectedMonth !== "all" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                        {MONTH_OPTIONS.find((m) => m.value === selectedMonth)
-                          ?.label || selectedMonth}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMonth("all")}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <X size={11} />
-                        </button>
-                      </span>
-                    )}
-                    {selectedYear !== "all" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                        {selectedYear}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedYear("all")}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <X size={11} />
-                        </button>
-                      </span>
-                    )}
-                    {selectedClass !== "all" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                        {selectedClass}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedClass("all")}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <X size={11} />
-                        </button>
-                      </span>
-                    )}
-                    {selectedSection !== "all" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        Section {selectedSection}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedSection("all")}
-                          className="hover:opacity-75 cursor-pointer"
-                        >
-                          <X size={11} />
-                        </button>
-                      </span>
-                    )}
-                  </div>
-                )}
+                {selectedClass !== "all" ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClass("all")}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-bold cursor-pointer"
+                  >
+                    Class: {selectedClass} <X size={11} />
+                  </button>
+                ) : null}
+                {selectedSection !== "all" ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSection("all")}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-bold cursor-pointer"
+                  >
+                    Section: {selectedSection} <X size={11} />
+                  </button>
+                ) : null}
+                {selectedMonth !== "all" ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMonth("all")}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-bold cursor-pointer"
+                  >
+                    Month: {selectedMonth} <X size={11} />
+                  </button>
+                ) : null}
               </div>
+
+              {activeFiltersCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <RotateCcw size={13} />
+                  <span>Reset Filters ({activeFiltersCount})</span>
+                </button>
+              ) : null}
             </div>
 
-            {/* ── Attendance Table View ── */}
             <DataTable
               columns={columns}
               data={records}
@@ -1922,113 +1459,22 @@ const AttendanceManagement = () => {
               onPageChange={setPage}
               onRowClick={(row) => handleOpenRecordDetail(row)}
               mobileColumns={["date", "classSection"]}
+              emptyTitle="No attendance records match"
+              emptyDescription="Try clearing filters or start a new register using Take Attendance above."
             />
           </div>
         </>
       )}
 
-      {/* ── INSPECT STUDENT ATTENDANCE HISTORY MODAL ───────────────────────── */}
-      <Modal
-        open={Boolean(inspectStudentHistory)}
-        onClose={() => setInspectStudentHistory(null)}
-        size="lg"
-        title={
-          inspectStudentHistory ? (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black border border-indigo-100 dark:border-indigo-900/50">
-                <GraduationCap size={20} />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-slate-900 dark:text-white text-base">
-                  {inspectStudentHistory.name}
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Roll: {inspectStudentHistory.roll} ·{" "}
-                  {inspectStudentHistory.classSection || "Class 10-A"}
-                </p>
-              </div>
-            </div>
-          ) : null
+      <StudentAttendanceHistoryModal
+        member={inspectStudentHistory}
+        canViewProfile={
+          inspectStudentHistory?.memberType === "teacher"
+            ? canViewTeacherProfile
+            : canViewStudentProfile
         }
-      >
-        <div className="space-y-4">
-
-            {/* Quick Stats for this Student */}
-            <div className="grid grid-cols-3 gap-3 text-center text-xs">
-              <div className="p-3 bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/40 rounded-xl">
-                <span className="text-[10px] text-indigo-800/80 dark:text-indigo-300 font-bold uppercase block">
-                  Attendance Rate
-                </span>
-                <span className="text-lg font-black text-indigo-700 dark:text-indigo-400">
-                  96.0%
-                </span>
-              </div>
-              <div className="p-3 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 rounded-xl">
-                <span className="text-[10px] text-emerald-800/80 dark:text-emerald-300 font-bold uppercase block">
-                  Days Present
-                </span>
-                <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">
-                  48 Days
-                </span>
-              </div>
-              <div className="p-3 bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 rounded-xl">
-                <span className="text-[10px] text-rose-800/80 dark:text-rose-300 font-bold uppercase block">
-                  Days Absent
-                </span>
-                <span className="text-lg font-black text-rose-700 dark:text-rose-400">2 Days</span>
-              </div>
-            </div>
-
-            {/* History Table */}
-            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs max-h-64 overflow-y-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/70 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase sticky top-0 border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="py-2.5 px-4">Date</th>
-                    <th className="py-2.5 px-4">Attendance Status</th>
-                    <th className="py-2.5 px-4">Notes</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {myAttData.logs.map((l) => (
-                    <tr key={l.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="py-2.5 px-4 font-bold text-slate-800 dark:text-slate-200">
-                        {l.date}
-                      </td>
-                      <td className="py-2.5 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            l.status === "Present"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-                              : l.status === "Absent"
-                                ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
-                                : l.status === "Half Day"
-                                  ? "bg-cyan-50 text-cyan-700 border border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20"
-                                  : "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 border-amber-500/20"
-                          }`}
-                        >
-                          {l.status}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-500 dark:text-slate-400 italic">
-                        {l.remarks || "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => setInspectStudentHistory(null)}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all"
-              >
-                Close Student Record
-              </button>
-            </div>
-        </div>
-      </Modal>
+        onClose={() => setInspectStudentHistory(null)}
+      />
     </div>
   );
 };

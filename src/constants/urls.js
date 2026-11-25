@@ -100,8 +100,10 @@ export const RESULT_URLS = {
 
 // ─── Attendance ───────────────────────────────────────────────────────────────
 export const ATTENDANCE_URLS = {
-  BASE:  '/attendance',
-  STATS: '/attendance/stats',
+  BASE:   '/attendance',
+  BY_ID:  (id) => `/attendance/${id}`,
+  STATS:  '/attendance/stats',
+  STATUS: '/attendance/status',
 };
 
 // ─── Audit Logs ───────────────────────────────────────────────────────────────

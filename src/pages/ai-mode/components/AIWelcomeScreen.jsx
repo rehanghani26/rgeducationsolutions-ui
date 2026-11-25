@@ -29,14 +29,16 @@ const CORE_CARDS = [
     icon: Banknote,
     title: "Fee Collections & Dues",
     desc: "Overview of collected fees, pending balances and defaulters list",
-    prompt: "Show fee collection summary, pending fee balances, and defaulters list.",
+    prompt:
+      "Show fee collection summary, pending fee balances, and defaulters list.",
     tag: "Finance",
   },
   {
     icon: Calendar,
     title: "Timetable & Faculty",
     desc: "Weekly class schedules, room allocations and teacher assignments",
-    prompt: "Show the current school timetable and period schedule across all classes.",
+    prompt:
+      "Show the current school timetable and period schedule across all classes.",
     tag: "Academics",
   },
 ];
@@ -46,6 +48,21 @@ export default function AIWelcomeScreen({
   role = "",
   onSelectPrompt,
 }) {
+  const isPersonalRole = ["student", "parent"].includes(
+    String(role || "").toLowerCase()
+  );
+  const cards = CORE_CARDS.map((card) =>
+    card.tag === "Attendance" && isPersonalRole
+      ? {
+          ...card,
+          title: "My Attendance",
+          desc: "View your personal attendance rate, present/absent counts and recent logs",
+          prompt:
+            "Show my personal attendance summary and recent attendance logs.",
+        }
+      : card
+  );
+
   return (
     <div className="relative flex min-h-full flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8 overflow-hidden">
       {/* Dynamic Ambient Background Glow */}
@@ -142,7 +159,7 @@ export default function AIWelcomeScreen({
           transition={{ delay: 0.25, duration: 0.35 }}
           className="grid grid-cols-1 sm:grid-cols-2 gap-3"
         >
-          {CORE_CARDS.map((card) => {
+          {cards.map((card) => {
             const Icon = card.icon;
             return (
               <motion.button

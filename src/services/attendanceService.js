@@ -1,9 +1,6 @@
 /**
  * @file attendanceService.js
- * @description Attendance module API service following the EODSrc/services pattern.
- *
- * Uses the shared API client to report request errors,
- * plus default attendanceService export for backward compatibility.
+ * @description Attendance module API service using the shared API client.
  */
 
 import { toast } from 'react-toastify';
@@ -26,7 +23,13 @@ export async function getAttendanceRecords(params = {}) {
 }
 
 export async function getAttendanceById(id) {
-  const url = `${ATTENDANCE_URLS.BASE}/${id}`;
+  const response = await api.get(ATTENDANCE_URLS.BY_ID(id));
+  return response.data;
+}
+
+export async function getAttendanceStatus(params = {}) {
+  const queryStr = buildQuery(params);
+  const url = `${ATTENDANCE_URLS.STATUS}${queryStr ? `?${queryStr}` : ''}`;
   const response = await api.get(url);
   return response.data;
 }
@@ -41,7 +44,18 @@ export async function getStudentAttendance(studentId, params = {}) {
     return response.data;
   } catch (error) {
     console.error('Error fetching student attendance:', error);
-    return { summary: { totalDays: 0, presentCount: 0, absentCount: 0, lateCount: 0, percentage: '0%' }, logs: [] };
+    return {
+      summary: {
+        totalDays: 0,
+        presentCount: 0,
+        absentCount: 0,
+        lateCount: 0,
+        halfDayCount: 0,
+        leaveCount: 0,
+        percentage: '0%',
+      },
+      logs: [],
+    };
   }
 }
 
@@ -53,13 +67,41 @@ export async function getAttendanceStats(params = {}) {
     return response.data;
   } catch (error) {
     console.error('Error fetching attendance stats:', error);
-    return { data: { overall: 0, classBreakdown: [] } };
+    return {
+      stats: {
+        totalStudents: 0,
+        totalClasses: 0,
+        todayMarkedClasses: 0,
+        todayPresent: 0,
+        todayAbsent: 0,
+        todayLate: 0,
+        todayHalfDay: 0,
+        todayLeave: 0,
+        notTaken: '0 Pending',
+        notTakenClasses: 0,
+        overallAttendance: '0%',
+        present: 0,
+        absent: 0,
+        late: 0,
+        halfDay: 0,
+        leave: 0,
+        total: 0,
+        percentage: 0,
+        recordsCount: 0,
+      },
+    };
   }
 }
 
 export async function createAttendance(data) {
   const response = await api.post(ATTENDANCE_URLS.BASE, data);
-  toast.success('Attendance recorded successfully');
+  toast.success(response.data?.message || 'Attendance recorded successfully');
+  return { status: response.status, data: response.data };
+}
+
+export async function updateAttendance(id, data) {
+  const response = await api.put(ATTENDANCE_URLS.BY_ID(id), data);
+  toast.success(response.data?.message || 'Attendance updated successfully');
   return { status: response.status, data: response.data };
 }
 
@@ -69,14 +111,29 @@ export async function getMyAttendance() {
     return response.data;
   } catch (error) {
     console.error('Error fetching my attendance:', error);
-    return { data: { summary: {}, history: [] } };
+    return {
+      summary: {
+        totalDays: 0,
+        presentCount: 0,
+        absentCount: 0,
+        halfDayCount: 0,
+        lateCount: 0,
+        leaveCount: 0,
+        percentage: 'N/A',
+      },
+      logs: [],
+    };
   }
 }
 
 const attendanceService = {
   getRecords: getAttendanceRecords,
+  getById: getAttendanceById,
+  getStatus: getAttendanceStatus,
   getStats: getAttendanceStats,
   create: createAttendance,
+  update: updateAttendance,
+  getStudentAttendance,
   getMyAttendance,
 };
 

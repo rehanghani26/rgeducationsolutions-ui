@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import api from "../../../services/api.js";
 import { getUserFromStorage } from "../../../config/access.jsx";
+import { MONTH_OPTIONS } from "../../../constants";
 import { dateOnly, formatDate, getDayName } from "../../../utils";
 import { SelectInput } from '../../../components/ui/FormControls.jsx';
 
@@ -173,7 +174,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
 
             <p className="text-xs text-slate-400">
               {isTodayTaken
-                ? `Attendance logged at ${todayLog.checkIn || "07:45 AM"} · Remarks: ${todayLog.remarks || "Full Day"}`
+                ? `Attendance logged at ${todayLog.checkIn || "—"} · Remarks: ${todayLog.remarks || "—"}`
                 : "Your class teacher has not taken attendance for today yet. Status will update dynamically once recorded."}
             </p>
           </div>
@@ -197,7 +198,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
                 {isTodayTaken ? todayLog.status : "N/A"}
               </h4>
               <span className="text-[10px] text-slate-400 font-medium">
-                {isTodayTaken ? `In: ${todayLog.checkIn || "07:45 AM"}` : "Pending Teacher Log"}
+                {isTodayTaken ? `In: ${todayLog.checkIn || "—"}` : "Pending Teacher Log"}
               </span>
             </div>
           </div>
@@ -272,6 +273,7 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
               <option value="absent">Absent</option>
               <option value="late">Late</option>
               <option value="half day">Half Day</option>
+              <option value="leave">Leave</option>
             </SelectInput>
 
             {/* Month Filter */}
@@ -281,9 +283,11 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
               className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
             >
               <option value="all">All Months</option>
-              <option value="5">May 2026</option>
-              <option value="4">April 2026</option>
-              <option value="3">March 2026</option>
+              {MONTH_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
             </SelectInput>
           </div>
         </div>
@@ -364,12 +368,12 @@ const StudentAttendance = ({ studentId: propStudentId }) => {
 
                       {/* Remarks */}
                       <td className="py-3.5 px-4 text-slate-400 text-xs">
-                        {log.remarks || "Full Day"}
+                        {log.remarks || "—"}
                       </td>
 
                       {/* Class */}
                       <td className="py-3.5 px-4 text-slate-400">
-                        {log.className || user?.className || "Class 10-A"}
+                        {log.className || user?.className || "—"}
                       </td>
                     </tr>
                   );

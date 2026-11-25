@@ -336,9 +336,9 @@ export default function AIResponseRenderer({
             <div key={`resp-created-student-${idx}`} className="pt-2">
               <AiStudentProfileCard
                 student={data.student}
-                attendance={{ percentage: 100, present: 1, absent: 0, late: 0 }}
+                attendance={{ percentage: 0, present: 0, absent: 0, late: 0 }}
                 leavesSummary={{ total: 0, pending: 0, approved: 0 }}
-                fee={{ amountPaid: 0, amountPending: 0, status: "Current" }}
+                fee={{ amountPaid: 0, amountPending: 0, status: "Pending" }}
                 onSelectStudentForIdCard={onSelectStudentForIdCard}
                 onSelectStudentForLeaves={onSelectStudentForLeaves}
                 onSelectStudentForEdit={onOpenEditStudent}
@@ -619,16 +619,23 @@ export default function AIResponseRenderer({
         if (
           (toolName === "getAttendanceByDate" ||
             toolName === "getAttendanceStats" ||
+            toolName === "getAttendanceStatus" ||
+            toolName === "getMyAttendanceSummary" ||
             toolName === "getStudentAttendance") &&
-          (data.summary || data.absentStudents || data.records)
+          (data.summary || data.absentStudents || data.records || data.takenSections || data.pendingSections)
         ) {
           return (
             <div key={`resp-att-${idx}`} className="pt-2">
               <AIAttendanceCard
                 date={data.date || act.args?.date}
+                type={data.type || act.args?.type || "student"}
                 summary={data.summary || {}}
                 absentStudents={data.absentStudents || []}
-                records={data.records || []}
+                lateStudents={data.lateStudents || []}
+                halfDayStudents={data.halfDayStudents || []}
+                leaveStudents={data.leaveStudents || []}
+                takenSections={data.takenSections || []}
+                pendingSections={data.pendingSections || []}
                 onAskAiPrompt={onAskAiPrompt}
               />
             </div>
@@ -720,17 +727,17 @@ export default function AIResponseRenderer({
           return (
             <div key={`resp-confirm-${idx}`} className="pt-2">
               <AIConfirmationCard
-                type={data.success ? "success" : "confirm"}
+                type={data.success && !data.requiresConfirmation ? "success" : "confirm"}
                 title={data.title}
                 message={data.message}
-                details={act.args}
+                details={data.confirmationDetails || act.args}
                 onConfirm={() =>
                   onAskAiPrompt &&
-                  onAskAiPrompt(`Confirm execution: ${act.tool}`)
+                  onAskAiPrompt(`Yes, confirm execution of ${data.action || act.tool} with those exact details.`)
                 }
                 onCancel={() =>
                   onAskAiPrompt &&
-                  onAskAiPrompt(`Cancel operation: ${act.tool}`)
+                  onAskAiPrompt(`Cancel operation: ${data.action || act.tool}`)
                 }
               />
             </div>
