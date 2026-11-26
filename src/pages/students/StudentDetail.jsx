@@ -65,6 +65,7 @@ import {
   Compass,
   Users,
   GraduationCap,
+  BedDouble,
 } from "lucide-react";
 import ActivityTimeline from "../../components/ui/ActivityTimeline.jsx";
 import StatusBadge from "../../components/ui/StatusBadge.jsx";
@@ -74,6 +75,7 @@ import Loader from "../../components/ui/Loader.jsx";
 import EmbeddedPdfViewer from "../../components/ui/EmbeddedPdfViewer.jsx";
 import PdfViewerModal from "../../components/ui/PdfViewerModal.jsx";
 import ResetStudentPasswordModal from "./ResetStudentPasswordModal.jsx";
+import StudentHostelPlacement from "../hostel/HostelPlacement.jsx";
 import {
   getStudentById,
   getStudentActivity,
@@ -537,6 +539,12 @@ const StudentDetail = () => {
       label: "Academic & Enrollment",
       shortLabel: "Academic",
       icon: ClipboardList,
+    },
+    {
+      id: "hostel",
+      label: "Hostel Allocation",
+      shortLabel: "Hostel",
+      icon: BedDouble,
     },
     {
       id: "id-card",
@@ -1014,6 +1022,10 @@ const StudentDetail = () => {
 
         {/* Tab Content Area */}
         <div className="p-3 sm:p-5 md:p-6">
+          {activeTab === "hostel" && (
+            <StudentHostelPlacement key={studentId} studentId={student._id || student.id || studentId} />
+          )}
+
           {/* ── 1. OVERVIEW TAB ──────────────────────────────────────────── */}
           {activeTab === "overview" && (
             <div className="space-y-4 sm:space-y-6">

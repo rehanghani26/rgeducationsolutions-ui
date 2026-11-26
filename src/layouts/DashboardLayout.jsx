@@ -31,6 +31,7 @@ import { ROUTES } from "../routes/routes.js";
 import rgLogo from "../assets/logo/RGLOGO.png";
 import { useSchoolBranding } from "../context/SchoolBrandingContext.jsx";
 import { AcademicSessionProvider, useAcademicSession } from "../context/AcademicSessionContext.jsx";
+import useHostelData from "../hooks/useHostelData.js";
 
 const resolveUserImageUrl = (userObj) => {
   const raw =
@@ -90,9 +91,14 @@ const DashboardLayout = () => {
   const dropdownRef = useRef(null);
 
   const { user } = useSelector((state) => state.auth);
+  const hostelAccess = useHostelData("/access", {
+    enabled: Boolean(user && user.role !== "student"),
+    account: user && [user.schoolId, user._id || user.id, user.role].join(":"),
+  });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const hostelWorkspace = isNavActive(location.pathname, ROUTES.HOSTEL);
   const { theme } = useTheme();
   const { schoolLogo, schoolName, refreshBranding } = useSchoolBranding();
 
@@ -129,8 +135,8 @@ const DashboardLayout = () => {
   // Reactive dynamic role permissions from Redux Toolkit store (zero duplicate API calls)
   const roleAccessState = useSelector((state) => state.roleAccess || {});
   const navSections = React.useMemo(
-    () => filterNavForUser(user),
-    [user, roleAccessState.roles]
+    () => filterNavForUser(user, hostelAccess.data?.canManage),
+    [user, roleAccessState.roles, hostelAccess.data?.canManage]
   );
 
   const handleLogout = () => {
@@ -727,7 +733,9 @@ const DashboardLayout = () => {
         </header>
 
         {/* Main Content Viewport */}
-        <main className="flex-1 min-h-0 overflow-y-auto bg-[#FAF7F2] p-2.5 sm:p-4 md:p-5 lg:p-6 text-stone-900 dark:bg-[#121214] dark:text-[#FAF7F2]">
+        <main className={`flex-1 min-h-0 bg-[#FAF7F2] text-stone-900 dark:bg-[#121214] dark:text-[#FAF7F2] ${
+          hostelWorkspace ? "overflow-hidden" : "overflow-y-auto p-2.5 sm:p-4 md:p-5 lg:p-6"
+        }`}>
           <ErrorBoundary compact>
             <Outlet key={sessionId} context={{ activeDashboardTab, setActiveDashboardTab }} />
           </ErrorBoundary>

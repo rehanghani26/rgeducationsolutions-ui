@@ -22,10 +22,10 @@ const buildQuery = (params = {}) => {
  * Fetch paginated student list.
  * @param {object} params
  */
-export async function getStudents(params = {}) {
+export async function getStudents(params = {}, { signal, localErrorUi } = {}) {
   const queryStr = buildQuery(params);
   const url = `${STUDENT_URLS.BASE}${queryStr ? `?${queryStr}` : ""}`;
-  const response = await api.get(url);
+  const response = await api.get(url, { signal, localErrorUi });
   return response.data;
 }
 

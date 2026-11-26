@@ -54,6 +54,7 @@ import PdfViewerModal from '../../components/ui/PdfViewerModal.jsx';
 import { getStudentById, getStudents } from '../../services/studentService.js';
 import { getUserFromStorage } from '../../config/access.jsx';
 import { notifyApiError } from '../../services/apiErrors.js';
+import StudentHostelPlacement from '../hostel/HostelPlacement.jsx';
 
 const resolveImageUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
@@ -299,6 +300,8 @@ export default function StudentProfileView({ authUser: propAuthUser = null }) {
         subtitle="Complete verified enrollment details, personal information, guardian contacts, and identity credentials"
         breadcrumbs={[{ label: 'Student Portal' }, { label: 'My Profile' }]}
       />
+
+      <StudentHostelPlacement />
 
       {/* ─── PROFILE HERO BANNER ──────────────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-2xl border border-orange-200 dark:border-orange-500/20 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/70 dark:from-[#181716] dark:via-[#2A180C] dark:to-[#1F140A] p-3.5 sm:p-5 md:p-6 shadow-xs dark:shadow-xl">

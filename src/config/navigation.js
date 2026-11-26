@@ -287,7 +287,7 @@ export const PRIVILEGED_ROLES = ADMIN_ROLES;
  * @param {{ role: string, permissions?: string[] } | null} user
  * @returns {typeof NAV_SECTIONS}
  */
-export const filterNavForUser = (user) => {
+export const filterNavForUser = (user, canManageHostel) => {
   if (!user) return [];
   const rawRole = (user.role || '').trim().toLowerCase();
   const normRole = rawRole.replace(/_/g, '-');
@@ -296,6 +296,7 @@ export const filterNavForUser = (user) => {
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => {
+        if (item.permission === 'hostel') return Boolean(canManageHostel);
         // Super-admin has access to everything
         if (normRole === 'super-admin' || normRole === 'superadmin') return true;
 

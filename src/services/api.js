@@ -131,7 +131,7 @@ api.interceptors.response.use(
         error.code === "ERR_NETWORK" ||
         [502, 503, 504].includes(status));
 
-    if (isServerDown && typeof window !== "undefined") {
+    if (isServerDown && !originalRequest?.localErrorUi && typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("server:offline", {
           detail: {
@@ -187,7 +187,7 @@ api.interceptors.response.use(
       !originalRequest.url?.includes("/auth/login") &&
       !originalRequest.url?.includes("/auth/refresh");
     if (!canRefresh) {
-      notifyApiError(error);
+      if (!originalRequest?.localErrorUi) notifyApiError(error);
       throw error;
     }
 

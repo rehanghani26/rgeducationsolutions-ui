@@ -1,30 +1,7 @@
 /**
  * @file mockData.js
- * @description Mock data fallback for hostel, library, transport, reports, and notifications.
+ * @description Mock data fallback for library, transport, reports, and notifications.
  */
-
-export const mockHostel = [
-  {
-    id: 'hst-1',
-    blockName: 'Al-Farooq Boys Residence Block A',
-    totalRooms: 24,
-    occupiedRooms: 20,
-    capacity: 72,
-    residentsCount: 60,
-    warden: 'Maulana Tariq Jameel',
-    wardenPhone: '+91 98765 43210',
-  },
-  {
-    id: 'hst-2',
-    blockName: 'Aisha Siddiqa Girls Residence Block B',
-    totalRooms: 18,
-    occupiedRooms: 14,
-    capacity: 54,
-    residentsCount: 42,
-    warden: 'Fatima Begum',
-    wardenPhone: '+91 98765 43211',
-  },
-];
 
 export const mockLibrary = [
   {
@@ -130,7 +107,6 @@ export const mockTransport = [
 ];
 
 export default {
-  mockHostel,
   mockLibrary,
   mockNotifications,
   mockReports,
